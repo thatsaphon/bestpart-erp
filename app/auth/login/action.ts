@@ -48,5 +48,4 @@ export async function login(formData: FormData) {
     cookieStore.set('token', token)
 
     redirect('/')
-    // return { message: 'login successfully' }
 }

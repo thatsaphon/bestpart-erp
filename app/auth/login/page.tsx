@@ -3,7 +3,6 @@
 import React from 'react'
 import { login } from './action'
 import toast from 'react-hot-toast'
-import { redirect } from 'next/navigation'
 
 type Props = {}
 
@@ -14,7 +13,6 @@ export default function Login({}: Props) {
         action={async (formData) => {
           const result = await login(formData)
           if (result?.error) return toast.error(result.error)
-          // if (result.message) return toast.success(result.message)
         }}>
         <div className='border-black border flex flex-col gap-2 rounded-md w-full p-12'>
           <div className='grid grid-cols-[100px_200px] justify-center items-center'>

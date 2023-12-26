@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Image from 'next/image'
-import LogoutButton from '../components/LogoutButton'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -17,6 +16,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  if (!headers().has('user')) redirect('/auth/login')
   async function logout() {
     'use server'
     cookies().delete('token')

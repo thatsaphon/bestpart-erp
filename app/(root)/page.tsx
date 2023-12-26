@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 

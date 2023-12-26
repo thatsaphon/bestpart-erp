@@ -5,7 +5,6 @@ import { Role } from '@prisma/client'
 import bcrypt from 'bcrypt'
 
 export async function createUser(formData: FormData) {
-    console.log('create')
     const username = formData.get('username')
     const password = formData.get('password')
     const role = formData.get('role')
@@ -23,7 +22,4 @@ export async function createUser(formData: FormData) {
             flag: `{}`,
         },
     })
-    // redirect('/home')
-    // return 'success'
-    // toast.success('Successful')
 }
