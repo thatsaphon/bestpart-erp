@@ -9,7 +9,6 @@ export async function middleware(request: NextRequest) {
 
 
     if (request.nextUrl.pathname.startsWith('/auth/login')) {
-        request.cookies.delete('token')
         return NextResponse.next()
     }
 
@@ -31,6 +30,6 @@ export async function middleware(request: NextRequest) {
 
 // See "Matching Paths" below to learn more
 export const config = {
-    matcher: ['/', '/auth/:path*'],
+    matcher: ['/:path', '/auth/:path*'],
 
 }

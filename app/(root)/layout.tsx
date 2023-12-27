@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Image from 'next/image'
 import { cookies, headers } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { RedirectType, redirect } from 'next/navigation'
+import { AuthPayloadSchema } from '../auth/payload'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,12 +21,14 @@ export default function RootLayout({
   async function logout() {
     'use server'
     cookies().delete('token')
-    redirect('/auth/login')
+    redirect('/auth/login', RedirectType.replace)
   }
+  const userObject = JSON.parse(headers().get('user') as string)
+  const user = AuthPayloadSchema.parse(userObject)
   return (
     <>
       <div className='w-screen h-screen grid grid-cols-[200px_1fr]'>
-        <div className='w-full h-full border-b flex flex-col p-3 border-r-2 border-slate-300 bg-slate-200 justify-between'>
+        <div className='w-full h-full border-b flex flex-col p-3 border-r-2 border-slate-300 bg-slate-200 justify-between gap-2'>
           <Image
             src={'/BestPart_AI.jpg'}
             alt={'BestPartLogo'}
@@ -33,11 +36,31 @@ export default function RootLayout({
             width={300}
             className='rounded-full'
           />
-          <form action={logout}>
-            <button className=''>Logout</button>
+          <div className='flex flex-col justify-start flex-1 items-center'>
+            <span className='text-sm'>ระบบขาย</span>
+            <span className='text-sm'>รายงาน</span>
+            <span className='text-sm'>ตั้งค่า</span>
+            <span className='text-sm'>ออกจากระบบ</span>
+          </div>
+          <form action={logout} className='text-center'>
+            <button className='p-2 bg-amber-900 text-white rounded-md'>
+              Logout
+            </button>
           </form>
         </div>
-        <main className='p-3'>{children}</main>
+        <div className='w-full h-full flex flex-col'>
+          <div className='w-full h-[50px] bg-slate-200 flex justify-between items-center px-2'>
+            <div></div>
+            <div>
+              {user.first_name
+                ? `${user.first_name} ${user.last_name}`
+                : `User: ${user.username
+                    ?.slice(0, 1)
+                    .toUpperCase()}${user.username?.slice(1)}`}
+            </div>
+          </div>
+          <main className='p-3 flex-1'>{children}</main>
+        </div>
       </div>
     </>
   )

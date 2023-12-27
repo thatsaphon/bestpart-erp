@@ -25,3 +25,129 @@ enum Role {
   USER
   ADMIN
 }
+
+model Document {
+  id              Int            @id @default(autoincrement())
+  documentId      String         @unique
+  date            DateTime
+  generalLedger   GeneralLedger? @relation(fields: [generalLedgerId], references: [id])
+  generalLedgerId Int
+  skuMovements    SkuMovement[]
+  arSubledger     ARSubledger[]
+  apSubledger     APSubledger[]
+
+  @@index([generalLedgerId])
+}
+
+model ChartOfAccount {
+  id            Int             @id
+  name          String
+  type          AccountType
+  GeneralLedger GeneralLedger[]
+}
+
+enum AccountType {
+  Assets
+  Liabilities
+  Equity
+  Revenue
+  Expense
+}
+
+model GeneralLedger {
+  id               Int            @id @default(autoincrement())
+  document         Document[]
+  chartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
+  chartOfAccountId Int
+  amount           Decimal
+
+  @@index([chartOfAccountId])
+}
+
+model Contact {
+  id        Int       @id @default(autoincrement())
+  name      String
+  Addresses Address[]
+  flag      Json
+  taxId     String
+
+  apSubledger APSubledger[]
+  arSubledger ARSubledger[]
+}
+
+model Address {
+  id           Int     @id @default(autoincrement())
+  contact      Contact @relation(fields: [contactId], references: [id])
+  contactId    Int
+  isMain       Boolean
+  name         String
+  addressLine1 String?
+  addressLine2 String?
+  phone        String?
+
+  @@index([contactId])
+}
+
+model SkuMaster {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  flag         Json
+  goodsMasters GoodsMaster[]
+  skuMovements SkuMovement[]
+}
+
+model GoodsMaster {
+  id       Int       @id @default(autoincrement())
+  code     String    @unique
+  sku      SkuMaster @relation(fields: [skuId], references: [id])
+  skuId    Int
+  quantity Decimal
+  unit     String
+  price    Decimal
+  flag     Json
+
+  @@index([skuId])
+}
+
+model SkuMovement {
+  id         Int       @id @default(autoincrement())
+  date       DateTime
+  sku        SkuMaster @relation(fields: [skuId], references: [id])
+  skuId      Int
+  goodsCode  String
+  document   Document  @relation(fields: [documentId], references: [id])
+  documentId Int
+
+  quantity  Int
+  cost      Decimal
+  sellPrice Decimal
+  vat       Decimal
+
+  flag Json
+
+  @@index([skuId])
+  @@index([documentId])
+}
+
+model APSubledger {
+  id         Int      @id @default(autoincrement())
+  ap         Contact  @relation(fields: [contactId], references: [id])
+  contactId  Int
+  document   Document @relation(fields: [documentId], references: [id])
+  documentId Int
+
+  @@index([contactId])
+  @@index([documentId])
+}
+
+model ARSubledger {
+  id         Int      @id @default(autoincrement())
+  ar         Contact  @relation(fields: [contactId], references: [id])
+  contactId  Int
+  document   Document @relation(fields: [documentId], references: [id])
+  documentId Int
+
+  @@index([contactId])
+  @@index([documentId])
+}
