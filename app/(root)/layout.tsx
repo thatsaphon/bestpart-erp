@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { cookies, headers } from 'next/headers'
 import { RedirectType, redirect } from 'next/navigation'
 import { AuthPayloadSchema } from '../auth/payload'
+import { revalidatePath } from 'next/cache'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,6 +22,7 @@ export default function RootLayout({
   async function logout() {
     'use server'
     cookies().delete('token')
+    revalidatePath('/auth/login')
     redirect('/auth/login', RedirectType.replace)
   }
   const userObject = JSON.parse(headers().get('user') as string)
