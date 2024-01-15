@@ -18,6 +18,7 @@ import { NavMenu } from '@/components/nav-menu'
 import { NavMenubar } from '@/components/nav-menubar'
 import { Button } from '@/components/ui/button'
 import UploadButton from '@/components/upload-button'
+import { z } from 'zod'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -47,8 +48,17 @@ export default async function LayoutComponent({
   const userObject = JSON.parse(
     headers().get('user') as string
   )
-  const user =
-    AuthPayloadSchema.parse(userObject)
+  const userValidation =
+    AuthPayloadSchema.safeParse(
+      userObject
+    )
+
+  let user: z.infer<
+    typeof AuthPayloadSchema
+  >
+  if (userValidation.success) {
+    user = userValidation.data
+  }
 
   const upload = async (
     formData: FormData
