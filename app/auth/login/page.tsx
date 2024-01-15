@@ -16,14 +16,14 @@ export default function Login({}: Props) {
     revalidatePath('/auth/login')
     redirect('/auth/login', RedirectType.replace)
   }
-  if (!user || !cookies().has('token'))
+  if (!user || !cookies().get('token')?.value)
     return (
       <main className='p-36 h-screen w-screen'>
         <LoginComponent />
       </main>
     )
 
-  if (user && cookies().has('token'))
+  if (user && cookies().get('token')?.value)
     return (
       <>
         <main className='p-36 h-screen w-screen flex justify-center items-center'>

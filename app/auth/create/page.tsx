@@ -1,7 +1,7 @@
 import React from 'react'
 import CreateUserForm from '@/app/components/CreateUserForm'
 import { headers } from 'next/headers'
-import { AuthPayloadSchema } from '../payload'
+import { AuthPayloadSchema } from '../../model/payload'
 import { redirect } from 'next/navigation'
 
 type Props = {}

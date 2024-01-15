@@ -6,6 +6,6 @@ export const AuthPayloadSchema = z.object(
         first_name: z.string().nullable(),
         last_name: z.string().nullable(),
         role: z.string().nullable(),
-        flag: z.string().nullable(),
+        flag: z.record(z.string())
     }
 ) 
