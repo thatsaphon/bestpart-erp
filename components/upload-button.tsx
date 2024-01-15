@@ -7,9 +7,12 @@ import { uploadFile } from '@/lib/s3-client'
 type Props = {}
 
 export default function UploadButton({}: Props) {
-  const [file, setFile] = useState()
+  const [file, setFile] = useState<
+    File | undefined
+  >()
   const upload = async () => {
-    console.log(file)
+    if (!file) return
+
     const binary =
       await file.arrayBuffer()
     const buffer = Buffer.from(binary)

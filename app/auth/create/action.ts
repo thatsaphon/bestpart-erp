@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/app/db/db'
-import { Role } from '@prisma/client'
+import { Role } from '.prisma/client'
 import bcrypt from 'bcrypt'
 export async function createUser(formData: FormData) {
     const username = formData.get('username')

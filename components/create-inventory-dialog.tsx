@@ -37,7 +37,7 @@ import {
 import { Separator } from './ui/separator'
 import { signal } from '@preact/signals'
 import { Tooltip } from 'react-tooltip'
-import { SkuMaster } from '@prisma/client'
+import { SkuMaster } from '.prisma/client'
 import {
   useRouter,
   useSearchParams,

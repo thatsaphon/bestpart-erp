@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/app/db/db'
-import { SkuMaster } from '@prisma/client'
+import { SkuMaster } from '.prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
