@@ -40,7 +40,7 @@ export async function createInventory(formData: FormData) {
             }
         })
         console.log('revalidate')
-        revalidatePath('/(root)/inventory', 'page')
+        revalidatePath('/inventory')
         return {
             message: 'success',
             data: sku
@@ -56,5 +56,5 @@ export const deleteInventory = async (formData: FormData) => {
     const code = formData.get('code') as string
     console.log(code)
     await prisma.skuMaster.delete({ where: { code } })
-    revalidatePath('/(root)/inventory', 'page')
+    revalidatePath('/inventory')
 }

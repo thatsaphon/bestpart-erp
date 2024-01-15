@@ -19,6 +19,7 @@ model User {
   role       Role
   password   String
   flag       Json
+  avatarUrl  String?
 }
 
 enum Role {

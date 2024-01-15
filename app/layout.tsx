@@ -4,6 +4,7 @@ import './globals.css'
 import { Toaster } from 'react-hot-toast'
 import { cn } from '@/lib/utils'
 import { ThemeProvider } from '@/components/theme-provider'
+import LayoutComponent from '@/components/layout-component'
 
 export const fontSans = FontSans({
   subsets: ['latin'],
@@ -35,7 +36,9 @@ export default function RootLayout({
           defaultTheme='system'
           enableSystem
           disableTransitionOnChange>
-          {children}
+          <LayoutComponent>
+            {children}
+          </LayoutComponent>
           <Toaster />
         </ThemeProvider>
       </body>

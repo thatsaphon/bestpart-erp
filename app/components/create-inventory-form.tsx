@@ -4,7 +4,7 @@ import React, {
   Fragment,
   useState,
 } from 'react'
-import { createInventory } from '../(root)/inventory/action'
+import { createInventory } from '../abc/inventory/action'
 import { Button } from '@/components/ui/button'
 
 type Props = {}

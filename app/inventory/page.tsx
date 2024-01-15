@@ -20,6 +20,9 @@ import { deleteInventory } from './action'
 
 type Props = {}
 
+export const revalidate = 600
+export const dynamic = 'force-dynamic'
+
 export default async function InventoryListPage({}: Props) {
   // const result:SkuMaster[] =
   //   await prisma.$queryRaw`select * from SkuMaster where JSON_SEARCH(flag, "all", "%tes%")`
@@ -27,20 +30,6 @@ export default async function InventoryListPage({}: Props) {
     await prisma.skuMaster.findMany({})
 
   console.log(result.length)
-  //   const inventory = await prisma.skuMaster.findMany({
-  //     where: {
-  //       //   flag: { equals: { tags: ['test'] } },
-  //       flag: {
-  //         path: '$.tags',
-  //         array_contains: ['test'],
-  //         // path: '$.tags',
-  //         //   string_contains: 'tes',
-  //         // array_contains: ['%test%'],
-  //         // string_contains: '%test%',
-  //       },
-  //     },
-  //   })
-  //   console.log(inventory)
   return (
     <div className=''>
       {/* <div className='p-3'>
@@ -56,6 +45,7 @@ export default async function InventoryListPage({}: Props) {
             สร้าง
           </Link> */}
         </h1>
+        <p>number: {result.length}</p>
         <div className='grid w-full max-w-sm items-center gap-1.5 mt-2'>
           {/* <Label htmlFor='search'>
             Search

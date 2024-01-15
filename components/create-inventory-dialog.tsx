@@ -1,5 +1,5 @@
 'use client'
-import { createInventory } from '@/app/(root)/inventory/action'
+import { createInventory } from '@/app/inventory/action'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
