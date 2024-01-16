@@ -3,12 +3,13 @@
 import { ZodError, z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import bcrypt from 'bcrypt'
-import { prisma } from '@/app/db/db'
+import prisma from '@/app/db/db'
 import { endOfToday } from 'date-fns'
 import { AuthPayloadSchema } from '../../model/payload'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { RedirectType, redirect } from 'next/navigation'
 import * as jose from 'jose'
+import { revalidatePath } from 'next/cache'
 
 export async function login(formData: FormData) {
     const cookieStore = cookies()
@@ -48,4 +49,15 @@ export async function login(formData: FormData) {
     cookieStore.set('token', token)
 
     redirect('/')
+}
+
+export async function logout() {
+    // 'use server'
+    console.log('logout')
+    cookies().delete('token')
+    revalidatePath('/auth/login')
+    redirect(
+        '/auth/login',
+        RedirectType.replace
+    )
 }

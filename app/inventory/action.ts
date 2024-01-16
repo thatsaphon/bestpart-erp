@@ -1,19 +1,31 @@
 'use server'
 
-import { prisma } from '@/app/db/db'
+import prisma from '@/app/db/db'
 import { SkuMaster } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 
-export async function getInventory() {
+export async function getInventory(page = '1', limit = '10') {
+    return await prisma.skuMaster.findMany({
+        skip:
+            (Number(page) - 1) *
+            Number(limit),
+        take: Number(limit),
+        include: {
+            brand: true,
+            carModel: true,
+        },
+    })
 }
 
 export async function createInventory(formData: FormData) {
     const code = formData.get('code')
     const name = formData.get('name')
     const tags = formData.getAll('tags') as string[]
+
+    console.log(tags)
 
     if (typeof code !== 'string') return { message: 'code must not be empty' }
     if (typeof name !== 'string') return { message: 'name must not be empty' }

@@ -1,33 +1,62 @@
-import { InventoryCard } from '@/components/inventory-card'
-import InventoryMenuList from '@/app/components/inventory-menu-list'
-import { prisma } from '@/app/db/db'
+import prisma from '@/app/db/db'
 import { CreateInventoryDialog } from '@/components/create-inventory-dialog'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { SkuMaster } from '@prisma/client'
-import Link from 'next/link'
-import React from 'react'
-import { deleteInventory } from './action'
+import {
+  deleteInventory,
+  getInventory,
+} from './action'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
+import { InventoryCard } from '@/components/inventory-card'
 
-type Props = {}
+type Props = {
+  searchParams: {
+    page?: string
+    limit?: string
+    search?: string
+  }
+}
 
 export const revalidate = 600
 export const dynamic = 'force-dynamic'
 
-export default async function InventoryListPage({}: Props) {
-  // const result:SkuMaster[] =
-  //   await prisma.$queryRaw`select * from SkuMaster where JSON_SEARCH(flag, "all", "%tes%")`
-  const result: SkuMaster[] =
-    await prisma.skuMaster.findMany({})
+export default async function InventoryListPage({
+  searchParams: {
+    page = '1',
+    limit = '10',
+  },
+}: Props) {
+  // const page = searchParams.page || 1
+  // const limit = searchParams.limit || 10
+  const result = await getInventory(
+    page,
+    limit
+  )
+  // await prisma.skuMaster.findMany({
+  //   skip:
+  //     (Number(page) - 1) *
+  //     Number(limit),
+  //   take: Number(limit),
+  //   include: {
+  //     brand: true,
+  //     carModel: true,
+  //   },
+  // })
+
+  const skuCount =
+    await prisma.skuMaster.count({})
+
+  const numberOfPage = Math.ceil(
+    skuCount / Number(limit)
+  )
 
   console.log(result.length)
   return (
@@ -58,24 +87,63 @@ export default async function InventoryListPage({}: Props) {
         </div>
         <div className='grid grid-cols-3  gap-2'>
           {result.map((item, index) => (
-            <form
-              key={index}
-              action={deleteInventory}>
-              <input
-                type='hidden'
-                name='code'
-                value={item.code}
-              />
-              <Button type='submit'>
-                {item.name}
-              </Button>
-            </form>
-            // <InventoryCard
+            // <form
             //   key={index}
-            //   inventory={item}
-            // />
+            //   action={deleteInventory}>
+            //   <input
+            //     type='hidden'
+            //     name='code'
+            //     value={item.code}
+            //   />
+            //   <Button type='submit'>
+            //     {item.name}
+            //   </Button>
+            // </form>
+            <InventoryCard
+              key={index}
+              inventory={item}
+            />
           ))}
         </div>
+        <Pagination className='mt-4'>
+          <PaginationContent>
+            {page !== '1' && (
+              <PaginationItem>
+                <PaginationPrevious
+                  href={`?page=${
+                    +page - 1
+                  }&limit=${limit}`}
+                />
+              </PaginationItem>
+            )}
+            {Array.from({
+              length: numberOfPage,
+            }).map((_, index) => (
+              <PaginationItem
+                key={index}>
+                <PaginationLink
+                  isActive={
+                    +page === index + 1
+                  }
+                  href={`?page=${
+                    index + 1
+                  }&limit=${limit}`}>
+                  {index + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            {page !==
+              String(numberOfPage) && (
+              <PaginationItem>
+                <PaginationNext
+                  href={`?page=${
+                    +page + 1
+                  }&limit=${limit}`}
+                />
+              </PaginationItem>
+            )}
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   )

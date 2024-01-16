@@ -19,6 +19,7 @@ import { NavMenubar } from '@/components/nav-menubar'
 import { Button } from '@/components/ui/button'
 import UploadButton from '@/components/upload-button'
 import { z } from 'zod'
+import UserAvatar from './user-avatar'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -35,16 +36,6 @@ export default async function LayoutComponent({
 }: {
   children: React.ReactNode
 }) {
-  async function logout() {
-    'use server'
-    cookies().delete('token')
-    revalidatePath('/auth/login')
-    redirect(
-      '/auth/login',
-      RedirectType.replace
-    )
-  }
-
   const userObject = JSON.parse(
     headers().get('user') as string
   )
@@ -56,9 +47,9 @@ export default async function LayoutComponent({
   let user: z.infer<
     typeof AuthPayloadSchema
   >
-  if (userValidation.success) {
-    user = userValidation.data
-  }
+  if (!userValidation.success)
+    return <>{children}</>
+  user = userValidation.data
 
   const upload = async (
     formData: FormData
@@ -67,11 +58,8 @@ export default async function LayoutComponent({
 
     const file = formData.get('file')
     console.log(file)
-    // fetch(process.env.S3_API, {
-    //   method: 'PUT',
-    //   body: JSON.stringify()
-    // })
   }
+
   return (
     <div className='min-h-screen flex flex-col'>
       <div className='w-screen h-14 flex items-center justify-between pr-5'>
@@ -84,16 +72,9 @@ export default async function LayoutComponent({
           {/* <NavMenu /> */}
           <NavMenubar />
         </nav>
-        <div className='mr-2 flex items-center'>
+        <div className='mr-2 flex items-center gap-2'>
           <ModeToggle />
-          <form
-            action={logout}
-            className='text-center'>
-            <Button
-              variant={'destructive'}>
-              Logout
-            </Button>
-          </form>
+          <UserAvatar user={user} />
         </div>
       </div>
       <Separator />

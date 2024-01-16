@@ -12,7 +12,11 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useState } from 'react'
+import {
+  Fragment,
+  useRef,
+  useState,
+} from 'react'
 import {
   useFormState,
   useFormStatus,
@@ -53,31 +57,36 @@ export function CreateInventoryDialog({
   const router = useRouter()
   const { pending } = useFormStatus()
   const searchParams = useSearchParams()
-  const tagInput =
-    searchParams.get('tagInput')
-  const tags =
-    searchParams.getAll('tags')
+  const [tags, setTags] = useState<
+    string[]
+  >([])
 
-  const handleTagInput = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const params = new URLSearchParams(
-      searchParams
+  const tagInputRef =
+    useRef<HTMLInputElement>(null)
+
+  const onAddTag = () => {
+    if (!tagInputRef.current) return
+    if (
+      !tagInputRef.current.value.trim()
     )
-    if (e.target.value) {
-      params.set(
-        'tagInput',
-        e.target.value
-      )
-    } else {
-      params.delete('tagInput')
-    }
-    router.replace(
-      `/inventory?${params.toString()}`
-    )
+      return
+
+    setTags((prev) => [
+      ...prev,
+      tagInputRef.current
+        ?.value as string,
+    ])
+    tagInputRef.current.value = ''
   }
 
-  const onAddTag = () => {}
+  const onDeleteTag = (
+    index: number
+  ) => {
+    setTags((prev) => [
+      ...prev.slice(0, index),
+      ...prev.slice(index + 1),
+    ])
+  }
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -176,14 +185,9 @@ export function CreateInventoryDialog({
                   </Label>
                   <div className='flex gap-2 justify-between flex-1'>
                     <Input
+                      ref={tagInputRef}
                       type='text'
                       className='px-2 border border-slate-400 ml-2 w-full'
-                      value={
-                        tagInput ?? ''
-                      }
-                      onChange={
-                        handleTagInput
-                      }
                     />
                     <Button
                       type='button'
@@ -201,13 +205,25 @@ export function CreateInventoryDialog({
                   <div className='col-start-2 flex flex-wrap gap-1'>
                     {tags.map(
                       (tag, i) => (
-                        <Badge
-                          key={i}
-                          variant={
-                            'secondary'
-                          }>
-                          {tag}
-                        </Badge>
+                        <Fragment
+                          key={i}>
+                          <Badge
+                            variant={
+                              'secondary'
+                            }
+                            onClick={() =>
+                              onDeleteTag(
+                                i
+                              )
+                            }>
+                            {tag}
+                          </Badge>
+                          <input
+                            hidden
+                            value={tag}
+                            name='tags'
+                          />
+                        </Fragment>
                       )
                     )}
                   </div>
