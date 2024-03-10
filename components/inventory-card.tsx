@@ -18,6 +18,8 @@ import {
 } from '@prisma/client'
 import { z } from 'zod'
 import { Badge } from '@/components/ui/badge'
+import { InventoryDialog } from './inventory-dialog'
+import { SkuFlagSchema } from '@/app/schema/sku-flag-schema'
 
 type Props = {
   inventory: SkuMaster & {
@@ -25,10 +27,6 @@ type Props = {
     carModel?: CarModel | null
   }
 }
-
-const SkuFlagSchema = z.object({
-  tags: z.array(z.string()).optional(),
-})
 
 export function InventoryCard({
   inventory,
@@ -89,7 +87,11 @@ export function InventoryCard({
             </Badge>
           ))}
         </div>
-        {/* <Button>Deploy</Button> */}
+        <InventoryDialog
+          mode='edit'
+          inventory={inventory}
+          label='แก้ไขสินค้า'
+        />
       </CardFooter>
     </Card>
   )

@@ -12,14 +12,16 @@ generator client {
 }
 
 model User {
-  id         Int     @id @default(autoincrement())
-  username   String  @unique
+  id         Int      @id @default(autoincrement())
+  username   String   @unique
   first_name String?
   last_name  String?
   role       Role
   password   String
   flag       Json
   avatarUrl  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 enum Role {

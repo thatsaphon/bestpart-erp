@@ -1,12 +1,9 @@
-import prisma from '@/app/db/db'
-import { CreateInventoryDialog } from '@/components/create-inventory-dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { SkuMaster } from '@prisma/client'
-import {
-  deleteInventory,
-  getInventory,
-} from './action'
+import prisma from "@/app/db/db";
+import { InventoryDialog } from "@/components/inventory-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { SkuMaster } from "@prisma/client";
+import { getInventory } from "@/app/actions/inventories";
 import {
   Pagination,
   PaginationContent,
@@ -14,32 +11,26 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination'
-import { InventoryCard } from '@/components/inventory-card'
+} from "@/components/ui/pagination";
+import { InventoryCard } from "@/components/inventory-card";
 
 type Props = {
   searchParams: {
-    page?: string
-    limit?: string
-    search?: string
-  }
-}
+    page?: string;
+    limit?: string;
+    search?: string;
+  };
+};
 
-export const revalidate = 600
-export const dynamic = 'force-dynamic'
+export const revalidate = 600;
+export const dynamic = "force-dynamic";
 
 export default async function InventoryListPage({
-  searchParams: {
-    page = '1',
-    limit = '10',
-  },
+  searchParams: { page = "1", limit = "10" },
 }: Props) {
   // const page = searchParams.page || 1
   // const limit = searchParams.limit || 10
-  const result = await getInventory(
-    page,
-    limit
-  )
+  const result = await getInventory(page, limit);
   // await prisma.skuMaster.findMany({
   //   skip:
   //     (Number(page) - 1) *
@@ -51,23 +42,20 @@ export default async function InventoryListPage({
   //   },
   // })
 
-  const skuCount =
-    await prisma.skuMaster.count({})
+  const skuCount = await prisma.skuMaster.count({});
 
-  const numberOfPage = Math.ceil(
-    skuCount / Number(limit)
-  )
+  const numberOfPage = Math.ceil(skuCount / Number(limit));
 
-  console.log(result.length)
+  console.log(result.length);
   return (
-    <div className=''>
+    <div className="">
       {/* <div className='p-3'>
         <InventoryMenuList />
       </div> */}
-      <div className='mb-2 p-3'>
-        <h1 className='text-3xl flex items-center gap-2 text-primary'>
+      <div className="mb-2 p-3">
+        <h1 className="text-3xl flex items-center gap-2 text-primary">
           <span>สินค้าคงคลัง</span>
-          <CreateInventoryDialog />
+          <InventoryDialog />
           {/* <Link
             href={'/inventory/create'}
             className='p-2 bg-green-700 text-white rounded-md text-xl'>
@@ -75,17 +63,13 @@ export default async function InventoryListPage({
           </Link> */}
         </h1>
         <p>number: {result.length}</p>
-        <div className='grid w-full max-w-sm items-center gap-1.5 mt-2'>
+        <div className="grid w-full max-w-sm items-center gap-1.5 mt-2">
           {/* <Label htmlFor='search'>
             Search
           </Label> */}
-          <Input
-            type='search'
-            id='search'
-            placeholder='Search'
-          />
+          <Input type="search" id="search" placeholder="Search" />
         </div>
-        <div className='grid grid-cols-3  gap-2'>
+        <div className="grid grid-cols-3  gap-2">
           {result.map((item, index) => (
             // <form
             //   key={index}
@@ -99,52 +83,38 @@ export default async function InventoryListPage({
             //     {item.name}
             //   </Button>
             // </form>
-            <InventoryCard
-              key={index}
-              inventory={item}
-            />
+            <InventoryCard key={index} inventory={item} />
           ))}
         </div>
-        <Pagination className='mt-4'>
+        <Pagination className="mt-4">
           <PaginationContent>
-            {page !== '1' && (
+            {page !== "1" && (
               <PaginationItem>
                 <PaginationPrevious
-                  href={`?page=${
-                    +page - 1
-                  }&limit=${limit}`}
+                  href={`?page=${+page - 1}&limit=${limit}`}
                 />
               </PaginationItem>
             )}
             {Array.from({
               length: numberOfPage,
             }).map((_, index) => (
-              <PaginationItem
-                key={index}>
+              <PaginationItem key={index}>
                 <PaginationLink
-                  isActive={
-                    +page === index + 1
-                  }
-                  href={`?page=${
-                    index + 1
-                  }&limit=${limit}`}>
+                  isActive={+page === index + 1}
+                  href={`?page=${index + 1}&limit=${limit}`}
+                >
                   {index + 1}
                 </PaginationLink>
               </PaginationItem>
             ))}
-            {page !==
-              String(numberOfPage) && (
+            {page !== String(numberOfPage) && (
               <PaginationItem>
-                <PaginationNext
-                  href={`?page=${
-                    +page + 1
-                  }&limit=${limit}`}
-                />
+                <PaginationNext href={`?page=${+page + 1}&limit=${limit}`} />
               </PaginationItem>
             )}
           </PaginationContent>
         </Pagination>
       </div>
     </div>
-  )
+  );
 }

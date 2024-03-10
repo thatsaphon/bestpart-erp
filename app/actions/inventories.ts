@@ -70,3 +70,43 @@ export const deleteInventory = async (formData: FormData) => {
     await prisma.skuMaster.delete({ where: { code } })
     revalidatePath('/inventory')
 }
+
+export const editInventory = async (formData: FormData) => {
+    // const code = formData.get('code')
+    // const name = formData.get('name')
+    // const tags = formData.getAll('tags') as string[]
+    const validator = z
+        .object({
+            code: z.string().trim().min(1, 'code must not be empty'),
+            name: z.string().trim().min(1, 'name must not be empty'),
+            tags: z.array(z.string().trim().min(1, 'tag must not be empty')),
+        })
+    try {
+
+        const { code, name, tags } = validator.parse({
+            code: formData.get('code'),
+            name: formData.get('name'),
+            tags: formData.getAll('tags')
+        })
+        await prisma.skuMaster.update({
+            where: {
+                code
+            },
+            data: {
+                name,
+                flag: {
+                    set: tags
+                }
+            }
+        })
+    } catch (error) {
+        return error
+    }
+}
+
+const uploadPicture = async (formData: FormData) => {
+    const validator = z.object({
+        code: z.string().trim().min(1, 'code must not be empty'),
+    })
+
+}
