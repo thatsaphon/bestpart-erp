@@ -11,23 +11,14 @@ export default async function LayoutComponent({
 }: {
   children: React.ReactNode
 }) {
-  const userObject = JSON.parse(
-    headers().get('user') as string
-  )
-  const userValidation =
-    AuthPayloadSchema.safeParse(
-      userObject
-    )
+  const userObject = JSON.parse(headers().get('user') as string)
+  const userValidation = AuthPayloadSchema.safeParse(userObject)
 
-  let user: z.infer<
-    typeof AuthPayloadSchema
-  >
-  // if (!userValidation.success) return <>{children}</>;
+  let user: z.infer<typeof AuthPayloadSchema>
+  if (!userValidation.success) return <>{children}</>
   user = userValidation.data
 
-  const upload = async (
-    formData: FormData
-  ) => {
+  const upload = async (formData: FormData) => {
     'use server'
 
     const file = formData.get('file')

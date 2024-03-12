@@ -4,32 +4,34 @@ import * as jose from 'jose'
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
+  const token = request.cookies.get('token')
 
-    const token = request.cookies.get('token')
+  if (request.nextUrl.pathname.startsWith('/auth/login')) {
+    return NextResponse.next()
+  }
 
+  if (!token) return NextResponse.redirect(new URL('/auth/login', request.url))
 
-    if (request.nextUrl.pathname.startsWith('/auth/login')) {
-        return NextResponse.next()
-    }
-
-    if (!token) return NextResponse.redirect(new URL('/auth/login', request.url))
-
-    try {
-        const requestHeaders = new Headers(request.headers)
-        const payload = await jose.jwtVerify(token.value, new TextEncoder().encode(process.env.JWT_SECRET))
-        requestHeaders.set('user', JSON.stringify(payload.payload.data))
-        return NextResponse.next({
-            headers: requestHeaders
-        })
-    }
-    catch (err) {
-        request.cookies.delete('token')
-        return NextResponse.redirect(new URL('/auth/login', request.url))
-    }
+  try {
+    const requestHeaders = new Headers(request.headers)
+    const payload = await jose.jwtVerify(
+      token.value,
+      new TextEncoder().encode(process.env.JWT_SECRET)
+    )
+    requestHeaders.set('user', JSON.stringify(payload.payload.data))
+    return NextResponse.next({
+      headers: requestHeaders,
+    })
+  } catch (err) {
+    request.cookies.delete('token')
+    return NextResponse.redirect(new URL('/auth/login', request.url))
+  }
 }
 
 // See "Matching Paths" below to learn more
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|auth|favicon.ico|robots.txt|images|$|auth/:path*).*)', '/'],
-
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|images|$).*)',
+    '/',
+  ],
 }

@@ -1,9 +1,10 @@
-'use client';
+'use client'
 
-import toast from 'react-hot-toast';
-import { login } from '../auth/login/action';
+import { login } from '@/app/auth/login/action'
+import toast from 'react-hot-toast'
+// import { login }
 
-type Props = {};
+type Props = {}
 
 export default function LoginComponent({}: Props) {
   return (
@@ -11,11 +12,11 @@ export default function LoginComponent({}: Props) {
       action={async (formData) => {
         const result = await login(
           formData
-        );
+        )
         if (result?.error)
           return toast.error(
             result.error
-          );
+          )
       }}
     >
       <div className='border-black border flex flex-col gap-2 rounded-md w-full p-12'>
@@ -51,5 +52,5 @@ export default function LoginComponent({}: Props) {
         </div>
       </div>
     </form>
-  );
+  )
 }

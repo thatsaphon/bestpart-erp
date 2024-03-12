@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { createUser } from '../auth/create/action'
+import { createUser } from '@/app/auth/create/action'
 import toast from 'react-hot-toast'
 
 type Props = {}
@@ -12,7 +12,8 @@ export default function CreateUserForm({}: Props) {
       action={async (formData) => {
         await createUser(formData)
         toast.success('Successful')
-      }}>
+      }}
+    >
       <div className='border-black border flex flex-col gap-2 rounded-md w-full p-12'>
         <div className='text-center grid grid-cols-[100px_200px] justify-center items-center gap-2'>
           <label htmlFor='new-username'>Username</label>
