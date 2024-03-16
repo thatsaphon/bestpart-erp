@@ -4,6 +4,7 @@ import * as jose from 'jose'
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
+  console.log('first')
   const token = request.cookies.get('token')
 
   if (request.nextUrl.pathname.startsWith('/auth/login')) {
@@ -31,7 +32,7 @@ export async function middleware(request: NextRequest) {
 // See "Matching Paths" below to learn more
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|images|$).*)',
+    '/((?!api|_next/static|_next/image|auth|favicon.ico|robots.txt|images|$|auth/:path*).*)',
     '/',
   ],
 }

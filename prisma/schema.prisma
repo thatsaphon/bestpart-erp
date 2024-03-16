@@ -91,6 +91,15 @@ model Address {
   @@index([contactId])
 }
 
+model MainSku {
+  id         Int     @id @default(autoincrement())
+  partNumber String?
+  name       String
+
+  flag       Json
+  skuMasters SkuMaster[]
+}
+
 model SkuMaster {
   id   Int    @id @default(autoincrement())
   code String @unique
@@ -100,6 +109,8 @@ model SkuMaster {
   brandId    Int?
   carModel   CarModel? @relation(fields: [carModelId], references: [id])
   carModelId Int?
+  mainSkuId  Int
+  mainSku    MainSku?  @relation(fields: [mainSkuId], references: [id])
 
   flag         Json
   goodsMasters GoodsMaster[]
@@ -107,6 +118,7 @@ model SkuMaster {
 
   @@index([brandId])
   @@index([carModelId])
+  @@index([mainSkuId])
 }
 
 model CarModel {

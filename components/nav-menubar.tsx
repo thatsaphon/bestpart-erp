@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Menubar,
   MenubarCheckboxItem,
@@ -12,94 +14,62 @@ import {
   MenubarSubContent,
   MenubarSubTrigger,
   MenubarTrigger,
-} from "@/components/ui/menubar-modified";
-import { cva } from "class-variance-authority";
-import { ChevronDown } from "lucide-react";
-import Link from "next/link";
-import { InventoryDialog } from "./inventory-dialog";
+} from '@/components/ui/menubar-modified'
+import { cva } from 'class-variance-authority'
+import { ChevronDown } from 'lucide-react'
+import Link from 'next/link'
+import { InventoryDialog } from './inventory-dialog'
+import { cn } from '@/lib/utils'
+import { usePathname } from 'next/navigation'
 // import { navigationMenuTriggerStyle } from './ui/navigation-menu'
 
 export function NavMenubar() {
+  const pathName = usePathname()
   return (
     <Menubar>
       <MenubarMenu>
-        <MenubarTrigger>งานขาย</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>
-            New Sales
-            {/* <MenubarShortcut>Ctrl + N</MenubarShortcut> */}
-          </MenubarItem>
-          <MenubarItem asChild>
-            <Link href={"/sales"}>Go to Sales List</Link>
-            {/* <MenubarShortcut>⌘N</MenubarShortcut> */}
-          </MenubarItem>
-          <MenubarItem disabled>New Incognito Window</MenubarItem>
-          <MenubarSeparator />
-          <MenubarSub>
-            <MenubarSubTrigger>Share</MenubarSubTrigger>
-            <MenubarSubContent>
-              <MenubarItem>Email link</MenubarItem>
-              <MenubarItem>Messages</MenubarItem>
-              <MenubarItem>Notes</MenubarItem>
-            </MenubarSubContent>
-          </MenubarSub>
-          <MenubarSeparator />
-          <MenubarItem>
-            Print... <MenubarShortcut>⌘P</MenubarShortcut>
-          </MenubarItem>
-        </MenubarContent>
+        <Link href={'/'}>
+          <MenubarTrigger className={cn(pathName === '/' && 'bg-accent')}>
+            หน้าหลัก
+          </MenubarTrigger>
+        </Link>
       </MenubarMenu>
       <MenubarMenu>
-        <MenubarTrigger>จัดซื้อ</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>
-            Undo <MenubarShortcut>⌘Z</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem>
-            Redo <MenubarShortcut>⇧⌘Z</MenubarShortcut>
-          </MenubarItem>
-          <MenubarSeparator />
-          <MenubarSub>
-            <MenubarSubTrigger>Find</MenubarSubTrigger>
-            <MenubarSubContent>
-              <MenubarItem>Search the web</MenubarItem>
-              <MenubarSeparator />
-              <MenubarItem>Find...</MenubarItem>
-              <MenubarItem>Find Next</MenubarItem>
-              <MenubarItem>Find Previous</MenubarItem>
-            </MenubarSubContent>
-          </MenubarSub>
-          <MenubarSeparator />
-          <MenubarItem>Cut</MenubarItem>
-          <MenubarItem>Copy</MenubarItem>
-          <MenubarItem>Paste</MenubarItem>
-        </MenubarContent>
+        <Link href={'/sales'}>
+          <MenubarTrigger
+            className={cn(pathName.includes('/sales') && 'bg-accent')}
+          >
+            งานขาย
+          </MenubarTrigger>
+        </Link>
       </MenubarMenu>
       <MenubarMenu>
-        <MenubarTrigger>คลังสินค้า</MenubarTrigger>
-        <MenubarContent>
-          {/* <MenubarItem asChild>
-          </MenubarItem> */}
-          <InventoryDialog isButton={false} label="New Inventory" />
-          <MenubarItem asChild>
-            <Link href={"/inventory"}>Go to Inventory List</Link>
-          </MenubarItem>
-        </MenubarContent>
+        <Link href={'/purchase'}>
+          <MenubarTrigger
+            className={cn(pathName.includes('/purchase') && 'bg-accent')}
+          >
+            จัดซื้อ
+          </MenubarTrigger>
+        </Link>
       </MenubarMenu>
       <MenubarMenu>
-        <MenubarTrigger>บัญชี</MenubarTrigger>
-        <MenubarContent>
-          <MenubarRadioGroup value="benoit">
-            <MenubarRadioItem value="andy">Andy</MenubarRadioItem>
-            <MenubarRadioItem value="benoit">Benoit</MenubarRadioItem>
-            <MenubarRadioItem value="Luis">Luis</MenubarRadioItem>
-          </MenubarRadioGroup>
-          <MenubarSeparator />
-          <MenubarItem inset>Edit...</MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem inset>Add Profile...</MenubarItem>
-        </MenubarContent>
+        <Link href={'/inventory'}>
+          <MenubarTrigger
+            className={cn(pathName.includes('/inventory') && 'bg-accent')}
+          >
+            คลังสินค้า
+          </MenubarTrigger>
+        </Link>
+      </MenubarMenu>
+      <MenubarMenu>
+        <Link href={'/accounting'}>
+          <MenubarTrigger
+            className={cn(pathName.includes('/accounting') && 'bg-accent')}
+          >
+            บัญชี
+          </MenubarTrigger>
+        </Link>
       </MenubarMenu>
     </Menubar>
-  );
+  )
 }

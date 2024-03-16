@@ -5,6 +5,7 @@ import { ModeToggle } from '@/components/mode-toggle'
 import { NavMenubar } from '@/components/nav-menubar'
 import { z } from 'zod'
 import UserAvatar from './user-avatar'
+import Link from 'next/link'
 
 export default async function LayoutComponent({
   children,
@@ -28,12 +29,13 @@ export default async function LayoutComponent({
   return (
     <div className='min-h-screen flex flex-col'>
       <div className='w-screen h-14 flex items-center justify-between pr-5'>
-        <a
+        <Link
           className='flex h-7 items-center justify-center rounded-full text-primary
         px-4 text-center text-sm transition-colors font-bold mr-5'
+          href={'/'}
         >
           BestPart Alai
-        </a>
+        </Link>
         <nav className='flex space-x-6 flex-1'>
           <NavMenubar />
         </nav>
