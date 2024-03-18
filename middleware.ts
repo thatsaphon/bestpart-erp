@@ -4,7 +4,6 @@ import * as jose from 'jose'
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
-  console.log('first')
   const token = request.cookies.get('token')
 
   if (request.nextUrl.pathname.startsWith('/auth/login')) {

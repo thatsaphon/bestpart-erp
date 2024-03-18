@@ -54,7 +54,11 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-sans)', ...fontFamily.sans],
+        sans: [
+          'var(--font-sans)',
+          'var(--font-nato_sans_thai_looped)',
+          ...fontFamily.sans,
+        ],
       },
       borderRadius: {
         lg: 'var(--radius)',
