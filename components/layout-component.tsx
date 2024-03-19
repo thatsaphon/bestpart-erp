@@ -1,23 +1,17 @@
-import { headers } from 'next/headers'
-import { AuthPayloadSchema } from '../app/model/payload'
 import { Separator } from '@/components/ui/separator'
 import { ModeToggle } from '@/components/mode-toggle'
 import { NavMenubar } from '@/components/nav-menubar'
-import { z } from 'zod'
 import UserAvatar from './user-avatar'
 import Link from 'next/link'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { getServerSession } from 'next-auth'
 
 export default async function LayoutComponent({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const userObject = JSON.parse(headers().get('user') as string)
-  const userValidation = AuthPayloadSchema.safeParse(userObject)
-
-  let user: z.infer<typeof AuthPayloadSchema>
-  if (!userValidation.success) return <>{children}</>
-  user = userValidation.data
+  const session = await getServerSession(authOptions)
 
   const upload = async (formData: FormData) => {
     'use server'
@@ -41,7 +35,7 @@ export default async function LayoutComponent({
         </nav>
         <div className='mr-2 flex items-center gap-2'>
           <ModeToggle />
-          <UserAvatar user={user} />
+          <UserAvatar user={session?.user} />
         </div>
       </div>
       <Separator />

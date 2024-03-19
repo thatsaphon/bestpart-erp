@@ -1,16 +1,9 @@
 'use client'
 import React from 'react'
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from './ui/avatar'
+import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 import { User } from '@prisma/client'
 
-import {
-  LogOut,
-  User as UserIcon,
-} from 'lucide-react'
+import { LogOut, User as UserIcon } from 'lucide-react'
 
 import {
   DropdownMenu,
@@ -29,45 +22,32 @@ import {
 import { logout } from '@/app/auth/login/action'
 import { z } from 'zod'
 import { AuthPayloadSchema } from '@/app/model/payload'
+import { signOut, useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 type Props = {
-  user?: z.infer<
-    typeof AuthPayloadSchema
-  >
+  user?: z.infer<typeof AuthPayloadSchema>
 }
 
-export default function UserAvatar({
-  user,
-}: Props) {
+export default function UserAvatar({ user }: Props) {
+  const session = useSession()
+  const router = useRouter()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className='rounded-full'>
           <Avatar>
-            <AvatarImage
-              src={
-                user?.avatarUrl ?? ''
-              }
-              alt='avatar'
-            />
+            <AvatarImage src={user?.avatarUrl ?? ''} alt='avatar' />
             <AvatarFallback>
-              {user?.first_name
-                ?.slice(0, 1)
-                .toUpperCase() ??
-                user?.username
-                  .slice(0, 1)
-                  .toUpperCase()}
+              {user?.first_name?.slice(0, 1).toUpperCase() ??
+                user?.username.slice(0, 1).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className='w-56'
-        align='end'>
+      <DropdownMenuContent className='w-56' align='end'>
         <DropdownMenuLabel>
-          {`${user?.username
-            .slice(0, 1)
-            .toUpperCase()}${user?.username.slice(
+          {`${user?.username.slice(0, 1).toUpperCase()}${user?.username.slice(
             1
           )}`}
         </DropdownMenuLabel>
@@ -81,14 +61,14 @@ export default function UserAvatar({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={async () =>
-            await logout()
-          }>
+          onClick={async () => {
+            signOut()
+            router.push('/')
+          }}
+        >
           <LogOut className='mr-2 h-4 w-4' />
           <span>Log out</span>
-          <DropdownMenuShortcut>
-            ⇧⌘Q
-          </DropdownMenuShortcut>
+          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

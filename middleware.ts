@@ -1,37 +1,20 @@
-import { NextResponse } from 'next/server'
-import { NextRequest } from 'next/server'
-import * as jose from 'jose'
+import { getToken } from 'next-auth/jwt'
+import { NextRequest, NextResponse } from 'next/server'
 
-// This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')
+  // const user = await getToken({
+  //   req: request,
+  //   secret: process.env.NEXTAUTH_SECRET,
+  // })
 
-  if (request.nextUrl.pathname.startsWith('/auth/login')) {
-    return NextResponse.next()
-  }
+  // Get the pathname of the request
+  // const { pathname } = request.nextUrl
 
-  if (!token) return NextResponse.redirect(new URL('/auth/login', request.url))
+  // If the pathname starts with /protected and the user is not an admin, redirect to the home page
+  // if (pathname.startsWith('/protected') && (!user || user.role !== 'admin')) {
+  //   return NextResponse.redirect(new URL('/', request.url))
+  // }
 
-  try {
-    const requestHeaders = new Headers(request.headers)
-    const payload = await jose.jwtVerify(
-      token.value,
-      new TextEncoder().encode(process.env.JWT_SECRET)
-    )
-    requestHeaders.set('user', JSON.stringify(payload.payload.data))
-    return NextResponse.next({
-      headers: requestHeaders,
-    })
-  } catch (err) {
-    request.cookies.delete('token')
-    return NextResponse.redirect(new URL('/auth/login', request.url))
-  }
-}
-
-// See "Matching Paths" below to learn more
-export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|auth|favicon.ico|robots.txt|images|$|auth/:path*).*)',
-    '/',
-  ],
+  // Continue with the request if the user is an admin or the route is not protected
+  return NextResponse.next()
 }
