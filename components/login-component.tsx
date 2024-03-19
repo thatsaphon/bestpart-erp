@@ -20,7 +20,6 @@ export default function LoginComponent({}: Props) {
         if (result?.error) {
           console.error(result.error)
         } else {
-          router.push('/')
           router.refresh()
         }
         if (result?.error) return toast.error(result.error)

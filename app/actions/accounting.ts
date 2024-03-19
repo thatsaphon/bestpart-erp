@@ -3,9 +3,10 @@
 import { $Enums } from '@prisma/client'
 import { z } from 'zod'
 import prisma from '../db/db'
+import { revalidatePath } from 'next/cache'
 
 export async function createChartOfAccounts(
-  prevState: string,
+  prevState: any,
   formData: FormData
 ) {
   const [firstKey, ...otherKeys] = Object.keys(
@@ -32,11 +33,11 @@ export async function createChartOfAccounts(
         type: accountType,
       },
     })
-
-    return 'success'
+    revalidatePath('/accounting')
+    return { message: 'success' }
   } catch (err) {
     console.log(err)
     console.log('error in createChartOfAccounts')
-    return 'failed'
+    return { message: 'failed' }
   }
 }

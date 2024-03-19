@@ -10,9 +10,10 @@ import { cn } from '@/lib/utils'
 import { ThemeProvider } from '@/components/theme-provider'
 import LayoutComponent from '@/components/layout-component'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 
 import SessionProvider from '@/components/session-provider'
+import { authOptions } from './api/auth/[...nextauth]/authOptions'
+import LoginComponent from '@/components/login-component'
 
 export const fontSans = FontSans({
   subsets: ['latin'],
@@ -36,6 +37,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const session = await getServerSession(authOptions)
+
   return (
     <html lang='en' suppressHydrationWarning>
       <body
@@ -53,7 +55,11 @@ export default async function RootLayout({
         >
           <SessionProvider session={session}>
             {session && <LayoutComponent>{children}</LayoutComponent>}
-            {!session && children}
+            {!session && (
+              <main className='p-36 h-screen w-screen'>
+                <LoginComponent />
+              </main>
+            )}
           </SessionProvider>
 
           <Toaster />

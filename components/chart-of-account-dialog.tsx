@@ -34,27 +34,25 @@ export default function ChartOfAccountDialog({
   label = 'Add',
 }: Props) {
   const [open, setOpen] = React.useState(false)
-  const [state, formAction] = useFormState(createChartOfAccounts, '')
+  const [state, formAction] = useFormState(createChartOfAccounts, {
+    message: '',
+  })
 
   useEffect(() => {
-    console.log(state)
-    // if (!state) return console.log(state)
-    // if (state.message === '') return
-    // if (state.message === 'success') {
-    //   toast.success('success')
-    // }
-    // if (state.message !== 'success') {
-    //   toast.error(state.message)
-    // }
+    if (state.message === '') return
+    if (state.message === 'success') {
+      toast.success('success')
+      state.message = ''
+    }
+    if (state.message !== 'failed') {
+      toast.error(state.message)
+      state.message = ''
+    }
   }, [state])
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant='outline'
-          className={className}
-          onClick={() => setOpen(true)}
-        >
+        <Button variant='outline' className={className}>
           {label}
         </Button>
       </DialogTrigger>
@@ -86,11 +84,7 @@ export default function ChartOfAccountDialog({
           <Input name='accountName' />
           <DialogFooter className='mt-4'>
             <DialogClose asChild>
-              <Button
-                type='button'
-                onClick={() => setOpen(false)}
-                variant={'secondary'}
-              >
+              <Button type='button' variant={'secondary'}>
                 Close
               </Button>
             </DialogClose>

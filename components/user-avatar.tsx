@@ -62,8 +62,7 @@ export default function UserAvatar({ user }: Props) {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={async () => {
-            signOut()
-            router.push('/')
+            await signOut()
           }}
         >
           <LogOut className='mr-2 h-4 w-4' />
