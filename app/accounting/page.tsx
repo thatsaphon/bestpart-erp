@@ -23,7 +23,10 @@ export default async function AccountingPage({}: Props) {
   const resetChartOfAccount = async () => {
     'use server'
     const file = await fs.readFile(
-      process.cwd() + '/public/master-data/chart-of-accounts.csv',
+      process.cwd() +
+        `/${
+          process.env.NODE_ENV === 'production' ? 'static' : 'public'
+        }/master-data/chart-of-accounts.csv`,
       'utf8'
     )
     console.log(file)

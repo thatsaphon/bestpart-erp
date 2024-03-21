@@ -14,6 +14,7 @@ import { getServerSession } from 'next-auth'
 import SessionProvider from '@/components/session-provider'
 import { authOptions } from './api/auth/[...nextauth]/authOptions'
 import LoginComponent from '@/components/login-component'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const fontSans = FontSans({
   subsets: ['latin'],
@@ -47,6 +48,7 @@ export default async function RootLayout({
           fontSans.variable
         )}
       >
+        <SpeedInsights />
         <ThemeProvider
           attribute='class'
           defaultTheme='system'
