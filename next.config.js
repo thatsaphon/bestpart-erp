@@ -13,6 +13,11 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    outputFileTracingIncludes: {
+      '/public/master-data': ['./**/*'],
+    },
+  },
 }
 
 module.exports = nextConfig
