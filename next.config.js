@@ -15,7 +15,7 @@ const nextConfig = {
   },
   experimental: {
     outputFileTracingIncludes: {
-      outputFileTracingRoot: path.join(process.cwd(), 'master-data/*+'),
+      outputFileTracingRoot: path.join(process.cwd(), 'master-data/*'),
     },
   },
 }
