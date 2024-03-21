@@ -24,6 +24,8 @@ export default async function AccountingPage({}: Props) {
     'use server'
     console.log(__dirname)
     console.log(process.cwd())
+    const dir = await fs.readdir(process.cwd())
+    console.log(dir)
     const file = await fs.readFile(
       process.cwd() + `/master-data/chart-of-accounts.csv`,
       'utf8'

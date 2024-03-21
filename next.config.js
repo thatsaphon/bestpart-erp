@@ -15,10 +15,10 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    outputFileTracingRoot: path.join(__dirname, '../../'),
-    // outputFileTracingIncludes: {
-    //   '/': ['./master-data/*', './master-data/**/*'],
-    // },
+    // outputFileTracingRoot: path.join(__dirname, '../../'),
+    outputFileTracingIncludes: {
+      '/': ['./master-data/*', './master-data/**/*'],
+    },
   },
 }
 
