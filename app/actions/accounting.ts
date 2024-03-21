@@ -14,23 +14,23 @@ export async function createChartOfAccounts(
   ) as (keyof typeof $Enums.AccountType)[]
 
   const schema = z.object({
-    accountNumber: z.number().positive().int(),
-    accountName: z.string().min(1),
-    accountType: z.enum([firstKey, ...otherKeys]),
+    id: z.number().positive().int(),
+    name: z.string().min(1),
+    type: z.enum([firstKey, ...otherKeys]),
   })
 
   try {
-    const { accountName, accountNumber, accountType } = schema.parse({
-      accountNumber: Number(formData.get('accountNumber')),
-      accountName: formData.get('accountName'),
-      accountType: formData.get('accountType'),
+    const { id, name, type } = schema.parse({
+      id: Number(formData.get('accountNumber')),
+      name: formData.get('accountName'),
+      type: formData.get('accountType'),
     })
 
     await prisma.chartOfAccount.create({
       data: {
-        id: accountNumber,
-        name: accountName,
-        type: accountType,
+        id,
+        name,
+        type,
       },
     })
     revalidatePath('/accounting')

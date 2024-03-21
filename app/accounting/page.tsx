@@ -7,6 +7,11 @@ import {
 } from '@/components/ui/accordion'
 import ChartOfAccountDialog from '@/components/chart-of-account-dialog'
 import prisma from '../db/db'
+import ResetChartOfAccountDialog from '@/components/reset-chart-of-account-dialog'
+import { revalidatePath } from 'next/cache'
+import { promises as fs } from 'fs'
+import { csvToJSONObject } from '@/lib/csvToObject'
+import { chartOfAccountSchema } from '../schema/chart-of-accounts-schema'
 
 type Props = {}
 
@@ -14,10 +19,38 @@ export const revalidate = 600
 
 export default async function AccountingPage({}: Props) {
   const chartOfAccount = await prisma.chartOfAccount.findMany({})
-  console.log(chartOfAccount)
+
+  const resetChartOfAccount = async () => {
+    'use server'
+    const file = await fs.readFile(
+      process.cwd() + '/public/master-data/chart-of-accounts.csv',
+      'utf8'
+    )
+    console.log(file)
+    const result = await csvToJSONObject(file)
+    // console.log(result)
+    const validated = chartOfAccountSchema.array().safeParse(result)
+
+    if (!validated.success) {
+      // console.log(validated.error)
+      return {
+        error: 'invalid data',
+      }
+    }
+
+    await prisma.chartOfAccount.deleteMany({})
+    await prisma.chartOfAccount.createMany({
+      data: validated.data,
+    })
+    revalidatePath('/accounting')
+  }
+
   return (
     <main className='p-3 h-full w-full'>
-      <h1 className='text-3xl font-bold'>Chart of Account</h1>
+      <div className='flex gap-x-3'>
+        <h1 className='text-3xl font-bold'>Chart of Account</h1>
+        <ResetChartOfAccountDialog resetChartOfAccount={resetChartOfAccount} />
+      </div>
       <div className='p-6'>
         <Accordion type='single' collapsible className='w-full max-w-[700px]'>
           <AccordionItem value='assets'>

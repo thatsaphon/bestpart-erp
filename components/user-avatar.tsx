@@ -30,8 +30,6 @@ type Props = {
 }
 
 export default function UserAvatar({ user }: Props) {
-  const session = useSession()
-  const router = useRouter()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

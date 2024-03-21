@@ -25,6 +25,10 @@ export default async function RootLayout({
           label='Balance Sheet'
         />
         <Separator />
+        <SubMenuNavLink href='/accounting/cash' label='Cash' />
+        <Separator />
+        <SubMenuNavLink href='/accounting/land-ppe' label='Land and PP&E' />
+        <Separator />
       </div>
       <Separator orientation='vertical' className='h-full' />
       {children}
