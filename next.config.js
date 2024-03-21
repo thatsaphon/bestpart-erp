@@ -16,9 +16,9 @@ const nextConfig = {
   },
   experimental: {
     outputFileTracingRoot: path.join(__dirname, '../../'),
-    outputFileTracingIncludes: {
-      '/': ['./master-data/*', './master-data/**/*'],
-    },
+    // outputFileTracingIncludes: {
+    //   '/': ['./master-data/*', './master-data/**/*'],
+    // },
   },
 }
 
