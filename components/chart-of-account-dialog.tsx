@@ -1,8 +1,9 @@
 'use client'
 
-import { Dialog, DialogTrigger } from '@radix-ui/react-dialog'
 import React, { useEffect } from 'react'
 import {
+  Dialog,
+  DialogTrigger,
   DialogClose,
   DialogContent,
   DialogDescription,

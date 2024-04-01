@@ -1,7 +1,6 @@
 'use client'
 import React from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
-import { User } from '@prisma/client'
 
 import { LogOut, User as UserIcon } from 'lucide-react'
 
@@ -19,11 +18,9 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { logout } from '@/app/auth/login/action'
 import { z } from 'zod'
-import { AuthPayloadSchema } from '@/app/model/payload'
-import { signOut, useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { AuthPayloadSchema } from '@/app/schema/authPayloadSchema'
+import { signOut } from 'next-auth/react'
 
 type Props = {
   user?: z.infer<typeof AuthPayloadSchema>

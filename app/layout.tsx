@@ -1,9 +1,5 @@
 import type { Metadata } from 'next'
-import {
-  Inter as FontSans,
-  Sarabun,
-  Noto_Sans_Thai_Looped,
-} from 'next/font/google'
+import { Inter as FontSans, Sarabun } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
 import { cn } from '@/lib/utils'
@@ -21,10 +17,10 @@ export const fontSans = FontSans({
   variable: '--font-sans',
 })
 
-export const nato_sans_thai_looped = Noto_Sans_Thai_Looped({
+export const fontThai = Sarabun({
   subsets: ['thai', 'latin'],
   weight: '400',
-  variable: '--font-nato_sans_thai_looped',
+  variable: '--font-thai',
 })
 
 export const metadata: Metadata = {
@@ -44,7 +40,7 @@ export default async function RootLayout({
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
-          nato_sans_thai_looped.variable,
+          fontThai.variable,
           fontSans.variable
         )}
       >
@@ -58,7 +54,7 @@ export default async function RootLayout({
           <SessionProvider session={session}>
             {session && <LayoutComponent>{children}</LayoutComponent>}
             {!session && (
-              <main className='p-36 h-screen w-screen'>
+              <main className='h-screen w-screen p-36'>
                 <LoginComponent />
               </main>
             )}

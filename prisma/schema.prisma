@@ -19,10 +19,12 @@ model User {
   last_name  String?
   role       Role
   password   String
-  flag       Json
+  flag       Json?
   avatarUrl  String?
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  accountOwners AccountOwner[]
 }
 
 enum Role {
@@ -39,6 +41,8 @@ model Document {
   skuMovements    SkuMovement[]
   arSubledger     ArSubledger[]
   apSubledger     ApSubledger[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @default(now()) @updatedAt
 
   @@index([generalLedgerId])
 }
@@ -48,6 +52,10 @@ model ChartOfAccount {
   name          String
   type          AccountType
   GeneralLedger GeneralLedger[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+
+  accountOwner AccountOwner[]
 }
 
 enum AccountType {
@@ -66,6 +74,8 @@ model GeneralLedger {
   chartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
   chartOfAccountId Int
   amount           Decimal
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @default(now()) @updatedAt
 
   @@index([chartOfAccountId])
 }
@@ -74,11 +84,14 @@ model Contact {
   id        Int       @id @default(autoincrement())
   name      String
   Addresses Address[]
-  flag      Json
+  flag      Json?
   taxId     String
 
   apSubledger ApSubledger[]
   arSubledger ArSubledger[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Address {
@@ -91,6 +104,9 @@ model Address {
   addressLine2 String?
   phone        String?
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([contactId])
 }
 
@@ -99,8 +115,11 @@ model MainSku {
   partNumber String?
   name       String
 
-  flag       Json
+  flag       Json?
   skuMasters SkuMaster[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model SkuMaster {
@@ -115,9 +134,12 @@ model SkuMaster {
   mainSkuId  Int
   mainSku    MainSku?  @relation(fields: [mainSkuId], references: [id])
 
-  flag         Json
+  flag         Json?
   goodsMasters GoodsMaster[]
   skuMovements SkuMovement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([brandId])
   @@index([carModelId])
@@ -129,6 +151,9 @@ model CarModel {
   name String
 
   skuMasters SkuMaster[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Brand {
@@ -136,6 +161,9 @@ model Brand {
   name String
 
   skuMasters SkuMaster[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model GoodsMaster {
@@ -146,7 +174,10 @@ model GoodsMaster {
   quantity Decimal
   unit     String
   price    Decimal
-  flag     Json
+  flag     Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([skuId])
 }
@@ -165,7 +196,10 @@ model SkuMovement {
   sellPrice Decimal
   vat       Decimal
 
-  flag Json
+  flag Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([skuId])
   @@index([documentId])
@@ -178,6 +212,9 @@ model ApSubledger {
   document   Document @relation(fields: [documentId], references: [id])
   documentId Int
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([contactId])
   @@index([documentId])
 }
@@ -189,6 +226,20 @@ model ArSubledger {
   document   Document @relation(fields: [documentId], references: [id])
   documentId Int
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   @@index([contactId])
   @@index([documentId])
+}
+
+model AccountOwner {
+  id              Int            @id @default(autoincrement())
+  accountNumber   ChartOfAccount @relation(fields: [accountNumberId], references: [id])
+  accountNumberId Int
+  user            User           @relation(fields: [userId], references: [id])
+  userId          String
+
+  @@index([accountNumberId])
+  @@index([userId])
 }

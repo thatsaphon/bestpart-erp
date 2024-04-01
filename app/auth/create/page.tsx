@@ -1,6 +1,6 @@
 import React from 'react'
 import { headers } from 'next/headers'
-import { AuthPayloadSchema } from '../../model/payload'
+import { AuthPayloadSchema } from '../../schema/authPayloadSchema'
 import CreateUserForm from '@/components/create-user-form'
 import { redirect } from 'next/navigation'
 
@@ -13,7 +13,7 @@ export default function CreateUser({}: Props) {
   // if (!user.success) redirect('/auth/login')
   // if (user.data.role !== 'ADMIN') redirect('/auth/login')
   return (
-    <main className='p-36 h-screen w-screen'>
+    <main className='h-screen w-screen p-36'>
       <CreateUserForm />
     </main>
   )
