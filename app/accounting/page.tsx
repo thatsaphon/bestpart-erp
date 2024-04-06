@@ -12,13 +12,24 @@ import { revalidatePath } from 'next/cache'
 import { promises as fs } from 'fs'
 import { csvToJSONObject } from '@/lib/csvToObject'
 import { chartOfAccountSchema } from '../schema/chart-of-accounts-schema'
+import { EyeOpenIcon } from '@radix-ui/react-icons'
+import ChartOfAccountDetailDialog from '@/components/chart-of-account-detail-dialog'
+import Link from 'next/link'
+import { URLSearchParams } from 'url'
+import { createQueryString } from '@/lib/searhParams'
 
-type Props = {}
+type Props = {
+    searchParams: { accountId?: string }
+}
 
 export const revalidate = 600
 
-export default async function AccountingPage({}: Props) {
+export default async function AccountingPage({ searchParams }: Props) {
     const chartOfAccount = await prisma.chartOfAccount.findMany({})
+    const accountDetail = await prisma.chartOfAccount.findUnique({
+        where: { id: searchParams.accountId ? +searchParams.accountId : 0 },
+        include: { GeneralLedger: true, accountOwners: true },
+    })
 
     const resetChartOfAccount = async () => {
         'use server'
@@ -71,9 +82,14 @@ export default async function AccountingPage({}: Props) {
                                     .map((account, index) => (
                                         <Fragment key={index}>
                                             <span>{account.id}</span>
-                                            <span className="text-right">
-                                                {account.name}
-                                            </span>
+                                            <div className="flex items-center justify-self-end ">
+                                                <span>{account.name}</span>
+                                                <Link
+                                                    href={`?${createQueryString(new URLSearchParams(searchParams), 'accountId', String(account.id))}`}
+                                                >
+                                                    <EyeOpenIcon className="ml-1 mt-0.5 w-3 hover:cursor-pointer" />
+                                                </Link>
+                                            </div>
                                         </Fragment>
                                     ))}
                             </div>
@@ -95,9 +111,14 @@ export default async function AccountingPage({}: Props) {
                                     .map((account, index) => (
                                         <Fragment key={index}>
                                             <span>{account.id}</span>
-                                            <span className="text-right">
-                                                {account.name}
-                                            </span>
+                                            <div className="flex items-center justify-self-end ">
+                                                <span>{account.name}</span>
+                                                <Link
+                                                    href={`?${createQueryString(new URLSearchParams(searchParams), 'accountId', String(account.id))}`}
+                                                >
+                                                    <EyeOpenIcon className="ml-1 mt-0.5 w-3 hover:cursor-pointer" />
+                                                </Link>
+                                            </div>
                                         </Fragment>
                                     ))}
                             </div>
@@ -118,9 +139,14 @@ export default async function AccountingPage({}: Props) {
                                     .map((account, index) => (
                                         <Fragment key={index}>
                                             <span>{account.id}</span>
-                                            <span className="text-right">
-                                                {account.name}
-                                            </span>
+                                            <div className="flex items-center justify-self-end ">
+                                                <span>{account.name}</span>
+                                                <Link
+                                                    href={`?${createQueryString(new URLSearchParams(searchParams), 'accountId', String(account.id))}`}
+                                                >
+                                                    <EyeOpenIcon className="ml-1 mt-0.5 w-3 hover:cursor-pointer" />
+                                                </Link>
+                                            </div>
                                         </Fragment>
                                     ))}
                             </div>{' '}
@@ -141,9 +167,14 @@ export default async function AccountingPage({}: Props) {
                                     .map((account, index) => (
                                         <Fragment key={index}>
                                             <span>{account.id}</span>
-                                            <span className="text-right">
-                                                {account.name}
-                                            </span>
+                                            <div className="flex items-center justify-self-end ">
+                                                <span>{account.name}</span>
+                                                <Link
+                                                    href={`?${createQueryString(new URLSearchParams(searchParams), 'accountId', String(account.id))}`}
+                                                >
+                                                    <EyeOpenIcon className="ml-1 mt-0.5 w-3 hover:cursor-pointer" />
+                                                </Link>
+                                            </div>
                                         </Fragment>
                                     ))}
                             </div>{' '}
@@ -164,9 +195,14 @@ export default async function AccountingPage({}: Props) {
                                     .map((account, index) => (
                                         <Fragment key={index}>
                                             <span>{account.id}</span>
-                                            <span className="text-right">
-                                                {account.name}
-                                            </span>
+                                            <div className="flex items-center justify-self-end ">
+                                                <span>{account.name}</span>
+                                                <Link
+                                                    href={`?${createQueryString(new URLSearchParams(searchParams), 'accountId', String(account.id))}`}
+                                                >
+                                                    <EyeOpenIcon className="ml-1 mt-0.5 w-3 hover:cursor-pointer" />
+                                                </Link>
+                                            </div>
                                         </Fragment>
                                     ))}
                             </div>{' '}
@@ -188,9 +224,14 @@ export default async function AccountingPage({}: Props) {
                                     .map((account, index) => (
                                         <Fragment key={index}>
                                             <span>{account.id}</span>
-                                            <span className="text-right">
-                                                {account.name}
-                                            </span>
+                                            <div className="flex items-center justify-self-end ">
+                                                <span>{account.name}</span>
+                                                <Link
+                                                    href={`?${createQueryString(new URLSearchParams(searchParams), 'accountId', String(account.id))}`}
+                                                >
+                                                    <EyeOpenIcon className="ml-1 mt-0.5 w-3 hover:cursor-pointer" />
+                                                </Link>
+                                            </div>
                                         </Fragment>
                                     ))}
                             </div>{' '}
@@ -212,9 +253,14 @@ export default async function AccountingPage({}: Props) {
                                     .map((account, index) => (
                                         <Fragment key={index}>
                                             <span>{account.id}</span>
-                                            <span className="text-right">
-                                                {account.name}
-                                            </span>
+                                            <div className="flex items-center justify-self-end ">
+                                                <span>{account.name}</span>
+                                                <Link
+                                                    href={`?${createQueryString(new URLSearchParams(searchParams), 'accountId', String(account.id))}`}
+                                                >
+                                                    <EyeOpenIcon className="ml-1 mt-0.5 w-3 hover:cursor-pointer" />
+                                                </Link>
+                                            </div>
                                         </Fragment>
                                     ))}
                             </div>{' '}
@@ -224,6 +270,10 @@ export default async function AccountingPage({}: Props) {
             </div>
             {/* <div className='flex flex-wrap lg:grid lg:grid-cols-3 mb-3 gap-3'>
       </div> */}
+            <ChartOfAccountDetailDialog
+                key={searchParams.accountId}
+                account={accountDetail}
+            />
         </main>
     )
 }

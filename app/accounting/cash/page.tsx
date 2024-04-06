@@ -8,11 +8,15 @@ import {
 } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import React from 'react'
+import React, { Fragment } from 'react'
 import { Prisma } from '@prisma/client'
 import { AuthPayloadSchema } from '@/app/schema/authPayloadSchema'
+import { Metadata } from 'next'
 
 type Props = {}
+export const metadata: Metadata = {
+    title: 'Cash',
+}
 
 export default async function CashPage({}: Props) {
     const users = await prisma.user.findMany({
@@ -27,6 +31,12 @@ export default async function CashPage({}: Props) {
         },
     })
     const validated = AuthPayloadSchema.array().safeParse(users)
+
+    const chartOfAccounts = await prisma.chartOfAccount.findMany({
+        where: {
+            AND: [{ id: { gte: 11100 } }, { id: { lt: 11400 } }],
+        },
+    })
 
     return (
         <main className="max-w-[724px] p-3">
@@ -53,15 +63,17 @@ export default async function CashPage({}: Props) {
                                 />
                             </div>
                             <div className="mt-3 grid grid-cols-2 px-3">
-                                {/* {chartOfAccount
-                  .filter((account) => account.type === 'Assets')
-                  .sort((a, b) => a.id - b.id)
-                  .map((account, index) => (
-                    <Fragment key={index}>
-                      <span>{account.id}</span>
-                      <span className='text-right'>{account.name}</span>
-                    </Fragment>
-                  ))} */}
+                                {chartOfAccounts
+                                    .filter((account) => account.id < 11200)
+                                    .sort((a, b) => a.id - b.id)
+                                    .map((account, index) => (
+                                        <Fragment key={index}>
+                                            <span>{account.id}</span>
+                                            <span className="text-right">
+                                                {account.name}
+                                            </span>
+                                        </Fragment>
+                                    ))}
                             </div>
                         </AccordionContent>
                     </AccordionItem>
@@ -77,6 +89,23 @@ export default async function CashPage({}: Props) {
                                     label="Add new Bank Account"
                                 />
                             </div>
+                            <div className="mt-3 grid grid-cols-2 px-3">
+                                {chartOfAccounts
+                                    .filter(
+                                        (account) =>
+                                            account.id >= 11200 &&
+                                            account.id < 11300
+                                    )
+                                    .sort((a, b) => a.id - b.id)
+                                    .map((account, index) => (
+                                        <Fragment key={index}>
+                                            <span>{account.id}</span>
+                                            <span className="text-right">
+                                                {account.name}
+                                            </span>
+                                        </Fragment>
+                                    ))}
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="cashier">
@@ -90,6 +119,23 @@ export default async function CashPage({}: Props) {
                                     type="Cashier"
                                     label="Add new Cashier"
                                 />
+                            </div>
+                            <div className="mt-3 grid grid-cols-2 px-3">
+                                {chartOfAccounts
+                                    .filter(
+                                        (account) =>
+                                            account.id >= 11300 &&
+                                            account.id < 11400
+                                    )
+                                    .sort((a, b) => a.id - b.id)
+                                    .map((account, index) => (
+                                        <Fragment key={index}>
+                                            <span>{account.id}</span>
+                                            <span className="text-right">
+                                                {account.name}
+                                            </span>
+                                        </Fragment>
+                                    ))}
                             </div>
                         </AccordionContent>
                     </AccordionItem>

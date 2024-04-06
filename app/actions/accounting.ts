@@ -6,38 +6,68 @@ import prisma from '../db/db'
 import { revalidatePath } from 'next/cache'
 
 export async function createChartOfAccounts(
-  prevState: any,
-  formData: FormData
+    prevState: any,
+    formData: FormData
 ) {
-  const [firstKey, ...otherKeys] = Object.keys(
-    $Enums.AccountType
-  ) as (keyof typeof $Enums.AccountType)[]
+    const [firstKey, ...otherKeys] = Object.keys(
+        $Enums.AccountType
+    ) as (keyof typeof $Enums.AccountType)[]
 
-  const schema = z.object({
-    id: z.number().positive().int(),
-    name: z.string().min(1),
-    type: z.enum([firstKey, ...otherKeys]),
-  })
-
-  try {
-    const { id, name, type } = schema.parse({
-      id: Number(formData.get('accountNumber')),
-      name: formData.get('accountName'),
-      type: formData.get('accountType'),
+    const schema = z.object({
+        id: z.number().positive().int(),
+        name: z.string().min(1),
+        type: z.enum([firstKey, ...otherKeys]),
+        accountOwners: z.array(z.string()),
     })
 
-    await prisma.chartOfAccount.create({
-      data: {
-        id,
-        name,
-        type,
-      },
+    try {
+        const { id, name, type, accountOwners } = schema.parse({
+            id: Number(formData.get('accountNumber')),
+            name: formData.get('accountName'),
+            type: formData.get('accountType'),
+            accountOwners: formData.getAll('accountOwners'),
+        })
+
+        const userOwners = await prisma.user.findMany({
+            where: { username: { in: accountOwners } },
+        })
+
+        await prisma.chartOfAccount.create({
+            data: {
+                id,
+                name,
+                type,
+                accountOwners: {
+                    createMany: {
+                        data: userOwners.map((user) => ({ userId: user.id })),
+                    },
+                },
+            },
+        })
+        revalidatePath('/accounting')
+        return { message: 'success' }
+    } catch (err) {
+        console.log(err)
+        console.log('error in createChartOfAccounts')
+        return { message: 'failed' }
+    }
+}
+
+export async function deleteChartOfAccount(id: number) {
+    const account = await prisma.chartOfAccount.findUnique({
+        where: { id },
+        include: { GeneralLedger: true },
     })
+    if (!account) throw new Error('Not Found')
+    if (account.GeneralLedger.length)
+        throw new Error('cannot delete this account')
+    console.log('success')
+    await prisma.$transaction([
+        prisma.accountOwner.deleteMany({ where: { accountNumberId: id } }),
+        prisma.chartOfAccount.delete({
+            where: { id },
+            include: { accountOwners: true },
+        }),
+    ])
     revalidatePath('/accounting')
-    return { message: 'success' }
-  } catch (err) {
-    console.log(err)
-    console.log('error in createChartOfAccounts')
-    return { message: 'failed' }
-  }
 }
