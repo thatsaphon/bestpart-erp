@@ -1,9 +1,8 @@
 import prisma from '@/app/db/db'
-import { InventoryDialog } from '@/components/inventory-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SkuMaster } from '@prisma/client'
-import { getInventory } from '@/app/actions/inventories'
+import { getInventory } from '@/app/actions/inventory/inventories'
 import {
     Pagination,
     PaginationContent,
@@ -14,6 +13,7 @@ import {
 } from '@/components/ui/pagination'
 import { InventoryCard } from '@/components/inventory-card'
 import { headers } from 'next/headers'
+import CreateMainSkuDialog from '@/components/create-main-sku-dialog'
 
 type Props = {
     searchParams: {
@@ -31,7 +31,7 @@ export default async function InventoryListPage({
 }: Props) {
     // const page = searchParams.page || 1
     // const limit = searchParams.limit || 10
-    const result = await getInventory(page, limit)
+    // const result = await getInventory(page, limit)
     // await prisma.skuMaster.findMany({
     //   skip:
     //     (Number(page) - 1) *
@@ -55,14 +55,14 @@ export default async function InventoryListPage({
             <div className="mb-2 p-3">
                 <h1 className="flex items-center gap-2 text-3xl text-primary">
                     <span>สินค้าคงคลัง</span>
-                    <InventoryDialog />
+                    <CreateMainSkuDialog />
                     {/* <Link
             href={'/inventory/create'}
             className='p-2 bg-green-700 text-white rounded-md text-xl'>
             สร้าง
           </Link> */}
                 </h1>
-                <p>number: {result.length}</p>
+                {/* <p>number: {result.length}</p> */}
                 <div className="mt-2 grid w-full max-w-sm items-center gap-1.5">
                     {/* <Label htmlFor='search'>
             Search
@@ -70,21 +70,9 @@ export default async function InventoryListPage({
                     <Input type="search" id="search" placeholder="Search" />
                 </div>
                 <div className="grid grid-cols-3  gap-2">
-                    {result.map((item, index) => (
-                        // <form
-                        //   key={index}
-                        //   action={deleteInventory}>
-                        //   <input
-                        //     type='hidden'
-                        //     name='code'
-                        //     value={item.code}
-                        //   />
-                        //   <Button type='submit'>
-                        //     {item.name}
-                        //   </Button>
-                        // </form>
+                    {/* {result.map((item, index) => (
                         <InventoryCard key={index} inventory={item} />
-                    ))}
+                    ))} */}
                 </div>
                 <Pagination className="mt-4">
                     <PaginationContent>

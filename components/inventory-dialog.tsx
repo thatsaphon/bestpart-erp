@@ -1,5 +1,8 @@
 'use client'
-import { createInventory, editInventory } from '@/app/actions/inventories'
+import {
+    createInventory,
+    editInventory,
+} from '@/app/actions/inventory/inventories'
 import { Button } from '@/components/ui/button'
 import {
     Dialog,
@@ -27,7 +30,6 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { Separator } from './ui/separator'
-import { signal } from '@preact/signals'
 import { Tooltip } from 'react-tooltip'
 import { Brand, CarModel, SkuMaster } from '@prisma/client'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -46,7 +48,7 @@ type Props = {
 
 export function InventoryDialog({
     inventory,
-    label = 'สร้างสินค้า',
+    label = 'สร้างสินค้าหลัก',
     mode = 'create',
     isButton = true,
 }: Props) {

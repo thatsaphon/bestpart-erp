@@ -1,3 +1,4 @@
+import LandAndPPEAccountDialog from '@/components/land-ppe-account-dialog'
 import {
     Accordion,
     AccordionItem,
@@ -26,7 +27,9 @@ export default function LandAndPPE({}: Props) {
                     <AccordionItem value="assets">
                         <AccordionTrigger>Land</AccordionTrigger>
                         <AccordionContent>
-                            <div className="text-right"></div>
+                            <div className="text-right">
+                                <LandAndPPEAccountDialog />
+                            </div>
                             <div className="mt-3 grid grid-cols-2 px-3">
                                 {/* {chartOfAccount
                   .filter((account) => account.type === 'Assets')

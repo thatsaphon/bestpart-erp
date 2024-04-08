@@ -2,9 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -113,7 +113,7 @@ model Address {
 model MainSku {
   id         Int     @id @default(autoincrement())
   partNumber String?
-  name       String
+  name       String  @unique
 
   flag       Json?
   skuMasters SkuMaster[]

@@ -65,6 +65,7 @@ export async function createInventory(formData: FormData) {
             data: sku,
         }
     } catch (error) {
+        console.log(error)
         return {
             message: 'error',
         }

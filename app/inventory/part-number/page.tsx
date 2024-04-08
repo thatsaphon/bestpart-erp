@@ -3,7 +3,7 @@ import { InventoryDialog } from '@/components/inventory-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SkuMaster } from '@prisma/client'
-import { getInventory } from '@/app/actions/inventories'
+import { getInventory } from '@/app/actions/inventory/inventories'
 import {
     Pagination,
     PaginationContent,
