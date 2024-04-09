@@ -32,7 +32,7 @@ export default function CreateMainSkuDialog({}: Props) {
                 <form
                     action={async (formData) => {
                         try {
-                            const result = await createMainSku(formData)
+                            await createMainSku(formData)
                             toast.success('Main SKU created')
                         } catch (error) {
                             console.log(error)

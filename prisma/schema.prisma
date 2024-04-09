@@ -115,24 +115,28 @@ model MainSku {
   partNumber String?
   name       String  @unique
 
+  carModel   CarModel? @relation(fields: [carModelId], references: [id])
+  carModelId Int?
+
   flag       Json?
   skuMasters SkuMaster[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([carModelId])
 }
 
 model SkuMaster {
-  id   Int    @id @default(autoincrement())
-  code String @unique
-  name String @unique
+  id     Int     @id @default(autoincrement())
+  detail String?
 
-  brand      Brand?    @relation(fields: [brandId], references: [id])
-  brandId    Int?
-  carModel   CarModel? @relation(fields: [carModelId], references: [id])
-  carModelId Int?
-  mainSkuId  Int
-  mainSku    MainSku?  @relation(fields: [mainSkuId], references: [id])
+  brand   Brand? @relation(fields: [brandId], references: [id])
+  brandId Int?
+
+  mainSkuId Int
+  mainSku   MainSku? @relation(fields: [mainSkuId], references: [id])
+  remark    String?
 
   flag         Json?
   goodsMasters GoodsMaster[]
@@ -142,7 +146,6 @@ model SkuMaster {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@index([brandId])
-  @@index([carModelId])
   @@index([mainSkuId])
 }
 
@@ -150,7 +153,7 @@ model CarModel {
   id   Int    @id @default(autoincrement())
   name String
 
-  skuMasters SkuMaster[]
+  mainSkus MainSku[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

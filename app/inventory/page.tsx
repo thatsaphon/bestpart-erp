@@ -14,6 +14,8 @@ import {
 import { InventoryCard } from '@/components/inventory-card'
 import { headers } from 'next/headers'
 import CreateMainSkuDialog from '@/components/create-main-sku-dialog'
+import { ListBulletIcon } from '@radix-ui/react-icons'
+import { ListIcon } from 'lucide-react'
 
 type Props = {
     searchParams: {
@@ -43,10 +45,23 @@ export default async function InventoryListPage({
     //   },
     // })
 
-    const skuCount = await prisma.skuMaster.count({})
+    const mainSkus = await prisma.mainSku.findMany({
+        skip: (Number(page) - 1) * Number(limit),
+        take: Number(limit),
+        include: {
+            carModel: true,
+            skuMasters: {
+                include: {
+                    brand: true,
+                    goodsMasters: true,
+                },
+            },
+        },
+    })
+
+    const skuCount = await prisma.mainSku.count({})
 
     const numberOfPage = Math.ceil(skuCount / Number(limit))
-
     return (
         <div className="">
             {/* <div className='p-3'>
@@ -63,17 +78,20 @@ export default async function InventoryListPage({
           </Link> */}
                 </h1>
                 {/* <p>number: {result.length}</p> */}
-                <div className="mt-2 grid w-full max-w-sm items-center gap-1.5">
+                <div className="mt-2 grid w-full max-w-sm grid-cols-2 items-center gap-1.5">
                     {/* <Label htmlFor='search'>
             Search
           </Label> */}
                     <Input type="search" id="search" placeholder="Search" />
+                    <ListIcon className="" />
                 </div>
-                <div className="grid grid-cols-3  gap-2">
-                    {/* {result.map((item, index) => (
-                        <InventoryCard key={index} inventory={item} />
-                    ))} */}
-                </div>
+                {true && (
+                    <div className="mt-2 grid grid-cols-3 gap-2">
+                        {mainSkus.map((item, index) => (
+                            <InventoryCard key={index} mainSku={item} />
+                        ))}
+                    </div>
+                )}
                 <Pagination className="mt-4">
                     <PaginationContent>
                         {page !== '1' && (
