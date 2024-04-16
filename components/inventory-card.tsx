@@ -1,5 +1,3 @@
-'use client'
-
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -20,19 +18,7 @@ import {
     MainSku,
     SkuMaster,
 } from '@prisma/client'
-import { z } from 'zod'
 import { Badge } from '@/components/ui/badge'
-import { InventoryDialog } from './inventory-dialog'
-import { SkuFlagSchema } from '@/app/schema/sku-flag-schema'
-import { Pencil1Icon } from '@radix-ui/react-icons'
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTrigger,
-} from './ui/dialog'
-import { useState } from 'react'
 import EditMainSkuDialog from './edit-main-sku-dialog'
 
 type Props = {
@@ -46,42 +32,49 @@ type Props = {
 }
 
 export function InventoryCard({ mainSku }: Props) {
-    let tags: string[] = []
-    const [addingNewSku, setAddingNewSku] = useState(false)
-    // const skuFlag = SkuFlagSchema.safeParse(inventory.flag)
-    // tags = skuFlag.success && skuFlag.data.tags ? skuFlag.data.tags : []
-
     return (
-        <Card className="w-[350px]">
+        <Card className="w-[350px] bg-primary-foreground">
             <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                     <span>{mainSku?.name}</span>
-                    {/* Create project */}
                     <EditMainSkuDialog mainSku={mainSku} />
                 </CardTitle>
                 {/* <CardDescription>{inventory?.name}</CardDescription> */}
             </CardHeader>
             <CardContent>
-                {/* <form>
-                    <div className="grid w-full items-center gap-4">
-                        <div className="gird-cols-[30px_1fr] grid">
-                            <Label htmlFor="name">ยี่ห้อ</Label>
+                {mainSku.skuMasters.map((skuMaster, index) => (
+                    <React.Fragment key={index}>
+                        <div
+                            key={index}
+                            className="grid w-full grid-cols-4 items-center gap-4 border-b py-1"
+                        >
+                            <div className="border-r">
+                                <div className="">{skuMaster?.detail}</div>
+                                <div className="text-sm text-muted-foreground">
+                                    {skuMaster?.remark}
+                                </div>
+                            </div>
+                            {skuMaster.goodsMasters.map(
+                                (goodsMaster, index) => (
+                                    <React.Fragment key={index}>
+                                        <div className="col-start-2 text-sm">
+                                            {goodsMaster?.code}
+                                        </div>
+                                        <div className="col-start-3 justify-self-end text-sm">
+                                            {goodsMaster?.unit}x
+                                            {goodsMaster?.quantity}
+                                        </div>
+                                        <div className="col-start-4 justify-self-end text-sm">
+                                            {goodsMaster?.price}
+                                        </div>
+                                    </React.Fragment>
+                                )
+                            )}
                         </div>
-                        <div className="gird-cols-[30px_1fr] grid">
-                            <Label htmlFor="framework">รุ่นรถ</Label>
-                        </div>
-                    </div>
-                </form> */}
+                    </React.Fragment>
+                ))}
             </CardContent>
-            <CardFooter className="flex justify-between">
-                <div className="flex gap-1">
-                    {tags.map((tag) => (
-                        <Badge key={tag} variant={'outline'}>
-                            {tag}
-                        </Badge>
-                    ))}
-                </div>
-            </CardFooter>
+            <CardFooter className="flex justify-between"></CardFooter>
         </Card>
     )
 }

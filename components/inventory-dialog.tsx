@@ -232,6 +232,7 @@ export function InventoryDialog({
                                                 </Badge>
                                                 <input
                                                     hidden
+                                                    readOnly
                                                     value={tag}
                                                     name="tags"
                                                 />

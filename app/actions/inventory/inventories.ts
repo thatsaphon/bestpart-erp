@@ -29,16 +29,21 @@ export async function createInventory(formData: FormData) {
     const tags = formData.getAll('tags') as string[]
 
     const validator = z.object({
-        detail: z.string().trim().optional().nullable(),
+        detail: z.string().trim(),
         remark: z.string().trim().optional().nullable(),
+        mainSkuId: z.number().positive().int(),
         tags: z
             .array(z.string().trim().min(1, 'tag must not be empty'))
             .optional(),
     })
 
+    console.log(formData.get('detail'))
+    console.log(formData.get('remark'))
+    console.log(formData.get('mainSkuId'))
     const result = validator.safeParse({
-        remark: formData.get('remark'),
         detail: formData.get('detail'),
+        remark: formData.get('remark'),
+        mainSkuId: Number(formData.get('mainSkuId')),
     })
     if (!result.success)
         return {
@@ -55,6 +60,7 @@ export async function createInventory(formData: FormData) {
             data: {
                 detail: result.data.detail,
                 remark: result.data.remark,
+                mainSkuId: result.data.mainSkuId,
                 flag: { tags },
             },
         })

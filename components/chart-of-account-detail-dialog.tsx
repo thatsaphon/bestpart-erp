@@ -28,7 +28,7 @@ import {
 import toast from 'react-hot-toast'
 import { useFormState } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChartOfAccount, Prisma } from '@prisma/client'
+import { ChartOfAccount } from '@prisma/client'
 import { deleteKeyFromQueryString } from '@/lib/searhParams'
 
 type Props = {
@@ -43,7 +43,7 @@ type Props = {
               }[]
               GeneralLedger: {
                   id: number
-                  amount: Prisma.Decimal
+                  amount: number
               }[]
           })
         | null

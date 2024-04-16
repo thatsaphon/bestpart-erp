@@ -114,6 +114,7 @@ export default function LandAndPPEAccountDialog({
                             type="text"
                             className="hidden"
                             value={typePrefix[type] + accountNumber}
+                            readOnly
                         />
                     </div>
                     <Label className="mb-3">Account Name</Label>
@@ -122,6 +123,7 @@ export default function LandAndPPEAccountDialog({
                         name="accountType"
                         value={'Assets'}
                         className="hidden"
+                        readOnly
                     />
                     <Label className="mb-3">Select Owner</Label>
                     <Select
@@ -167,6 +169,7 @@ export default function LandAndPPEAccountDialog({
                                 key={user}
                                 className="hidden"
                                 value={user}
+                                readOnly
                                 name="accountOwners"
                             />
                         ))}

@@ -73,7 +73,7 @@ model GeneralLedger {
   document         Document[]
   chartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
   chartOfAccountId Int
-  amount           Decimal
+  amount           Float
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @default(now()) @updatedAt
 
@@ -128,14 +128,14 @@ model MainSku {
 }
 
 model SkuMaster {
-  id     Int     @id @default(autoincrement())
-  detail String?
+  id     Int    @id @default(autoincrement())
+  detail String
 
   brand   Brand? @relation(fields: [brandId], references: [id])
   brandId Int?
 
   mainSkuId Int
-  mainSku   MainSku? @relation(fields: [mainSkuId], references: [id])
+  mainSku   MainSku @relation(fields: [mainSkuId], references: [id])
   remark    String?
 
   flag         Json?
@@ -174,9 +174,9 @@ model GoodsMaster {
   code     String    @unique
   sku      SkuMaster @relation(fields: [skuId], references: [id])
   skuId    Int
-  quantity Decimal
+  quantity Float
   unit     String
-  price    Decimal
+  price    Float
   flag     Json?
 
   createdAt DateTime @default(now())
@@ -195,9 +195,9 @@ model SkuMovement {
   documentId Int
 
   quantity  Int
-  cost      Decimal
-  sellPrice Decimal
-  vat       Decimal
+  cost      Float
+  sellPrice Float
+  vat       Float
 
   flag Json?
 

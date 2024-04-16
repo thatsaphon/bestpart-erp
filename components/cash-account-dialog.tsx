@@ -114,6 +114,7 @@ export default function CashAccountDialog({
                             type="text"
                             className="hidden"
                             value={typePrefix[type] + accountNumber}
+                            readOnly
                         />
                     </div>
                     <Label className="mb-3">Account Name</Label>
@@ -122,6 +123,7 @@ export default function CashAccountDialog({
                         name="accountType"
                         value={'Assets'}
                         className="hidden"
+                        readOnly
                     />
                     <Label className="mb-3">Select Owner</Label>
                     <Select
@@ -168,6 +170,7 @@ export default function CashAccountDialog({
                                 className="hidden"
                                 value={user}
                                 name="accountOwners"
+                                readOnly
                             />
                         ))}
                     </div>
