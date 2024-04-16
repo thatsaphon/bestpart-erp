@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -20,8 +20,10 @@ import toast from 'react-hot-toast'
 type Props = {}
 
 export default function CreateMainSkuDialog({}: Props) {
+    const [isOpen, setIsOpen] = useState(false)
+
     return (
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button variant={'outline'}>สร้างสินค้าหลัก</Button>
             </DialogTrigger>
@@ -34,6 +36,7 @@ export default function CreateMainSkuDialog({}: Props) {
                         try {
                             await createMainSku(formData)
                             toast.success('Main SKU created')
+                            setIsOpen(false)
                         } catch (error) {
                             console.log(error)
                             toast.error('fail')

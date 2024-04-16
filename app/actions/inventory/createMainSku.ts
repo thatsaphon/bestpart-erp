@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/app/db/db'
+import { revalidatePath } from 'next/cache'
 import { ZodError, z } from 'zod'
 
 export async function createMainSku(formData: FormData) {
@@ -18,4 +19,5 @@ export async function createMainSku(formData: FormData) {
             partNumber: result.partNumber,
         },
     })
+    revalidatePath('inventory')
 }

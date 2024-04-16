@@ -71,24 +71,15 @@ export default async function InventoryListPage({
                 <h1 className="flex items-center gap-2 text-3xl text-primary">
                     <span>สินค้าคงคลัง</span>
                     <CreateMainSkuDialog />
-                    {/* <Link
-            href={'/inventory/create'}
-            className='p-2 bg-green-700 text-white rounded-md text-xl'>
-            สร้าง
-          </Link> */}
                 </h1>
-                {/* <p>number: {result.length}</p> */}
                 <div className="mt-2 grid w-full max-w-sm grid-cols-2 items-center gap-1.5">
-                    {/* <Label htmlFor='search'>
-            Search
-          </Label> */}
                     <Input type="search" id="search" placeholder="Search" />
                     <ListIcon className="" />
                 </div>
                 {true && (
-                    <div className="mt-2 grid grid-cols-3 gap-2">
+                    <div className="mt-2 flex flex-wrap gap-3">
                         {mainSkus.map((item, index) => (
-                            <InventoryCard key={index} mainSku={item} />
+                            <InventoryCard key={item.id} mainSku={item} />
                         ))}
                     </div>
                 )}
