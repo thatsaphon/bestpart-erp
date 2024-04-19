@@ -16,12 +16,15 @@ import { headers } from 'next/headers'
 import CreateMainSkuDialog from '@/components/create-main-sku-dialog'
 import { ListBulletIcon } from '@radix-ui/react-icons'
 import { ListIcon } from 'lucide-react'
+import Link from 'next/link'
+import { createQueryString } from '@/lib/searhParams'
 
 type Props = {
     searchParams: {
         page?: string
         limit?: string
         search?: string
+        remaining?: 'true' | 'false' | ''
     }
 }
 
@@ -29,7 +32,8 @@ export const revalidate = 600
 export const dynamic = 'force-dynamic'
 
 export default async function InventoryListPage({
-    searchParams: { page = '1', limit = '10' },
+    searchParams,
+    searchParams: { page = '1', limit = '10', search = '', remaining = '' },
 }: Props) {
     // const page = searchParams.page || 1
     // const limit = searchParams.limit || 10
@@ -54,6 +58,8 @@ export default async function InventoryListPage({
                 include: {
                     brand: true,
                     goodsMasters: true,
+                    images: true,
+                    skuMovements: remaining === 'true',
                 },
             },
         },
@@ -62,58 +68,59 @@ export default async function InventoryListPage({
     const skuCount = await prisma.mainSku.count({})
 
     const numberOfPage = Math.ceil(skuCount / Number(limit))
+
     return (
-        <div className="">
-            {/* <div className='p-3'>
-        <InventoryMenuList />
-      </div> */}
-            <div className="mb-2 p-3">
-                <h1 className="flex items-center gap-2 text-3xl text-primary">
-                    <span>สินค้าคงคลัง</span>
-                    <CreateMainSkuDialog />
-                </h1>
-                <div className="mt-2 grid w-full max-w-sm grid-cols-2 items-center gap-1.5">
-                    <Input type="search" id="search" placeholder="Search" />
-                    <ListIcon className="" />
-                </div>
-                {true && (
-                    <div className="mt-2 flex flex-wrap gap-3">
-                        {mainSkus.map((item, index) => (
-                            <InventoryCard key={item.id} mainSku={item} />
-                        ))}
-                    </div>
-                )}
-                <Pagination className="mt-4">
-                    <PaginationContent>
-                        {page !== '1' && (
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    href={`?page=${+page - 1}&limit=${limit}`}
-                                />
-                            </PaginationItem>
-                        )}
-                        {Array.from({
-                            length: numberOfPage,
-                        }).map((_, index) => (
-                            <PaginationItem key={index}>
-                                <PaginationLink
-                                    isActive={+page === index + 1}
-                                    href={`?page=${index + 1}&limit=${limit}`}
-                                >
-                                    {index + 1}
-                                </PaginationLink>
-                            </PaginationItem>
-                        ))}
-                        {page !== String(numberOfPage) && (
-                            <PaginationItem>
-                                <PaginationNext
-                                    href={`?page=${+page + 1}&limit=${limit}`}
-                                />
-                            </PaginationItem>
-                        )}
-                    </PaginationContent>
-                </Pagination>
+        <div className="mb-2 p-3">
+            <h1 className="flex items-center gap-2 text-3xl text-primary">
+                <span>สินค้าคงคลัง</span>
+                <CreateMainSkuDialog />
+            </h1>
+            <div className="mt-2 grid w-full max-w-sm grid-cols-2 items-center gap-1.5">
+                <Input type="search" id="search" placeholder="Search" />
+                <ListIcon className="" />
+                <Link
+                    href={`?${createQueryString(new URLSearchParams(searchParams), 'remaining', 'true')}`}
+                >
+                    <Button type="submit">ดูจำนวน</Button>
+                </Link>
             </div>
+            {true && (
+                <div className="mt-2 flex flex-wrap gap-3">
+                    {mainSkus.map((item, index) => (
+                        <InventoryCard key={item.id} mainSku={item} />
+                    ))}
+                </div>
+            )}
+            <Pagination className="mt-4">
+                <PaginationContent>
+                    {page !== '1' && (
+                        <PaginationItem>
+                            <PaginationPrevious
+                                href={`?page=${+page - 1}&limit=${limit}`}
+                            />
+                        </PaginationItem>
+                    )}
+                    {Array.from({
+                        length: numberOfPage,
+                    }).map((_, index) => (
+                        <PaginationItem key={index}>
+                            <PaginationLink
+                                isActive={+page === index + 1}
+                                href={`?page=${index + 1}&limit=${limit}`}
+                            >
+                                {index + 1}
+                            </PaginationLink>
+                        </PaginationItem>
+                    ))}
+                    {page !== String(numberOfPage) && (
+                        <PaginationItem>
+                            <PaginationNext
+                                href={`?page=${+page + 1}&limit=${limit}`}
+                            />
+                        </PaginationItem>
+                    )}
+                </PaginationContent>
+            </Pagination>
         </div>
     )
 }

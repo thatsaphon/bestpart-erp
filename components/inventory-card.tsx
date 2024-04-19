@@ -17,6 +17,8 @@ import {
     GoodsMaster,
     MainSku,
     SkuMaster,
+    SkuMovement,
+    Image as PrismaImage,
 } from '@prisma/client'
 import { Badge } from '@/components/ui/badge'
 import EditMainSkuDialog from './edit-main-sku-dialog'
@@ -27,6 +29,8 @@ type Props = {
             brand?: Brand | null
             carModel?: CarModel | null
             goodsMasters: GoodsMaster[]
+            skuMovements?: SkuMovement[]
+            images: PrismaImage[]
         })[]
     }
 }
@@ -39,24 +43,36 @@ export function InventoryCard({ mainSku }: Props) {
                     <span>{mainSku?.name}</span>
                     <EditMainSkuDialog mainSku={mainSku} />
                 </CardTitle>
-                {/* <CardDescription>{inventory?.name}</CardDescription> */}
+                <CardDescription>{mainSku.partNumber}</CardDescription>
             </CardHeader>
             <CardContent>
                 {mainSku.skuMasters.map((skuMaster, index) => (
                     <React.Fragment key={index}>
+                        <div className="pb-2">
+                            <div className="">{skuMaster?.detail}</div>
+                            <div className="text-sm text-muted-foreground">
+                                {skuMaster?.remark}
+                            </div>
+                        </div>
                         <div
                             key={index}
-                            className="grid w-full grid-cols-4 items-center gap-4 border-b py-1"
+                            className="grid w-full grid-cols-4 items-center gap-4 rounded-md border-b border-t bg-muted px-1 py-1"
                         >
-                            <div className="border-r">
-                                <div className="">{skuMaster?.detail}</div>
-                                <div className="text-sm text-muted-foreground">
-                                    {skuMaster?.remark}
-                                </div>
-                            </div>
                             {skuMaster.goodsMasters.map(
                                 (goodsMaster, index) => (
                                     <React.Fragment key={index}>
+                                        <div>
+                                            {!!skuMaster.skuMovements
+                                                ? skuMaster.skuMovements.reduce(
+                                                      (acc, cur) => {
+                                                          return (
+                                                              acc + cur.quantity
+                                                          )
+                                                      },
+                                                      0
+                                                  )
+                                                : '?'}
+                                        </div>
                                         <div className="col-start-2 text-sm">
                                             {goodsMaster?.code}
                                         </div>

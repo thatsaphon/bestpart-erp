@@ -1,7 +1,13 @@
 'use client'
 
-import { Brand, CarModel, GoodsMaster, SkuMaster } from '@prisma/client'
-import React, { Fragment, useEffect, useState } from 'react'
+import {
+    Brand,
+    CarModel,
+    GoodsMaster,
+    Image as PrismaImage,
+    SkuMaster,
+} from '@prisma/client'
+import { Fragment, useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import {
     Card,
@@ -11,20 +17,34 @@ import {
     CardContent,
 } from './ui/card'
 import { Input } from './ui/input'
-import { CheckIcon, PlusCircledIcon } from '@radix-ui/react-icons'
+import { PlusCircledIcon } from '@radix-ui/react-icons'
 import { createOrUpdateGoodsMasters } from '@/app/actions/inventory/goodsMaster'
 import { useFormState } from 'react-dom'
+import { Barcode } from 'lucide-react'
+import { generateBarcode } from '@/app/actions/inventory/generateBarcode'
+import toast from 'react-hot-toast'
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from './ui/accordion'
+import Image from 'next/image'
+import { addImageToTag } from '@/app/actions/inventory/addImageToFlag'
+import { uploadFile } from '@/lib/s3-client'
 
 type Props = {
     skuMaster: SkuMaster & {
         brand?: Brand | null
         carModel?: CarModel | null
         goodsMasters: GoodsMaster[]
+        images: PrismaImage[]
     }
 }
 
 export default function SkuMasterCardForm({ skuMaster }: Props) {
     const [isEdit, setIsEdit] = useState(false)
+    const [file, setFile] = useState<File | null | undefined>(null)
     const [goodsMasters, setGoodsMasters] = useState<Partial<GoodsMaster>[]>(
         skuMaster.goodsMasters
     )
@@ -49,10 +69,24 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                 <CardHeader className="flex-row justify-between p-3">
                     <div>
                         <CardTitle className="text-lg">
-                            {skuMaster.detail || ''}
+                            {isEdit ? (
+                                <Input
+                                    defaultValue={skuMaster.detail}
+                                    name="detail"
+                                />
+                            ) : (
+                                skuMaster.detail
+                            )}
                         </CardTitle>
                         <CardDescription>
-                            {skuMaster.remark || ''}
+                            {isEdit ? (
+                                <Input
+                                    defaultValue={skuMaster.remark || ''}
+                                    name="remark"
+                                />
+                            ) : (
+                                skuMaster.remark
+                            )}
                         </CardDescription>
                     </div>
                     <div className="space-x-2">
@@ -71,12 +105,12 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                 </CardHeader>
 
                 <CardContent>
-                    <div className="grid grid-cols-3 border-b-2 border-primary">
+                    <div className="grid grid-cols-[2fr_1fr_1fr] border-b-2 border-primary">
                         <span>Barcode</span>
                         <span className="justify-self-end">หน่วย</span>
                         <span className="justify-self-end">ราคา</span>
                     </div>
-                    <div className="grid grid-cols-3 items-center border-b-2">
+                    <div className="grid grid-cols-[165px_1fr_1fr] items-center border-b-2">
                         {goodsMasters.map((goodsMaster, i) =>
                             isEdit ? (
                                 <Fragment key={i}>
@@ -87,11 +121,35 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                                         hidden
                                         readOnly
                                     />
-                                    <Input
-                                        name="code"
-                                        className="my-1 focus-visible:ring-0 focus-visible:ring-offset-0"
-                                        defaultValue={goodsMaster.code}
-                                    />
+                                    <div className="flex items-center gap-1">
+                                        <Barcode
+                                            onClick={async () => {
+                                                const result =
+                                                    await generateBarcode()
+
+                                                if (!result)
+                                                    return toast.error(
+                                                        'something wrong'
+                                                    )
+
+                                                const input =
+                                                    document.getElementById(
+                                                        `${goodsMaster.id}-${i}`
+                                                    )
+                                                if (input) {
+                                                    ;(
+                                                        input as HTMLInputElement
+                                                    ).value = result
+                                                }
+                                            }}
+                                        />
+                                        <Input
+                                            id={`${goodsMaster.id}-${i}`}
+                                            name="code"
+                                            className="my-1 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                            defaultValue={goodsMaster.code}
+                                        />
+                                    </div>
                                     <div className="flex">
                                         <Input
                                             name="unit"
@@ -175,8 +233,69 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                             </span>
                         )}
                     </div>
+                    <Accordion type="single" collapsible>
+                        <AccordionItem value="item-1">
+                            <AccordionTrigger>Image</AccordionTrigger>
+                            <AccordionContent>
+                                <input type="text" name="skuMasterId" hidden />
+                                {file && (
+                                    <Image
+                                        src={URL.createObjectURL(file)}
+                                        alt="picture"
+                                        key={file.name}
+                                        width={500}
+                                        height={500}
+                                    />
+                                )}
+                                <Input
+                                    onChange={(e) =>
+                                        setFile(e.target.files?.[0])
+                                    }
+                                    // ref={ref}
+                                    type="file"
+                                    accept="image/*"
+                                    name="file"
+                                />
+                                {file && (
+                                    <Button
+                                        formAction={async (formData) => {
+                                            try {
+                                                const fileName =
+                                                    window.crypto.randomUUID() +
+                                                    '.jpeg'
+                                                const result = await uploadFile(
+                                                    fileName,
+                                                    file,
+                                                    'sku'
+                                                )
+                                                if (result) {
+                                                    await addImageToTag(
+                                                        formData,
+                                                        fileName
+                                                    )
+                                                }
+                                            } catch (err) {}
+                                        }}
+                                    >
+                                        Submit
+                                    </Button>
+                                )}
+                                <div className="grid grid-cols-3 gap-2">
+                                    {skuMaster.images.map((image) => (
+                                        <Image
+                                            src={image.path}
+                                            alt={skuMaster.detail}
+                                            key={image.id}
+                                            width={500}
+                                            height={500}
+                                        />
+                                    ))}
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
                 </CardContent>
-                <CardContent className="grid grid-cols-3 border-b-2 border-secondary pb-0"></CardContent>
+                {/* <CardContent className="grid grid-cols-3 border-b-2 border-secondary pb-0"></CardContent> */}
             </Card>
         </form>
     )

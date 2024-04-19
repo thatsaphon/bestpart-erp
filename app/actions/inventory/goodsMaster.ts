@@ -11,6 +11,8 @@ export const createOrUpdateGoodsMasters = async (
     formData: FormData
 ) => {
     const validator = z.object({
+        detail: z.string().trim(),
+        remark: z.string().trim().optional().nullable(),
         skuMasterId: z.number().positive().int(),
         goodsMasterId: z.array(
             z.coerce.number().positive().int().or(z.string())
@@ -21,6 +23,8 @@ export const createOrUpdateGoodsMasters = async (
         price: z.array(z.coerce.number().positive()),
     })
     console.log({
+        detail: formData.get('detail'),
+        remark: formData.get('remark'),
         skuMasterId: Number(formData.get('skuMasterId')),
         goodsMasterId: formData.getAll('goodsMasterId'),
         code: formData.getAll('code'),
@@ -30,6 +34,8 @@ export const createOrUpdateGoodsMasters = async (
     })
 
     const validateResult = validator.safeParse({
+        detail: formData.get('detail'),
+        remark: formData.get('remark'),
         skuMasterId: Number(formData.get('skuMasterId')),
         goodsMasterId: formData.getAll('goodsMasterId'),
         code: formData.getAll('code'),
@@ -42,8 +48,16 @@ export const createOrUpdateGoodsMasters = async (
         console.log(validateResult.error)
         return { error: fromZodError(validateResult.error).message }
     }
-    const { skuMasterId, goodsMasterId, code, unit, quantity, price } =
-        validateResult.data
+    const {
+        detail,
+        remark,
+        skuMasterId,
+        goodsMasterId,
+        code,
+        unit,
+        quantity,
+        price,
+    } = validateResult.data
     const goodsMasters = goodsMasterId.map((id, index) => ({
         id,
         code: code[index],
@@ -56,6 +70,8 @@ export const createOrUpdateGoodsMasters = async (
         await prisma.skuMaster.update({
             where: { id: skuMasterId },
             data: {
+                detail,
+                remark,
                 goodsMasters: {
                     deleteMany: {
                         skuId: skuMasterId,

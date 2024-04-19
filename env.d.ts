@@ -7,5 +7,6 @@ namespace NodeJS {
         NEXT_PUBLIC_S3_SECRET_KEY_ID: string
         NEXT_PUBLIC_S3_SECRET_ACCESS_KEY: string
         NEXT_PUBLIC_BUCKET_NAME: string
+        NEXT_PUBLIC_S3_PUBLIC_URL: string
     }
 }

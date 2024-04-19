@@ -26,8 +26,6 @@ export async function getPartNumbers(page = '1', limit = '10') {
 }
 
 export async function createInventory(formData: FormData) {
-    const tags = formData.getAll('tags') as string[]
-
     const validator = z.object({
         detail: z.string().trim(),
         remark: z.string().trim().optional().nullable(),
@@ -61,7 +59,6 @@ export async function createInventory(formData: FormData) {
                 detail: result.data.detail,
                 remark: result.data.remark,
                 mainSkuId: result.data.mainSkuId,
-                flag: { tags },
             },
         })
         revalidatePath('/inventory')
