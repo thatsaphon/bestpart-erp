@@ -69,23 +69,7 @@ export default async function PartNumberListPage({
           </Label> */}
                     <Input type="search" id="search" placeholder="Search" />
                 </div>
-                <div className="grid grid-cols-3  gap-2">
-                    {/* {result.map((item, index) => (
-                        // <form
-                        //   key={index}
-                        //   action={deleteInventory}>
-                        //   <input
-                        //     type='hidden'
-                        //     name='code'
-                        //     value={item.code}
-                        //   />
-                        //   <Button type='submit'>
-                        //     {item.name}
-                        //   </Button>
-                        // </form>
-                        <InventoryCard key={index} inventory={item} />
-                    ))} */}
-                </div>
+                <div className="grid grid-cols-3  gap-2">{}</div>
                 <Pagination className="mt-4">
                     <PaginationContent>
                         {page !== '1' && (

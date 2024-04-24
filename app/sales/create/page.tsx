@@ -1,11 +1,21 @@
 import { searchAccountReceivable } from '@/app/actions/contact/searchAccountReceivable'
 import searchAccountReceivableById from '@/app/actions/contact/searchAccountReceivableById'
-import prisma from '@/app/db/db'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import SelectSearch from '@/components/select-search'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import React from 'react'
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import SelectSearchMainSku from '@/components/select-search-main-sku/select-search-main-sku'
+import SelectSearchMainSkuWrapper from '@/components/select-search-main-sku/select-search-main-sku-wrapper'
 
 type Props = {
     searchParams: {
@@ -42,11 +52,25 @@ export default function NewSales({}: Props) {
                             textAreaKeys={['name']}
                         />
                     </div>
-                    <div className="space-x-2">
-                        <Label>ที่อยู่</Label>
-                        <Input className="w-auto" />
-                    </div>
                 </div>
+                <Table className="mt-3">
+                    <TableCaption>A list of your recent invoices.</TableCaption>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Barcode</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead className="text-right">
+                                Quantity
+                            </TableHead>
+                            <TableHead className="text-right">Unit</TableHead>
+                            <TableHead className="text-right">Price</TableHead>
+                            <TableHead className="text-right">Total</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <SelectSearchMainSkuWrapper />
+                    </TableBody>
+                </Table>
             </form>
         </div>
     )

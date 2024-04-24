@@ -17,7 +17,7 @@ export const createOrUpdateGoodsMasters = async (
         goodsMasterId: z.array(
             z.coerce.number().positive().int().or(z.string())
         ),
-        code: z.array(z.string().trim().min(1, 'code must not be empty')),
+        barcode: z.array(z.string().trim().min(1, 'barcode must not be empty')),
         unit: z.array(z.string().trim().min(1, 'unit must not be empty')),
         quantity: z.array(z.coerce.number().positive()),
         price: z.array(z.coerce.number().positive()),
@@ -27,7 +27,7 @@ export const createOrUpdateGoodsMasters = async (
         remark: formData.get('remark'),
         skuMasterId: Number(formData.get('skuMasterId')),
         goodsMasterId: formData.getAll('goodsMasterId'),
-        code: formData.getAll('code'),
+        barcode: formData.getAll('barcode'),
         unit: formData.getAll('unit'),
         quantity: formData.getAll('quantity'),
         price: formData.getAll('price'),
@@ -38,7 +38,7 @@ export const createOrUpdateGoodsMasters = async (
         remark: formData.get('remark'),
         skuMasterId: Number(formData.get('skuMasterId')),
         goodsMasterId: formData.getAll('goodsMasterId'),
-        code: formData.getAll('code'),
+        barcode: formData.getAll('barcode'),
         unit: formData.getAll('unit'),
         quantity: formData.getAll('quantity'),
         price: formData.getAll('price'),
@@ -53,14 +53,14 @@ export const createOrUpdateGoodsMasters = async (
         remark,
         skuMasterId,
         goodsMasterId,
-        code,
+        barcode,
         unit,
         quantity,
         price,
     } = validateResult.data
     const goodsMasters = goodsMasterId.map((id, index) => ({
         id,
-        code: code[index],
+        barcode: barcode[index],
         unit: unit[index],
         quantity: quantity[index],
         price: price[index],

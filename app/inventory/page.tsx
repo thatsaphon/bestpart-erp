@@ -17,7 +17,7 @@ import CreateMainSkuDialog from '@/components/create-main-sku-dialog'
 import { ListBulletIcon } from '@radix-ui/react-icons'
 import { ListIcon } from 'lucide-react'
 import Link from 'next/link'
-import { createQueryString } from '@/lib/searhParams'
+import { createQueryString } from '@/lib/searchParams'
 
 type Props = {
     searchParams: {

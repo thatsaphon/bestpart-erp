@@ -101,6 +101,7 @@ export default function SelectSearch<T>({
                                     try {
                                         const result =
                                             await searchByIdFunction(selectedId)
+                                        console.log(result)
                                         setTextAreaFromData(result)
                                     } catch (err) {
                                         if (err instanceof Error) {

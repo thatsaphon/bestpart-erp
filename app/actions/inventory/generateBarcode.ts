@@ -8,7 +8,7 @@ export const generateBarcode = async () => {
         const checkDigit = checkDigitEAN13(barcode)
         const result = await prisma.goodsMaster.findUnique({
             where: {
-                code: barcode + checkDigit,
+                barcode: barcode + checkDigit,
             },
         })
         if (!result) return barcode

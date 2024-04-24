@@ -151,7 +151,7 @@ export function InventoryDialog({
                                     </Label>
                                     {mode === 'create' && (
                                         <Input
-                                            name="code"
+                                            name="barcode"
                                             type="text"
                                             className="ml-2 border border-slate-400 px-2"
                                         />

@@ -74,7 +74,7 @@ export function InventoryCard({ mainSku }: Props) {
                                                 : '?'}
                                         </div>
                                         <div className="col-start-2 text-sm">
-                                            {goodsMaster?.code}
+                                            {goodsMaster?.barcode}
                                         </div>
                                         <div className="col-start-3 justify-self-end text-sm">
                                             {goodsMaster?.unit}x

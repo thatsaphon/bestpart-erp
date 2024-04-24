@@ -145,9 +145,9 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                                         />
                                         <Input
                                             id={`${goodsMaster.id}-${i}`}
-                                            name="code"
+                                            name="barcode"
                                             className="my-1 focus-visible:ring-0 focus-visible:ring-offset-0"
-                                            defaultValue={goodsMaster.code}
+                                            defaultValue={goodsMaster.barcode}
                                         />
                                     </div>
                                     <div className="flex">
@@ -171,7 +171,7 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                                 </Fragment>
                             ) : (
                                 <Fragment key={i}>
-                                    <span>{goodsMaster.code}</span>
+                                    <span>{goodsMaster.barcode}</span>
                                     <span className="justify-self-end">
                                         {goodsMaster.unit}x
                                         {goodsMaster.quantity?.toString()}
@@ -192,7 +192,7 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                                     hidden
                                 />
                                 <Input
-                                    name="code"
+                                    name="barcode"
                                     className="my-1 focus-visible:ring-0 focus-visible:ring-offset-0"
                                 />
                                 <div className="flex">

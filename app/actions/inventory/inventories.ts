@@ -81,9 +81,6 @@ export const deleteInventory = async (formData: FormData) => {
 }
 
 export const editInventory = async (formData: FormData) => {
-    // const code = formData.get('code')
-    // const name = formData.get('name')
-    // const tags = formData.getAll('tags') as string[]
     const validator = z.object({
         id: z.number().positive().int(),
         detail: z.string().trim().optional(),
@@ -104,9 +101,6 @@ export const editInventory = async (formData: FormData) => {
             data: {
                 detail,
                 remark,
-                flag: {
-                    set: tags,
-                },
             },
         })
     } catch (error) {
@@ -116,6 +110,6 @@ export const editInventory = async (formData: FormData) => {
 
 const uploadPicture = async (formData: FormData) => {
     const validator = z.object({
-        code: z.string().trim().min(1, 'code must not be empty'),
+        skuId: z.string().trim().min(1, 'skuId must not be empty'),
     })
 }

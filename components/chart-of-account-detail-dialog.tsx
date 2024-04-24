@@ -29,7 +29,7 @@ import toast from 'react-hot-toast'
 import { useFormState } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ChartOfAccount } from '@prisma/client'
-import { deleteKeyFromQueryString } from '@/lib/searhParams'
+import { deleteKeyFromQueryString } from '@/lib/searchParams'
 
 type Props = {
     className?: string
