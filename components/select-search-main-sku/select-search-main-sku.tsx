@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Fragment, ReactNode, useState } from 'react'
+import React, { Fragment, ReactNode, useEffect, useState } from 'react'
 import {
     Popover,
     PopoverContent,
@@ -27,40 +27,32 @@ import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/fi
 import Image from 'next/image'
 
 type Props = {
-    name?: string
-    // type?: T
-    // searchFunction?: (
-    //     value: string,
-    //     page?: string,
-    //     limit?: string
-    // ) => Promise<T[]>
-    // searchByIdFunction?: (id: string) => Promise<T>
-    // keys?: (keyof T)[]
-    keysMap?: { [key: string]: string }
     page?: string
     limit?: string
     caption?: string
-    hasTextArea?: boolean
     onInsertRow?: () => void
     rowId: string
     totalRows: string[]
-    // textAreaKeys?: (keyof T)[]
+    setItems: React.Dispatch<
+        React.SetStateAction<
+            (ReturnSearchType & {
+                quantity: number
+                rowId: string
+            })[]
+        >
+    >
 }
 
 type ReturnSearchType = Awaited<ReturnType<typeof findGoodsMasterByBarcode>>
 
 export default function SelectSearchMainSku({
-    name,
-    // searchFunction,
-    // searchByIdFunction,
-    // keys = [],
     page = '1',
     limit = '10',
     caption,
-    hasTextArea,
     onInsertRow,
     rowId,
     totalRows,
+    setItems,
 }: Props) {
     const [isOpen, setIsOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
@@ -70,8 +62,6 @@ export default function SelectSearchMainSku({
         useState<ReturnSearchType | null>(null)
 
     const [quantityInput, setQuantityInput] = useState(1)
-
-    const [textArea, setTextArea] = useState<string>('')
 
     const searchFunction = searchGoodsMasters
     const searchByIdFunction = findGoodsMasterByBarcode
@@ -92,6 +82,13 @@ export default function SelectSearchMainSku({
         }
     }
 
+    const onBarcodeScanned = async () => {
+        if (searchByIdFunction) {
+            const result = await searchByIdFunction(selectedId)
+            setSelectedResult(result)
+        }
+    }
+
     const mapSearchResults = (searchResults: ReturnSearchType[]) => {
         return searchResults.map((result) => {
             return {
@@ -101,30 +98,59 @@ export default function SelectSearchMainSku({
         })
     }
 
+    useEffect(() => {
+        if (!selectedResult) return
+
+        setItems((prev) => {
+            if (prev.find((item) => item.rowId === rowId))
+                return prev.map((item) =>
+                    item.rowId === rowId
+                        ? {
+                              ...selectedResult,
+                              quantity: quantityInput,
+                              rowId: rowId,
+                          }
+                        : item
+                )
+
+            return [
+                ...prev,
+                {
+                    ...selectedResult,
+                    quantity: quantityInput,
+                    rowId: rowId,
+                },
+            ]
+        })
+    }, [quantityInput, rowId, selectedResult, setItems])
+
     return (
         <>
             <TableRow>
                 <TableCell>
                     <Popover open={isOpen} onOpenChange={setIsOpen}>
-                        <span className="relative flex flex-col items-end gap-1">
+                        <span className="flex flex-col gap-1">
                             <span className="relative">
                                 <Input
-                                    name={barcode}
+                                    name={'barcode'}
                                     id={rowId}
                                     value={selectedId}
                                     onChange={(e) =>
                                         setSelectedId(e.target.value)
                                     }
                                     onKeyDown={async (e) => {
-                                        if (!onInsertRow) return
+                                        if (e.key === 'Enter') {
+                                            return await onBarcodeScanned()
+                                        }
 
-                                        if (
-                                            e.key === 'Tab' ||
-                                            e.key === 'ArrowDown'
-                                        ) {
+                                        if (e.key === 'ArrowDown') {
                                             if (
                                                 rowId ===
-                                                totalRows[totalRows.length - 1]
+                                                    totalRows[
+                                                        totalRows.length - 1
+                                                    ] &&
+                                                selectedResult &&
+                                                onInsertRow
                                             ) {
                                                 e.preventDefault()
                                                 onInsertRow()
@@ -158,63 +184,15 @@ export default function SelectSearchMainSku({
                                                     ) - 1
                                                 ]?.focus()
                                         }
-                                        // if (
-                                        //     e.key === 'Enter' &&
-                                        //     searchByIdFunction
-                                        // ) {
-                                        //     console.log(
-                                        //         (e.target as HTMLInputElement)
-                                        //             .value
-                                        //     )
-
-                                        //     try {
-                                        //         const result =
-                                        //             await searchByIdFunction(
-                                        //                 selectedId
-                                        //             )
-                                        //         console.log(result)
-                                        //         setSelectedResult(result)
-                                        //     } catch (err) {
-                                        //         if (err instanceof Error) {
-                                        //             return toast.error(
-                                        //                 err.message
-                                        //             )
-                                        //         }
-                                        //         return toast.error(
-                                        //             'Something went wrong'
-                                        //         )
-                                        //     }
-                                        // }
-                                        // if (
-                                        //     e.key === 'ArrowDown' &&
-                                        //     onInsertRow
-                                        // ) {
-                                        //     e.preventDefault()
-                                        //     if (
-                                        //         rowId ===
-                                        //         totalRows[totalRows.length - 1]
-                                        //     ) {
-                                        //         onInsertRow()
-                                        //     }
-                                        // }
                                     }}
                                     className={cn(
                                         'w-[240px] justify-start text-left font-normal'
                                     )}
                                 ></Input>
                                 <PopoverTrigger asChild>
-                                    <SearchIcon className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 hover:cursor-pointer" />
+                                    <SearchIcon className="absolute left-[215px] top-1/2 h-4 w-4 -translate-y-1/2 hover:cursor-pointer" />
                                 </PopoverTrigger>
                             </span>
-                            {hasTextArea && (
-                                <Textarea
-                                    value={textArea}
-                                    className="float-right w-[240px] justify-end text-left font-normal"
-                                    onChange={(e) =>
-                                        setTextArea(e.target.value)
-                                    }
-                                />
-                            )}
                         </span>
                         <PopoverContent
                             className="w-auto"
@@ -251,13 +229,6 @@ export default function SelectSearchMainSku({
                                         <TableHead>Barcode</TableHead>
                                         <TableHead>หน่วย</TableHead>
                                         <TableHead>ราคา</TableHead>
-                                        {/* {keys.map((key) => (
-                                    <TableHead key={key as string}>
-                                        {keysMap
-                                            ? keysMap[key as string]
-                                            : (key as string)}
-                                    </TableHead>
-                                ))} */}
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -299,6 +270,7 @@ export default function SelectSearchMainSku({
                                                                                     ],
                                                                             }
                                                                         )
+
                                                                         setIsOpen(
                                                                             false
                                                                         )
@@ -382,15 +354,36 @@ export default function SelectSearchMainSku({
                         className="text-right"
                         type="number"
                         value={quantityInput}
-                        onChange={(e) => setQuantityInput(+e.target.value)}
+                        onChange={(e) => {
+                            setQuantityInput(+e.target.value)
+                        }}
                         onKeyDown={(e) => {
                             if (!onInsertRow) return
 
                             if (e.key === 'Tab' || e.key === 'ArrowDown') {
-                                if (rowId === totalRows[totalRows.length - 1]) {
+                                if (
+                                    rowId === totalRows[totalRows.length - 1] &&
+                                    selectedResult
+                                ) {
                                     e.preventDefault()
                                     onInsertRow()
                                     return
+                                }
+
+                                if (e.key === 'Tab') {
+                                    e.preventDefault()
+                                    document
+                                        .getElementsByName('barcode')
+                                        [
+                                            totalRows.findIndex(
+                                                (id) =>
+                                                    id === rowId &&
+                                                    rowId !==
+                                                        totalRows[
+                                                            totalRows.length - 1
+                                                        ]
+                                            ) + 1
+                                        ]?.focus()
                                 }
 
                                 if (e.key === 'ArrowDown') {

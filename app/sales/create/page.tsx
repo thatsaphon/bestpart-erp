@@ -10,12 +10,15 @@ import {
     TableBody,
     TableCaption,
     TableCell,
+    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
 import SelectSearchMainSku from '@/components/select-search-main-sku/select-search-main-sku'
 import SelectSearchMainSkuWrapper from '@/components/select-search-main-sku/select-search-main-sku-wrapper'
+import TableFooterWrapper from '@/components/select-search-main-sku/table-footer-wrapper'
+import TableBodyFooterWrapper from '@/components/select-search-main-sku/table-body-footer-wrapper'
 
 type Props = {
     searchParams: {
@@ -67,9 +70,8 @@ export default function NewSales({}: Props) {
                             <TableHead className="text-right">Total</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
-                        <SelectSearchMainSkuWrapper />
-                    </TableBody>
+
+                    <TableBodyFooterWrapper />
                 </Table>
             </form>
         </div>

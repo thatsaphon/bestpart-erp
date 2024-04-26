@@ -2,15 +2,29 @@
 
 import { useState, useEffect } from 'react'
 import SelectSearchMainSku from './select-search-main-sku'
+import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/findGoodsMasterByBarcode'
 
-type Props = {}
+type Props = {
+    totalRows: string[]
+    setTotalRows: (totalRows: string[]) => void
+    setItems: React.Dispatch<
+        React.SetStateAction<
+            (Awaited<ReturnType<typeof findGoodsMasterByBarcode>> & {
+                quantity: number
+                rowId: string
+            })[]
+        >
+    >
+}
 
-export default function SelectSearchMainSkuWrapper({}: Props) {
-    const [totalRows, setTotalRows] = useState<string[]>([])
-
+export default function SelectSearchMainSkuWrapper({
+    totalRows,
+    setTotalRows,
+    setItems,
+}: Props) {
     useEffect(() => {
         if (totalRows.length === 0) setTotalRows([window.crypto.randomUUID()])
-    }, [totalRows.length])
+    }, [setTotalRows, totalRows.length])
 
     const onInsertRow = () => {
         const newRowId = window.crypto.randomUUID()
@@ -27,6 +41,7 @@ export default function SelectSearchMainSkuWrapper({}: Props) {
                     rowId={rowId}
                     totalRows={totalRows}
                     onInsertRow={onInsertRow}
+                    setItems={setItems}
                 />
             ))}
         </>
