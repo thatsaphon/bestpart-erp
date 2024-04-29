@@ -3,11 +3,13 @@
 import React, { useEffect } from 'react'
 import { TableFooter, TableRow, TableCell } from '../ui/table'
 import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/findGoodsMasterByBarcode'
+import { Button } from '../ui/button'
 
 type Props = {
     items: (Awaited<ReturnType<typeof findGoodsMasterByBarcode>> & {
         quantity: number
         rowId: string
+        price?: number
     })[]
 }
 
@@ -26,19 +28,22 @@ export default function TableFooterWrapper({ items }: Props) {
                                     sum +
                                     (100 / 107) *
                                         item.quantity *
-                                        item.skuMasters.reduce(
-                                            (sum, item) =>
-                                                sum +
-                                                item.goodsMasters.reduce(
-                                                    (sum, item) =>
-                                                        typeof item.price ===
-                                                        'number'
-                                                            ? sum + item?.price
-                                                            : sum,
-                                                    0
-                                                ),
-                                            0
-                                        ),
+                                        (typeof item.price === 'number'
+                                            ? item.price
+                                            : item.skuMasters.reduce(
+                                                  (sum, item) =>
+                                                      sum +
+                                                      item.goodsMasters.reduce(
+                                                          (sum, item) =>
+                                                              typeof item.price ===
+                                                              'number'
+                                                                  ? sum +
+                                                                    item?.price
+                                                                  : sum,
+                                                          0
+                                                      ),
+                                                  0
+                                              )),
                                 0
                             )
                             .toFixed(2)}
@@ -55,19 +60,22 @@ export default function TableFooterWrapper({ items }: Props) {
                                     sum +
                                     (7 / 107) *
                                         item.quantity *
-                                        item.skuMasters.reduce(
-                                            (sum, item) =>
-                                                sum +
-                                                item.goodsMasters.reduce(
-                                                    (sum, item) =>
-                                                        typeof item.price ===
-                                                        'number'
-                                                            ? sum + item?.price
-                                                            : sum,
-                                                    0
-                                                ),
-                                            0
-                                        ),
+                                        (typeof item.price === 'number'
+                                            ? item.price
+                                            : item.skuMasters.reduce(
+                                                  (sum, item) =>
+                                                      sum +
+                                                      item.goodsMasters.reduce(
+                                                          (sum, item) =>
+                                                              typeof item.price ===
+                                                              'number'
+                                                                  ? sum +
+                                                                    item?.price
+                                                                  : sum,
+                                                          0
+                                                      ),
+                                                  0
+                                              )),
                                 0
                             )
                             .toFixed(2)}
@@ -83,22 +91,36 @@ export default function TableFooterWrapper({ items }: Props) {
                                 (sum, item) =>
                                     sum +
                                     item.quantity *
-                                        item.skuMasters.reduce(
-                                            (sum, item) =>
-                                                sum +
-                                                item.goodsMasters.reduce(
-                                                    (sum, item) =>
-                                                        typeof item.price ===
-                                                        'number'
-                                                            ? sum + item?.price
-                                                            : sum,
-                                                    0
-                                                ),
-                                            0
-                                        ),
+                                        (typeof item.price === 'number'
+                                            ? item.price
+                                            : item.skuMasters.reduce(
+                                                  (sum, item) =>
+                                                      sum +
+                                                      item.goodsMasters.reduce(
+                                                          (sum, item) =>
+                                                              typeof item.price ===
+                                                              'number'
+                                                                  ? sum +
+                                                                    item?.price
+                                                                  : sum,
+                                                          0
+                                                      ),
+                                                  0
+                                              )),
                                 0
                             )
                             .toLocaleString()}
+                    </TableCell>
+                </TableRow>
+                <TableRow className="bg-background">
+                    <TableCell colSpan={6} className="space-x-1 text-right">
+                        <Button type="button" variant={'outline'}>
+                            Print
+                        </Button>
+                        <Button type="button" variant={'destructive'}>
+                            Cancel
+                        </Button>
+                        <Button type="submit">Submit</Button>
                     </TableCell>
                 </TableRow>
             </TableFooter>

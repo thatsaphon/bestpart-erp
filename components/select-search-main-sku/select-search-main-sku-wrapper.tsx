@@ -15,12 +15,14 @@ type Props = {
             })[]
         >
     >
+    type?: 'sales' | 'purchase'
 }
 
 export default function SelectSearchMainSkuWrapper({
     totalRows,
     setTotalRows,
     setItems,
+    type = 'sales',
 }: Props) {
     useEffect(() => {
         if (totalRows.length === 0) setTotalRows([window.crypto.randomUUID()])
@@ -42,6 +44,7 @@ export default function SelectSearchMainSkuWrapper({
                     totalRows={totalRows}
                     onInsertRow={onInsertRow}
                     setItems={setItems}
+                    type={type}
                 />
             ))}
         </>

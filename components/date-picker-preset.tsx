@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select'
 
 export function DatePickerWithPresets() {
-    const [date, setDate] = React.useState<Date>()
+    const [date, setDate] = React.useState<Date>(new Date())
 
     return (
         <Popover>
@@ -34,6 +34,14 @@ export function DatePickerWithPresets() {
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
+                    <input
+                        name="date"
+                        type="hidden"
+                        onChange={(e) => {
+                            setDate(new Date(e.target.value))
+                        }}
+                        value={date.toISOString().substring(0, 10)}
+                    />
                     {date ? format(date, 'PPP') : <span>Pick a date</span>}
                 </Button>
             </PopoverTrigger>
@@ -62,7 +70,7 @@ export function DatePickerWithPresets() {
                     <Calendar
                         mode="single"
                         selected={date}
-                        onSelect={setDate}
+                        onSelect={(value) => !!value && setDate(value)}
                     />
                 </div>
             </PopoverContent>

@@ -6,14 +6,17 @@ import { TableBody } from '../ui/table'
 import SelectSearchMainSkuWrapper from './select-search-main-sku-wrapper'
 import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/findGoodsMasterByBarcode'
 
-type Props = {}
+type Props = {
+    type?: 'sales' | 'purchase'
+}
 
-export default function TableBodyFooterWrapper({}: Props) {
+export default function TableBodyFooterWrapper({ type = 'sales' }: Props) {
     const [totalRows, setTotalRows] = useState<string[]>([])
     const [items, setItems] = useState<
         (Awaited<ReturnType<typeof findGoodsMasterByBarcode>> & {
             quantity: number
             rowId: string
+            price?: number
         })[]
     >([])
     return (
@@ -23,6 +26,7 @@ export default function TableBodyFooterWrapper({}: Props) {
                     totalRows={totalRows}
                     setTotalRows={setTotalRows}
                     setItems={setItems}
+                    type={type}
                 />
             </TableBody>
             <TableFooterWrapper items={items} />

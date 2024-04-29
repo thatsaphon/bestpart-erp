@@ -38,9 +38,11 @@ type Props = {
             (ReturnSearchType & {
                 quantity: number
                 rowId: string
+                price?: number
             })[]
         >
     >
+    type?: 'sales' | 'purchase'
 }
 
 type ReturnSearchType = Awaited<ReturnType<typeof findGoodsMasterByBarcode>>
@@ -53,6 +55,7 @@ export default function SelectSearchMainSku({
     rowId,
     totalRows,
     setItems,
+    type = 'sales',
 }: Props) {
     const [isOpen, setIsOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
@@ -62,6 +65,7 @@ export default function SelectSearchMainSku({
         useState<ReturnSearchType | null>(null)
 
     const [quantityInput, setQuantityInput] = useState(1)
+    const [priceInput, setPriceInput] = useState(0)
 
     const searchFunction = searchGoodsMasters
     const searchByIdFunction = findGoodsMasterByBarcode
@@ -83,9 +87,15 @@ export default function SelectSearchMainSku({
     }
 
     const onBarcodeScanned = async () => {
-        if (searchByIdFunction) {
-            const result = await searchByIdFunction(selectedId)
-            setSelectedResult(result)
+        try {
+            if (searchByIdFunction) {
+                const result = await searchByIdFunction(selectedId)
+                setSelectedResult(result)
+            }
+        } catch (err) {
+            if (err instanceof Error) return toast.error(err.message)
+
+            return toast.error('Something went wrong')
         }
     }
 
@@ -108,6 +118,7 @@ export default function SelectSearchMainSku({
                         ? {
                               ...selectedResult,
                               quantity: quantityInput,
+                              price: priceInput,
                               rowId: rowId,
                           }
                         : item
@@ -118,11 +129,12 @@ export default function SelectSearchMainSku({
                 {
                     ...selectedResult,
                     quantity: quantityInput,
+                    price: priceInput,
                     rowId: rowId,
                 },
             ]
         })
-    }, [quantityInput, rowId, selectedResult, setItems])
+    }, [priceInput, quantityInput, rowId, selectedResult, setItems])
 
     return (
         <>
@@ -140,6 +152,7 @@ export default function SelectSearchMainSku({
                                     }
                                     onKeyDown={async (e) => {
                                         if (e.key === 'Enter') {
+                                            e.preventDefault()
                                             return await onBarcodeScanned()
                                         }
 
@@ -419,12 +432,25 @@ export default function SelectSearchMainSku({
                 </TableCell>
                 <TableCell className="text-right">
                     {selectedResult &&
+                        type === 'sales' &&
                         selectedResult?.skuMasters[0]?.goodsMasters[0].price}
+                    {type !== 'sales' && (
+                        <Input
+                            name="price"
+                            type="number"
+                            value={priceInput}
+                            onChange={(e) => {
+                                setPriceInput(+e.target.value)
+                            }}
+                        />
+                    )}
                 </TableCell>
                 <TableCell className="text-right">
                     {selectedResult &&
+                        type === 'sales' &&
                         selectedResult?.skuMasters[0]?.goodsMasters[0].price *
                             quantityInput}
+                    {type !== 'sales' && priceInput * quantityInput}
                 </TableCell>
             </TableRow>
         </>

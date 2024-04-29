@@ -33,18 +33,15 @@ enum Role {
 }
 
 model Document {
-  id              Int            @id @default(autoincrement())
-  documentId      String         @unique
-  date            DateTime
-  generalLedger   GeneralLedger? @relation(fields: [generalLedgerId], references: [id])
-  generalLedgerId Int
-  skuMovements    SkuMovement[]
-  arSubledger     ArSubledger[]
-  apSubledger     ApSubledger[]
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @default(now()) @updatedAt
-
-  @@index([generalLedgerId])
+  id             Int             @id @default(autoincrement())
+  documentId     String          @unique
+  date           DateTime
+  generalLedgers GeneralLedger[]
+  skuMovements   SkuMovement[]
+  arSubledger    ArSubledger[]
+  apSubledger    ApSubledger[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now()) @updatedAt
 }
 
 model ChartOfAccount {
