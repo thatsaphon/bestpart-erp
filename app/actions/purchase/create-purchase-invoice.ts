@@ -10,7 +10,7 @@ export const createPurchaseInvoice = async (formData: FormData) => {
     const validator = z.object({
         vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
         barcodes: z.array(
-            z.string().trim().min(1, 'goodsCode must not be empty')
+            z.string().trim().min(1, 'barcode must not be empty')
         ),
         quanties: z.array(
             z.coerce.number().positive().min(0.01).or(z.string())
@@ -127,21 +127,10 @@ export const createPurchaseInvoice = async (formData: FormData) => {
                 ],
             },
             skuMovements: {
-                // create:[
-                //     {
-                //         date: new Date(date),
-                //         goodsCode: '5',
-                //         quantity: 0,
-                //         cost: 0,
-                //         sellPrice: 0,
-                //         vat: 0,
-                //         skuId:1
-                //     }
-                // ]
                 create: mapQuanties.map((item) => ({
                     date: new Date(date),
                     skuId: item.skuId,
-                    goodsCode: String(item.id),
+                    barcode: String(item.id),
                     quantity: item.q * item.quantity,
                     cost: +(((100 / 107) * +item.p) / item.quantity).toFixed(2),
                     sellPrice: 0,

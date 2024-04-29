@@ -188,7 +188,7 @@ model SkuMovement {
   date       DateTime
   sku        SkuMaster @relation(fields: [skuId], references: [id])
   skuId      Int
-  goodsCode  String
+  barcode    String
   document   Document  @relation(fields: [documentId], references: [id])
   documentId Int
 

@@ -9,7 +9,7 @@ const createInvoice = async (formData: FormData) => {
     const validator = z.object({
         customerId: z.string().trim().min(1, 'customerId must not be empty'),
         barcodes: z.array(
-            z.string().trim().min(1, 'goodsCode must not be empty')
+            z.string().trim().min(1, 'barcode must not be empty')
         ),
         quanties: z.array(
             z.coerce.number().positive().min(0.01).or(z.string())
