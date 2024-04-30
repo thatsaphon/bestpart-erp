@@ -30,10 +30,10 @@ export default function TableFooterWrapper({ items }: Props) {
                                         item.quantity *
                                         (typeof item.price === 'number'
                                             ? item.price
-                                            : item.skuMasters.reduce(
+                                            : item.SkuMaster.reduce(
                                                   (sum, item) =>
                                                       sum +
-                                                      item.goodsMasters.reduce(
+                                                      item.GoodsMaster.reduce(
                                                           (sum, item) =>
                                                               typeof item.price ===
                                                               'number'
@@ -62,10 +62,10 @@ export default function TableFooterWrapper({ items }: Props) {
                                         item.quantity *
                                         (typeof item.price === 'number'
                                             ? item.price
-                                            : item.skuMasters.reduce(
+                                            : item.SkuMaster.reduce(
                                                   (sum, item) =>
                                                       sum +
-                                                      item.goodsMasters.reduce(
+                                                      item.GoodsMaster.reduce(
                                                           (sum, item) =>
                                                               typeof item.price ===
                                                               'number'
@@ -93,10 +93,10 @@ export default function TableFooterWrapper({ items }: Props) {
                                     item.quantity *
                                         (typeof item.price === 'number'
                                             ? item.price
-                                            : item.skuMasters.reduce(
+                                            : item.SkuMaster.reduce(
                                                   (sum, item) =>
                                                       sum +
-                                                      item.goodsMasters.reduce(
+                                                      item.GoodsMaster.reduce(
                                                           (sum, item) =>
                                                               typeof item.price ===
                                                               'number'

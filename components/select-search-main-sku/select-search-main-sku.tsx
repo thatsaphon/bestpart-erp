@@ -65,7 +65,7 @@ export default function SelectSearchMainSku({
         useState<ReturnSearchType | null>(null)
 
     const [quantityInput, setQuantityInput] = useState(1)
-    const [priceInput, setPriceInput] = useState(0)
+    const [priceInput, setPriceInput] = useState<number | undefined>()
 
     const searchFunction = searchGoodsMasters
     const searchByIdFunction = findGoodsMasterByBarcode
@@ -450,7 +450,9 @@ export default function SelectSearchMainSku({
                         type === 'sales' &&
                         selectedResult?.SkuMaster[0]?.GoodsMaster[0].price *
                             quantityInput}
-                    {type !== 'sales' && priceInput * quantityInput}
+                    {type !== 'sales' &&
+                        priceInput &&
+                        priceInput * quantityInput}
                 </TableCell>
             </TableRow>
         </>
