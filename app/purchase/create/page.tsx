@@ -1,10 +1,12 @@
+'use client'
+
 import { searchAccountReceivable } from '@/app/actions/contact/searchAccountReceivable'
 import searchAccountReceivableById from '@/app/actions/contact/searchAccountReceivableById'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import SelectSearch from '@/components/select-search'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import React from 'react'
+import { useState, useRef } from 'react'
 import {
     Table,
     TableBody,
@@ -20,6 +22,7 @@ import SelectSearchMainSkuWrapper from '@/components/select-search-main-sku/sele
 import TableFooterWrapper from '@/components/select-search-main-sku/table-footer-wrapper'
 import TableBodyFooterWrapper from '@/components/select-search-main-sku/table-body-footer-wrapper'
 import { createPurchaseInvoice } from '@/app/actions/purchase/create-purchase-invoice'
+import toast from 'react-hot-toast'
 
 type Props = {
     searchParams: {
@@ -30,13 +33,29 @@ type Props = {
 }
 
 export default function NewPurchase({}: Props) {
+    const ref = useRef<HTMLFormElement>(null)
+    const [key, setKey] = useState('1')
     return (
         <div className="mb-2 p-3">
-            <form action={createPurchaseInvoice}>
+            <form
+                ref={ref}
+                action={async (formData) => {
+                    try {
+                        await createPurchaseInvoice(formData)
+                        ref.current?.reset()
+                        setKey(String(Date.now()))
+                        toast.success('บันทึกสําเร็จ')
+                    } catch (err) {
+                        if (err instanceof Error)
+                            return toast.error(err.message)
+                        toast.error('Something went wrong')
+                    }
+                }}
+            >
                 <div className="flex gap-3">
                     <div className="space-x-2">
                         <Label>วันที่</Label>
-                        <DatePickerWithPresets />
+                        <DatePickerWithPresets key={key} />
                     </div>
                     <div className="space-x-2">
                         <Label>No.</Label>
@@ -47,6 +66,7 @@ export default function NewPurchase({}: Props) {
                     <div className="flex items-baseline space-x-2">
                         <Label>เจ้าหนี้</Label>
                         <SelectSearch
+                            key={key}
                             searchFunction={searchAccountReceivable}
                             searchByIdFunction={searchAccountReceivableById}
                             keys={['id', 'name']}
@@ -69,10 +89,11 @@ export default function NewPurchase({}: Props) {
                             <TableHead className="text-right">Unit</TableHead>
                             <TableHead className="text-right">Price</TableHead>
                             <TableHead className="text-right">Total</TableHead>
+                            <TableHead className="text-right"></TableHead>
                         </TableRow>
                     </TableHeader>
 
-                    <TableBodyFooterWrapper type="purchase" />
+                    <TableBodyFooterWrapper type="purchase" key={key} />
                 </Table>
             </form>
         </div>

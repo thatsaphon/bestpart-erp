@@ -4,6 +4,8 @@ import React, { useEffect } from 'react'
 import { TableFooter, TableRow, TableCell } from '../ui/table'
 import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/findGoodsMasterByBarcode'
 import { Button } from '../ui/button'
+import { createInvoice } from '@/app/actions/sales/create-invoice'
+import toast from 'react-hot-toast'
 
 type Props = {
     items: (Awaited<ReturnType<typeof findGoodsMasterByBarcode>> & {
@@ -11,9 +13,18 @@ type Props = {
         rowId: string
         price?: number
     })[]
+    setTotalRows: (totalRows: string[]) => void
+    setItems: React.Dispatch<
+        React.SetStateAction<
+            (Awaited<ReturnType<typeof findGoodsMasterByBarcode>> & {
+                quantity: number
+                rowId: string
+            })[]
+        >
+    >
 }
 
-export default function TableFooterWrapper({ items }: Props) {
+export default function TableFooterWrapper({ items, setTotalRows }: Props) {
     return (
         <>
             <TableFooter>
@@ -22,7 +33,7 @@ export default function TableFooterWrapper({ items }: Props) {
                         Total (Excluded Vat)
                     </TableCell>
                     <TableCell className="text-right">
-                        {items
+                        {(+items
                             .reduce(
                                 (sum, item) =>
                                     sum +
@@ -46,7 +57,7 @@ export default function TableFooterWrapper({ items }: Props) {
                                               )),
                                 0
                             )
-                            .toFixed(2)}
+                            .toFixed(2)).toLocaleString()}
                     </TableCell>
                 </TableRow>
                 <TableRow className="bg-background">
@@ -54,7 +65,7 @@ export default function TableFooterWrapper({ items }: Props) {
                         Vat (7%)
                     </TableCell>
                     <TableCell className="text-right">
-                        {items
+                        {(+items
                             .reduce(
                                 (sum, item) =>
                                     sum +
@@ -78,7 +89,7 @@ export default function TableFooterWrapper({ items }: Props) {
                                               )),
                                 0
                             )
-                            .toFixed(2)}
+                            .toFixed(2)).toLocaleString()}
                     </TableCell>
                 </TableRow>
                 <TableRow>
@@ -120,7 +131,7 @@ export default function TableFooterWrapper({ items }: Props) {
                         <Button type="button" variant={'destructive'}>
                             Cancel
                         </Button>
-                        <Button type="submit">Submit</Button>
+                        <Button>Submit</Button>
                     </TableCell>
                 </TableRow>
             </TableFooter>

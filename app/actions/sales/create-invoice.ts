@@ -8,9 +8,9 @@ import { fromZodError } from 'zod-validation-error'
 export const createInvoice = async (formData: FormData) => {
     const validator = z.object({
         customerId: z.string().trim().min(1, 'customerId must not be empty'),
-        barcodes: z.array(
-            z.string().trim().min(1, 'barcode must not be empty')
-        ),
+        barcodes: z
+            .array(z.string().trim().min(1, 'barcode must not be empty'))
+            .min(1),
         quanties: z.array(
             z.coerce.number().positive().min(0.01).or(z.string())
         ),
@@ -192,11 +192,8 @@ const calInventoryCost = async (
 ) => {
     const skuIn = await prisma.skuIn.findMany({
         where: { skuMasterId, remaining: { not: 0 } },
-        orderBy: { date: 'asc' },
+        orderBy: { date: 'asc', id: 'asc' },
     })
-    // console.log(quantity)
-    // console.log(documentId)
-    // console.log(skuMasterId)
     if (skuIn.reduce((sum, item) => sum + item.remaining, 0) < quantity) {
         return 0
     }
@@ -204,9 +201,6 @@ const calInventoryCost = async (
     let result = 0
     let q = 0
     for (let i = 0; i < skuIn.length; i++) {
-        console.log(skuIn[i].remaining)
-        console.log(quantity)
-        console.log(q)
         if (q === quantity) {
             break
         }
@@ -224,8 +218,6 @@ const calInventoryCost = async (
             result += skuIn[i].cost * (quantity - q)
             q = q + skuIn[i].remaining
             skuIn[i].remaining = 0
-            console.log('q + skuIn[i].remaining: ', q + skuIn[i].remaining)
-            console.log('q: ', q)
             await prisma.skuIn.update({
                 where: { id: skuIn[i].id },
                 data: { remaining: skuIn[i].remaining },

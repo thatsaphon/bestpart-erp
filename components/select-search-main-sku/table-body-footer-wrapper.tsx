@@ -29,7 +29,11 @@ export default function TableBodyFooterWrapper({ type = 'sales' }: Props) {
                     type={type}
                 />
             </TableBody>
-            <TableFooterWrapper items={items} />
+            <TableFooterWrapper
+                items={items}
+                setTotalRows={setTotalRows}
+                setItems={setItems}
+            />
         </>
     )
 }

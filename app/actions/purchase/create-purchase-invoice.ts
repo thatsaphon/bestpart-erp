@@ -9,9 +9,9 @@ import { generateDocumentNumber } from '../sales/create-invoice'
 export const createPurchaseInvoice = async (formData: FormData) => {
     const validator = z.object({
         vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
-        barcodes: z.array(
-            z.string().trim().min(1, 'barcode must not be empty')
-        ),
+        barcodes: z
+            .array(z.string().trim().min(1, 'barcode must not be empty'))
+            .min(1),
         quanties: z.array(
             z.coerce.number().positive().min(0.01).or(z.string())
         ),

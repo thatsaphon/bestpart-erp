@@ -42,6 +42,7 @@ export default function SelectSearchMainSkuWrapper({
                     key={rowId}
                     rowId={rowId}
                     totalRows={totalRows}
+                    setTotalRows={setTotalRows}
                     onInsertRow={onInsertRow}
                     setItems={setItems}
                     type={type}

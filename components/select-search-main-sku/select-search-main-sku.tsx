@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/popover'
 import { Button } from '../ui/button'
 import { cn } from '@/lib/utils'
-import { CalendarIcon } from '@radix-ui/react-icons'
+import { CalendarIcon, Cross1Icon } from '@radix-ui/react-icons'
 import { Input } from '../ui/input'
 import { SearchIcon } from 'lucide-react'
 import {
@@ -33,6 +33,7 @@ type Props = {
     onInsertRow?: () => void
     rowId: string
     totalRows: string[]
+    setTotalRows: (totalRows: string[]) => void
     setItems: React.Dispatch<
         React.SetStateAction<
             (ReturnSearchType & {
@@ -54,6 +55,7 @@ export default function SelectSearchMainSku({
     onInsertRow,
     rowId,
     totalRows,
+    setTotalRows,
     setItems,
     type = 'sales',
 }: Props) {
@@ -296,7 +298,7 @@ export default function SelectSearchMainSku({
                                                                                 curr
                                                                             ) =>
                                                                                 prev +
-                                                                                curr.quantity,
+                                                                                curr.remaining,
                                                                             0
                                                                         )}
                                                                     </TableCell>
@@ -452,7 +454,30 @@ export default function SelectSearchMainSku({
                             quantityInput}
                     {type !== 'sales' &&
                         priceInput &&
-                        priceInput * quantityInput}
+                        (priceInput * quantityInput).toLocaleString()}
+                </TableCell>
+                <TableCell>
+                    {selectedResult ? (
+                        <Cross1Icon
+                            className="font-bold text-destructive hover:cursor-pointer"
+                            onClick={() => {
+                                setTotalRows(
+                                    totalRows.filter((id) => id !== rowId)
+                                )
+                            }}
+                        ></Cross1Icon>
+                    ) : totalRows[0] === rowId ? (
+                        <></>
+                    ) : (
+                        <Cross1Icon
+                            className="font-bold text-destructive hover:cursor-pointer"
+                            onClick={() => {
+                                setTotalRows(
+                                    totalRows.filter((id) => id !== rowId)
+                                )
+                            }}
+                        ></Cross1Icon>
+                    )}
                 </TableCell>
             </TableRow>
         </>
