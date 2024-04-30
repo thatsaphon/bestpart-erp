@@ -14,7 +14,7 @@ export const addImageToTag = async (formData: FormData, fileName: string) => {
         await prisma.skuMaster.update({
             where: { id: skuMasterId },
             data: {
-                images: {
+                Image: {
                     create: {
                         path: `${process.env.NEXT_PUBLIC_S3_PUBLIC_URL}/sku/${fileName}`,
                     },

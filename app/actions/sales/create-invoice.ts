@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 
-const createInvoice = async (formData: FormData) => {
+export const createInvoice = async (formData: FormData) => {
     const validator = z.object({
         customerId: z.string().trim().min(1, 'customerId must not be empty'),
         barcodes: z.array(
@@ -74,9 +74,11 @@ const createInvoice = async (formData: FormData) => {
         if (!goodsMaster) {
             throw new Error('goods not found')
         }
-        // if (Number(quanties[i]) > goodsMaster.quantity) {
-        //     throw new Error('quantity not enough')
-        // }
+        if (
+            !(await isSufficient(mapQuanties[i].skuMasterId, mapQuanties[i].q))
+        ) {
+            throw new Error('insufficient inventory')
+        }
     }
 
     if (!documentId) {
@@ -87,20 +89,19 @@ const createInvoice = async (formData: FormData) => {
         data: {
             date: new Date(date),
             documentId: documentId,
-            arSubledger: {
+            ArSubledger: {
                 create: {
                     contactId: Number(customerId),
                 },
             },
-            generalLedgers: {
+            GeneralLedger: {
                 create: [
                     // ลูกหนี้
                     {
                         chartOfAccountId: 12000,
-                        amount: mapQuanties.reduce(
-                            (sum, item) => sum + item.q * item.price,
-                            0
-                        ),
+                        amount: +mapQuanties
+                            .reduce((sum, item) => sum + item.q * item.price, 0)
+                            .toFixed(2),
                     },
                     // รายได้
                     {
@@ -124,14 +125,115 @@ const createInvoice = async (formData: FormData) => {
                             )
                             .toFixed(2),
                     },
-                    // สินค้า
-                    { chartOfAccountId: 13000, amount: 0 },
-                    // ต้นทุนขาย
-                    { chartOfAccountId: 51000, amount: 0 },
                 ],
             },
         },
     })
+
+    const asyncSkuOut = mapQuanties.map(async (item) => ({
+        date: new Date(date),
+        skuMasterId: item.skuMasterId,
+        barcode: String(item.id),
+        quantity: item.q * item.quantity,
+        cost: await calInventoryCost(item.skuMasterId, +item.q, invoice.id),
+        price: +((100 / 107) * item.q * item.price).toFixed(2),
+        vat: +((7 / 107) * item.q * item.price).toFixed(2),
+    }))
+
+    const skuOut = await Promise.all(asyncSkuOut)
+
+    await prisma.document.update({
+        where: { id: invoice.id },
+        data: {
+            SkuOut: {
+                create: skuOut.map((item) => ({
+                    ...item,
+                })),
+            },
+            GeneralLedger: {
+                create: [
+                    // สินค้า
+                    {
+                        chartOfAccountId: 13000,
+                        amount: skuOut.reduce(
+                            (sum, item) => sum + item.cost,
+                            0
+                        ),
+                    },
+                    // ต้นทุนขาย
+                    {
+                        chartOfAccountId: 51000,
+                        amount: skuOut.reduce(
+                            (sum, item) => sum + item.cost,
+                            0
+                        ),
+                    },
+                ],
+            },
+        },
+    })
+}
+
+const isSufficient = async (skuMasterId: number, quantity: number) => {
+    const skuIn = await prisma.skuIn.findMany({
+        where: { skuMasterId, remaining: { not: 0 } },
+        orderBy: { date: 'asc' },
+    })
+    if (skuIn.reduce((sum, item) => sum + item.remaining, 0) < quantity) {
+        return false
+    }
+    return true
+}
+
+const calInventoryCost = async (
+    skuMasterId: number,
+    quantity: number,
+    documentId: number
+) => {
+    const skuIn = await prisma.skuIn.findMany({
+        where: { skuMasterId, remaining: { not: 0 } },
+        orderBy: { date: 'asc' },
+    })
+    // console.log(quantity)
+    // console.log(documentId)
+    // console.log(skuMasterId)
+    if (skuIn.reduce((sum, item) => sum + item.remaining, 0) < quantity) {
+        return 0
+    }
+
+    let result = 0
+    let q = 0
+    for (let i = 0; i < skuIn.length; i++) {
+        console.log(skuIn[i].remaining)
+        console.log(quantity)
+        console.log(q)
+        if (q === quantity) {
+            break
+        }
+        if (skuIn[i].remaining >= quantity - q) {
+            result += skuIn[i].cost * (quantity - q)
+            skuIn[i].remaining = skuIn[i].remaining - (quantity - q)
+            q = quantity
+            await prisma.skuIn.update({
+                where: { id: skuIn[i].id },
+                data: { remaining: skuIn[i].remaining },
+            })
+        }
+
+        if (skuIn[i].remaining < quantity - q) {
+            result += skuIn[i].cost * (quantity - q)
+            q = q + skuIn[i].remaining
+            skuIn[i].remaining = 0
+            console.log('q + skuIn[i].remaining: ', q + skuIn[i].remaining)
+            console.log('q: ', q)
+            await prisma.skuIn.update({
+                where: { id: skuIn[i].id },
+                data: { remaining: skuIn[i].remaining },
+            })
+        }
+    }
+
+    return result
 }
 
 export const generateDocumentNumber = async (prefix: string, date: string) => {

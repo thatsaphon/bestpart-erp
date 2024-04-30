@@ -247,12 +247,12 @@ export default function SelectSearchMainSku({
                                 <TableBody>
                                     {searchResults.map((result) => (
                                         <Fragment key={result.id}>
-                                            {result.skuMasters.map(
+                                            {result.SkuMaster.map(
                                                 (skuMaster) => (
                                                     <Fragment
                                                         key={skuMaster.id}
                                                     >
-                                                        {skuMaster.goodsMasters.map(
+                                                        {skuMaster.GoodsMaster.map(
                                                             (
                                                                 goodsMaster,
                                                                 index
@@ -268,14 +268,14 @@ export default function SelectSearchMainSku({
                                                                         setSelectedResult(
                                                                             {
                                                                                 ...result,
-                                                                                skuMasters:
+                                                                                SkuMaster:
                                                                                     [
                                                                                         {
                                                                                             ...result
-                                                                                                .skuMasters[
+                                                                                                .SkuMaster[
                                                                                                 index
                                                                                             ],
-                                                                                            goodsMasters:
+                                                                                            GoodsMaster:
                                                                                                 [
                                                                                                     goodsMaster,
                                                                                                 ],
@@ -290,7 +290,7 @@ export default function SelectSearchMainSku({
                                                                     }}
                                                                 >
                                                                     <TableCell>
-                                                                        {skuMaster.skuMovements.reduce(
+                                                                        {skuMaster.SkuIn.reduce(
                                                                             (
                                                                                 prev,
                                                                                 curr
@@ -345,7 +345,7 @@ export default function SelectSearchMainSku({
                         <PopoverContent className="w-auto">
                             <div className="grid w-[500px] grid-cols-3 gap-1">
                                 {selectedResult &&
-                                    selectedResult?.skuMasters[0]?.images.map(
+                                    selectedResult?.SkuMaster[0]?.Image.map(
                                         (image) => (
                                             <Image
                                                 unoptimized
@@ -428,12 +428,12 @@ export default function SelectSearchMainSku({
                 </TableCell>
                 <TableCell className="text-right">
                     {selectedResult &&
-                        `${selectedResult?.skuMasters[0]?.goodsMasters[0].unit}(${selectedResult?.skuMasters[0]?.goodsMasters[0].quantity})`}
+                        `${selectedResult?.SkuMaster[0]?.GoodsMaster[0].unit}(${selectedResult?.SkuMaster[0]?.GoodsMaster[0].quantity})`}
                 </TableCell>
                 <TableCell className="text-right">
                     {selectedResult &&
                         type === 'sales' &&
-                        selectedResult?.skuMasters[0]?.goodsMasters[0].price}
+                        selectedResult?.SkuMaster[0]?.GoodsMaster[0].price}
                     {type !== 'sales' && (
                         <Input
                             name="price"
@@ -448,7 +448,7 @@ export default function SelectSearchMainSku({
                 <TableCell className="text-right">
                     {selectedResult &&
                         type === 'sales' &&
-                        selectedResult?.skuMasters[0]?.goodsMasters[0].price *
+                        selectedResult?.SkuMaster[0]?.GoodsMaster[0].price *
                             quantityInput}
                     {type !== 'sales' && priceInput * quantityInput}
                 </TableCell>

@@ -17,7 +17,7 @@ import {
     GoodsMaster,
     MainSku,
     SkuMaster,
-    SkuMovement,
+    SkuIn,
     Image as PrismaImage,
 } from '@prisma/client'
 import { Badge } from '@/components/ui/badge'
@@ -25,12 +25,12 @@ import EditMainSkuDialog from './edit-main-sku-dialog'
 
 type Props = {
     mainSku: MainSku & {
-        skuMasters: (SkuMaster & {
-            brand?: Brand | null
-            carModel?: CarModel | null
-            goodsMasters: GoodsMaster[]
-            skuMovements?: SkuMovement[]
-            images: PrismaImage[]
+        SkuMaster: (SkuMaster & {
+            Brand?: Brand | null
+            CarModel?: CarModel | null
+            GoodsMaster: GoodsMaster[]
+            SkuIn?: SkuIn[]
+            Image: PrismaImage[]
         })[]
     }
 }
@@ -46,7 +46,7 @@ export function InventoryCard({ mainSku }: Props) {
                 <CardDescription>{mainSku.partNumber}</CardDescription>
             </CardHeader>
             <CardContent>
-                {mainSku.skuMasters.map((skuMaster, index) => (
+                {mainSku.SkuMaster.map((skuMaster, index) => (
                     <React.Fragment key={index}>
                         <div className="pb-2">
                             <div className="">{skuMaster?.detail}</div>
@@ -58,34 +58,30 @@ export function InventoryCard({ mainSku }: Props) {
                             key={index}
                             className="grid w-full grid-cols-4 items-center gap-4 rounded-md border-b border-t bg-muted px-1 py-1"
                         >
-                            {skuMaster.goodsMasters.map(
-                                (goodsMaster, index) => (
-                                    <React.Fragment key={index}>
-                                        <div>
-                                            {!!skuMaster.skuMovements
-                                                ? skuMaster.skuMovements.reduce(
-                                                      (acc, cur) => {
-                                                          return (
-                                                              acc + cur.quantity
-                                                          )
-                                                      },
-                                                      0
-                                                  )
-                                                : '?'}
-                                        </div>
-                                        <div className="col-start-2 text-sm">
-                                            {goodsMaster?.barcode}
-                                        </div>
-                                        <div className="col-start-3 justify-self-end text-sm">
-                                            {goodsMaster?.unit}x
-                                            {goodsMaster?.quantity}
-                                        </div>
-                                        <div className="col-start-4 justify-self-end text-sm">
-                                            {goodsMaster?.price}
-                                        </div>
-                                    </React.Fragment>
-                                )
-                            )}
+                            {skuMaster.GoodsMaster.map((goodsMaster, index) => (
+                                <React.Fragment key={index}>
+                                    <div>
+                                        {!!skuMaster.SkuIn
+                                            ? skuMaster.SkuIn.reduce(
+                                                  (acc, cur) => {
+                                                      return acc + cur.remaining
+                                                  },
+                                                  0
+                                              )
+                                            : '?'}
+                                    </div>
+                                    <div className="col-start-2 text-sm">
+                                        {goodsMaster?.barcode}
+                                    </div>
+                                    <div className="col-start-3 justify-self-end text-sm">
+                                        {goodsMaster?.unit}x
+                                        {goodsMaster?.quantity}
+                                    </div>
+                                    <div className="col-start-4 justify-self-end text-sm">
+                                        {goodsMaster?.price}
+                                    </div>
+                                </React.Fragment>
+                            ))}
                         </div>
                     </React.Fragment>
                 ))}

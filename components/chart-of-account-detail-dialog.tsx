@@ -36,9 +36,9 @@ type Props = {
     label?: string
     account:
         | (ChartOfAccount & {
-              accountOwners: {
+              AccountOwner: {
                   id: number
-                  accountNumberId: number
+                  chartOfAccountId: number
                   userId: string
               }[]
               GeneralLedger: {

@@ -14,9 +14,9 @@ import { DialogFooter } from './ui/dialog'
 type Props = {
     children: React.ReactNode
     skuMaster: SkuMaster & {
-        brand?: Brand | null
-        carModel?: CarModel | null
-        goodsMasters: GoodsMaster[]
+        Brand?: Brand | null
+        CarModel?: CarModel | null
+        GoodsMaster: GoodsMaster[]
     }
 }
 

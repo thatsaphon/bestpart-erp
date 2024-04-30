@@ -94,10 +94,7 @@ export default function SelectSearch<T>({
                             onChange={(e) => setSelectedId(e.target.value)}
                             onKeyDown={async (e) => {
                                 if (e.key === 'Enter' && searchByIdFunction) {
-                                    console.log(
-                                        (e.target as HTMLInputElement).value
-                                    )
-
+                                    e.preventDefault()
                                     try {
                                         const result =
                                             await searchByIdFunction(selectedId)

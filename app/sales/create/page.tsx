@@ -19,6 +19,7 @@ import SelectSearchMainSku from '@/components/select-search-main-sku/select-sear
 import SelectSearchMainSkuWrapper from '@/components/select-search-main-sku/select-search-main-sku-wrapper'
 import TableFooterWrapper from '@/components/select-search-main-sku/table-footer-wrapper'
 import TableBodyFooterWrapper from '@/components/select-search-main-sku/table-body-footer-wrapper'
+import { createInvoice } from '@/app/actions/sales/create-invoice'
 
 type Props = {
     searchParams: {
@@ -31,7 +32,7 @@ type Props = {
 export default function NewSales({}: Props) {
     return (
         <div className="mb-2 p-3">
-            <form action="">
+            <form action={createInvoice}>
                 <div className="flex gap-3">
                     <div className="space-x-2">
                         <Label>วันที่</Label>
@@ -50,7 +51,7 @@ export default function NewSales({}: Props) {
                             searchByIdFunction={searchAccountReceivableById}
                             keys={['id', 'name']}
                             keysMap={{ id: 'Id', name: 'ชื่อลูกค้า' }}
-                            name="ar"
+                            name="customerId"
                             hasTextArea={true}
                             textAreaKeys={['name']}
                         />

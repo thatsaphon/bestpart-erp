@@ -24,7 +24,7 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
 
-  accountOwners AccountOwner[]
+  AccountOwner AccountOwner[]
 }
 
 enum Role {
@@ -33,15 +33,17 @@ enum Role {
 }
 
 model Document {
-  id             Int             @id @default(autoincrement())
-  documentId     String          @unique
-  date           DateTime
-  generalLedgers GeneralLedger[]
-  skuMovements   SkuMovement[]
-  arSubledger    ArSubledger[]
-  apSubledger    ApSubledger[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @default(now()) @updatedAt
+  id            Int             @id @default(autoincrement())
+  documentId    String          @unique
+  date          DateTime
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  GeneralLedger GeneralLedger[]
+  SkuOut        SkuOut[]
+  SkuIn         SkuIn[]
+  ApSubledger   ApSubledger[]
+  ArSubledger   ArSubledger[]
+  Image         Image[]
 }
 
 model ChartOfAccount {
@@ -52,7 +54,7 @@ model ChartOfAccount {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @default(now()) @updatedAt
 
-  accountOwners AccountOwner[]
+  AccountOwner AccountOwner[]
 }
 
 enum AccountType {
@@ -67,8 +69,8 @@ enum AccountType {
 
 model GeneralLedger {
   id               Int            @id @default(autoincrement())
-  document         Document[]
-  chartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
+  Document         Document[]
+  ChartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
   chartOfAccountId Int
   amount           Float
   createdAt        DateTime       @default(now())
@@ -78,14 +80,14 @@ model GeneralLedger {
 }
 
 model Contact {
-  id        Int       @id @default(autoincrement())
-  name      String
-  Addresses Address[]
-  flag      Json?
-  taxId     String
+  id      Int       @id @default(autoincrement())
+  name    String
+  Address Address[]
+  flag    Json?
+  taxId   String?
 
-  apSubledger ApSubledger[]
-  arSubledger ArSubledger[]
+  ApSubledger ApSubledger[]
+  ArSubledger ArSubledger[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -93,7 +95,7 @@ model Contact {
 
 model Address {
   id           Int     @id @default(autoincrement())
-  contact      Contact @relation(fields: [contactId], references: [id])
+  Contact      Contact @relation(fields: [contactId], references: [id])
   contactId    Int
   isMain       Boolean
   name         String
@@ -112,14 +114,14 @@ model MainSku {
   partNumber String?
   name       String  @unique
 
-  carModel   CarModel? @relation(fields: [carModelId], references: [id])
   carModelId Int?
 
-  flag       Json?
-  skuMasters SkuMaster[]
+  CarModel CarModel? @relation(fields: [carModelId], references: [id])
+  flag     Json?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now()) @updatedAt
+  SkuMaster SkuMaster[]
 
   @@index([carModelId])
 }
@@ -128,20 +130,19 @@ model SkuMaster {
   id     Int    @id @default(autoincrement())
   detail String
 
-  brand   Brand? @relation(fields: [brandId], references: [id])
+  Brand   Brand? @relation(fields: [brandId], references: [id])
   brandId Int?
 
   mainSkuId Int
   mainSku   MainSku @relation(fields: [mainSkuId], references: [id])
   remark    String?
 
-  goodsMasters GoodsMaster[]
-  skuMovements SkuMovement[]
-
-  images Image[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
+  SkuOut      SkuOut[]
+  SkuIn       SkuIn[]
+  Image       Image[]
+  GoodsMaster GoodsMaster[]
 
   @@index([brandId])
   @@index([mainSkuId])
@@ -151,7 +152,7 @@ model CarModel {
   id   Int    @id @default(autoincrement())
   name String
 
-  mainSkus MainSku[]
+  MainSku MainSku[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -161,56 +162,73 @@ model Brand {
   id   Int    @id @default(autoincrement())
   name String
 
-  skuMasters SkuMaster[]
+  SkuMaster SkuMaster[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
 
 model GoodsMaster {
-  id       Int       @id @default(autoincrement())
-  barcode  String    @unique
-  sku      SkuMaster @relation(fields: [skuId], references: [id])
-  skuId    Int
-  quantity Float
-  unit     String
-  price    Float
-  flag     Json?
+  id          Int       @id @default(autoincrement())
+  barcode     String    @unique
+  SkuMaster   SkuMaster @relation(fields: [skuMasterId], references: [id])
+  skuMasterId Int
+  quantity    Float
+  unit        String
+  price       Float
+  flag        Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@index([skuId])
+  @@index([skuMasterId])
 }
 
-model SkuMovement {
-  id         Int       @id @default(autoincrement())
-  date       DateTime
-  sku        SkuMaster @relation(fields: [skuId], references: [id])
-  skuId      Int
-  barcode    String
-  document   Document  @relation(fields: [documentId], references: [id])
-  documentId Int
+model SkuOut {
+  id          Int       @id @default(autoincrement())
+  date        DateTime
+  SkuMaster   SkuMaster @relation(fields: [skuMasterId], references: [id])
+  skuMasterId Int
+  barcode     String
+  Document    Document  @relation(fields: [documentId], references: [id])
+  documentId  Int
 
-  quantity  Int
-  cost      Float
-  sellPrice Float
-  vat       Float
-
-  flag Json?
+  quantity Float
+  cost     Float
+  price    Float
+  vat      Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@index([skuId])
+  @@index([skuMasterId])
   @@index([documentId])
+}
+
+model SkuIn {
+  id          Int       @id @default(autoincrement())
+  date        DateTime
+  SkuMaster   SkuMaster @relation(fields: [skuMasterId], references: [id])
+  skuMasterId Int
+  Document    Document  @relation(fields: [documentId], references: [id])
+  documentId  Int
+
+  barcode String?
+
+  quantity Float
+  cost     Float
+  vat      Float
+
+  remaining Int
+
+  @@index([skuMasterId])
 }
 
 model ApSubledger {
   id         Int      @id @default(autoincrement())
-  ap         Contact  @relation(fields: [contactId], references: [id])
+  Contact    Contact  @relation(fields: [contactId], references: [id])
   contactId  Int
-  document   Document @relation(fields: [documentId], references: [id])
+  Document   Document @relation(fields: [documentId], references: [id])
   documentId Int
 
   createdAt DateTime @default(now())
@@ -222,9 +240,9 @@ model ApSubledger {
 
 model ArSubledger {
   id         Int      @id @default(autoincrement())
-  ar         Contact  @relation(fields: [contactId], references: [id])
+  Contact    Contact  @relation(fields: [contactId], references: [id])
   contactId  Int
-  document   Document @relation(fields: [documentId], references: [id])
+  Document   Document @relation(fields: [documentId], references: [id])
   documentId Int
 
   createdAt DateTime @default(now())
@@ -235,21 +253,23 @@ model ArSubledger {
 }
 
 model AccountOwner {
-  id              Int            @id @default(autoincrement())
-  accountNumber   ChartOfAccount @relation(fields: [accountNumberId], references: [id])
-  accountNumberId Int
-  user            User           @relation(fields: [userId], references: [id])
-  userId          String
+  id               Int            @id @default(autoincrement())
+  ChartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
+  chartOfAccountId Int
+  User             User           @relation(fields: [userId], references: [id])
+  userId           String
 
-  @@index([accountNumberId])
+  @@index([chartOfAccountId])
   @@index([userId])
 }
 
 model Image {
   id          String     @id @default(uuid())
   path        String
+  Document    Document?  @relation(fields: [documentId], references: [id])
+  SkuMaster   SkuMaster? @relation(fields: [skuMasterId], references: [id])
   skuMasterId Int?
-  skuMaster   SkuMaster? @relation(fields: [skuMasterId], references: [id])
+  documentId  Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

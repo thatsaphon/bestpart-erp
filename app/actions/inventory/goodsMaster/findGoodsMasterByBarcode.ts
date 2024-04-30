@@ -8,26 +8,28 @@ export const findGoodsMasterByBarcode = async (barcode: string) => {
 
         const data = await prisma.mainSku.findFirst({
             include: {
-                skuMasters: {
+                SkuMaster: {
                     where: {
-                        goodsMasters: {
+                        GoodsMaster: {
                             some: { barcode: { equals: barcode } },
                         },
                     },
                     include: {
-                        goodsMasters: {
+                        GoodsMaster: {
                             where: { barcode: { equals: barcode } },
                         },
-                        brand: true,
-                        images: true,
-                        skuMovements: true,
+                        Brand: true,
+                        Image: true,
+                        SkuIn: {
+                            where: { remaining: { not: 0 } },
+                        },
                     },
                 },
             },
         })
         console.log(data)
         if (!data) throw new Error('Data not found')
-        if (!data?.skuMasters[0]?.goodsMasters[0])
+        if (!data?.SkuMaster[0]?.GoodsMaster[0])
             throw new Error('Data not found')
 
         return data

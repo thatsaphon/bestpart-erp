@@ -28,7 +28,7 @@ export default async function AccountingPage({ searchParams }: Props) {
     const chartOfAccount = await prisma.chartOfAccount.findMany({})
     const accountDetail = await prisma.chartOfAccount.findUnique({
         where: { id: searchParams.accountId ? +searchParams.accountId : 0 },
-        include: { GeneralLedger: true, accountOwners: true },
+        include: { GeneralLedger: true, AccountOwner: true },
     })
 
     const resetChartOfAccount = async () => {

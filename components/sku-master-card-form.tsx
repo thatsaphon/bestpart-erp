@@ -35,10 +35,10 @@ import { uploadFile } from '@/lib/s3-client'
 
 type Props = {
     skuMaster: SkuMaster & {
-        brand?: Brand | null
-        carModel?: CarModel | null
-        goodsMasters: GoodsMaster[]
-        images: PrismaImage[]
+        Brand?: Brand | null
+        CarModel?: CarModel | null
+        GoodsMaster: GoodsMaster[]
+        Image: PrismaImage[]
     }
 }
 
@@ -46,14 +46,14 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
     const [isEdit, setIsEdit] = useState(false)
     const [file, setFile] = useState<File | null | undefined>(null)
     const [goodsMasters, setGoodsMasters] = useState<Partial<GoodsMaster>[]>(
-        skuMaster.goodsMasters
+        skuMaster.GoodsMaster
     )
 
     const [state, formAction] = useFormState(createOrUpdateGoodsMasters, {
         error: '',
     })
     useEffect(() => {
-        setGoodsMasters(skuMaster.goodsMasters)
+        setGoodsMasters(skuMaster.GoodsMaster)
         setIsEdit(false)
     }, [skuMaster])
     return (
@@ -95,7 +95,7 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                             variant={'outline'}
                             onClick={() => {
                                 setIsEdit(!isEdit)
-                                setGoodsMasters(skuMaster.goodsMasters)
+                                setGoodsMasters(skuMaster.GoodsMaster)
                             }}
                             type="button"
                         >
@@ -281,7 +281,7 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                                     </Button>
                                 )}
                                 <div className="grid grid-cols-3 gap-2">
-                                    {skuMaster.images.map((image) => (
+                                    {skuMaster.Image.map((image) => (
                                         <Image
                                             src={image.path}
                                             alt={skuMaster.detail}

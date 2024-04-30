@@ -10,7 +10,7 @@ export async function getInventory(page = '1', limit = '10') {
         skip: (Number(page) - 1) * Number(limit),
         take: Number(limit),
         include: {
-            brand: true,
+            Brand: true,
         },
     })
 }
@@ -20,7 +20,7 @@ export async function getPartNumbers(page = '1', limit = '10') {
         skip: (Number(page) - 1) * Number(limit),
         take: Number(limit),
         include: {
-            skuMasters: true,
+            SkuMaster: true,
         },
     })
 }
@@ -106,10 +106,4 @@ export const editInventory = async (formData: FormData) => {
     } catch (error) {
         return error
     }
-}
-
-const uploadPicture = async (formData: FormData) => {
-    const validator = z.object({
-        skuId: z.string().trim().min(1, 'skuId must not be empty'),
-    })
 }

@@ -79,20 +79,23 @@ export const createPurchaseInvoice = async (formData: FormData) => {
         }
     })
 
+    console.log(documentId)
     if (!documentId) {
         documentId = await generateDocumentNumber('PINV', date)
+        console.log(documentId)
     }
 
     const invoice = await prisma.document.create({
         data: {
             date: new Date(date),
             documentId: documentId,
-            apSubledger: {
+
+            ApSubledger: {
                 create: {
                     contactId: Number(vendorId),
                 },
             },
-            generalLedgers: {
+            GeneralLedger: {
                 create: [
                     // เจ้าหนี้การค้า
                     {
@@ -126,15 +129,15 @@ export const createPurchaseInvoice = async (formData: FormData) => {
                     },
                 ],
             },
-            skuMovements: {
+            SkuIn: {
                 create: mapQuanties.map((item) => ({
                     date: new Date(date),
-                    skuId: item.skuId,
-                    barcode: String(item.id),
+                    skuMasterId: item.skuMasterId,
+                    barcode: item.barcode,
                     quantity: item.q * item.quantity,
                     cost: +(((100 / 107) * +item.p) / item.quantity).toFixed(2),
-                    sellPrice: 0,
                     vat: +(((7 / 107) * +item.p) / item.quantity).toFixed(2),
+                    remaining: item.q * item.quantity,
                 })),
             },
         },

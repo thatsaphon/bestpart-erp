@@ -21,6 +21,7 @@ import {
     Brand,
     CarModel,
     GoodsMaster,
+    SkuIn,
     Image as PrismaImage,
 } from '@prisma/client'
 import { createInventory } from '@/app/actions/inventory/inventories'
@@ -31,11 +32,12 @@ import InventoryDialogContextMenu from './inventory-dialog-context-menu'
 
 type Props = {
     mainSku: MainSku & {
-        skuMasters: (SkuMaster & {
-            brand?: Brand | null
-            carModel?: CarModel | null
-            goodsMasters: GoodsMaster[]
-            images: PrismaImage[]
+        SkuMaster: (SkuMaster & {
+            Brand?: Brand | null
+            CarModel?: CarModel | null
+            GoodsMaster: GoodsMaster[]
+            SkuIn?: SkuIn[]
+            Image: PrismaImage[]
         })[]
     }
 }
@@ -125,8 +127,8 @@ export default function EditMainSkuDialog({ mainSku }: Props) {
                     </form>
                 </DialogHeader>
                 <div className="flex min-h-[400px] flex-col gap-2">
-                    {mainSku.skuMasters.length > 0 &&
-                        mainSku.skuMasters.map((skuMaster, index) => (
+                    {mainSku.SkuMaster.length > 0 &&
+                        mainSku.SkuMaster.map((skuMaster, index) => (
                             <InventoryDialogContextMenu
                                 key={skuMaster.id}
                                 skuMaster={skuMaster}

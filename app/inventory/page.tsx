@@ -35,31 +35,19 @@ export default async function InventoryListPage({
     searchParams,
     searchParams: { page = '1', limit = '10', search = '', remaining = '' },
 }: Props) {
-    // const page = searchParams.page || 1
-    // const limit = searchParams.limit || 10
-    // const result = await getInventory(page, limit)
-    // await prisma.skuMaster.findMany({
-    //   skip:
-    //     (Number(page) - 1) *
-    //     Number(limit),
-    //   take: Number(limit),
-    //   include: {
-    //     brand: true,
-    //     carModel: true,
-    //   },
-    // })
-
     const mainSkus = await prisma.mainSku.findMany({
         skip: (Number(page) - 1) * Number(limit),
         take: Number(limit),
         include: {
-            carModel: true,
-            skuMasters: {
+            CarModel: true,
+            SkuMaster: {
                 include: {
-                    brand: true,
-                    goodsMasters: true,
-                    images: true,
-                    skuMovements: remaining === 'true',
+                    Brand: true,
+                    GoodsMaster: true,
+                    Image: true,
+                    SkuIn: {
+                        where: { remaining: { not: 0 } },
+                    },
                 },
             },
         },

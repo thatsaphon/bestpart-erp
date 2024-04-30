@@ -37,10 +37,11 @@ export async function createChartOfAccounts(
                 id,
                 name,
                 type,
-                accountOwners: {
-                    createMany: {
-                        data: userOwners.map((user) => ({ userId: user.id })),
-                    },
+                AccountOwner: {
+                    create: userOwners.map((user) => ({ userId: user.id })),
+                    // createMany: {
+                    //     data: userOwners.map((user) => ({ userId: user.id })),
+                    // },
                 },
             },
         })
@@ -63,10 +64,10 @@ export async function deleteChartOfAccount(id: number) {
         throw new Error('cannot delete this account')
     console.log('success')
     await prisma.$transaction([
-        prisma.accountOwner.deleteMany({ where: { accountNumberId: id } }),
+        prisma.accountOwner.deleteMany({ where: { chartOfAccountId: id } }),
         prisma.chartOfAccount.delete({
             where: { id },
-            include: { accountOwners: true },
+            include: { AccountOwner: true },
         }),
     ])
     revalidatePath('/accounting')

@@ -72,9 +72,9 @@ export const createOrUpdateGoodsMasters = async (
             data: {
                 detail,
                 remark,
-                goodsMasters: {
+                GoodsMaster: {
                     deleteMany: {
-                        skuId: skuMasterId,
+                        skuMasterId: skuMasterId,
                         NOT: goodsMasterId
                             .filter((id) => !!id)
                             .map((id) => ({ id: id })) as { id: number }[],
@@ -82,19 +82,19 @@ export const createOrUpdateGoodsMasters = async (
                     createMany: {
                         data: goodsMasters
                             .filter(({ id }) => !id)
-                            .map((goodMaster) => ({
-                                ...goodMaster,
+                            .map((goodsMaster) => ({
+                                ...goodsMaster,
                                 id: undefined,
                             })),
                     },
                     updateMany: goodsMasters
                         .filter(({ id }) => !!id)
-                        .map((goodMaster) => ({
+                        .map((goodsMaster) => ({
                             data: {
-                                ...goodMaster,
+                                ...goodsMaster,
                                 id: undefined,
                             },
-                            where: { id: +goodMaster.id },
+                            where: { id: +goodsMaster.id },
                         })),
                 },
             },
