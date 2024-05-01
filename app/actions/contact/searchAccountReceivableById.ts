@@ -2,7 +2,7 @@
 
 import prisma from '@/app/db/db'
 
-export default async function searchAccountReceivableById(id: string) {
+export async function searchAccountReceivableById(id: string) {
     try {
         const data = await prisma.contact.findUnique({
             where: {

@@ -23,65 +23,55 @@ import {
 import { Textarea } from './ui/textarea'
 import toast from 'react-hot-toast'
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
+import { searchAccountReceivable } from '@/app/actions/contact/searchAccountReceivable'
+import { searchAccountReceivableById } from '@/app/actions/contact/searchAccountReceivableById'
+import { Contact } from '@prisma/client'
 
 type Props<T> = {
     name?: string
-    type?: T
-    searchFunction?: (
-        value: string,
-        page?: string,
-        limit?: string
-    ) => Promise<T[]>
-    searchByIdFunction?: (id: string) => Promise<T>
-    keys?: (keyof T)[]
-    keysMap?: { [key: string]: string }
     page?: string
     limit?: string
     caption?: string
     hasTextArea?: boolean
-    textAreaKeys?: (keyof T)[]
 }
 
-export default function SelectSearch<T>({
-    name,
-    searchFunction,
-    searchByIdFunction,
-    keys = [],
-    keysMap,
+type Payment = 'cash' | 'transfer' | 'credit'
+
+export default function SelectSearchCustomer<T>({
+    name = 'customerId',
     page = '1',
     limit = '10',
     caption,
     hasTextArea,
-    textAreaKeys = [],
 }: Props<T>) {
     const [isOpen, setIsOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
-    const [searchResults, setSearchResults] = useState<T[]>([])
+    const [searchResults, setSearchResults] = useState<Contact[]>([])
     const [selectedId, setSelectedId] = useState<string>('')
+    const [selectedResult, setSelectedResult] = useState<Contact>()
     const [textArea, setTextArea] = useState<string>('')
+    const [credit, setCredit] = useState<Payment>('cash')
 
     const onSearchChanged = async (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         const value = event.target.value
         setSearchValue(value)
-        if (searchFunction) {
-            setSearchResults(await searchFunction(value, page, limit))
+        if (searchAccountReceivable) {
+            setSearchResults(await searchAccountReceivable(value, page, limit))
         }
     }
 
     const onSearchClicked = async () => {
-        if (searchFunction) {
-            setSearchResults(await searchFunction(searchValue, page, limit))
+        if (searchAccountReceivable) {
+            setSearchResults(
+                await searchAccountReceivable(searchValue, page, limit)
+            )
         }
     }
 
-    const setTextAreaFromData = (data: T) => {
-        for (const key of textAreaKeys) {
-            setTextArea((prev) => {
-                return prev + data[key] + '\n'
-            })
-        }
+    const setTextAreaFromData = (data: Contact) => {
+        setTextArea(`${data.name}`)
     }
 
     return (
@@ -106,11 +96,16 @@ export default function SelectSearch<T>({
                                     setIsOpen(true)
                                     return
                                 }
-                                if (e.key === 'Enter' && searchByIdFunction) {
+                                if (
+                                    e.key === 'Enter' &&
+                                    searchAccountReceivableById
+                                ) {
                                     e.preventDefault()
                                     try {
                                         const result =
-                                            await searchByIdFunction(selectedId)
+                                            await searchAccountReceivableById(
+                                                selectedId
+                                            )
                                         setTextAreaFromData(result)
                                     } catch (err) {
                                         if (err instanceof Error) {
@@ -167,13 +162,8 @@ export default function SelectSearch<T>({
                         <TableCaption>{caption}</TableCaption>
                         <TableHeader className="bg-primary-foreground/60 ">
                             <TableRow>
-                                {keys.map((key) => (
-                                    <TableHead key={key as string}>
-                                        {keysMap
-                                            ? keysMap[key as string]
-                                            : (key as string)}
-                                    </TableHead>
-                                ))}
+                                <TableHead>Id</TableHead>
+                                <TableHead>ชื่อลูกค้า</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -182,28 +172,31 @@ export default function SelectSearch<T>({
                                     key={(result as any).id || index}
                                     onClick={() => {
                                         setSelectedId((result as any).id)
+                                        setSelectedResult(result)
                                         setTextAreaFromData(result)
                                         setIsOpen(false)
                                     }}
                                 >
-                                    {keys.map((key, i) => (
-                                        <TableCell
-                                            key={`key-${(result as any).id}${i}`}
-                                        >
-                                            {result[key] as ReactNode}
-                                        </TableCell>
-                                    ))}
+                                    <TableCell>{result.id}</TableCell>
+                                    <TableCell>{result.name}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </PopoverContent>
             </Popover>
-
-            <ToggleGroup type="single" defaultValue="cash">
-                <ToggleGroupItem value="cash">Cash</ToggleGroupItem>
-                <ToggleGroupItem value="credit">Credit</ToggleGroupItem>
-            </ToggleGroup>
+            {selectedResult && selectedResult.credit && (
+                <ToggleGroup
+                    type="single"
+                    defaultValue="cash"
+                    onValueChange={(e: Payment) => setCredit(e)}
+                >
+                    <ToggleGroupItem value="cash">Cash</ToggleGroupItem>
+                    <ToggleGroupItem value="transfer">Transfer</ToggleGroupItem>
+                    <ToggleGroupItem value="credit">Credit</ToggleGroupItem>
+                    <input type="text" hidden value={credit} name="payment" />
+                </ToggleGroup>
+            )}
         </>
     )
 }

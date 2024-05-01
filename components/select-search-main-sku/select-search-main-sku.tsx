@@ -148,7 +148,20 @@ export default function SelectSearchMainSku({
         <>
             <TableRow>
                 <TableCell>
-                    <Popover open={isOpen} onOpenChange={setIsOpen}>
+                    <Popover
+                        open={isOpen}
+                        onOpenChange={(bool) => {
+                            setIsOpen(bool)
+                            if (!bool)
+                                document
+                                    .getElementsByName('barcode')
+                                    [
+                                        totalRows.findIndex(
+                                            (row) => row === rowId
+                                        )
+                                    ]?.focus()
+                        }}
+                    >
                         <span className="flex flex-col gap-1">
                             <span className="relative">
                                 <Input
@@ -159,6 +172,11 @@ export default function SelectSearchMainSku({
                                         setSelectedId(e.target.value)
                                     }
                                     onKeyDown={async (e) => {
+                                        if (e.key === '?' || e.key === 'ฦ') {
+                                            e.preventDefault()
+                                            setIsOpen(true)
+                                            return
+                                        }
                                         if (e.key === 'Enter') {
                                             e.preventDefault()
                                             return await onBarcodeScanned()

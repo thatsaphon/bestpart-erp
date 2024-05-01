@@ -1,7 +1,7 @@
 'use client'
 
 import { searchAccountReceivable } from '@/app/actions/contact/searchAccountReceivable'
-import searchAccountReceivableById from '@/app/actions/contact/searchAccountReceivableById'
+import { searchAccountReceivableById } from '@/app/actions/contact/searchAccountReceivableById'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import SelectSearch from '@/components/select-search'
 import { Input } from '@/components/ui/input'
@@ -17,7 +17,7 @@ import {
 import TableBodyFooterWrapper from '@/components/select-search-main-sku/table-body-footer-wrapper'
 import { createInvoice } from '@/app/actions/sales/create-invoice'
 import toast from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
+import SelectSearchCustomer from '@/components/select-search-customer'
 
 type Props = {
     searchParams: {
@@ -58,17 +58,12 @@ export default function NewSales({}: Props) {
                     </div>
                 </div>
                 <div className="flex gap-3">
-                    <div className="flex items-baseline space-x-2">
+                    <div className="my-1 flex items-baseline space-x-2">
                         <Label>ลูกหนี้</Label>
-                        <SelectSearch
-                            searchFunction={searchAccountReceivable}
-                            searchByIdFunction={searchAccountReceivableById}
+                        <SelectSearchCustomer
                             key={key}
-                            keys={['id', 'name']}
-                            keysMap={{ id: 'Id', name: 'ชื่อลูกค้า' }}
                             name="customerId"
                             hasTextArea={true}
-                            textAreaKeys={['name']}
                         />
                     </div>
                 </div>

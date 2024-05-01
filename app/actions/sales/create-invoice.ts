@@ -16,6 +16,7 @@ export const createInvoice = async (formData: FormData) => {
         ),
         date: z.string().trim().min(1, 'date must not be empty'),
         documentId: z.string().trim().optional().nullable(),
+        payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
     })
 
     const result = validator.safeParse({
@@ -24,6 +25,7 @@ export const createInvoice = async (formData: FormData) => {
         quanties: formData.getAll('quantity'),
         date: formData.get('date'),
         documentId: formData.get('documentId'),
+        payment: formData.get('payment'),
     })
 
     if (!result.success) {
