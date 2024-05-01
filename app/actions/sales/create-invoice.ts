@@ -192,7 +192,7 @@ const calInventoryCost = async (
 ) => {
     const skuIn = await prisma.skuIn.findMany({
         where: { skuMasterId, remaining: { not: 0 } },
-        orderBy: { date: 'asc', id: 'asc' },
+        orderBy: [{ date: 'asc' }, { id: 'asc' }],
     })
     if (skuIn.reduce((sum, item) => sum + item.remaining, 0) < quantity) {
         return 0

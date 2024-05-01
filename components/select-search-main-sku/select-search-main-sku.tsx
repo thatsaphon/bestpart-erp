@@ -67,7 +67,9 @@ export default function SelectSearchMainSku({
         useState<ReturnSearchType | null>(null)
 
     const [quantityInput, setQuantityInput] = useState(1)
-    const [priceInput, setPriceInput] = useState<number | undefined>()
+    const [priceInput, setPriceInput] = useState<number | undefined>(
+        type === 'purchase' ? 0 : undefined
+    )
 
     const searchFunction = searchGoodsMasters
     const searchByIdFunction = findGoodsMasterByBarcode
@@ -136,6 +138,10 @@ export default function SelectSearchMainSku({
                 },
             ]
         })
+
+        return () => {
+            setItems((prev) => prev.filter((item) => item.rowId !== rowId))
+        }
     }, [priceInput, quantityInput, rowId, selectedResult, setItems])
 
     return (
@@ -289,6 +295,20 @@ export default function SelectSearchMainSku({
                                                                         setIsOpen(
                                                                             false
                                                                         )
+
+                                                                        document
+                                                                            .getElementsByName(
+                                                                                'quantity'
+                                                                            )
+                                                                            [
+                                                                                totalRows.findIndex(
+                                                                                    (
+                                                                                        id
+                                                                                    ) =>
+                                                                                        id ===
+                                                                                        rowId
+                                                                                )
+                                                                            ]?.focus()
                                                                     }}
                                                                 >
                                                                     <TableCell>
@@ -369,6 +389,7 @@ export default function SelectSearchMainSku({
                         className="text-right"
                         type="number"
                         value={quantityInput}
+                        onFocus={(e) => e.target.select()}
                         onChange={(e) => {
                             setQuantityInput(+e.target.value)
                         }}
@@ -376,6 +397,9 @@ export default function SelectSearchMainSku({
                             if (!onInsertRow) return
 
                             if (e.key === 'Tab' || e.key === 'ArrowDown') {
+                                if (type === 'purchase' && e.key === 'Tab')
+                                    return
+
                                 if (
                                     rowId === totalRows[totalRows.length - 1] &&
                                     selectedResult
@@ -385,7 +409,7 @@ export default function SelectSearchMainSku({
                                     return
                                 }
 
-                                if (e.key === 'Tab') {
+                                if (e.key === 'Tab' && type === 'sales') {
                                     e.preventDefault()
                                     document
                                         .getElementsByName('barcode')
@@ -444,6 +468,62 @@ export default function SelectSearchMainSku({
                             onChange={(e) => {
                                 setPriceInput(+e.target.value)
                             }}
+                            onKeyDown={(e) => {
+                                if (!onInsertRow) return
+
+                                if (e.key === 'Tab' || e.key === 'ArrowDown') {
+                                    if (
+                                        rowId ===
+                                            totalRows[totalRows.length - 1] &&
+                                        selectedResult
+                                    ) {
+                                        e.preventDefault()
+                                        onInsertRow()
+                                        return
+                                    }
+
+                                    if (e.key === 'Tab') {
+                                        e.preventDefault()
+                                        document
+                                            .getElementsByName('barcode')
+                                            [
+                                                totalRows.findIndex(
+                                                    (id) =>
+                                                        id === rowId &&
+                                                        rowId !==
+                                                            totalRows[
+                                                                totalRows.length -
+                                                                    1
+                                                            ]
+                                                ) + 1
+                                            ]?.focus()
+                                    }
+
+                                    if (e.key === 'ArrowDown') {
+                                        e.preventDefault()
+                                        console.log(
+                                            document
+                                                .getElementsByName('quantity')
+                                                [
+                                                    totalRows.findIndex(
+                                                        (id) => id === rowId
+                                                    ) + 1
+                                                ]?.focus()
+                                        )
+                                    }
+                                }
+
+                                if (e.key === 'ArrowUp') {
+                                    e.preventDefault()
+                                    document
+                                        .getElementsByName('quantity')
+                                        [
+                                            totalRows.findIndex(
+                                                (id) => id === rowId
+                                            ) - 1
+                                        ]?.focus()
+                                }
+                            }}
                         />
                     )}
                 </TableCell>
@@ -457,7 +537,18 @@ export default function SelectSearchMainSku({
                         (priceInput * quantityInput).toLocaleString()}
                 </TableCell>
                 <TableCell>
-                    {selectedResult ? (
+                    {selectedResult && totalRows.length === 1 ? (
+                        <Cross1Icon
+                            className="font-bold text-destructive hover:cursor-pointer"
+                            onClick={() => {
+                                setSelectedResult(null)
+                                setSelectedId('')
+                                document
+                                    .getElementsByName('barcode')[0]
+                                    ?.focus()
+                            }}
+                        ></Cross1Icon>
+                    ) : selectedResult ? (
                         <Cross1Icon
                             className="font-bold text-destructive hover:cursor-pointer"
                             onClick={() => {
