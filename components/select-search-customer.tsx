@@ -107,6 +107,7 @@ export default function SelectSearchCustomer<T>({
                                                 selectedId
                                             )
                                         setTextAreaFromData(result)
+                                        setSelectedResult(result)
                                     } catch (err) {
                                         if (err instanceof Error) {
                                             return toast.error(err.message)
@@ -185,6 +186,7 @@ export default function SelectSearchCustomer<T>({
                     </Table>
                 </PopoverContent>
             </Popover>
+            <input type="text" hidden value={credit} name="payment" readOnly />
             {selectedResult && selectedResult.credit && (
                 <ToggleGroup
                     type="single"
@@ -194,7 +196,6 @@ export default function SelectSearchCustomer<T>({
                     <ToggleGroupItem value="cash">Cash</ToggleGroupItem>
                     <ToggleGroupItem value="transfer">Transfer</ToggleGroupItem>
                     <ToggleGroupItem value="credit">Credit</ToggleGroupItem>
-                    <input type="text" hidden value={credit} name="payment" />
                 </ToggleGroup>
             )}
         </>
