@@ -1,12 +1,9 @@
 'use client'
 
-import { searchAccountReceivable } from '@/app/actions/contact/searchAccountReceivable'
-import { searchAccountReceivableById } from '@/app/actions/contact/searchAccountReceivableById'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
-import SelectSearch from '@/components/select-search'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
     Table,
     TableCaption,
@@ -18,12 +15,24 @@ import TableBodyFooterWrapper from '@/components/select-search-main-sku/table-bo
 import { createInvoice } from '@/app/actions/sales/create-invoice'
 import toast from 'react-hot-toast'
 import SelectSearchCustomer from '@/components/select-search-customer'
+import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+import { useRouter } from 'next/navigation'
 
-type Props = {}
+type Props = {
+    document?: Awaited<ReturnType<typeof getSalesInvoiceDetail>>
+}
 
-export default function NewSales({}: Props) {
+export default function InvoiceDetailComponent({ document }: Props) {
     const ref = useRef<HTMLFormElement>(null)
     const [key, setKey] = useState('1')
+    const router = useRouter()
+
+    useEffect(() => {
+        if (!document) {
+            toast.error('ไม่พบข้อมูล')
+            router.push('/sales/create')
+        }
+    }, [document, router])
     return (
         <div className="mb-2 p-3">
             <form
@@ -48,7 +57,11 @@ export default function NewSales({}: Props) {
                     </div>
                     <div className="space-x-2">
                         <Label>No.</Label>
-                        <Input className="w-auto" placeholder="Optional" />
+                        <Input
+                            className="w-auto"
+                            placeholder="Optional"
+                            defaultValue={document?.documentId}
+                        />
                     </div>
                 </div>
                 <div className="flex gap-3">
@@ -59,6 +72,9 @@ export default function NewSales({}: Props) {
                             name="customerId"
                             hasTextArea={true}
                             placeholder="Optional"
+                            defaultValue={String(
+                                document?.ArSubledger?.Contact.id
+                            )}
                         />
                     </div>
                 </div>
@@ -78,7 +94,7 @@ export default function NewSales({}: Props) {
                         </TableRow>
                     </TableHeader>
 
-                    <TableBodyFooterWrapper key={key} />
+                    <TableBodyFooterWrapper key={key} document={document} />
                 </Table>
             </form>
         </div>

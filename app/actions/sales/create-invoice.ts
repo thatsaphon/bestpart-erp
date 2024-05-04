@@ -1,13 +1,15 @@
 'use server'
 
 import prisma from '@/app/db/db'
+import { Contact } from '@prisma/client'
 import { format } from 'date-fns'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 
 export const createInvoice = async (formData: FormData) => {
     const validator = z.object({
-        customerId: z.string().trim().min(1, 'customerId must not be empty'),
+        customerId: z.string().trim().nullable(),
         barcodes: z
             .array(z.string().trim().min(1, 'barcode must not be empty'))
             .min(1),
@@ -39,16 +41,23 @@ export const createInvoice = async (formData: FormData) => {
         )
     }
 
-    let { customerId, barcodes, quanties, date, documentId } = result.data
+    let { customerId, barcodes, quanties, date, documentId, payment } =
+        result.data
 
-    const contact = await prisma.contact.findUnique({
-        where: {
-            id: Number(customerId),
-        },
-    })
-    if (!contact) {
-        throw new Error('contact not found')
+    const getContact = async () => {
+        if (customerId) {
+            const contact = await prisma.contact.findUnique({
+                where: {
+                    id: Number(customerId),
+                },
+            })
+            if (!contact) {
+                throw new Error('contact not found')
+            }
+            return contact
+        }
     }
+    let contact: Contact | undefined = await getContact()
 
     const goodsMasters = await prisma.goodsMaster.findMany({
         where: {
@@ -91,16 +100,21 @@ export const createInvoice = async (formData: FormData) => {
         data: {
             date: new Date(date),
             documentId: documentId,
-            ArSubledger: {
-                create: {
-                    contactId: Number(customerId),
-                },
-            },
+            ArSubledger: !!contact
+                ? {
+                      create: {
+                          contactId: Number(customerId),
+                          paymentStatus:
+                              payment === 'cash' ? 'Paid' : 'NotPaid',
+                      },
+                  }
+                : undefined,
             GeneralLedger: {
                 create: [
-                    // ลูกหนี้
+                    // 11000 = เงินสด, 12000 = ลูกหนี้
                     {
-                        chartOfAccountId: 12000,
+                        chartOfAccountId:
+                            !!contact && payment === 'credit' ? 12000 : 11000,
                         amount: +mapQuanties
                             .reduce((sum, item) => sum + item.q * item.price, 0)
                             .toFixed(2),
@@ -134,8 +148,11 @@ export const createInvoice = async (formData: FormData) => {
 
     const asyncSkuOut = mapQuanties.map(async (item) => ({
         date: new Date(date),
+        goodsMasterId: item.id,
         skuMasterId: item.skuMasterId,
-        barcode: String(item.id),
+        barcode: String(item.barcode),
+        unit: item.unit,
+        quantityPerUnit: item.quantity,
         quantity: item.q * item.quantity,
         cost: await calInventoryCost(item.skuMasterId, +item.q, invoice.id),
         price: +((100 / 107) * item.q * item.price).toFixed(2),
@@ -174,6 +191,7 @@ export const createInvoice = async (formData: FormData) => {
             },
         },
     })
+    revalidatePath('/sales')
 }
 
 const isSufficient = async (skuMasterId: number, quantity: number) => {

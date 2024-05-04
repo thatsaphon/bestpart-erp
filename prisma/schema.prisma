@@ -38,12 +38,12 @@ model Document {
   date          DateTime
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @default(now()) @updatedAt
-  GeneralLedger GeneralLedger[]
   SkuOut        SkuOut[]
   SkuIn         SkuIn[]
-  ApSubledger   ApSubledger[]
-  ArSubledger   ArSubledger[]
+  ApSubledger   ApSubledger?
+  ArSubledger   ArSubledger?
   Image         Image[]
+  GeneralLedger GeneralLedger[]
 }
 
 model ChartOfAccount {
@@ -69,12 +69,12 @@ enum AccountType {
 
 model GeneralLedger {
   id               Int            @id @default(autoincrement())
-  Document         Document[]
   ChartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
   chartOfAccountId Int
   amount           Float
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @default(now()) @updatedAt
+  GeneralLedger    Document[]
 
   @@index([chartOfAccountId])
 }
@@ -137,12 +137,13 @@ model SkuMaster {
   mainSku   MainSku @relation(fields: [mainSkuId], references: [id])
   remark    String?
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @default(now()) @updatedAt
-  SkuOut      SkuOut[]
-  SkuIn       SkuIn[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   Image       Image[]
   GoodsMaster GoodsMaster[]
+  SkuIn       SkuIn[]
+  SkuOut      SkuOut[]
 
   @@index([brandId])
   @@index([mainSkuId])
@@ -178,6 +179,9 @@ model GoodsMaster {
   price       Float
   flag        Json?
 
+  SkuOut SkuOut[]
+  SkuIn  SkuIn[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
@@ -185,35 +189,45 @@ model GoodsMaster {
 }
 
 model SkuOut {
-  id          Int       @id @default(autoincrement())
-  date        DateTime
-  SkuMaster   SkuMaster @relation(fields: [skuMasterId], references: [id])
-  skuMasterId Int
-  barcode     String
-  Document    Document  @relation(fields: [documentId], references: [id])
-  documentId  Int
+  id            Int         @id @default(autoincrement())
+  date          DateTime
+  Document      Document    @relation(fields: [documentId], references: [id])
+  documentId    Int
+  GoodsMaster   GoodsMaster @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId Int
+  SkuMaster     SkuMaster   @relation(fields: [skuMasterId], references: [id])
+
+  barcode         String
+  unit            String
+  quantityPerUnit Float  @default(1)
 
   quantity Float
   cost     Float
   price    Float
   vat      Float
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  skuMasterId Int
 
   @@index([skuMasterId])
+  @@index([goodsMasterId])
   @@index([documentId])
 }
 
 model SkuIn {
-  id          Int       @id @default(autoincrement())
-  date        DateTime
-  SkuMaster   SkuMaster @relation(fields: [skuMasterId], references: [id])
-  skuMasterId Int
-  Document    Document  @relation(fields: [documentId], references: [id])
-  documentId  Int
+  id            Int         @id @default(autoincrement())
+  date          DateTime
+  Document      Document    @relation(fields: [documentId], references: [id])
+  documentId    Int
+  GoodsMaster   GoodsMaster @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId Int
+  SkuMaster     SkuMaster   @relation(fields: [skuMasterId], references: [id])
+  skuMasterId   Int
 
-  barcode String?
+  barcode         String?
+  unit            String
+  quantityPerUnit Float   @default(1)
 
   quantity Float
   cost     Float
@@ -221,15 +235,18 @@ model SkuIn {
 
   remaining Int
 
+  @@index([documentId])
+  @@index([goodsMasterId])
   @@index([skuMasterId])
 }
 
 model ApSubledger {
-  id         Int      @id @default(autoincrement())
-  Contact    Contact  @relation(fields: [contactId], references: [id])
-  contactId  Int
-  Document   Document @relation(fields: [documentId], references: [id])
-  documentId Int
+  id            Int           @id @default(autoincrement())
+  Contact       Contact       @relation(fields: [contactId], references: [id])
+  contactId     Int
+  Document      Document      @relation(fields: [documentId], references: [id])
+  documentId    Int           @unique
+  paymentStatus PaymentStatus @default(NotPaid)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -239,17 +256,26 @@ model ApSubledger {
 }
 
 model ArSubledger {
-  id         Int      @id @default(autoincrement())
-  Contact    Contact  @relation(fields: [contactId], references: [id])
-  contactId  Int
-  Document   Document @relation(fields: [documentId], references: [id])
-  documentId Int
+  id            Int           @id @default(autoincrement())
+  Contact       Contact       @relation(fields: [contactId], references: [id])
+  contactId     Int
+  Document      Document      @relation(fields: [documentId], references: [id])
+  documentId    Int           @unique
+  paymentStatus PaymentStatus @default(NotPaid)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
   @@index([contactId])
   @@index([documentId])
+}
+
+enum PaymentStatus {
+  Cash
+  Paid
+  NotPaid  @map("Not Paid")
+  WriteOff @map("Write Off")
+  Billed
 }
 
 model AccountOwner {

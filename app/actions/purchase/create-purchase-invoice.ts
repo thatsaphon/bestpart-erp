@@ -79,7 +79,6 @@ export const createPurchaseInvoice = async (formData: FormData) => {
         }
     })
 
-    console.log(documentId)
     if (!documentId) {
         documentId = await generateDocumentNumber('PINV', date)
         console.log(documentId)
@@ -132,8 +131,11 @@ export const createPurchaseInvoice = async (formData: FormData) => {
             SkuIn: {
                 create: mapQuanties.map((item) => ({
                     date: new Date(date),
+                    goodsMasterId: item.id,
                     skuMasterId: item.skuMasterId,
                     barcode: item.barcode,
+                    unit: item.unit,
+                    quantityPerUnit: item.quantity,
                     quantity: item.q * item.quantity,
                     cost: +(((100 / 107) * +item.p) / item.quantity).toFixed(2),
                     vat: +(((7 / 107) * +item.p) / item.quantity).toFixed(2),

@@ -33,6 +33,8 @@ type Props<T> = {
     limit?: string
     caption?: string
     hasTextArea?: boolean
+    placeholder?: string
+    defaultValue?: string
 }
 
 type Payment = 'cash' | 'transfer' | 'credit'
@@ -43,11 +45,13 @@ export default function SelectSearchCustomer<T>({
     limit = '10',
     caption,
     hasTextArea,
+    placeholder,
+    defaultValue,
 }: Props<T>) {
     const [isOpen, setIsOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
     const [searchResults, setSearchResults] = useState<Contact[]>([])
-    const [selectedId, setSelectedId] = useState<string>('')
+    const [selectedId, setSelectedId] = useState<string>(defaultValue || '')
     const [selectedResult, setSelectedResult] = useState<Contact>()
     const [textArea, setTextArea] = useState<string>('')
     const [credit, setCredit] = useState<Payment>('cash')
@@ -121,7 +125,8 @@ export default function SelectSearchCustomer<T>({
                             className={cn(
                                 'w-[240px] justify-start text-left font-normal'
                             )}
-                        ></Input>
+                            placeholder={placeholder}
+                        />
                         <PopoverTrigger asChild>
                             <SearchIcon className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 hover:cursor-pointer" />
                         </PopoverTrigger>
