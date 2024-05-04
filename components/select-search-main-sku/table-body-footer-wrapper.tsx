@@ -46,11 +46,12 @@ export default function TableBodyFooterWrapper({
                                 {item.GoodsMaster.SkuMaster.mainSku.name}
                             </TableCell>
                             <TableCell className="text-right">
-                                {item.quantity}
+                                {item.quantity / item.quantityPerUnit}
                             </TableCell>
                             <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                             <TableCell className="text-right">
-                                {(item.price + item.vat) / item.quantity}
+                                {(item.price + item.vat) /
+                                    (item.quantity / item.quantityPerUnit)}
                             </TableCell>
                             <TableCell className="text-right">
                                 {item.price + item.vat}
