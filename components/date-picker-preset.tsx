@@ -20,12 +20,17 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 
-export function DatePickerWithPresets() {
-    const [date, setDate] = React.useState<Date>(new Date())
+type Props = {
+    disabled?: boolean
+    defaultDate?: Date
+}
+
+export function DatePickerWithPresets({ disabled, defaultDate }: Props) {
+    const [date, setDate] = React.useState<Date>(defaultDate || new Date())
 
     return (
         <Popover>
-            <PopoverTrigger asChild>
+            <PopoverTrigger asChild disabled={disabled}>
                 <Button
                     variant={'outline'}
                     className={cn(

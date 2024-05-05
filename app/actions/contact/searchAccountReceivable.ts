@@ -10,6 +10,9 @@ export async function searchAccountReceivable(
     try {
         return await prisma.contact.findMany({
             where: { name: { contains: value } },
+            include: {
+                Address: true,
+            },
             skip: (Number(page) - 1) * Number(limit),
             take: Number(limit),
         })

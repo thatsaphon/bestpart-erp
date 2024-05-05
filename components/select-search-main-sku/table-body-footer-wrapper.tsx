@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from 'react'
 import TableFooterWrapper from './table-footer-wrapper'
-import { TableBody, TableCell, TableRow } from '../ui/table'
+import { TableBody, TableCell, TableFooter, TableRow } from '../ui/table'
 import SelectSearchMainSkuWrapper from './select-search-main-sku-wrapper'
 import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/findGoodsMasterByBarcode'
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+import { Textarea } from '../ui/textarea'
 
 type Props = {
     type?: 'sales' | 'purchase'
@@ -59,11 +60,63 @@ export default function TableBodyFooterWrapper({
                         </TableRow>
                     ))}
             </TableBody>
-            <TableFooterWrapper
-                items={items}
-                setTotalRows={setTotalRows}
-                setItems={setItems}
-            />
+            {(!document || isUpdated) && (
+                <TableFooterWrapper
+                    items={items}
+                    setTotalRows={setTotalRows}
+                    setItems={setItems}
+                />
+            )}
+            {document && !isUpdated && (
+                <TableFooter>
+                    <TableRow className="bg-background hover:bg-background">
+                        <TableCell colSpan={5} className="text-right ">
+                            Total (Excluded Vat)
+                        </TableCell>
+                        <TableCell className="text-right">
+                            {Math.abs(
+                                Number(
+                                    document.GeneralLedger.find(
+                                        (item) =>
+                                            item.chartOfAccountId === 41000
+                                    )?.amount
+                                )
+                            )}
+                        </TableCell>
+                    </TableRow>
+                    <TableRow className="bg-background hover:bg-background">
+                        <TableCell colSpan={5} className="text-right">
+                            Vat
+                        </TableCell>
+                        <TableCell className="text-right">
+                            {Math.abs(
+                                Number(
+                                    document.GeneralLedger.find(
+                                        (item) =>
+                                            item.chartOfAccountId === 23100
+                                    )?.amount
+                                )
+                            )}
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell colSpan={5} className="text-right">
+                            Total
+                        </TableCell>
+                        <TableCell className="text-right">
+                            {Math.abs(
+                                Number(
+                                    document.GeneralLedger.find(
+                                        (item) =>
+                                            item.chartOfAccountId === 11000 ||
+                                            item.chartOfAccountId === 12000
+                                    )?.amount
+                                )
+                            )}
+                        </TableCell>
+                    </TableRow>
+                </TableFooter>
+            )}
         </>
     )
 }

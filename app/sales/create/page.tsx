@@ -18,6 +18,7 @@ import TableBodyFooterWrapper from '@/components/select-search-main-sku/table-bo
 import { createInvoice } from '@/app/actions/sales/create-invoice'
 import toast from 'react-hot-toast'
 import SelectSearchCustomer from '@/components/select-search-customer'
+import { Textarea } from '@/components/ui/textarea'
 
 type Props = {}
 
@@ -58,12 +59,14 @@ export default function NewSales({}: Props) {
                             key={key}
                             name="customerId"
                             hasTextArea={true}
-                            placeholder="Optional"
+                            placeholder="รหัสลูกหนี้"
                         />
                     </div>
                 </div>
                 <Table className="mt-3">
-                    <TableCaption>A list of your recent invoices.</TableCaption>
+                    <TableCaption>
+                        <Textarea placeholder="หมายเหตุ" name="remark" />
+                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>

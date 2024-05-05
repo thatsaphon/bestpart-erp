@@ -6,6 +6,8 @@ import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/fi
 import { Button } from '../ui/button'
 import { createInvoice } from '@/app/actions/sales/create-invoice'
 import toast from 'react-hot-toast'
+import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+import { Textarea } from '../ui/textarea'
 
 type Props = {
     items: (Awaited<ReturnType<typeof findGoodsMasterByBarcode>> & {

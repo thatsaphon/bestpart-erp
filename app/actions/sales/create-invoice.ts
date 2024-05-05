@@ -10,6 +10,9 @@ import { fromZodError } from 'zod-validation-error'
 export const createInvoice = async (formData: FormData) => {
     const validator = z.object({
         customerId: z.string().trim().nullable(),
+        address: z.string().trim().optional().nullable(),
+        phone: z.string().trim().optional().nullable(),
+        taxId: z.string().trim().optional().nullable(),
         barcodes: z
             .array(z.string().trim().min(1, 'barcode must not be empty'))
             .min(1),
@@ -19,15 +22,20 @@ export const createInvoice = async (formData: FormData) => {
         date: z.string().trim().min(1, 'date must not be empty'),
         documentId: z.string().trim().optional().nullable(),
         payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
+        remark: z.string().trim().optional().nullable(),
     })
 
     const result = validator.safeParse({
         customerId: formData.get('customerId'),
+        address: formData.get('address'),
+        phone: formData.get('phone'),
+        taxId: formData.get('taxId'),
         barcodes: formData.getAll('barcode'),
         quanties: formData.getAll('quantity'),
         date: formData.get('date'),
         documentId: formData.get('documentId'),
         payment: formData.get('payment'),
+        remark: formData.get('remark'),
     })
 
     if (!result.success) {
@@ -41,8 +49,18 @@ export const createInvoice = async (formData: FormData) => {
         )
     }
 
-    let { customerId, barcodes, quanties, date, documentId, payment } =
-        result.data
+    let {
+        customerId,
+        address,
+        phone,
+        taxId,
+        barcodes,
+        quanties,
+        date,
+        documentId,
+        payment,
+        remark,
+    } = result.data
 
     const getContact = async () => {
         if (customerId) {
@@ -98,8 +116,13 @@ export const createInvoice = async (formData: FormData) => {
 
     const invoice = await prisma.document.create({
         data: {
+            contactName: address?.split('\n')[0] || '',
+            address: address?.substring(address.indexOf('\n') + 1) || '',
+            phone: phone || '',
+            taxId: taxId || '',
             date: new Date(date),
             documentId: documentId,
+            remark: remark,
             ArSubledger: !!contact
                 ? {
                       create: {

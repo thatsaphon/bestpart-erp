@@ -9,6 +9,9 @@ import { generateDocumentNumber } from '../sales/create-invoice'
 export const createPurchaseInvoice = async (formData: FormData) => {
     const validator = z.object({
         vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
+        address: z.string().trim().optional().nullable(),
+        phone: z.string().trim().optional().nullable(),
+        taxId: z.string().trim().optional().nullable(),
         barcodes: z
             .array(z.string().trim().min(1, 'barcode must not be empty'))
             .min(1),
@@ -22,6 +25,9 @@ export const createPurchaseInvoice = async (formData: FormData) => {
 
     const result = validator.safeParse({
         vendorId: formData.get('vendorId'),
+        address: formData.get('address'),
+        phone: formData.get('phone'),
+        taxId: formData.get('taxId'),
         barcodes: formData.getAll('barcode'),
         quanties: formData.getAll('quantity'),
         prices: formData.getAll('price'),
@@ -47,7 +53,17 @@ export const createPurchaseInvoice = async (formData: FormData) => {
         )
     }
 
-    let { vendorId, barcodes, quanties, prices, date, documentId } = result.data
+    let {
+        vendorId,
+        address,
+        phone,
+        taxId,
+        barcodes,
+        quanties,
+        prices,
+        date,
+        documentId,
+    } = result.data
 
     const contact = await prisma.contact.findUnique({
         where: {
@@ -86,6 +102,10 @@ export const createPurchaseInvoice = async (formData: FormData) => {
 
     const invoice = await prisma.document.create({
         data: {
+            contactName: address?.split('\n')[0] || '',
+            address: address?.substring(address.indexOf('\n') + 1) || '',
+            phone: phone || '',
+            taxId: taxId || '',
             date: new Date(date),
             documentId: documentId,
 
