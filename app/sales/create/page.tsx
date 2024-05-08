@@ -28,6 +28,7 @@ export default function NewSales({}: Props) {
     return (
         <div className="mb-2 p-3">
             <form
+                id="form"
                 ref={ref}
                 action={async (formData) => {
                     try {

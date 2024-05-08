@@ -1,12 +1,14 @@
-'use client'
-
 import React, { useEffect, useState } from 'react'
 import TableFooterWrapper from './table-footer-wrapper'
 import { TableBody, TableCell, TableFooter, TableRow } from '../ui/table'
 import SelectSearchMainSkuWrapper from './select-search-main-sku-wrapper'
 import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/findGoodsMasterByBarcode'
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
-import { Textarea } from '../ui/textarea'
+import { Button } from '../ui/button'
+import Link from 'next/link'
+import { BlobProvider } from '@react-pdf/renderer'
+import SalesInvoicePdf from '../pdf/invoice-pdf'
+import { cn } from '@/lib/utils'
 
 type Props = {
     type?: 'sales' | 'purchase'
@@ -26,6 +28,11 @@ export default function TableBodyFooterWrapper({
     const [totalRows, setTotalRows] = useState<string[]>([])
     const [items, setItems] = useState<rowItemType[]>([])
     const [isUpdated, setIsUpdated] = useState(false)
+    const [isClient, setIsClient] = useState(false)
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
 
     return (
         <>
@@ -112,6 +119,38 @@ export default function TableBodyFooterWrapper({
                                             item.chartOfAccountId === 12000
                                     )?.amount
                                 )
+                            )}
+                        </TableCell>
+                    </TableRow>
+                    <TableRow className="bg-background">
+                        <TableCell colSpan={6} className="space-x-1 text-right">
+                            <Button type="button" variant={'destructive'}>
+                                Cancel
+                            </Button>
+                            {isClient ? (
+                                <BlobProvider
+                                    document={
+                                        <SalesInvoicePdf document={document} />
+                                    }
+                                >
+                                    {({ blob, url, loading, error }) =>
+                                        !url ? (
+                                            <Button disabled>Loading</Button>
+                                        ) : (
+                                            <Link
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                href={url}
+                                            >
+                                                <Button type="button">
+                                                    Print
+                                                </Button>
+                                            </Link>
+                                        )
+                                    }
+                                </BlobProvider>
+                            ) : (
+                                <Button disabled>Loading</Button>
                             )}
                         </TableCell>
                     </TableRow>
