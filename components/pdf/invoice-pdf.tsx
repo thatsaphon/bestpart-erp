@@ -110,7 +110,12 @@ export default function SalesInvoicePdf({ document }: Props) {
 
     return (
         <Document>
-            <Page size="A5" orientation="landscape" style={styles.page} fixed>
+            <Page
+                size={['396', '648']}
+                orientation="landscape"
+                style={styles.page}
+                fixed
+            >
                 <View style={styles.title} fixed>
                     <Text style={{ textAlign: 'center', width: '100%' }}>
                         ใบกำกับภาษีอย่างย่อ/ใบเสร็จรับเงิน{' '}

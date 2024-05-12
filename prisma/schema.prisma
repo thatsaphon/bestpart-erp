@@ -8,8 +8,9 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
+  provider        = "prisma-client-js"
+  output          = "../node_modules/.prisma/client"
+  previewFeatures = ["fullTextSearch"]
 }
 
 model User {
@@ -91,9 +92,13 @@ model Contact {
   Address Address[]
   taxId   String?
 
-  ApSubledger ApSubledger[]
-  ArSubledger ArSubledger[]
-  credit      Boolean?
+  ApSubledger   ApSubledger[]
+  ArSubledger   ArSubledger[]
+  credit        Boolean?
+  searchKeyword String?
+
+  isAr Boolean @default(true)
+  isAp Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -124,8 +129,8 @@ model MainSku {
 
   carModelId Int?
 
-  CarModel CarModel? @relation(fields: [carModelId], references: [id])
-  flag     Json?
+  CarModel      CarModel? @relation(fields: [carModelId], references: [id])
+  searchKeyword String?
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now()) @updatedAt

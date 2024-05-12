@@ -9,7 +9,41 @@ export async function searchAccountReceivable(
 ) {
     try {
         return await prisma.contact.findMany({
-            where: { name: { contains: value } },
+            where: {
+                OR: [
+                    {
+                        AND: value
+                            .split(' ')
+                            .map((x) => ({ name: { contains: x } })),
+                    },
+                    {
+                        Address: {
+                            some: {
+                                OR: [
+                                    {
+                                        AND: value.split(' ').map((x) => ({
+                                            name: { contains: x },
+                                        })),
+                                    },
+                                    {
+                                        AND: value.split(' ').map((x) => ({
+                                            phone: { contains: x },
+                                        })),
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                    {
+                        AND: value
+                            .split(' ')
+                            .map((x) => ({ searchKeyword: { contains: x } })),
+                    },
+                ],
+                isAr: true,
+                // name: { search: value.split(' ').join(' & ') },
+                // name: { contains: value },
+            },
             include: {
                 Address: true,
             },

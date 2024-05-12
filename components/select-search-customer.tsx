@@ -32,6 +32,9 @@ import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 import { searchAccountReceivable } from '@/app/actions/contact/searchAccountReceivable'
 import { searchAccountReceivableById } from '@/app/actions/contact/searchAccountReceivableById'
 import { Address, Contact } from '@prisma/client'
+import { Label } from './ui/label'
+import { Separator } from './ui/separator'
+import { createNewContact } from '@/app/actions/contact/createNewContact'
 
 type Props<T> = {
     name?: string
@@ -52,6 +55,8 @@ type InvoiceAddress = {
 }
 type Payment = 'cash' | 'transfer' | 'credit'
 
+type PopoverType = 'search' | 'create'
+
 export default function SelectSearchCustomer<T>({
     name = 'customerId',
     page = '1',
@@ -64,6 +69,7 @@ export default function SelectSearchCustomer<T>({
     defaultAddress,
 }: Props<T>) {
     const [isOpen, setIsOpen] = useState(false)
+    const [popoverType, setPopoverType] = useState<PopoverType>('search')
     const [searchValue, setSearchValue] = useState('')
     const [searchResults, setSearchResults] = useState<
         (Contact & { Address: Address[] })[]
@@ -191,8 +197,32 @@ export default function SelectSearchCustomer<T>({
                             placeholder={placeholder}
                             disabled={disabled}
                         />
-                        <PopoverTrigger asChild>
+                        <PopoverTrigger
+                            asChild
+                            onClick={(e) => {
+                                if (popoverType === 'create' && isOpen)
+                                    e.preventDefault()
+                                setPopoverType('search')
+                            }}
+                        >
                             <SearchIcon className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 hover:cursor-pointer" />
+                        </PopoverTrigger>
+                        <PopoverTrigger
+                            asChild
+                            onClick={(e) => {
+                                if (popoverType === 'search' && isOpen)
+                                    e.preventDefault()
+                                setPopoverType('create')
+                            }}
+                        >
+                            <Button
+                                variant={'outline'}
+                                type="button"
+                                className="absolute top-1/2 ml-1 -translate-y-1/2 hover:cursor-pointer"
+                            >
+                                สร้างลูกค้า
+                            </Button>
+                            {/* <SearchIcon className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 hover:cursor-pointer" /> */}
                         </PopoverTrigger>
                     </span>
                     {hasTextArea && (
@@ -239,57 +269,119 @@ export default function SelectSearchCustomer<T>({
                         </>
                     )}
                 </span>
-                <PopoverContent
-                    className="w-auto"
-                    onInteractOutside={(e) => e.preventDefault()}
-                    align="start"
-                >
-                    <div className="space-x-2">
-                        <Input
-                            value={searchValue}
-                            onChange={onSearchChanged}
-                            placeholder="Search"
-                            className="w-[240px]"
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    onSearchClicked()
+                {popoverType === 'search' && (
+                    <PopoverContent
+                        className="w-auto"
+                        onInteractOutside={(e) => e.preventDefault()}
+                        align="start"
+                    >
+                        <div className="space-x-2">
+                            <Input
+                                value={searchValue}
+                                onChange={onSearchChanged}
+                                placeholder="Search"
+                                className="w-[240px]"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        onSearchClicked()
+                                    }
+                                }}
+                            />
+                            <Button
+                                type="button"
+                                variant={'outline'}
+                                onClick={onSearchClicked}
+                            >
+                                Search
+                            </Button>
+                        </div>
+                        <Table>
+                            <TableCaption>{caption}</TableCaption>
+                            <TableHeader className="bg-primary-foreground/60 ">
+                                <TableRow>
+                                    <TableHead>Id</TableHead>
+                                    <TableHead>ชื่อลูกค้า</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {searchResults.map((result, index) => (
+                                    <TableRow
+                                        key={(result as any).id || index}
+                                        onClick={() => {
+                                            setSelectedId((result as any).id)
+                                            setSelectedResult(result)
+                                            setTextAreaFromData(result)
+                                            setIsOpen(false)
+                                        }}
+                                    >
+                                        <TableCell>{result.id}</TableCell>
+                                        <TableCell>{result.name}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </PopoverContent>
+                )}
+                {popoverType === 'create' && (
+                    <PopoverContent
+                        className="w-auto"
+                        onInteractOutside={(e) => e.preventDefault()}
+                        align="start"
+                    >
+                        <form
+                            action={async (formData) => {
+                                try {
+                                    await createNewContact(formData)
+                                    toast.success('Create success')
+                                    setIsOpen(false)
+                                } catch (err) {
+                                    if (err instanceof Error)
+                                        toast.error(err.message)
+
+                                    toast.error('Something went wrong')
                                 }
                             }}
-                        />
-                        <Button
-                            type="button"
-                            variant={'outline'}
-                            onClick={onSearchClicked}
                         >
-                            Search
-                        </Button>
-                    </div>
-                    <Table>
-                        <TableCaption>{caption}</TableCaption>
-                        <TableHeader className="bg-primary-foreground/60 ">
-                            <TableRow>
-                                <TableHead>Id</TableHead>
-                                <TableHead>ชื่อลูกค้า</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {searchResults.map((result, index) => (
-                                <TableRow
-                                    key={(result as any).id || index}
-                                    onClick={() => {
-                                        setSelectedId((result as any).id)
-                                        setSelectedResult(result)
-                                        setTextAreaFromData(result)
-                                        setIsOpen(false)
-                                    }}
+                            <Label>
+                                ชื่อลูกค้า <Input type="text" name="name" />
+                            </Label>
+                            <Label>
+                                ชื่อเต็มสำหรับออกใบกำกับภาษี
+                                <Input
+                                    type="text"
+                                    name="fullName"
+                                    placeholder="ปล่อยว่างหากเหมือนกับชื่อข้างบน"
+                                />
+                            </Label>
+                            <Label>
+                                เบอร์โทร <Input type="text" name="phone" />
+                            </Label>
+                            <Label>
+                                ที่อยู่ <Textarea name="address" />
+                            </Label>
+                            <Label>
+                                เลขประจำตัวผู้เสียภาษี
+                                <Input type="text" name="taxId" />
+                            </Label>
+                            <Label>
+                                คำค้นหา
+                                <Input type="text" name="searchKeyword" />
+                            </Label>
+
+                            <Separator className="my-3" />
+                            <div className="flex justify-end">
+                                <Button
+                                    type="submit"
+                                    // formAction={(formData) => {
+                                    //     createNewContact(formData)
+                                    // }}
                                 >
-                                    <TableCell>{result.id}</TableCell>
-                                    <TableCell>{result.name}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </PopoverContent>
+                                    Create
+                                </Button>
+                            </div>
+                        </form>
+                    </PopoverContent>
+                )}
             </Popover>
             <input type="text" hidden value={credit} name="payment" readOnly />
             {selectedResult && selectedResult.credit && (
