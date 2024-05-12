@@ -22,16 +22,6 @@ export const createOrUpdateGoodsMasters = async (
         quantity: z.array(z.coerce.number().positive()),
         price: z.array(z.coerce.number().positive()),
     })
-    console.log({
-        detail: formData.get('detail'),
-        remark: formData.get('remark'),
-        skuMasterId: Number(formData.get('skuMasterId')),
-        goodsMasterId: formData.getAll('goodsMasterId'),
-        barcode: formData.getAll('barcode'),
-        unit: formData.getAll('unit'),
-        quantity: formData.getAll('quantity'),
-        price: formData.getAll('price'),
-    })
 
     const validateResult = validator.safeParse({
         detail: formData.get('detail'),
@@ -43,7 +33,7 @@ export const createOrUpdateGoodsMasters = async (
         quantity: formData.getAll('quantity'),
         price: formData.getAll('price'),
     })
-    console.log(validateResult)
+
     if (!validateResult.success) {
         console.log(validateResult.error)
         return { error: fromZodError(validateResult.error).message }

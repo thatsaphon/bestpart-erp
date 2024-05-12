@@ -20,7 +20,7 @@ export const fontSans = FontSans({
 
 export const fontThai = Sarabun({
     subsets: ['thai', 'latin'],
-    weight: '400',
+    weight: ['100', '200', '300', '400', '500', '600', '700', '800'],
     variable: '--font-thai',
 })
 

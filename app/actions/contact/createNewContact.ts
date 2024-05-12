@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/app/db/db'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 export const createNewContact = async (formData: FormData) => {
@@ -45,4 +46,6 @@ export const createNewContact = async (formData: FormData) => {
             },
         },
     })
+
+    revalidatePath('/contact')
 }
