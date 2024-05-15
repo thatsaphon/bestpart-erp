@@ -40,21 +40,22 @@ export default function EditContactDialog({ contact }: Props) {
             <DialogTrigger asChild>
                 <Pencil1Icon className="h-4 w-4 text-primary/50 hover:cursor-pointer" />
             </DialogTrigger>
-            <form
-                action={async (formData) => {
-                    try {
-                        await updateContact(contact.id, formData)
-                        toast.success('แก้ไขผู้ติดต่อสําเร็จ')
-                        setIsOpen(false)
-                    } catch (error) {
-                        if (error instanceof Error)
-                            return toast.error(error.message)
+            <DialogContent>
+                <form
+                    className="flex flex-col gap-4"
+                    action={async (formData) => {
+                        try {
+                            await updateContact(contact.id, formData)
+                            toast.success('แก้ไขผู้ติดต่อสําเร็จ')
+                            setIsOpen(false)
+                        } catch (error) {
+                            if (error instanceof Error)
+                                return toast.error(error.message)
 
-                        toast.error('Something went wrong')
-                    }
-                }}
-            >
-                <DialogContent>
+                            toast.error('Something went wrong')
+                        }
+                    }}
+                >
                     <DialogHeader>แก้ไขผู้ติดต่อ</DialogHeader>
                     <Label>
                         <p className="mb-2">ชื่อผู้ติดต่อ: </p>
@@ -120,8 +121,8 @@ export default function EditContactDialog({ contact }: Props) {
                         </DialogClose>
                         <Button type="submit">Save</Button>
                     </DialogFooter>
-                </DialogContent>
-            </form>
+                </form>
+            </DialogContent>
         </Dialog>
     )
 }
