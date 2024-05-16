@@ -25,7 +25,7 @@ import toast from 'react-hot-toast'
 import searchGoodsMasters from '@/app/actions/inventory/goodsMaster/searchGoodsMasters'
 import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/findGoodsMasterByBarcode'
 import Image from 'next/image'
-import { indexIJK } from '@/lib/index-i-j-k'
+import { indexIJK, lengthOfArray4D } from '@/lib/index-i-j-k'
 
 type Props = {
     page?: string
@@ -342,43 +342,78 @@ export default function SelectSearchMainSku({
                                                                             variant={
                                                                                 'outline'
                                                                             }
-                                                                            id={`button-${indexIJK({ i, j, k })}`}
+                                                                            id={`button-${indexIJK(
+                                                                                {
+                                                                                    i,
+                                                                                    j,
+                                                                                    k: index,
+                                                                                },
+                                                                                searchResults.map(
+                                                                                    (
+                                                                                        result
+                                                                                    ) =>
+                                                                                        result.SkuMaster.map(
+                                                                                            (
+                                                                                                skuMaster
+                                                                                            ) =>
+                                                                                                skuMaster.GoodsMaster.map(
+                                                                                                    (
+                                                                                                        goodsMaster
+                                                                                                    ) =>
+                                                                                                        goodsMaster
+                                                                                                )
+                                                                                        )
+                                                                                )
+                                                                            )}`}
                                                                             name="select-button"
                                                                             onKeyDown={(
                                                                                 e
                                                                             ) => {
-                                                                                const buttons =
-                                                                                    document
-                                                                                        .getElementById(
-                                                                                            rowId
-                                                                                        )
-                                                                                        ?.ownerDocument.getElementsByName(
-                                                                                            'select-button'
-                                                                                        )
-                                                                                if (
-                                                                                    !buttons
-                                                                                )
-                                                                                    return
+                                                                                const array4D =
+                                                                                    searchResults.map(
+                                                                                        (
+                                                                                            result
+                                                                                        ) =>
+                                                                                            result.SkuMaster.map(
+                                                                                                (
+                                                                                                    skuMaster
+                                                                                                ) =>
+                                                                                                    skuMaster.GoodsMaster.map(
+                                                                                                        (
+                                                                                                            goodsMaster
+                                                                                                        ) =>
+                                                                                                            goodsMaster
+                                                                                                    )
+                                                                                            )
+                                                                                    )
+                                                                                const rowIndex =
+                                                                                    indexIJK(
+                                                                                        {
+                                                                                            i,
+                                                                                            j,
+                                                                                            k: index,
+                                                                                        },
+                                                                                        array4D
+                                                                                    )
 
                                                                                 if (
                                                                                     e.key ===
                                                                                     'ArrowUp'
                                                                                 ) {
                                                                                     if (
-                                                                                        index
+                                                                                        rowIndex
                                                                                     )
                                                                                         document
                                                                                             .getElementById(
                                                                                                 rowId
                                                                                             )
                                                                                             ?.ownerDocument.getElementById(
-                                                                                                `button-${i}-${index - 1}`
+                                                                                                `button-${rowIndex - 1}`
                                                                                             )
                                                                                             ?.focus()
 
                                                                                     if (
-                                                                                        !index &&
-                                                                                        !i
+                                                                                        !rowIndex
                                                                                     )
                                                                                         document
                                                                                             .getElementById(
@@ -386,19 +421,6 @@ export default function SelectSearchMainSku({
                                                                                             )
                                                                                             ?.ownerDocument.getElementById(
                                                                                                 'search-sku'
-                                                                                            )
-                                                                                            ?.focus()
-
-                                                                                    if (
-                                                                                        !index &&
-                                                                                        i
-                                                                                    )
-                                                                                        document
-                                                                                            .getElementById(
-                                                                                                rowId
-                                                                                            )
-                                                                                            ?.ownerDocument.getElementById(
-                                                                                                `button-${i - 1}-${result.SkuMaster[i - 1].GoodsMaster.length - 1}`
                                                                                             )
                                                                                             ?.focus()
                                                                                 }
@@ -406,33 +428,12 @@ export default function SelectSearchMainSku({
                                                                                     e.key ===
                                                                                     'ArrowDown'
                                                                                 ) {
-                                                                                    console.log(
-                                                                                        'index',
-                                                                                        index,
-                                                                                        'i',
-                                                                                        i
-                                                                                    )
-                                                                                    console.log(
-                                                                                        result
-                                                                                            .SkuMaster
-                                                                                            .length
-                                                                                    )
-                                                                                    console.log(
-                                                                                        skuMaster
-                                                                                            .GoodsMaster
-                                                                                            .length
-                                                                                    )
                                                                                     if (
-                                                                                        i ===
-                                                                                            result
-                                                                                                .SkuMaster
-                                                                                                .length -
-                                                                                                1 &&
-                                                                                        index ===
-                                                                                            skuMaster
-                                                                                                .GoodsMaster
-                                                                                                .length -
-                                                                                                1
+                                                                                        rowIndex ===
+                                                                                        lengthOfArray4D(
+                                                                                            array4D
+                                                                                        ) -
+                                                                                            1
                                                                                     ) {
                                                                                         document
                                                                                             .getElementById(
@@ -445,36 +446,19 @@ export default function SelectSearchMainSku({
                                                                                     }
 
                                                                                     if (
-                                                                                        index !==
-                                                                                        skuMaster
-                                                                                            .GoodsMaster
-                                                                                            .length -
-                                                                                            1
+                                                                                        !(
+                                                                                            rowIndex ===
+                                                                                            lengthOfArray4D(
+                                                                                                array4D
+                                                                                            ) -
+                                                                                                1
+                                                                                        )
                                                                                     )
                                                                                         document
                                                                                             .getElementById(
-                                                                                                `button-${i}-${index + 1}`
+                                                                                                `button-${rowIndex + 1}`
                                                                                             )
                                                                                             ?.focus()
-
-                                                                                    if (
-                                                                                        i !==
-                                                                                            result
-                                                                                                .SkuMaster
-                                                                                                .length -
-                                                                                                1 &&
-                                                                                        index ===
-                                                                                            skuMaster
-                                                                                                .GoodsMaster
-                                                                                                .length -
-                                                                                                1
-                                                                                    ) {
-                                                                                        document
-                                                                                            .getElementById(
-                                                                                                `button-${i + 1}-${0}`
-                                                                                            )
-                                                                                            ?.focus()
-                                                                                    }
                                                                                 }
                                                                             }}
                                                                             onClick={() => {
