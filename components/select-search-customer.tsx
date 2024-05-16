@@ -215,13 +215,15 @@ export default function SelectSearchCustomer<T>({
                                 setPopoverType('create')
                             }}
                         >
-                            <Button
-                                variant={'outline'}
-                                type="button"
-                                className="absolute top-1/2 ml-1 -translate-y-1/2 hover:cursor-pointer"
-                            >
-                                สร้างลูกค้า
-                            </Button>
+                            {!disabled && (
+                                <Button
+                                    variant={'outline'}
+                                    type="button"
+                                    className="absolute top-1/2 ml-1 -translate-y-1/2 hover:cursor-pointer"
+                                >
+                                    สร้างลูกค้า
+                                </Button>
+                            )}
                             {/* <SearchIcon className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 hover:cursor-pointer" /> */}
                         </PopoverTrigger>
                     </span>
@@ -277,6 +279,7 @@ export default function SelectSearchCustomer<T>({
                     >
                         <div className="space-x-2">
                             <Input
+                                id="search-customer"
                                 value={searchValue}
                                 onChange={onSearchChanged}
                                 placeholder="Search"
@@ -284,6 +287,18 @@ export default function SelectSearchCustomer<T>({
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         onSearchClicked()
+                                    }
+                                    if (e.key === 'ArrowDown') {
+                                        document
+                                            .getElementById('button-0')
+                                            ?.focus()
+                                    }
+                                    if (e.key === 'ArrowUp') {
+                                        const buttons =
+                                            document.getElementsByName(
+                                                'select-button'
+                                            )
+                                        buttons[buttons.length - 1]?.focus()
                                     }
                                 }}
                             />
@@ -305,17 +320,68 @@ export default function SelectSearchCustomer<T>({
                             </TableHeader>
                             <TableBody>
                                 {searchResults.map((result, index) => (
-                                    <TableRow
-                                        key={(result as any).id || index}
-                                        onClick={() => {
-                                            setSelectedId((result as any).id)
-                                            setSelectedResult(result)
-                                            setTextAreaFromData(result)
-                                            setIsOpen(false)
-                                        }}
-                                    >
+                                    <TableRow key={(result as any).id || index}>
                                         <TableCell>{result.id}</TableCell>
                                         <TableCell>{result.name}</TableCell>
+                                        <TableCell>
+                                            <Button
+                                                onClick={() => {
+                                                    setSelectedId(
+                                                        (result as any).id
+                                                    )
+                                                    setSelectedResult(result)
+                                                    setTextAreaFromData(result)
+                                                    setIsOpen(false)
+                                                }}
+                                                variant={'outline'}
+                                                id={`button-${index}`}
+                                                name="select-button"
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'ArrowUp') {
+                                                        if (index)
+                                                            document
+                                                                .getElementById(
+                                                                    `button-${index - 1}`
+                                                                )
+                                                                ?.focus()
+
+                                                        if (!index)
+                                                            document
+                                                                .getElementById(
+                                                                    'search-customer'
+                                                                )
+                                                                ?.focus()
+                                                    }
+                                                    if (e.key === 'ArrowDown') {
+                                                        const buttons =
+                                                            document.getElementsByName(
+                                                                'select-button'
+                                                            )
+                                                        if (
+                                                            index ===
+                                                            buttons.length - 1
+                                                        )
+                                                            document
+                                                                .getElementById(
+                                                                    'search-customer'
+                                                                )
+                                                                ?.focus()
+
+                                                        if (
+                                                            index !==
+                                                            buttons.length - 1
+                                                        )
+                                                            document
+                                                                .getElementById(
+                                                                    `button-${index + 1}`
+                                                                )
+                                                                ?.focus()
+                                                    }
+                                                }}
+                                            >
+                                                เลือก
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

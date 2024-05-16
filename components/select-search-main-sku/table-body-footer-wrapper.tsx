@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { BlobProvider } from '@react-pdf/renderer'
 import SalesInvoicePdf from '../pdf/invoice-pdf'
 import { cn } from '@/lib/utils'
+import CreditSalesInvoicePdf from '../pdf/credit-invoice-pdf'
 
 type Props = {
     type?: 'sales' | 'purchase'
@@ -130,7 +131,15 @@ export default function TableBodyFooterWrapper({
                             {isClient ? (
                                 <BlobProvider
                                     document={
-                                        <SalesInvoicePdf document={document} />
+                                        !document.ArSubledger ? (
+                                            <SalesInvoicePdf
+                                                document={document}
+                                            />
+                                        ) : (
+                                            <CreditSalesInvoicePdf
+                                                document={document}
+                                            />
+                                        )
                                     }
                                 >
                                     {({ blob, url, loading, error }) =>

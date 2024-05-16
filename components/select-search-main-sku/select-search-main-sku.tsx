@@ -25,6 +25,7 @@ import toast from 'react-hot-toast'
 import searchGoodsMasters from '@/app/actions/inventory/goodsMaster/searchGoodsMasters'
 import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/findGoodsMasterByBarcode'
 import Image from 'next/image'
+import { indexIJK } from '@/lib/index-i-j-k'
 
 type Props = {
     page?: string
@@ -146,7 +147,7 @@ export default function SelectSearchMainSku({
 
     return (
         <>
-            <TableRow>
+            <TableRow id={rowId}>
                 <TableCell>
                     <Popover
                         open={isOpen}
@@ -240,6 +241,7 @@ export default function SelectSearchMainSku({
                         >
                             <div className="space-x-2">
                                 <Input
+                                    id="search-sku"
                                     value={searchValue}
                                     onChange={onSearchChanged}
                                     placeholder="Search"
@@ -247,6 +249,19 @@ export default function SelectSearchMainSku({
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                             onSearchClicked()
+                                        }
+                                        const buttons = document
+                                            .getElementById(rowId)
+                                            ?.ownerDocument.getElementsByName(
+                                                'select-button'
+                                            )
+                                        if (!buttons) return
+
+                                        if (e.key === 'ArrowDown') {
+                                            buttons[0]?.focus()
+                                        }
+                                        if (e.key === 'ArrowUp') {
+                                            buttons[buttons.length - 1]?.focus()
                                         }
                                     }}
                                 />
@@ -271,10 +286,10 @@ export default function SelectSearchMainSku({
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {searchResults.map((result) => (
+                                    {searchResults.map((result, i) => (
                                         <Fragment key={result.id}>
                                             {result.SkuMaster.map(
-                                                (skuMaster) => (
+                                                (skuMaster, j) => (
                                                     <Fragment
                                                         key={skuMaster.id}
                                                     >
@@ -287,47 +302,6 @@ export default function SelectSearchMainSku({
                                                                     key={
                                                                         goodsMaster.barcode
                                                                     }
-                                                                    onClick={() => {
-                                                                        setSelectedId(
-                                                                            goodsMaster.barcode
-                                                                        )
-                                                                        setSelectedResult(
-                                                                            {
-                                                                                ...result,
-                                                                                SkuMaster:
-                                                                                    [
-                                                                                        {
-                                                                                            ...result
-                                                                                                .SkuMaster[
-                                                                                                index
-                                                                                            ],
-                                                                                            GoodsMaster:
-                                                                                                [
-                                                                                                    goodsMaster,
-                                                                                                ],
-                                                                                        },
-                                                                                    ],
-                                                                            }
-                                                                        )
-
-                                                                        setIsOpen(
-                                                                            false
-                                                                        )
-
-                                                                        document
-                                                                            .getElementsByName(
-                                                                                'quantity'
-                                                                            )
-                                                                            [
-                                                                                totalRows.findIndex(
-                                                                                    (
-                                                                                        id
-                                                                                    ) =>
-                                                                                        id ===
-                                                                                        rowId
-                                                                                )
-                                                                            ]?.focus()
-                                                                    }}
                                                                 >
                                                                     <TableCell>
                                                                         {skuMaster.SkuIn.reduce(
@@ -361,6 +335,192 @@ export default function SelectSearchMainSku({
                                                                         {
                                                                             goodsMaster.price
                                                                         }
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant={
+                                                                                'outline'
+                                                                            }
+                                                                            id={`button-${indexIJK({ i, j, k })}`}
+                                                                            name="select-button"
+                                                                            onKeyDown={(
+                                                                                e
+                                                                            ) => {
+                                                                                const buttons =
+                                                                                    document
+                                                                                        .getElementById(
+                                                                                            rowId
+                                                                                        )
+                                                                                        ?.ownerDocument.getElementsByName(
+                                                                                            'select-button'
+                                                                                        )
+                                                                                if (
+                                                                                    !buttons
+                                                                                )
+                                                                                    return
+
+                                                                                if (
+                                                                                    e.key ===
+                                                                                    'ArrowUp'
+                                                                                ) {
+                                                                                    if (
+                                                                                        index
+                                                                                    )
+                                                                                        document
+                                                                                            .getElementById(
+                                                                                                rowId
+                                                                                            )
+                                                                                            ?.ownerDocument.getElementById(
+                                                                                                `button-${i}-${index - 1}`
+                                                                                            )
+                                                                                            ?.focus()
+
+                                                                                    if (
+                                                                                        !index &&
+                                                                                        !i
+                                                                                    )
+                                                                                        document
+                                                                                            .getElementById(
+                                                                                                rowId
+                                                                                            )
+                                                                                            ?.ownerDocument.getElementById(
+                                                                                                'search-sku'
+                                                                                            )
+                                                                                            ?.focus()
+
+                                                                                    if (
+                                                                                        !index &&
+                                                                                        i
+                                                                                    )
+                                                                                        document
+                                                                                            .getElementById(
+                                                                                                rowId
+                                                                                            )
+                                                                                            ?.ownerDocument.getElementById(
+                                                                                                `button-${i - 1}-${result.SkuMaster[i - 1].GoodsMaster.length - 1}`
+                                                                                            )
+                                                                                            ?.focus()
+                                                                                }
+                                                                                if (
+                                                                                    e.key ===
+                                                                                    'ArrowDown'
+                                                                                ) {
+                                                                                    console.log(
+                                                                                        'index',
+                                                                                        index,
+                                                                                        'i',
+                                                                                        i
+                                                                                    )
+                                                                                    console.log(
+                                                                                        result
+                                                                                            .SkuMaster
+                                                                                            .length
+                                                                                    )
+                                                                                    console.log(
+                                                                                        skuMaster
+                                                                                            .GoodsMaster
+                                                                                            .length
+                                                                                    )
+                                                                                    if (
+                                                                                        i ===
+                                                                                            result
+                                                                                                .SkuMaster
+                                                                                                .length -
+                                                                                                1 &&
+                                                                                        index ===
+                                                                                            skuMaster
+                                                                                                .GoodsMaster
+                                                                                                .length -
+                                                                                                1
+                                                                                    ) {
+                                                                                        document
+                                                                                            .getElementById(
+                                                                                                rowId
+                                                                                            )
+                                                                                            ?.ownerDocument.getElementById(
+                                                                                                'search-sku'
+                                                                                            )
+                                                                                            ?.focus()
+                                                                                    }
+
+                                                                                    if (
+                                                                                        index !==
+                                                                                        skuMaster
+                                                                                            .GoodsMaster
+                                                                                            .length -
+                                                                                            1
+                                                                                    )
+                                                                                        document
+                                                                                            .getElementById(
+                                                                                                `button-${i}-${index + 1}`
+                                                                                            )
+                                                                                            ?.focus()
+
+                                                                                    if (
+                                                                                        i !==
+                                                                                            result
+                                                                                                .SkuMaster
+                                                                                                .length -
+                                                                                                1 &&
+                                                                                        index ===
+                                                                                            skuMaster
+                                                                                                .GoodsMaster
+                                                                                                .length -
+                                                                                                1
+                                                                                    ) {
+                                                                                        document
+                                                                                            .getElementById(
+                                                                                                `button-${i + 1}-${0}`
+                                                                                            )
+                                                                                            ?.focus()
+                                                                                    }
+                                                                                }
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                setSelectedId(
+                                                                                    goodsMaster.barcode
+                                                                                )
+                                                                                setSelectedResult(
+                                                                                    {
+                                                                                        ...result,
+                                                                                        SkuMaster:
+                                                                                            [
+                                                                                                {
+                                                                                                    ...result
+                                                                                                        .SkuMaster[
+                                                                                                        index
+                                                                                                    ],
+                                                                                                    GoodsMaster:
+                                                                                                        [
+                                                                                                            goodsMaster,
+                                                                                                        ],
+                                                                                                },
+                                                                                            ],
+                                                                                    }
+                                                                                )
+
+                                                                                setIsOpen(
+                                                                                    false
+                                                                                )
+
+                                                                                document
+                                                                                    .getElementsByName(
+                                                                                        'quantity'
+                                                                                    )
+                                                                                    [
+                                                                                        totalRows.findIndex(
+                                                                                            (
+                                                                                                id
+                                                                                            ) =>
+                                                                                                id ===
+                                                                                                rowId
+                                                                                        )
+                                                                                    ]?.focus()
+                                                                            }}
+                                                                        >
+                                                                            เลือก
+                                                                        </Button>
                                                                     </TableCell>
                                                                 </TableRow>
                                                             )
