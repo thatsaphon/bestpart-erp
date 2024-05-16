@@ -35,8 +35,8 @@ type Props<T> = {
     searchByIdFunction?: (id: string) => Promise<T>
     keys?: (keyof T)[]
     keysMap?: { [key: string]: string }
-    page?: string
-    limit?: string
+    page?: number
+    limit?: number
     caption?: string
     hasTextArea?: boolean
     textAreaKeys?: (keyof T)[]
@@ -48,8 +48,8 @@ export default function SelectSearch<T>({
     searchByIdFunction,
     keys = [],
     keysMap,
-    page = '1',
-    limit = '10',
+    page = 1,
+    limit = 10,
     caption,
     hasTextArea,
     textAreaKeys = [],

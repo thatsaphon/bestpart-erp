@@ -17,11 +17,13 @@ export default function LoginComponent({}: Props) {
                     password: formData.get('password'),
                 })
                 if (result?.error) {
+                    toast.error(result.error)
                     console.error(result.error)
+                    return
                 } else {
+                    toast.success('Login success')
                     router.refresh()
                 }
-                if (result?.error) return toast.error(result.error)
             }}
         >
             <div className="flex w-full flex-col gap-2 rounded-md border border-black p-12">
