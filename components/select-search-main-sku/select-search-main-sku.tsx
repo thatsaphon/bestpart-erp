@@ -26,10 +26,9 @@ import searchGoodsMasters from '@/app/actions/inventory/goodsMaster/searchGoodsM
 import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/findGoodsMasterByBarcode'
 import Image from 'next/image'
 import { indexIJK, lengthOfArray4D } from '@/lib/index-i-j-k'
+import PaginationClientComponent from '../pagination-client-component'
 
 type Props = {
-    page?: string
-    limit?: string
     caption?: string
     onInsertRow?: () => void
     rowId: string
@@ -50,8 +49,6 @@ type Props = {
 type ReturnSearchType = Awaited<ReturnType<typeof findGoodsMasterByBarcode>>
 
 export default function SelectSearchMainSku({
-    page = '1',
-    limit = '10',
     caption,
     onInsertRow,
     rowId,
@@ -60,6 +57,7 @@ export default function SelectSearchMainSku({
     setItems,
     type = 'sales',
 }: Props) {
+    const [page, setPage] = useState(1)
     const [isOpen, setIsOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
     const [searchResults, setSearchResults] = useState<ReturnSearchType[]>([])
@@ -81,13 +79,13 @@ export default function SelectSearchMainSku({
         const value = event.target.value
         setSearchValue(value)
         if (searchFunction) {
-            setSearchResults(await searchFunction(value, page, limit))
+            setSearchResults(await searchFunction(value, 1, 10))
         }
     }
 
     const onSearchClicked = async () => {
         if (searchFunction) {
-            setSearchResults(await searchFunction(searchValue, page, limit))
+            setSearchResults(await searchFunction(searchValue, 1, 10))
         }
     }
 
@@ -274,7 +272,25 @@ export default function SelectSearchMainSku({
                                 </Button>
                             </div>
                             <Table>
-                                <TableCaption>{caption}</TableCaption>
+                                <TableCaption>
+                                    <PaginationClientComponent
+                                        limit={10}
+                                        numberOfPage={Math.ceil(
+                                            searchResults.length / 10
+                                        )}
+                                        onPageClick={async (page: number) => {
+                                            setPage(page)
+                                            setSearchResults(
+                                                await searchFunction(
+                                                    searchValue,
+                                                    page,
+                                                    10
+                                                )
+                                            )
+                                        }}
+                                        page={page}
+                                    />
+                                </TableCaption>
                                 <TableHeader className="bg-primary-foreground/60 ">
                                     <TableRow>
                                         <TableHead>คงเหลือ</TableHead>

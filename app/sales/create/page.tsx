@@ -1,9 +1,6 @@
 'use client'
 
-import { searchAccountReceivable } from '@/app/actions/contact/searchAccountReceivable'
-import { searchAccountReceivableById } from '@/app/actions/contact/searchAccountReceivableById'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
-import SelectSearch from '@/components/select-search'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState, useRef } from 'react'

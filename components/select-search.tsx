@@ -29,8 +29,8 @@ type Props<T> = {
     type?: T
     searchFunction?: (
         value: string,
-        page?: string,
-        limit?: string
+        page?: number,
+        limit?: number
     ) => Promise<T[]>
     searchByIdFunction?: (id: string) => Promise<T>
     keys?: (keyof T)[]

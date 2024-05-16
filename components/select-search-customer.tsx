@@ -35,12 +35,10 @@ import { Address, Contact } from '@prisma/client'
 import { Label } from './ui/label'
 import { Separator } from './ui/separator'
 import { createNewContact } from '@/app/actions/contact/createNewContact'
+import PaginationClientComponent from './pagination-client-component'
 
 type Props<T> = {
     name?: string
-    page?: string
-    limit?: string
-    caption?: string
     hasTextArea?: boolean
     placeholder?: string
     defaultValue?: string
@@ -59,15 +57,13 @@ type PopoverType = 'search' | 'create'
 
 export default function SelectSearchCustomer<T>({
     name = 'customerId',
-    page = '1',
-    limit = '10',
-    caption,
     hasTextArea,
     placeholder,
     defaultValue,
     disabled,
     defaultAddress,
 }: Props<T>) {
+    const [page, setPage] = useState(1)
     const [isOpen, setIsOpen] = useState(false)
     const [popoverType, setPopoverType] = useState<PopoverType>('search')
     const [searchValue, setSearchValue] = useState('')
@@ -93,15 +89,13 @@ export default function SelectSearchCustomer<T>({
         const value = event.target.value
         setSearchValue(value)
         if (searchAccountReceivable) {
-            setSearchResults(await searchAccountReceivable(value, page, limit))
+            setSearchResults(await searchAccountReceivable(value, 1, 10))
         }
     }
 
     const onSearchClicked = async () => {
         if (searchAccountReceivable) {
-            setSearchResults(
-                await searchAccountReceivable(searchValue, page, limit)
-            )
+            setSearchResults(await searchAccountReceivable(searchValue, 1, 10))
         }
     }
 
@@ -311,7 +305,26 @@ export default function SelectSearchCustomer<T>({
                             </Button>
                         </div>
                         <Table>
-                            <TableCaption>{caption}</TableCaption>
+                            <TableCaption>
+                                {' '}
+                                <PaginationClientComponent
+                                    limit={10}
+                                    numberOfPage={Math.ceil(
+                                        searchResults.length / 10
+                                    )}
+                                    onPageClick={async (page: number) => {
+                                        setPage(page)
+                                        setSearchResults(
+                                            await searchAccountReceivable(
+                                                searchValue,
+                                                page,
+                                                10
+                                            )
+                                        )
+                                    }}
+                                    page={page}
+                                />
+                            </TableCaption>
                             <TableHeader className="bg-primary-foreground/60 ">
                                 <TableRow>
                                     <TableHead>Id</TableHead>
