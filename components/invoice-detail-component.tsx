@@ -18,12 +18,15 @@ import SelectSearchCustomer from '@/components/select-search-customer'
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import { Textarea } from './ui/textarea'
 import { Button } from './ui/button'
+import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 
 type Props = {
     document?: Awaited<ReturnType<typeof getSalesInvoiceDetail>>
 }
 
 export default function InvoiceDetailComponent({ document }: Props) {
+    const session = useSession()
     const ref = useRef<HTMLFormElement>(null)
     const [key, setKey] = useState('1')
 
@@ -64,6 +67,20 @@ export default function InvoiceDetailComponent({ document }: Props) {
                                 disabled
                             />
                         </div>
+                        {session.data?.user.role === 'ADMIN' && (
+                            <div>
+                                <Link
+                                    href={`/sales/${document?.documentId}/edit`}
+                                >
+                                    <Button
+                                        type="button"
+                                        variant={'destructive'}
+                                    >
+                                        Edit
+                                    </Button>
+                                </Link>
+                            </div>
+                        )}
                     </div>
                     <div className="flex gap-3">
                         <div className="my-1 flex items-baseline space-x-2">

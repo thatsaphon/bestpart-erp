@@ -13,8 +13,14 @@ export default function CreateUserForm({}: Props) {
     return session.data?.user.role === 'ADMIN' ? (
         <form
             action={async (formData) => {
-                await createUser(formData)
-                toast.success('Successful')
+                try {
+                    await createUser(formData)
+                    toast.success('Successful')
+                } catch (err) {
+                    if (err instanceof Error) return toast.error(err.message)
+
+                    toast.error('Something went wrong')
+                }
             }}
         >
             <div className="flex w-full flex-col gap-2 rounded-md border border-black p-12">

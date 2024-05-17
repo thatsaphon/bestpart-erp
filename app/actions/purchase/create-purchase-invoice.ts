@@ -36,14 +36,6 @@ export const createPurchaseInvoice = async (formData: FormData) => {
     })
 
     if (!result.success) {
-        console.log({
-            vendorId: formData.get('vendorId'),
-            barcodes: formData.getAll('barcode'),
-            quanties: formData.getAll('quantity'),
-            prices: formData.getAll('price'),
-            date: formData.get('date'),
-            documentId: formData.get('documentId'),
-        })
         throw new Error(
             fromZodError(result.error, {
                 prefix: '- ',
@@ -97,7 +89,6 @@ export const createPurchaseInvoice = async (formData: FormData) => {
 
     if (!documentId) {
         documentId = await generateDocumentNumber('PINV', date)
-        console.log(documentId)
     }
 
     const invoice = await prisma.document.create({

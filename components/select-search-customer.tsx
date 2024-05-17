@@ -5,6 +5,7 @@ import React, {
     Fragment,
     ReactNode,
     SetStateAction,
+    useEffect,
     useState,
 } from 'react'
 import {
@@ -99,9 +100,25 @@ export default function SelectSearchCustomer<T>({
         }
     }
 
+    useEffect(() => {
+        async function fetchCustomerData(customerId: string) {
+            if (defaultValue) {
+                try {
+                    const result = await searchAccountReceivableById(customerId)
+                    setSelectedResult(result)
+                } catch (err) {
+                    if (err instanceof Error) {
+                        return toast.error(err.message)
+                    }
+                    return toast.error('Something went wrong')
+                }
+            }
+        }
+        fetchCustomerData(defaultValue || '')
+    }, [defaultValue])
+
     const setTextAreaFromData = (data: Contact & { Address: Address[] }) => {
         const address = data.Address.find((address) => address.isMain)
-        console.log(address)
         if (data.Address.length === 0)
             return setAddress({ address: '', phone: '', taxId: '' })
         if (address) {

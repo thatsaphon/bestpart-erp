@@ -3,18 +3,21 @@ import { headers } from 'next/headers'
 import { AuthPayloadSchema } from '../../schema/authPayloadSchema'
 import CreateUserForm from '@/components/create-user-form'
 import { redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 
 type Props = {}
 
-export default function CreateUser({}: Props) {
-  // const userJSON = headers().get('user')
-  // const userObject = JSON.parse(userJSON as string)
-  // const user = AuthPayloadSchema.safeParse(userObject)
-  // if (!user.success) redirect('/auth/login')
-  // if (user.data.role !== 'ADMIN') redirect('/auth/login')
-  return (
-    <main className='h-screen w-screen p-36'>
-      <CreateUserForm />
-    </main>
-  )
+export default async function CreateUser({}: Props) {
+    const session = await getServerSession(authOptions)
+
+    if (session?.user.role !== 'ADMIN') {
+        return <>Unauthorized</>
+    }
+
+    return (
+        <main className="h-screen w-screen p-36">
+            <CreateUserForm />
+        </main>
+    )
 }

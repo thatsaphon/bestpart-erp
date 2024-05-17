@@ -147,7 +147,6 @@ export default function EditMainSkuDialog({ mainSku }: Props) {
                                 try {
                                     const result =
                                         await createInventory(formData)
-                                    console.log(result)
                                     if (result.message === 'error')
                                         return toast.error('fail')
 

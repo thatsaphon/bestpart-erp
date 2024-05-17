@@ -14,6 +14,7 @@ import CreditSalesInvoicePdf from '../pdf/credit-invoice-pdf'
 type Props = {
     type?: 'sales' | 'purchase'
     document?: Awaited<ReturnType<typeof getSalesInvoiceDetail>>
+    isUpdated?: boolean
 }
 
 type rowItemType = Awaited<ReturnType<typeof findGoodsMasterByBarcode>> & {
@@ -25,10 +26,10 @@ type rowItemType = Awaited<ReturnType<typeof findGoodsMasterByBarcode>> & {
 export default function TableBodyFooterWrapper({
     type = 'sales',
     document,
+    isUpdated = false,
 }: Props) {
     const [totalRows, setTotalRows] = useState<string[]>([])
     const [items, setItems] = useState<rowItemType[]>([])
-    const [isUpdated, setIsUpdated] = useState(false)
     const [isClient, setIsClient] = useState(false)
 
     useEffect(() => {
@@ -44,6 +45,7 @@ export default function TableBodyFooterWrapper({
                         setTotalRows={setTotalRows}
                         setItems={setItems}
                         type={type}
+                        document={document}
                     />
                 )}
                 {document &&

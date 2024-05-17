@@ -19,7 +19,6 @@ export default async function updateAddress(
             .nullable()
             .transform((value) => value === 'on' || value === 'true'),
     })
-    console.log(formData.get('isMain'))
 
     const { name, address, phone, taxId, isMain } = validator.parse({
         name: formData.get('name') || undefined,

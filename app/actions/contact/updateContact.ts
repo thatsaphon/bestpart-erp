@@ -20,8 +20,6 @@ export const updateContact = async (id: number, formData: FormData) => {
         credit: formData.get('credit')?.toString().toLowerCase() === 'true',
         searchKeyword: formData.get('searchKeyword') || undefined,
     })
-    console.log(formData.get('isAr'))
-    console.log(formData.get('isAp'))
 
     await prisma.contact.update({
         where: {

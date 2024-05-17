@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import SelectSearchMainSku from './select-search-main-sku'
 import { findGoodsMasterByBarcode } from '@/app/actions/inventory/goodsMaster/findGoodsMasterByBarcode'
+import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 
 type Props = {
     totalRows: string[]
@@ -16,6 +17,7 @@ type Props = {
         >
     >
     type?: 'sales' | 'purchase'
+    document?: Awaited<ReturnType<typeof getSalesInvoiceDetail>>
 }
 
 export default function SelectSearchMainSkuWrapper({
@@ -23,16 +25,24 @@ export default function SelectSearchMainSkuWrapper({
     setTotalRows,
     setItems,
     type = 'sales',
+    document: doc,
 }: Props) {
     useEffect(() => {
-        if (totalRows.length === 0) setTotalRows([window.crypto.randomUUID()])
-    }, [setTotalRows, totalRows.length])
+        if (!doc && totalRows.length === 0)
+            setTotalRows([window.crypto.randomUUID()])
+        async function fetchBarcode() {
+            if (doc && totalRows.length === 0) {
+                setTotalRows(doc.SkuOut.map((item) => item.barcode))
+            }
+        }
+        fetchBarcode()
+    }, [doc, setItems, setTotalRows, totalRows.length])
 
     const onInsertRow = () => {
         const newRowId = window.crypto.randomUUID()
         setTotalRows([...totalRows, newRowId])
         setTimeout(() => {
-            document.getElementById(newRowId)?.focus()
+            document.getElementById(`input-${newRowId}`)?.focus()
         }, 200)
     }
     return (
@@ -46,6 +56,10 @@ export default function SelectSearchMainSkuWrapper({
                     onInsertRow={onInsertRow}
                     setItems={setItems}
                     type={type}
+                    defaultBarcode={
+                        doc?.SkuOut.find((item) => item.barcode === rowId)
+                            ?.barcode
+                    }
                 />
             ))}
         </>

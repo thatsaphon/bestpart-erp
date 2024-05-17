@@ -44,6 +44,7 @@ type Props = {
         >
     >
     type?: 'sales' | 'purchase'
+    defaultBarcode?: string
 }
 
 type ReturnSearchType = Awaited<ReturnType<typeof findGoodsMasterByBarcode>>
@@ -56,12 +57,13 @@ export default function SelectSearchMainSku({
     setTotalRows,
     setItems,
     type = 'sales',
+    defaultBarcode,
 }: Props) {
     const [page, setPage] = useState(1)
     const [isOpen, setIsOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
     const [searchResults, setSearchResults] = useState<ReturnSearchType[]>([])
-    const [selectedId, setSelectedId] = useState<string>('')
+    const [selectedId, setSelectedId] = useState<string>(defaultBarcode || '')
     const [selectedResult, setSelectedResult] =
         useState<ReturnSearchType | null>(null)
 
@@ -112,6 +114,13 @@ export default function SelectSearchMainSku({
     }
 
     useEffect(() => {
+        async function initial(defaultBarcode: string) {
+            const result = await searchByIdFunction(defaultBarcode)
+            setSelectedResult(result)
+        }
+        if (!selectedResult && defaultBarcode) {
+            initial(defaultBarcode)
+        }
         if (!selectedResult) return
 
         setItems((prev) => {
@@ -141,7 +150,15 @@ export default function SelectSearchMainSku({
         return () => {
             setItems((prev) => prev.filter((item) => item.rowId !== rowId))
         }
-    }, [priceInput, quantityInput, rowId, selectedResult, setItems])
+    }, [
+        defaultBarcode,
+        priceInput,
+        quantityInput,
+        rowId,
+        searchByIdFunction,
+        selectedResult,
+        setItems,
+    ])
 
     return (
         <>
@@ -165,7 +182,7 @@ export default function SelectSearchMainSku({
                             <span className="relative">
                                 <Input
                                     name={'barcode'}
-                                    id={rowId}
+                                    id={`input-${rowId}`}
                                     value={selectedId}
                                     onChange={(e) =>
                                         setSelectedId(e.target.value)
@@ -197,18 +214,15 @@ export default function SelectSearchMainSku({
 
                                             if (e.key === 'ArrowDown') {
                                                 e.preventDefault()
-                                                console.log(
-                                                    document
-                                                        .getElementsByName(
-                                                            'barcode'
-                                                        )
-                                                        [
-                                                            totalRows.findIndex(
-                                                                (id) =>
-                                                                    id === rowId
-                                                            ) + 1
-                                                        ]?.focus()
-                                                )
+                                                document
+                                                    .getElementsByName(
+                                                        'barcode'
+                                                    )
+                                                    [
+                                                        totalRows.findIndex(
+                                                            (id) => id === rowId
+                                                        ) + 1
+                                                    ]?.focus()
                                             }
                                         }
 
@@ -605,15 +619,13 @@ export default function SelectSearchMainSku({
 
                                 if (e.key === 'ArrowDown') {
                                     e.preventDefault()
-                                    console.log(
-                                        document
-                                            .getElementsByName('quantity')
-                                            [
-                                                totalRows.findIndex(
-                                                    (id) => id === rowId
-                                                ) + 1
-                                            ]?.focus()
-                                    )
+                                    document
+                                        .getElementsByName('quantity')
+                                        [
+                                            totalRows.findIndex(
+                                                (id) => id === rowId
+                                            ) + 1
+                                        ]?.focus()
                                 }
                             }
 
@@ -679,15 +691,13 @@ export default function SelectSearchMainSku({
 
                                     if (e.key === 'ArrowDown') {
                                         e.preventDefault()
-                                        console.log(
-                                            document
-                                                .getElementsByName('quantity')
-                                                [
-                                                    totalRows.findIndex(
-                                                        (id) => id === rowId
-                                                    ) + 1
-                                                ]?.focus()
-                                        )
+                                        document
+                                            .getElementsByName('quantity')
+                                            [
+                                                totalRows.findIndex(
+                                                    (id) => id === rowId
+                                                ) + 1
+                                            ]?.focus()
                                     }
                                 }
 

@@ -15,7 +15,7 @@ export const createNewContact = async (formData: FormData) => {
         taxId: z.string().trim().optional(),
         searchKeyword: z.string().trim().optional(),
     })
-    console.log(formData.get('name'))
+
     const { name, fullName, isAr, isAp, phone, address, taxId, searchKeyword } =
         await validator.parse({
             name: formData.get('name'),

@@ -35,9 +35,6 @@ export async function createInventory(formData: FormData) {
             .optional(),
     })
 
-    console.log(formData.get('detail'))
-    console.log(formData.get('remark'))
-    console.log(formData.get('mainSkuId'))
     const result = validator.safeParse({
         detail: formData.get('detail'),
         remark: formData.get('remark'),
