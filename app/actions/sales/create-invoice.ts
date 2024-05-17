@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/app/db/db'
-import { Contact } from '@prisma/client'
+import { Contact, Prisma } from '@prisma/client'
 import { format } from 'date-fns'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -84,6 +84,21 @@ export const createInvoice = async (formData: FormData) => {
             },
         },
     })
+
+    const checkRemaining: {
+        id: number
+        skuMasterId: number
+        barcode: string
+        quantity: number
+        remaining: number
+    }[] = await prisma.$queryRaw`
+        select "SkuIn".id, "SkuIn"."skuMasterId", "SkuIn".barcode, "SkuIn".quantity, "SkuIn".quantity - sum("SkuInToOut".quantity)  as remaining 
+        from "SkuIn" left join "SkuInToOut" on "SkuIn"."id" = "SkuInToOut"."skuInId" 
+        where "SkuIn"."skuMasterId" in (${Prisma.join(goodsMasters.map((item) => item.skuMasterId))})
+        group by "SkuIn".id 
+        having sum("SkuInToOut".quantity) < "SkuIn".quantity
+        order by "SkuIn"."date" asc`
+
     if (goodsMasters.length !== barcodes.length) {
         throw new Error('goods not found')
     }
@@ -103,8 +118,15 @@ export const createInvoice = async (formData: FormData) => {
         if (!goodsMaster) {
             throw new Error('goods not found')
         }
+
+        const remaining = checkRemaining.filter(
+            (item) => item.skuMasterId === goodsMaster.skuMasterId
+        )
+
         if (
-            !(await isSufficient(mapQuanties[i].skuMasterId, mapQuanties[i].q))
+            remaining.length <= 0 ||
+            remaining.reduce((sum, item) => sum + item.remaining, 0) <
+                mapQuanties[i].q * mapQuanties[i].quantity
         ) {
             throw new Error('insufficient inventory')
         }
@@ -113,6 +135,100 @@ export const createInvoice = async (formData: FormData) => {
     if (!documentId) {
         documentId = await generateDocumentNumber('SINV', date)
     }
+    console.log(checkRemaining)
+    console.log(
+        mapQuanties.map((item) => {
+            return {
+                date: new Date(date),
+                goodsMasterId: item.id,
+                skuMasterId: item.skuMasterId,
+                barcode: String(item.barcode),
+                unit: item.unit,
+                quantityPerUnit: item.quantity,
+                quantity: item.q * item.quantity,
+                cost: 0,
+                price: +((100 / 107) * item.q * item.price).toFixed(2),
+                vat: +((7 / 107) * item.q * item.price).toFixed(2),
+                SkuInToOut: {
+                    create: checkRemaining
+                        .filter(
+                            ({ skuMasterId }) =>
+                                item.skuMasterId === skuMasterId
+                        )
+                        ?.map(({ skuMasterId, remaining }, index, array) => {
+                            console.log(158, remaining)
+                            if (index === 0) {
+                                if (remaining > item.q * item.quantity)
+                                    return {
+                                        skuInId: skuMasterId,
+                                        quantity: item.q * item.quantity,
+                                    }
+                                if (remaining < item.q * item.quantity)
+                                    return {
+                                        skuInId: skuMasterId,
+                                        quantity: remaining,
+                                    }
+                            }
+                            if (
+                                index > 0 &&
+                                array
+                                    .slice(0, index)
+                                    .reduce(
+                                        (sum, item) => sum + item.remaining,
+                                        0
+                                    ) >
+                                    item.q * item.quantity
+                            ) {
+                                if (
+                                    remaining -
+                                        array
+                                            .slice(0, index)
+                                            .reduce(
+                                                (sum, item) =>
+                                                    sum + item.remaining,
+                                                0
+                                            ) >
+                                    item.q * item.quantity
+                                )
+                                    return {
+                                        skuInId: skuMasterId,
+                                        quantity: item.q * item.quantity,
+                                    }
+
+                                if (
+                                    remaining -
+                                        array
+                                            .slice(0, index)
+                                            .reduce(
+                                                (sum, item) =>
+                                                    sum + item.remaining,
+                                                0
+                                            ) <
+                                    item.q * item.quantity
+                                )
+                                    return {
+                                        skuInId: skuMasterId,
+                                        quantity: remaining,
+                                    }
+
+                                if (
+                                    index > 0 &&
+                                    array
+                                        .slice(0, index)
+                                        .reduce(
+                                            (sum, item) => sum + item.remaining,
+                                            0
+                                        ) <
+                                        item.q * item.quantity
+                                )
+                                    return undefined
+                            }
+                        })
+                        .filter((item) => item),
+                },
+            }
+        })[0].SkuInToOut
+    )
 
     const invoice = await prisma.document.create({
         data: {
@@ -166,54 +282,171 @@ export const createInvoice = async (formData: FormData) => {
                     },
                 ],
             },
-        },
-    })
-
-    const asyncSkuOut = mapQuanties.map(async (item) => ({
-        date: new Date(date),
-        goodsMasterId: item.id,
-        skuMasterId: item.skuMasterId,
-        barcode: String(item.barcode),
-        unit: item.unit,
-        quantityPerUnit: item.quantity,
-        quantity: item.q * item.quantity,
-        cost: await calInventoryCost(item.skuMasterId, +item.q, invoice.id),
-        price: +((100 / 107) * item.q * item.price).toFixed(2),
-        vat: +((7 / 107) * item.q * item.price).toFixed(2),
-    }))
-
-    const skuOut = await Promise.all(asyncSkuOut)
-
-    await prisma.document.update({
-        where: { id: invoice.id },
-        data: {
             SkuOut: {
-                create: skuOut.map((item) => ({
-                    ...item,
-                })),
-            },
-            GeneralLedger: {
-                create: [
-                    // สินค้า
-                    {
-                        chartOfAccountId: 13000,
-                        amount: skuOut.reduce(
-                            (sum, item) => sum + item.cost,
-                            0
-                        ),
-                    },
-                    // ต้นทุนขาย
-                    {
-                        chartOfAccountId: 51000,
-                        amount: skuOut.reduce(
-                            (sum, item) => sum + item.cost,
-                            0
-                        ),
-                    },
-                ],
+                create: mapQuanties.map((item) => {
+                    return {
+                        date: new Date(date),
+                        goodsMasterId: item.id,
+                        skuMasterId: item.skuMasterId,
+                        barcode: String(item.barcode),
+                        unit: item.unit,
+                        quantityPerUnit: item.quantity,
+                        quantity: item.q * item.quantity,
+                        cost: 0,
+                        price: +((100 / 107) * item.q * item.price).toFixed(2),
+                        vat: +((7 / 107) * item.q * item.price).toFixed(2),
+                        SkuInToOut: {
+                            create: checkRemaining
+                                .filter(
+                                    ({ skuMasterId }) =>
+                                        item.skuMasterId === skuMasterId
+                                )
+                                ?.map(
+                                    (
+                                        { skuMasterId, remaining },
+                                        index,
+                                        array
+                                    ) => {
+                                        if (index === 0) {
+                                            if (
+                                                remaining >
+                                                item.q * item.quantity
+                                            )
+                                                return {
+                                                    skuInId: skuMasterId,
+                                                    quantity:
+                                                        item.q * item.quantity,
+                                                }
+                                            if (
+                                                remaining <
+                                                item.q * item.quantity
+                                            )
+                                                return {
+                                                    skuInId: skuMasterId,
+                                                    quantity: remaining,
+                                                }
+                                        }
+                                        if (
+                                            index > 0 &&
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) >
+                                                item.q * item.quantity
+                                        ) {
+                                            if (
+                                                remaining -
+                                                    array
+                                                        .slice(0, index)
+                                                        .reduce(
+                                                            (sum, item) =>
+                                                                sum +
+                                                                item.remaining,
+                                                            0
+                                                        ) >
+                                                item.q * item.quantity
+                                            )
+                                                return {
+                                                    skuInId: skuMasterId,
+                                                    quantity:
+                                                        item.q * item.quantity,
+                                                }
+
+                                            if (
+                                                remaining -
+                                                    array
+                                                        .slice(0, index)
+                                                        .reduce(
+                                                            (sum, item) =>
+                                                                sum +
+                                                                item.remaining,
+                                                            0
+                                                        ) <
+                                                item.q * item.quantity
+                                            )
+                                                return {
+                                                    skuInId: skuMasterId,
+                                                    quantity: remaining,
+                                                }
+
+                                            if (
+                                                index > 0 &&
+                                                array
+                                                    .slice(0, index)
+                                                    .reduce(
+                                                        (sum, item) =>
+                                                            sum +
+                                                            item.remaining,
+                                                        0
+                                                    ) <
+                                                    item.q * item.quantity
+                                            )
+                                                return undefined
+                                        }
+                                    }
+                                )
+                                .filter((item) => item),
+                        },
+                    }
+                }),
             },
         },
     })
+
+    // const asyncSkuOut = mapQuanties.map(async (item) => ({
+    //     date: new Date(date),
+    //     goodsMasterId: item.id,
+    //     skuMasterId: item.skuMasterId,
+    //     barcode: String(item.barcode),
+    //     unit: item.unit,
+    //     quantityPerUnit: item.quantity,
+    //     quantity: item.q * item.quantity,
+    //     cost: await calInventoryCost(item.skuMasterId, +item.q, invoice.id),
+    //     price: +((100 / 107) * item.q * item.price).toFixed(2),
+    //     vat: +((7 / 107) * item.q * item.price).toFixed(2),
+    // }))
+
+    // const skuOut = await Promise.all(asyncSkuOut)
+
+    // await prisma.document.update({
+    //     where: { id: invoice.id },
+    //     data: {
+    //         SkuOut: {
+    //             create: skuOut.map((item) => ({
+    //                 ...item,
+    //                 SkuInToOut: {
+    //                     create: {
+    //                         quantity: item.quantity,
+    //                         // remaining: item.quantity,
+    //                     },
+    //                 }
+    //             })),
+    //         },
+    //         GeneralLedger: {
+    //             create: [
+    //                 // สินค้า
+    //                 {
+    //                     chartOfAccountId: 13000,
+    //                     amount: skuOut.reduce(
+    //                         (sum, item) => sum + item.cost,
+    //                         0
+    //                     ),
+    //                 },
+    //                 // ต้นทุนขาย
+    //                 {
+    //                     chartOfAccountId: 51000,
+    //                     amount: skuOut.reduce(
+    //                         (sum, item) => sum + item.cost,
+    //                         0
+    //                     ),
+    //                 },
+    //             ],
+    //         },
+    //     },
+    // })
     revalidatePath('/sales')
 }
 
