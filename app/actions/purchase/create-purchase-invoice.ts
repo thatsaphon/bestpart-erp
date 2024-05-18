@@ -5,6 +5,8 @@ import { format } from 'date-fns'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { generateDocumentNumber } from '../sales/create-invoice'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 
 export const createPurchaseInvoice = async (formData: FormData) => {
     const validator = z.object({
@@ -91,6 +93,8 @@ export const createPurchaseInvoice = async (formData: FormData) => {
         documentId = await generateDocumentNumber('PINV', date)
     }
 
+    const session = await getServerSession(authOptions)
+
     const invoice = await prisma.document.create({
         data: {
             contactName: address?.split('\n')[0] || '',
@@ -99,7 +103,8 @@ export const createPurchaseInvoice = async (formData: FormData) => {
             taxId: taxId || '',
             date: new Date(date),
             documentId: documentId,
-
+            createdBy: session?.user.username,
+            updatedBy: session?.user.username,
             ApSubledger: {
                 create: {
                     contactId: Number(vendorId),
@@ -150,7 +155,6 @@ export const createPurchaseInvoice = async (formData: FormData) => {
                     quantity: item.q * item.quantity,
                     cost: +(((100 / 107) * +item.p) / item.quantity).toFixed(2),
                     vat: +(((7 / 107) * +item.p) / item.quantity).toFixed(2),
-                    remaining: item.q * item.quantity,
                 })),
             },
         },
