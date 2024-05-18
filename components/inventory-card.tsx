@@ -19,6 +19,7 @@ import {
     SkuMaster,
     SkuIn,
     Image as PrismaImage,
+    SkuInToOut,
 } from '@prisma/client'
 import { Badge } from '@/components/ui/badge'
 import EditMainSkuDialog from './edit-main-sku-dialog'
@@ -29,7 +30,7 @@ type Props = {
             Brand?: Brand | null
             CarModel?: CarModel | null
             GoodsMaster: GoodsMaster[]
-            SkuIn?: SkuIn[]
+            SkuIn?: (SkuIn & { SkuInToOut: SkuInToOut[] })[]
             Image: PrismaImage[]
         })[]
     }
@@ -64,7 +65,19 @@ export function InventoryCard({ mainSku }: Props) {
                                         {!!skuMaster.SkuIn
                                             ? skuMaster.SkuIn.reduce(
                                                   (acc, cur) => {
-                                                      return acc + cur.remaining
+                                                      return (
+                                                          acc +
+                                                          cur.quantity -
+                                                          cur.SkuInToOut.reduce(
+                                                              (acc, cur) => {
+                                                                  return (
+                                                                      acc +
+                                                                      cur.quantity
+                                                                  )
+                                                              },
+                                                              0
+                                                          )
+                                                      )
                                                   },
                                                   0
                                               )

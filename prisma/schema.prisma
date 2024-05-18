@@ -39,8 +39,6 @@ model Document {
   id            Int             @id @default(autoincrement())
   documentId    String          @unique
   date          DateTime
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @default(now()) @updatedAt
   SkuOut        SkuOut[]
   SkuIn         SkuIn[]
   ApSubledger   ApSubledger?
@@ -53,6 +51,11 @@ model Document {
   phone       String
   taxId       String
   remark      String @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  createdBy String?
+  updatedBy String?
 }
 
 model ChartOfAccount {
@@ -249,7 +252,6 @@ model SkuIn {
   cost     Float
   vat      Float
 
-  remaining  Int
   SkuInToOut SkuInToOut[]
 
   @@index([documentId])

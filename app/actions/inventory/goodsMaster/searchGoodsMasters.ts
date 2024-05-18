@@ -20,7 +20,9 @@ export default async function searchGoodsMasters(
                     Brand: true,
                     Image: true,
                     SkuIn: {
-                        where: { remaining: { not: 0 } },
+                        include: {
+                            SkuInToOut: true,
+                        }
                     },
                 },
             },

@@ -340,7 +340,16 @@ export default function SelectSearchMainSku({
                                                                                 curr
                                                                             ) =>
                                                                                 prev +
-                                                                                curr.remaining,
+                                                                                curr.quantity -
+                                                                                curr.SkuInToOut.reduce(
+                                                                                    (
+                                                                                        prev,
+                                                                                        curr
+                                                                                    ) =>
+                                                                                        prev +
+                                                                                        curr.quantity,
+                                                                                    0
+                                                                                ),
                                                                             0
                                                                         )}
                                                                     </TableCell>

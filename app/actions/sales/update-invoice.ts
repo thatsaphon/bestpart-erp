@@ -114,18 +114,18 @@ export const updateInvoice = async (id: number, formData: FormData) => {
         const skuIn = await prisma.skuIn.findMany({})
     }
 
-    for (let i = 0; i < barcodes.length; i++) {
+    for (let i = 0;i < barcodes.length;i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === barcodes[i]
         )
         if (!goodsMaster) {
             throw new Error('goods not found')
         }
-        if (
-            !(await isSufficient(mapQuanties[i].skuMasterId, mapQuanties[i].q))
-        ) {
-            throw new Error('insufficient inventory')
-        }
+        // if (
+        //     !(await isSufficient(mapQuanties[i].skuMasterId, mapQuanties[i].q))
+        // ) {
+        //     throw new Error('insufficient inventory')
+        // }
     }
 
     await prisma.document.update({
@@ -140,12 +140,12 @@ export const updateInvoice = async (id: number, formData: FormData) => {
             remark: remark || undefined,
             ArSubledger: !!contact
                 ? {
-                      update: {
-                          contactId: Number(customerId),
-                          paymentStatus:
-                              payment === 'cash' ? 'Paid' : 'NotPaid',
-                      },
-                  }
+                    update: {
+                        contactId: Number(customerId),
+                        paymentStatus:
+                            payment === 'cash' ? 'Paid' : 'NotPaid',
+                    },
+                }
                 : undefined,
             GeneralLedger: {
                 update: [
@@ -214,18 +214,6 @@ export const updateInvoice = async (id: number, formData: FormData) => {
         },
     })
 
-    const asyncSkuOut = mapQuanties.map(async (item) => ({
-        date: new Date(date),
-        goodsMasterId: item.id,
-        skuMasterId: item.skuMasterId,
-        barcode: String(item.barcode),
-        unit: item.unit,
-        quantityPerUnit: item.quantity,
-        quantity: item.q * item.quantity,
-        cost: await calInventoryCost(item.skuMasterId, +item.q, invoice.id),
-        price: +((100 / 107) * item.q * item.price).toFixed(2),
-        vat: +((7 / 107) * item.q * item.price).toFixed(2),
-    }))
 
     const skuOut = await Promise.all(asyncSkuOut)
 
@@ -260,60 +248,6 @@ export const updateInvoice = async (id: number, formData: FormData) => {
         },
     })
     revalidatePath('/sales')
-}
-
-const isSufficient = async (skuMasterId: number, quantity: number) => {
-    const skuIn = await prisma.skuIn.findMany({
-        where: { skuMasterId, remaining: { not: 0 } },
-        orderBy: { date: 'asc' },
-    })
-    if (skuIn.reduce((sum, item) => sum + item.remaining, 0) < quantity) {
-        return false
-    }
-    return true
-}
-
-const calInventoryCost = async (
-    skuMasterId: number,
-    quantity: number,
-    documentId: number
-) => {
-    const skuIn = await prisma.skuIn.findMany({
-        where: { skuMasterId, remaining: { not: 0 } },
-        orderBy: [{ date: 'asc' }, { id: 'asc' }],
-    })
-    if (skuIn.reduce((sum, item) => sum + item.remaining, 0) < quantity) {
-        return 0
-    }
-
-    let result = 0
-    let q = 0
-    for (let i = 0; i < skuIn.length; i++) {
-        if (q === quantity) {
-            break
-        }
-        if (skuIn[i].remaining >= quantity - q) {
-            result += skuIn[i].cost * (quantity - q)
-            skuIn[i].remaining = skuIn[i].remaining - (quantity - q)
-            q = quantity
-            await prisma.skuIn.update({
-                where: { id: skuIn[i].id },
-                data: { remaining: skuIn[i].remaining },
-            })
-        }
-
-        if (skuIn[i].remaining < quantity - q) {
-            result += skuIn[i].cost * (quantity - q)
-            q = q + skuIn[i].remaining
-            skuIn[i].remaining = 0
-            await prisma.skuIn.update({
-                where: { id: skuIn[i].id },
-                data: { remaining: skuIn[i].remaining },
-            })
-        }
-    }
-
-    return result
 }
 
 export const generateDocumentNumber = async (prefix: string, date: string) => {

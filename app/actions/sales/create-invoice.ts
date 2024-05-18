@@ -111,7 +111,7 @@ export const createInvoice = async (formData: FormData) => {
             q: +quanties[barcodes.indexOf(goodsMaster.barcode)],
         }
     })
-    for (let i = 0; i < barcodes.length; i++) {
+    for (let i = 0;i < barcodes.length;i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === barcodes[i]
         )
@@ -126,7 +126,7 @@ export const createInvoice = async (formData: FormData) => {
         if (
             remaining.length <= 0 ||
             remaining.reduce((sum, item) => sum + item.remaining, 0) <
-                mapQuanties[i].q * mapQuanties[i].quantity
+            mapQuanties[i].q * mapQuanties[i].quantity
         ) {
             throw new Error('insufficient inventory')
         }
@@ -135,100 +135,6 @@ export const createInvoice = async (formData: FormData) => {
     if (!documentId) {
         documentId = await generateDocumentNumber('SINV', date)
     }
-    console.log(checkRemaining)
-    console.log(
-        mapQuanties.map((item) => {
-            return {
-                date: new Date(date),
-                goodsMasterId: item.id,
-                skuMasterId: item.skuMasterId,
-                barcode: String(item.barcode),
-                unit: item.unit,
-                quantityPerUnit: item.quantity,
-                quantity: item.q * item.quantity,
-                cost: 0,
-                price: +((100 / 107) * item.q * item.price).toFixed(2),
-                vat: +((7 / 107) * item.q * item.price).toFixed(2),
-                SkuInToOut: {
-                    create: checkRemaining
-                        .filter(
-                            ({ skuMasterId }) =>
-                                item.skuMasterId === skuMasterId
-                        )
-                        ?.map(({ skuMasterId, remaining }, index, array) => {
-                            console.log(158, remaining)
-                            if (index === 0) {
-                                if (remaining > item.q * item.quantity)
-                                    return {
-                                        skuInId: skuMasterId,
-                                        quantity: item.q * item.quantity,
-                                    }
-                                if (remaining < item.q * item.quantity)
-                                    return {
-                                        skuInId: skuMasterId,
-                                        quantity: remaining,
-                                    }
-                            }
-                            if (
-                                index > 0 &&
-                                array
-                                    .slice(0, index)
-                                    .reduce(
-                                        (sum, item) => sum + item.remaining,
-                                        0
-                                    ) >
-                                    item.q * item.quantity
-                            ) {
-                                if (
-                                    remaining -
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) >
-                                    item.q * item.quantity
-                                )
-                                    return {
-                                        skuInId: skuMasterId,
-                                        quantity: item.q * item.quantity,
-                                    }
-
-                                if (
-                                    remaining -
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) <
-                                    item.q * item.quantity
-                                )
-                                    return {
-                                        skuInId: skuMasterId,
-                                        quantity: remaining,
-                                    }
-
-                                if (
-                                    index > 0 &&
-                                    array
-                                        .slice(0, index)
-                                        .reduce(
-                                            (sum, item) => sum + item.remaining,
-                                            0
-                                        ) <
-                                        item.q * item.quantity
-                                )
-                                    return undefined
-                            }
-                        })
-                        .filter((item) => item),
-                },
-            }
-        })[0].SkuInToOut
-    )
 
     const invoice = await prisma.document.create({
         data: {
@@ -241,12 +147,12 @@ export const createInvoice = async (formData: FormData) => {
             remark: remark || '',
             ArSubledger: !!contact
                 ? {
-                      create: {
-                          contactId: Number(customerId),
-                          paymentStatus:
-                              payment === 'cash' ? 'Paid' : 'NotPaid',
-                      },
-                  }
+                    create: {
+                        contactId: Number(customerId),
+                        paymentStatus:
+                            payment === 'cash' ? 'Paid' : 'NotPaid',
+                    },
+                }
                 : undefined,
             GeneralLedger: {
                 create: [
@@ -303,7 +209,7 @@ export const createInvoice = async (formData: FormData) => {
                                 )
                                 ?.map(
                                     (
-                                        { skuMasterId, remaining },
+                                        { id, remaining },
                                         index,
                                         array
                                     ) => {
@@ -313,7 +219,7 @@ export const createInvoice = async (formData: FormData) => {
                                                 item.q * item.quantity
                                             )
                                                 return {
-                                                    skuInId: skuMasterId,
+                                                    skuInId: id,
                                                     quantity:
                                                         item.q * item.quantity,
                                                 }
@@ -322,7 +228,7 @@ export const createInvoice = async (formData: FormData) => {
                                                 item.q * item.quantity
                                             )
                                                 return {
-                                                    skuInId: skuMasterId,
+                                                    skuInId: id,
                                                     quantity: remaining,
                                                 }
                                         }
@@ -335,40 +241,40 @@ export const createInvoice = async (formData: FormData) => {
                                                         sum + item.remaining,
                                                     0
                                                 ) >
-                                                item.q * item.quantity
+                                            item.q * item.quantity
                                         ) {
                                             if (
                                                 remaining -
-                                                    array
-                                                        .slice(0, index)
-                                                        .reduce(
-                                                            (sum, item) =>
-                                                                sum +
-                                                                item.remaining,
-                                                            0
-                                                        ) >
+                                                array
+                                                    .slice(0, index)
+                                                    .reduce(
+                                                        (sum, item) =>
+                                                            sum +
+                                                            item.remaining,
+                                                        0
+                                                    ) >
                                                 item.q * item.quantity
                                             )
                                                 return {
-                                                    skuInId: skuMasterId,
+                                                    skuInId: id,
                                                     quantity:
                                                         item.q * item.quantity,
                                                 }
 
                                             if (
                                                 remaining -
-                                                    array
-                                                        .slice(0, index)
-                                                        .reduce(
-                                                            (sum, item) =>
-                                                                sum +
-                                                                item.remaining,
-                                                            0
-                                                        ) <
+                                                array
+                                                    .slice(0, index)
+                                                    .reduce(
+                                                        (sum, item) =>
+                                                            sum +
+                                                            item.remaining,
+                                                        0
+                                                    ) <
                                                 item.q * item.quantity
                                             )
                                                 return {
-                                                    skuInId: skuMasterId,
+                                                    skuInId: id,
                                                     quantity: remaining,
                                                 }
 
@@ -382,7 +288,7 @@ export const createInvoice = async (formData: FormData) => {
                                                             item.remaining,
                                                         0
                                                     ) <
-                                                    item.q * item.quantity
+                                                item.q * item.quantity
                                             )
                                                 return undefined
                                         }
@@ -448,60 +354,6 @@ export const createInvoice = async (formData: FormData) => {
     //     },
     // })
     revalidatePath('/sales')
-}
-
-const isSufficient = async (skuMasterId: number, quantity: number) => {
-    const skuIn = await prisma.skuIn.findMany({
-        where: { skuMasterId, remaining: { not: 0 } },
-        orderBy: { date: 'asc' },
-    })
-    if (skuIn.reduce((sum, item) => sum + item.remaining, 0) < quantity) {
-        return false
-    }
-    return true
-}
-
-const calInventoryCost = async (
-    skuMasterId: number,
-    quantity: number,
-    documentId: number
-) => {
-    const skuIn = await prisma.skuIn.findMany({
-        where: { skuMasterId, remaining: { not: 0 } },
-        orderBy: [{ date: 'asc' }, { id: 'asc' }],
-    })
-    if (skuIn.reduce((sum, item) => sum + item.remaining, 0) < quantity) {
-        return 0
-    }
-
-    let result = 0
-    let q = 0
-    for (let i = 0; i < skuIn.length; i++) {
-        if (q === quantity) {
-            break
-        }
-        if (skuIn[i].remaining >= quantity - q) {
-            result += skuIn[i].cost * (quantity - q)
-            skuIn[i].remaining = skuIn[i].remaining - (quantity - q)
-            q = quantity
-            await prisma.skuIn.update({
-                where: { id: skuIn[i].id },
-                data: { remaining: skuIn[i].remaining },
-            })
-        }
-
-        if (skuIn[i].remaining < quantity - q) {
-            result += skuIn[i].cost * (quantity - q)
-            q = q + skuIn[i].remaining
-            skuIn[i].remaining = 0
-            await prisma.skuIn.update({
-                where: { id: skuIn[i].id },
-                data: { remaining: skuIn[i].remaining },
-            })
-        }
-    }
-
-    return result
 }
 
 export const generateDocumentNumber = async (prefix: string, date: string) => {
