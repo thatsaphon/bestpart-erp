@@ -13,6 +13,7 @@ import prisma from '../db/db'
 import PaginationComponent from '@/components/pagination-component'
 import { ViewIcon } from 'lucide-react'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
+import { Prisma } from '@prisma/client'
 
 type Props = {
     searchParams: {
@@ -49,6 +50,22 @@ export default async function SalesListPage({
         take: +limit,
         skip: (Number(page) - 1) * Number(limit),
     })
+
+    const checkRemaining: {
+        id: number
+        skuMasterId: number
+        barcode: string
+        quantity: number
+        remaining: number
+    }[] = await prisma.$queryRaw`
+        select "SkuIn".id, "SkuIn"."skuMasterId", "SkuIn".barcode, "SkuIn".quantity, "SkuIn".quantity - sum("SkuInToOut".quantity)  as remaining 
+        from "SkuIn" left join "SkuInToOut" on "SkuIn"."id" = "SkuInToOut"."skuInId" 
+        where "SkuIn"."skuMasterId" in (${Prisma.join([1, 2, 3])})
+        group by "SkuIn".id 
+        having sum("SkuInToOut".quantity) < "SkuIn".quantity
+        order by "SkuIn"."date" asc`
+
+    console.log(checkRemaining)
 
     const documentCount = await prisma.document.count({})
     const numberOfPage = Math.ceil(documentCount / Number(limit))

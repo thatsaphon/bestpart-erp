@@ -39,8 +39,6 @@ model Document {
   id            Int             @id @default(autoincrement())
   documentId    String          @unique
   date          DateTime
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @default(now()) @updatedAt
   SkuOut        SkuOut[]
   SkuIn         SkuIn[]
   ApSubledger   ApSubledger?
@@ -53,6 +51,11 @@ model Document {
   phone       String
   taxId       String
   remark      String @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  createdBy String?
+  updatedBy String?
 }
 
 model ChartOfAccount {
@@ -221,9 +224,10 @@ model SkuOut {
   price    Float
   vat      Float
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
   skuMasterId Int
+  SkuInToOut  SkuInToOut[]
 
   @@index([skuMasterId])
   @@index([goodsMasterId])
@@ -248,11 +252,24 @@ model SkuIn {
   cost     Float
   vat      Float
 
-  remaining Int
+  SkuInToOut SkuInToOut[]
 
   @@index([documentId])
   @@index([goodsMasterId])
   @@index([skuMasterId])
+}
+
+model SkuInToOut {
+  id       Int    @id @default(autoincrement())
+  SkuIn    SkuIn  @relation(fields: [skuInId], references: [id])
+  skuInId  Int
+  SKuOut   SkuOut @relation(fields: [skuOutId], references: [id])
+  skuOutId Int
+
+  quantity Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model ApSubledger {

@@ -46,7 +46,9 @@ export default async function InventoryListPage({
                     GoodsMaster: true,
                     Image: true,
                     SkuIn: {
-                        where: { remaining: { not: 0 } },
+                        include: {
+                            SkuInToOut: true,
+                        },
                     },
                 },
             },
