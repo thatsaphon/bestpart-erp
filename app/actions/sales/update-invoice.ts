@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/app/db/db'
-import { Contact } from '@prisma/client'
+import { Contact, Prisma } from '@prisma/client'
 import { format } from 'date-fns'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -9,7 +9,7 @@ import { fromZodError } from 'zod-validation-error'
 
 export const updateInvoice = async (id: number, formData: FormData) => {
     const validator = z.object({
-        customerId: z.string().trim().nullable(),
+        customerId: z.string().trim().optional().nullable(),
         address: z.string().trim().optional().nullable(),
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
@@ -41,9 +41,9 @@ export const updateInvoice = async (id: number, formData: FormData) => {
     if (!result.success) {
         throw new Error(
             fromZodError(result.error, {
-                prefix: '- ',
-                prefixSeparator: ' ',
-                includePath: false,
+                // prefix: '- ',
+                // prefixSeparator: ' ',
+                // includePath: false,
                 issueSeparator: '\n',
             }).message
         )
@@ -105,30 +105,58 @@ export const updateInvoice = async (id: number, formData: FormData) => {
             SkuOut: {
                 include: {
                     GoodsMaster: true,
+                    SkuInToOut: true,
                 },
             },
         },
     })
+    const checkRemaining: {
+        id: number
+        skuMasterId: number
+        barcode: string
+        quantity: number
+        remaining: number
+    }[] = await prisma.$queryRaw`
+        select "SkuIn".id, "SkuIn"."skuMasterId", "SkuIn".barcode, "SkuIn".quantity, "SkuIn".quantity - COALESCE(sum("SkuInToOut".quantity), 0)  as remaining 
+        from "SkuIn" left join "SkuInToOut" on "SkuIn"."id" = "SkuInToOut"."skuInId" 
+        where "SkuIn"."skuMasterId" in (${Prisma.join(goodsMasters.map((item) => item.skuMasterId))})
+        and ("SkuInToOut".id not in (${Prisma.join(invoice.SkuOut.flatMap((item) => item.SkuInToOut.map((item) => item.id)))})
+        or "SkuInToOut".id is null)
+        group by "SkuIn".id 
+        having sum("SkuInToOut".quantity) < "SkuIn".quantity or sum("SkuInToOut".quantity) is null
+        order by "SkuIn"."date", "SkuIn"."id" asc`
 
-    for (let skuOut of invoice.SkuOut) {
-        const skuIn = await prisma.skuIn.findMany({})
-    }
-
-    for (let i = 0;i < barcodes.length;i++) {
+    for (let i = 0; i < barcodes.length; i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === barcodes[i]
         )
         if (!goodsMaster) {
             throw new Error('goods not found')
         }
-        // if (
-        //     !(await isSufficient(mapQuanties[i].skuMasterId, mapQuanties[i].q))
-        // ) {
-        //     throw new Error('insufficient inventory')
-        // }
-    }
 
-    await prisma.document.update({
+        const remaining = checkRemaining.filter(
+            (item) => item.skuMasterId === goodsMaster.skuMasterId
+        )
+
+        if (
+            remaining.length <= 0 ||
+            remaining.reduce((sum, item) => sum + item.remaining, 0) <
+                mapQuanties[i].q * mapQuanties[i].quantity
+        ) {
+            throw new Error('insufficient inventory')
+        }
+    }
+    console.log(mapQuanties)
+    const deleteSkuInToOut = prisma.skuInToOut.deleteMany({
+        where: {
+            id: {
+                in: invoice.SkuOut.flatMap((item) =>
+                    item.SkuInToOut.map((item) => item.id)
+                ),
+            },
+        },
+    })
+    const updateInvoice = prisma.document.update({
         where: { id },
         data: {
             contactName: address?.split('\n')[0] || undefined,
@@ -140,12 +168,12 @@ export const updateInvoice = async (id: number, formData: FormData) => {
             remark: remark || undefined,
             ArSubledger: !!contact
                 ? {
-                    update: {
-                        contactId: Number(customerId),
-                        paymentStatus:
-                            payment === 'cash' ? 'Paid' : 'NotPaid',
-                    },
-                }
+                      update: {
+                          contactId: Number(customerId),
+                          paymentStatus:
+                              payment === 'cash' ? 'Paid' : 'NotPaid',
+                      },
+                  }
                 : undefined,
             GeneralLedger: {
                 update: [
@@ -211,43 +239,113 @@ export const updateInvoice = async (id: number, formData: FormData) => {
                     },
                 ],
             },
-        },
-    })
-
-
-    const skuOut = await Promise.all(asyncSkuOut)
-
-    await prisma.document.update({
-        where: { id: invoice.id },
-        data: {
             SkuOut: {
-                create: skuOut.map((item) => ({
-                    ...item,
-                })),
-            },
-            GeneralLedger: {
-                create: [
-                    // สินค้า
-                    {
-                        chartOfAccountId: 13000,
-                        amount: skuOut.reduce(
-                            (sum, item) => sum + item.cost,
-                            0
-                        ),
+                deleteMany: {
+                    id: {
+                        in: invoice.SkuOut.flatMap((item) => item.id),
                     },
-                    // ต้นทุนขาย
-                    {
-                        chartOfAccountId: 51000,
-                        amount: skuOut.reduce(
-                            (sum, item) => sum + item.cost,
-                            0
-                        ),
-                    },
-                ],
+                },
+                create: mapQuanties.map((item) => {
+                    return {
+                        date: date ? new Date(date) : undefined,
+                        goodsMasterId: item.id,
+                        skuMasterId: item.skuMasterId,
+                        barcode: String(item.barcode),
+                        unit: item.unit,
+                        quantityPerUnit: item.quantity,
+                        quantity: item.q * item.quantity,
+                        cost: 0,
+                        price: +((100 / 107) * item.q * item.price).toFixed(2),
+                        vat: +((7 / 107) * item.q * item.price).toFixed(2),
+                        SkuInToOut: {
+                            create: checkRemaining
+                                .filter(
+                                    ({ skuMasterId }) =>
+                                        item.skuMasterId === skuMasterId
+                                )
+                                ?.map(({ id, remaining }, index, array) => {
+                                    if (index === 0) {
+                                        if (remaining > item.q * item.quantity)
+                                            return {
+                                                skuInId: id,
+                                                quantity:
+                                                    item.q * item.quantity,
+                                            }
+                                        if (remaining < item.q * item.quantity)
+                                            return {
+                                                skuInId: id,
+                                                quantity: remaining,
+                                            }
+                                    }
+                                    // ครั้งที่ 2+ ตัดยอดหมดแล้ว
+                                    if (
+                                        item.q * item.quantity <
+                                        array
+                                            .slice(0, index)
+                                            .reduce(
+                                                (sum, item) =>
+                                                    sum + item.remaining,
+                                                0
+                                            )
+                                    )
+                                        return undefined
+
+                                    // ครั้งที่ 2+ ตัดทั้ง lot
+
+                                    if (
+                                        item.q * item.quantity -
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) >=
+                                        remaining
+                                    )
+                                        return {
+                                            skuInId: id,
+                                            quantity: remaining,
+                                        }
+
+                                    // ครั้งที่ 2+ ตัดส่วนที่เหลือ
+                                    if (
+                                        item.q * item.quantity -
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) <
+                                        remaining
+                                    )
+                                        return {
+                                            skuInId: id,
+                                            quantity:
+                                                item.q * item.quantity -
+                                                array
+                                                    .slice(0, index)
+                                                    .reduce(
+                                                        (sum, item) =>
+                                                            sum +
+                                                            item.remaining,
+                                                        0
+                                                    ),
+                                        }
+                                })
+                                .filter((item) => item),
+                        },
+                    }
+                }),
             },
         },
     })
+
+    await prisma.$transaction([deleteSkuInToOut, updateInvoice])
+
     revalidatePath('/sales')
+    revalidatePath(`/sales/${documentId}/edit`)
 }
 
 export const generateDocumentNumber = async (prefix: string, date: string) => {

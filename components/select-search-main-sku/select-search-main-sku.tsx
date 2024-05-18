@@ -45,6 +45,7 @@ type Props = {
     >
     type?: 'sales' | 'purchase'
     defaultBarcode?: string
+    defaultQuantity?: number
 }
 
 type ReturnSearchType = Awaited<ReturnType<typeof findGoodsMasterByBarcode>>
@@ -58,6 +59,7 @@ export default function SelectSearchMainSku({
     setItems,
     type = 'sales',
     defaultBarcode,
+    defaultQuantity,
 }: Props) {
     const [page, setPage] = useState(1)
     const [isOpen, setIsOpen] = useState(false)
@@ -66,8 +68,7 @@ export default function SelectSearchMainSku({
     const [selectedId, setSelectedId] = useState<string>(defaultBarcode || '')
     const [selectedResult, setSelectedResult] =
         useState<ReturnSearchType | null>(null)
-
-    const [quantityInput, setQuantityInput] = useState(1)
+    const [quantityInput, setQuantityInput] = useState(defaultQuantity || 1)
     const [priceInput, setPriceInput] = useState<number | undefined>(
         type === 'purchase' ? 0 : undefined
     )

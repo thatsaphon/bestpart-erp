@@ -60,6 +60,10 @@ export default function SelectSearchMainSkuWrapper({
                         doc?.SkuOut.find((item) => item.barcode === rowId)
                             ?.barcode
                     }
+                    defaultQuantity={
+                        doc?.SkuOut.find((item) => item.barcode === rowId)
+                            ?.quantity
+                    }
                 />
             ))}
         </>

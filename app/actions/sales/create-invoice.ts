@@ -113,7 +113,7 @@ export const createInvoice = async (formData: FormData) => {
             q: +quanties[barcodes.indexOf(goodsMaster.barcode)],
         }
     })
-    for (let i = 0;i < barcodes.length;i++) {
+    for (let i = 0; i < barcodes.length; i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === barcodes[i]
         )
@@ -128,7 +128,7 @@ export const createInvoice = async (formData: FormData) => {
         if (
             remaining.length <= 0 ||
             remaining.reduce((sum, item) => sum + item.remaining, 0) <
-            mapQuanties[i].q * mapQuanties[i].quantity
+                mapQuanties[i].q * mapQuanties[i].quantity
         ) {
             throw new Error('insufficient inventory')
         }
@@ -139,97 +139,6 @@ export const createInvoice = async (formData: FormData) => {
     }
 
     const session = await getServerSession(authOptions)
-
-    console.log(mapQuanties.map((item) => {
-        return {
-            date: new Date(date),
-            goodsMasterId: item.id,
-            skuMasterId: item.skuMasterId,
-            barcode: String(item.barcode),
-            unit: item.unit,
-            quantityPerUnit: item.quantity,
-            quantity: item.q * item.quantity,
-            cost: 0,
-            price: +((100 / 107) * item.q * item.price).toFixed(2),
-            vat: +((7 / 107) * item.q * item.price).toFixed(2),
-            SkuInToOut: {
-                create: checkRemaining
-                    .filter(
-                        ({ skuMasterId }) =>
-                            item.skuMasterId === skuMasterId
-                    )
-                    ?.map(
-                        (
-                            { id, remaining },
-                            index,
-                            array
-                        ) => {
-                            if (index === 0) {
-                                if (
-                                    remaining >
-                                    item.q * item.quantity
-                                )
-                                    return {
-                                        skuInId: id,
-                                        quantity:
-                                            item.q * item.quantity,
-                                    }
-                                if (
-                                    remaining <
-                                    item.q * item.quantity
-                                )
-                                    return {
-                                        skuInId: id,
-                                        quantity: remaining,
-                                    }
-                            }
-                            // ครั้งที่ 2+ ตัดยอดหมดแล้ว
-                            if (item.q * item.quantity < array
-                                .slice(0, index)
-                                .reduce(
-                                    (sum, item) =>
-                                        sum + item.remaining,
-                                    0
-                                )) return undefined
-
-                            // ครั้งที่ 2+ ตัดทั้ง lot
-
-                            if (item.q * item.quantity - array
-                                .slice(0, index)
-                                .reduce(
-                                    (sum, item) =>
-                                        sum + item.remaining,
-                                    0
-                                ) >= remaining) return {
-                                    skuInId: id,
-                                    quantity: remaining,
-                                }
-
-                            // ครั้งที่ 2+ ตัดส่วนที่เหลือ
-                            if (item.q * item.quantity - array
-                                .slice(0, index)
-                                .reduce(
-                                    (sum, item) =>
-                                        sum + item.remaining,
-                                    0
-                                ) < remaining) return {
-                                    skuInId: id,
-                                    quantity: item.q * item.quantity - array
-                                        .slice(0, index)
-                                        .reduce(
-                                            (sum, item) =>
-                                                sum + item.remaining,
-                                            0
-                                        ),
-                                }
-
-                        }
-                    )
-                    .filter((item) => item),
-            },
-        }
-    })[0].SkuInToOut.create)
-
 
     const invoice = await prisma.document.create({
         data: {
@@ -244,12 +153,12 @@ export const createInvoice = async (formData: FormData) => {
             updatedBy: session?.user.first_name,
             ArSubledger: !!contact
                 ? {
-                    create: {
-                        contactId: Number(customerId),
-                        paymentStatus:
-                            payment === 'cash' ? 'Paid' : 'NotPaid',
-                    },
-                }
+                      create: {
+                          contactId: Number(customerId),
+                          paymentStatus:
+                              payment === 'cash' ? 'Paid' : 'NotPaid',
+                      },
+                  }
                 : undefined,
             GeneralLedger: {
                 create: [
@@ -304,73 +213,77 @@ export const createInvoice = async (formData: FormData) => {
                                     ({ skuMasterId }) =>
                                         item.skuMasterId === skuMasterId
                                 )
-                                ?.map(
-                                    (
-                                        { id, remaining },
-                                        index,
-                                        array
-                                    ) => {
-                                        if (index === 0) {
-                                            if (
-                                                remaining >
-                                                item.q * item.quantity
-                                            )
-                                                return {
-                                                    skuInId: id,
-                                                    quantity:
-                                                        item.q * item.quantity,
-                                                }
-                                            if (
-                                                remaining <
-                                                item.q * item.quantity
-                                            )
-                                                return {
-                                                    skuInId: id,
-                                                    quantity: remaining,
-                                                }
-                                        }
-                                        // ครั้งที่ 2+ ตัดยอดหมดแล้ว
-                                        if (item.q * item.quantity < array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            )) return undefined
-
-                                        // ครั้งที่ 2+ ตัดทั้ง lot
-
-                                        if (item.q * item.quantity - array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) >= remaining) return {
+                                ?.map(({ id, remaining }, index, array) => {
+                                    if (index === 0) {
+                                        if (remaining > item.q * item.quantity)
+                                            return {
+                                                skuInId: id,
+                                                quantity:
+                                                    item.q * item.quantity,
+                                            }
+                                        if (remaining < item.q * item.quantity)
+                                            return {
                                                 skuInId: id,
                                                 quantity: remaining,
                                             }
-
-                                        // ครั้งที่ 2+ ตัดส่วนที่เหลือ
-                                        if (item.q * item.quantity - array
+                                    }
+                                    // ครั้งที่ 2+ ตัดยอดหมดแล้ว
+                                    if (
+                                        item.q * item.quantity <
+                                        array
                                             .slice(0, index)
                                             .reduce(
                                                 (sum, item) =>
                                                     sum + item.remaining,
                                                 0
-                                            ) < remaining) return {
-                                                skuInId: id,
-                                                quantity: item.q * item.quantity - array
+                                            )
+                                    )
+                                        return undefined
+
+                                    // ครั้งที่ 2+ ตัดทั้ง lot
+
+                                    if (
+                                        item.q * item.quantity -
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) >=
+                                        remaining
+                                    )
+                                        return {
+                                            skuInId: id,
+                                            quantity: remaining,
+                                        }
+
+                                    // ครั้งที่ 2+ ตัดส่วนที่เหลือ
+                                    if (
+                                        item.q * item.quantity -
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) <
+                                        remaining
+                                    )
+                                        return {
+                                            skuInId: id,
+                                            quantity:
+                                                item.q * item.quantity -
+                                                array
                                                     .slice(0, index)
                                                     .reduce(
                                                         (sum, item) =>
-                                                            sum + item.remaining,
+                                                            sum +
+                                                            item.remaining,
                                                         0
                                                     ),
-                                            }
-
-                                    }
-                                )
+                                        }
+                                })
                                 .filter((item) => item),
                         },
                     }

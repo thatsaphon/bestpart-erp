@@ -17,6 +17,7 @@ import toast from 'react-hot-toast'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import { Textarea } from '@/components/ui/textarea'
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+import { updateInvoice } from '@/app/actions/sales/update-invoice'
 
 type Props = {
     document: Awaited<ReturnType<typeof getSalesInvoiceDetail>>
@@ -32,7 +33,8 @@ export default function EditSales({ document }: Props) {
                 ref={ref}
                 action={async (formData) => {
                     try {
-                        await createInvoice(formData)
+                        document &&
+                            (await updateInvoice(document?.id, formData))
                         ref.current?.reset()
                         setKey(String(Date.now()))
                         toast.success('บันทึกสําเร็จ')
