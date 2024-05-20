@@ -15,7 +15,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { PlusCircledIcon } from '@radix-ui/react-icons'
+import { Cross1Icon, PlusCircledIcon } from '@radix-ui/react-icons'
 import React from 'react'
 import { searchSku } from './search-sku'
 
@@ -82,6 +82,27 @@ export default function TestCreateInvoice({}: Props) {
                                 }}
                             />
                         </TableCell>
+                        {items.map((item) => (
+                            <TableRow key={item.barcode}>
+                                <TableCell>{item.barcode}</TableCell>
+                                <TableCell>{item.name}</TableCell>
+                                <TableCell className="text-right">
+                                    {item.quantity}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {item.unit}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {item.price}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {item.price}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <Cross1Icon className="font-bold text-destructive hover:cursor-pointer" />
+                                </TableCell>
+                            </TableRow>
+                        ))}
                         <TableCell colSpan={6} className="text-right">
                             {/* Total */}
                             <PlusCircledIcon className="h-6 w-full text-center text-primary/50 hover:cursor-pointer hover:text-primary" />
