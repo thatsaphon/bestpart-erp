@@ -20,12 +20,17 @@ import { Textarea } from './ui/textarea'
 import { Button } from './ui/button'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { getPurchaseInvoiceDetail } from '@/app/actions/purchase/purchase-invoice-detail'
 
 type Props = {
     document?: Awaited<ReturnType<typeof getSalesInvoiceDetail>>
+    type?: 'sales' | 'purchase'
 }
 
-export default function InvoiceDetailComponent({ document }: Props) {
+export default function InvoiceDetailComponent({
+    document,
+    type = 'sales',
+}: Props) {
     const session = useSession()
     const ref = useRef<HTMLFormElement>(null)
     const [key, setKey] = useState('1')
@@ -84,10 +89,14 @@ export default function InvoiceDetailComponent({ document }: Props) {
                     </div>
                     <div className="flex gap-3">
                         <div className="my-1 flex items-baseline space-x-2">
-                            <Label>ลูกหนี้</Label>
+                            <Label>
+                                {type === 'sales' ? 'ลูกหนี้' : 'คู่ค้า'}
+                            </Label>
                             <SelectSearchCustomer
                                 key={key}
-                                name="customerId"
+                                name={
+                                    type === 'sales' ? 'customerId' : 'vendorId'
+                                }
                                 hasTextArea={true}
                                 placeholder="Optional"
                                 defaultValue={String(
@@ -126,7 +135,11 @@ export default function InvoiceDetailComponent({ document }: Props) {
                             </TableRow>
                         </TableHeader>
 
-                        <TableBodyFooterWrapper key={key} document={document} />
+                        <TableBodyFooterWrapper
+                            key={key}
+                            document={document}
+                            type={type}
+                        />
                     </Table>
                 </form>
             </div>
