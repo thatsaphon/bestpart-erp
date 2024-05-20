@@ -23,9 +23,14 @@ import {
 type Props = {
     disabled?: boolean
     defaultDate?: Date
+    name?: string
 }
 
-export function DatePickerWithPresets({ disabled, defaultDate }: Props) {
+export function DatePickerWithPresets({
+    disabled,
+    defaultDate,
+    name = 'date',
+}: Props) {
     const [date, setDate] = React.useState<Date>(defaultDate || new Date())
 
     return (
@@ -40,7 +45,7 @@ export function DatePickerWithPresets({ disabled, defaultDate }: Props) {
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     <input
-                        name="date"
+                        name={name}
                         type="hidden"
                         onChange={(e) => {
                             setDate(new Date(e.target.value))

@@ -43,7 +43,7 @@ export default function NewSales({}: Props) {
                 <div className="flex gap-3">
                     <div className="space-x-2">
                         <Label>วันที่</Label>
-                        <DatePickerWithPresets key={key} />
+                        <DatePickerWithPresets key={key} name="date" />
                     </div>
                     <div className="space-x-2">
                         <Label>No.</Label>

@@ -53,7 +53,9 @@ export default function PurchaseInvoiceDetailComponent({ document }: Props) {
                     </div>
                     {session.data?.user.role === 'ADMIN' && (
                         <div>
-                            <Link href={`/purchase/${document?.documentId}/edit`}>
+                            <Link
+                                href={`/purchase/${document?.documentId}/edit`}
+                            >
                                 <Button type="button" variant={'destructive'}>
                                     Edit
                                 </Button>

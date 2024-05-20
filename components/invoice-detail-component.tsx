@@ -60,6 +60,7 @@ export default function InvoiceDetailComponent({
                             <DatePickerWithPresets
                                 key={key}
                                 defaultDate={document?.date}
+                                name="date"
                                 disabled
                             />
                         </div>

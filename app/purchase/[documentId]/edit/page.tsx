@@ -10,6 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { Cross1Icon } from '@radix-ui/react-icons'
 import React from 'react'
 
 type Props = { params: { documentId: string } }
@@ -60,6 +61,7 @@ export default async function EditPurchaseInvoicePage({
                         <TableHead className="text-right">Unit</TableHead>
                         <TableHead className="text-right">Price</TableHead>
                         <TableHead className="text-right">Total</TableHead>
+                        <TableHead></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -84,6 +86,9 @@ export default async function EditPurchaseInvoicePage({
                             </TableCell>
                             <TableCell className="text-right">
                                 {purchaseInvoice.price}
+                            </TableCell>
+                            <TableCell className="text-right">
+                                <Cross1Icon className="font-bold text-destructive hover:cursor-pointer" />
                             </TableCell>
                         </TableRow>
                     ))}

@@ -345,7 +345,7 @@ export const updateInvoice = async (id: number, formData: FormData) => {
     await prisma.$transaction([deleteSkuInToOut, updateInvoice])
 
     revalidatePath('/sales')
-    revalidatePath(`/sales/${documentId}/edit`)
+    revalidatePath(`/sales/${documentId}`)
 }
 
 export const generateDocumentNumber = async (prefix: string, date: string) => {
