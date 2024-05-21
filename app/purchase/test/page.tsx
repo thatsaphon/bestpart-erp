@@ -2,7 +2,12 @@
 
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import { Button } from '@/components/ui/button'
-import { Dialog } from '@/components/ui/dialog'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -20,6 +25,7 @@ import React from 'react'
 import { searchSku } from './search-sku'
 import { getSkuByBarcode } from './barcode-scanned'
 import toast from 'react-hot-toast'
+import SearchSkuDialog from './search-sku-dialog'
 
 type Props = {}
 
@@ -262,9 +268,27 @@ export default function TestCreateInvoice({}: Props) {
                                             )
                                             ?.focus()
                                     }
+                                    if (e.code === 'Slash' && e.shiftKey) {
+                                        e.preventDefault()
+                                        setOpen(true)
+                                    }
                                 }}
                             />
                         </TableCell>
+                        <SearchSkuDialog
+                            isOpen={open}
+                            setIsOpen={setOpen}
+                            onSelected={(data) => {
+                                const isExist = items.find(
+                                    (item) => item.barcode === data.barcode
+                                )
+                                if (isExist) {
+                                    return toast.error('มีรายการนี้อยู่แล้ว')
+                                }
+                                setItems([...items, { ...data, quantity: 1 }])
+                                setOpen(false)
+                            }}
+                        />
                     </TableRow>
                 </TableBody>
                 <TableFooter>
