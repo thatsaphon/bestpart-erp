@@ -27,6 +27,7 @@ type Props = {
     children?: React.ReactNode
     onSelected: (data: {
         barcode: string
+        skuMasterId: number
         name: string
         detail: string
         price: number

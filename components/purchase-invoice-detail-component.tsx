@@ -117,10 +117,10 @@ export default function PurchaseInvoiceDetailComponent({ document }: Props) {
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantity})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {(item.cost + item.vat) / item.quantity}
+                                    {item.cost + item.vat}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {item.cost + item.vat}
+                                    {(item.cost + item.vat) * item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}
