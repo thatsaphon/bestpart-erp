@@ -8,17 +8,20 @@ import { generateDocumentNumber } from '@/app/actions/sales/create-invoice'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 
-export const createPurchaseInvoice = async (formData: FormData, items: {
-    barcode: string
-    skuMasterId: number
-    name: string
-    detail: string
-    unit: string
-    quantityPerUnit: number
-    quantity: number
-    price: number
-    partNumber: string
-}[]) => {
+export const createPurchaseInvoice = async (
+    formData: FormData,
+    items: {
+        barcode: string
+        skuMasterId: number
+        name: string
+        detail: string
+        unit: string
+        quantityPerUnit: number
+        quantity: number
+        price: number
+        partNumber: string
+    }[]
+) => {
     const validator = z.object({
         vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
         address: z.string().trim().optional().nullable(),
@@ -40,9 +43,6 @@ export const createPurchaseInvoice = async (formData: FormData, items: {
         address: formData.get('address'),
         phone: formData.get('phone'),
         taxId: formData.get('taxId'),
-        barcodes: formData.getAll('barcode'),
-        quanties: formData.getAll('quantity'),
-        prices: formData.getAll('price'),
         date: formData.get('date'),
         documentId: formData.get('documentId'),
     })
@@ -57,14 +57,7 @@ export const createPurchaseInvoice = async (formData: FormData, items: {
         )
     }
 
-    let {
-        vendorId,
-        address,
-        phone,
-        taxId,
-        date,
-        documentId,
-    } = result.data
+    let { vendorId, address, phone, taxId, date, documentId } = result.data
 
     const contact = await prisma.contact.findUnique({
         where: {
@@ -133,7 +126,8 @@ export const createPurchaseInvoice = async (formData: FormData, items: {
                         amount: +items
                             .reduce(
                                 (sum, item) =>
-                                    sum + (item.quantity * item.price * 100) / 107,
+                                    sum +
+                                    (item.quantity * item.price * 100) / 107,
                                 0
                             )
                             .toFixed(2),
@@ -144,7 +138,8 @@ export const createPurchaseInvoice = async (formData: FormData, items: {
                         amount: +items
                             .reduce(
                                 (sum, item) =>
-                                    sum + (item.quantity * item.price * 7) / 107,
+                                    sum +
+                                    (item.quantity * item.price * 7) / 107,
                                 0
                             )
                             .toFixed(2),
@@ -162,8 +157,14 @@ export const createPurchaseInvoice = async (formData: FormData, items: {
                     unit: item.unit,
                     quantityPerUnit: item.quantityPerUnit,
                     quantity: item.quantity * item.quantityPerUnit,
-                    cost: +(((100 / 107) * +item.price) / item.quantityPerUnit).toFixed(2),
-                    vat: +(((7 / 107) * +item.price) / item.quantityPerUnit).toFixed(2),
+                    cost: +(
+                        ((100 / 107) * +item.price) /
+                        item.quantityPerUnit
+                    ).toFixed(2),
+                    vat: +(
+                        ((7 / 107) * +item.price) /
+                        item.quantityPerUnit
+                    ).toFixed(2),
                 })),
             },
         },

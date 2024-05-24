@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/table'
 import { Cross1Icon } from '@radix-ui/react-icons'
 import React from 'react'
+import TestCreateInvoice from '../../test/page'
 
 type Props = { params: { documentId: string } }
 
@@ -19,13 +20,17 @@ export default async function EditPurchaseInvoicePage({
     params: { documentId },
 }: Props) {
     const purchaseInvoices: {
+        id: number
         date: Date
+        documentId: string
         contactId: number
         contactName: string
         address: string
         phone: string
         taxId: string
         remark: string
+        partNumber: string
+        skuMasterId: number
         barcode: string
         name: string
         detail: string
@@ -34,8 +39,8 @@ export default async function EditPurchaseInvoicePage({
         unit: string
         quantityPerUnit: number
     }[] = await prisma.$queryRaw`
-        select "Document"."date", "Contact"."id" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId", "Document"."remark",
-        "SkuIn".barcode, "MainSku"."name", "SkuMaster"."detail", "SkuIn".quantity, ("SkuIn".cost + "SkuIn".vat) as "price", "SkuIn".unit, "SkuIn"."quantityPerUnit" from "Document" 
+        select "Document".id, "Document"."date", "Document"."documentId", "Contact"."id" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId", "Document"."remark",
+        "SkuIn".barcode, "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuIn".quantity, ("SkuIn".cost + "SkuIn".vat) as "price", "SkuIn".unit, "SkuIn"."quantityPerUnit" from "Document" 
         left join "ApSubledger" on "ApSubledger"."documentId" = "Document"."id"
         left join "Contact" on "Contact"."id" = "ApSubledger"."contactId"
         left join "Address" on "Address"."contactId" = "Contact"."id"
@@ -46,64 +51,10 @@ export default async function EditPurchaseInvoicePage({
         -- left join "GeneralLedger" on "GeneralLedger"."id" = "_DocumentToGeneralLedger"."B"
         where "Document"."documentId" = ${documentId}`
 
-    console.log(purchaseInvoices)
-
     return (
-        <div className="p-3">
-            <Button variant="ghost">{`< Back`}</Button>
-            <Table>
-                <TableCaption>{purchaseInvoices[0].remark}</TableCaption>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Barcode</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead className="text-right">Quantity</TableHead>
-                        <TableHead className="text-right">Unit</TableHead>
-                        <TableHead className="text-right">Price</TableHead>
-                        <TableHead className="text-right">Total</TableHead>
-                        <TableHead></TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {purchaseInvoices.map((purchaseInvoice) => (
-                        <TableRow key={purchaseInvoice.barcode}>
-                            <TableCell>{purchaseInvoice.barcode}</TableCell>
-                            <TableCell>
-                                <p>{purchaseInvoice.name}</p>
-                                <p className="text-primary/50">
-                                    {purchaseInvoice.detail}
-                                </p>
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {purchaseInvoice.quantity}
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {purchaseInvoice.unit}
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {purchaseInvoice.price /
-                                    purchaseInvoice.quantity}
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {purchaseInvoice.price}
-                            </TableCell>
-                            <TableCell className="text-right">
-                                <Cross1Icon className="font-bold text-destructive hover:cursor-pointer" />
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-                <TableFooter>
-                    <TableRow>
-                        <TableCell colSpan={5} className="text-right">
-                            Total
-                        </TableCell>
-                        <TableCell className="text-right">
-                            {purchaseInvoices.reduce((a, b) => a + b.price, 0)}
-                        </TableCell>
-                    </TableRow>
-                </TableFooter>
-            </Table>
-        </div>
+        <TestCreateInvoice
+            defaultItems={purchaseInvoices}
+            defaultDocumentDetails={purchaseInvoices[0]}
+        />
     )
 }

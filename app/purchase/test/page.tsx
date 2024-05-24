@@ -20,23 +20,44 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Cross1Icon, PlusCircledIcon } from '@radix-ui/react-icons'
+import { Cross1Icon } from '@radix-ui/react-icons'
 import React from 'react'
-import { searchSku } from './search-sku'
 import { getSkuByBarcode } from './barcode-scanned'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from './search-sku-dialog'
-import { Contact, Prisma } from '@prisma/client'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { SearchIcon } from 'lucide-react'
-import SearchContact from './search-contact'
-import SelectSearchCustomer from '@/components/select-search-customer'
 import SelectSearchVendor from '@/components/select-search-vendor'
 import { createPurchaseInvoice } from './create-purchase-invoice'
+import { updatePurchaseInvoice } from './update-purchase-invoice'
 
-type Props = {}
+type Props = {
+    defaultItems?: {
+        barcode: string
+        skuMasterId: number
+        name: string
+        detail: string
+        unit: string
+        quantityPerUnit: number
+        quantity: number
+        price: number
+        partNumber: string
+    }[]
+    defaultDocumentDetails?: {
+        id: number
+        date: Date
+        documentId: string
+        contactId: number
+        contactName: string
+        address: string
+        phone: string
+        taxId: string
+        remark: string
+    }
+}
 
-export default function TestCreateInvoice({}: Props) {
+export default function TestCreateInvoice({
+    defaultItems = [],
+    defaultDocumentDetails,
+}: Props) {
     const [open, setOpen] = React.useState(false)
     const [items, setItems] = React.useState<
         {
@@ -50,7 +71,7 @@ export default function TestCreateInvoice({}: Props) {
             price: number
             partNumber: string
         }[]
-    >([])
+    >(defaultItems)
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
 
@@ -60,10 +81,20 @@ export default function TestCreateInvoice({}: Props) {
             <form
                 action={async (formData) => {
                     try {
-                        await createPurchaseInvoice(formData, items)
-                        setKey(String(Date.now()))
-                        toast.success('บันทึกสําเร็จ')
-                        setItems([])
+                        if (!defaultItems.length) {
+                            await createPurchaseInvoice(formData, items)
+                            setKey(String(Date.now()))
+                            setItems([])
+                        }
+
+                        if (defaultDocumentDetails) {
+                            await updatePurchaseInvoice(
+                                defaultDocumentDetails.id,
+                                formData,
+                                items
+                            )
+                            toast.success('บันทึกสําเร็จ')
+                        }
                     } catch (err) {
                         if (err instanceof Error)
                             return toast.error(err.message)
@@ -75,11 +106,20 @@ export default function TestCreateInvoice({}: Props) {
                     <div className="flex gap-3">
                         <Label className="flex items-center gap-2">
                             <p className="">วันที่</p>
-                            <DatePickerWithPresets />
+                            <DatePickerWithPresets
+                                defaultDate={defaultDocumentDetails?.date}
+                            />
                         </Label>
                         <Label className="flex items-center gap-2">
                             <p className="">No. </p>
-                            <Input className="w-auto" placeholder="Optional" />
+                            <Input
+                                className="w-auto"
+                                name="documentId"
+                                placeholder="Optional"
+                                defaultValue={
+                                    defaultDocumentDetails?.documentId
+                                }
+                            />
                         </Label>
                     </div>
 
@@ -93,6 +133,14 @@ export default function TestCreateInvoice({}: Props) {
                             name="vendorId"
                             hasTextArea={true}
                             placeholder="รหัสลูกหนี้"
+                            defaultValue={String(
+                                defaultDocumentDetails?.contactId
+                            )}
+                            defaultAddress={{
+                                address: defaultDocumentDetails?.address || '',
+                                phone: defaultDocumentDetails?.phone || '',
+                                taxId: defaultDocumentDetails?.taxId || '',
+                            }}
                         />
                     </div>
                 </div>
@@ -243,7 +291,18 @@ export default function TestCreateInvoice({}: Props) {
                                     {item.price * item.quantity}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    <Cross1Icon className="font-bold text-destructive hover:cursor-pointer" />
+                                    <Cross1Icon
+                                        className="font-bold text-destructive hover:cursor-pointer"
+                                        onClick={() =>
+                                            setItems(
+                                                items.filter(
+                                                    (i) =>
+                                                        i.barcode !==
+                                                        item.barcode
+                                                )
+                                            )
+                                        }
+                                    />
                                 </TableCell>
                             </TableRow>
                         ))}
