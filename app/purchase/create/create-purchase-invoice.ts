@@ -7,20 +7,11 @@ import { fromZodError } from 'zod-validation-error'
 import { generateDocumentNumber } from '@/app/actions/sales/create-invoice'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
+import { InvoiceItemDetailType } from './invoice-item-detail-type'
 
 export const createPurchaseInvoice = async (
     formData: FormData,
-    items: {
-        barcode: string
-        skuMasterId: number
-        name: string
-        detail: string
-        unit: string
-        quantityPerUnit: number
-        quantity: number
-        price: number
-        partNumber: string
-    }[]
+    items: InvoiceItemDetailType[]
 ) => {
     const validator = z.object({
         vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
@@ -79,15 +70,6 @@ export const createPurchaseInvoice = async (
         throw new Error('goods not found')
     }
 
-    // let mapQuanties: (Awaited<
-    //     ReturnType<typeof prisma.goodsMaster.findFirstOrThrow>
-    // > & { q: number; p: number })[] = goodsMasters.map((goodsMaster) => {
-    //     return {
-    //         ...goodsMaster,
-    //         q: +quanties[barcodes.indexOf(goodsMaster.barcode)],
-    //         p: +prices[barcodes.indexOf(goodsMaster.barcode)],
-    //     }
-    // })
 
     if (!documentId) {
         documentId = await generateDocumentNumber('PINV', date)
@@ -151,7 +133,7 @@ export const createPurchaseInvoice = async (
                     date: new Date(date),
                     goodsMasterId: goodsMasters.find(
                         (goodsMaster) => goodsMaster.barcode === item.barcode
-                    )?.id,
+                    )?.id as number,
                     skuMasterId: item.skuMasterId,
                     barcode: item.barcode,
                     unit: item.unit,

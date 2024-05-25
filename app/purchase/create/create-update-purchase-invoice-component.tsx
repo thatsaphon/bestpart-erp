@@ -28,19 +28,10 @@ import SearchSkuDialog from './search-sku-dialog'
 import SelectSearchVendor from '@/components/select-search-vendor'
 import { createPurchaseInvoice } from './create-purchase-invoice'
 import { updatePurchaseInvoice } from './update-purchase-invoice'
+import { InvoiceItemDetailType } from './invoice-item-detail-type'
 
 type Props = {
-    defaultItems?: {
-        barcode: string
-        skuMasterId: number
-        name: string
-        detail: string
-        unit: string
-        quantityPerUnit: number
-        quantity: number
-        price: number
-        partNumber: string
-    }[]
+    defaultItems?: InvoiceItemDetailType[]
     defaultDocumentDetails?: {
         id: number
         date: Date
@@ -54,24 +45,13 @@ type Props = {
     }
 }
 
-export default function TestCreateInvoice({
+export default function CreateOrUpdatePurchaseInvoiceComponent({
     defaultItems = [],
     defaultDocumentDetails,
 }: Props) {
     const [open, setOpen] = React.useState(false)
-    const [items, setItems] = React.useState<
-        {
-            barcode: string
-            skuMasterId: number
-            name: string
-            detail: string
-            unit: string
-            quantityPerUnit: number
-            quantity: number
-            price: number
-            partNumber: string
-        }[]
-    >(defaultItems)
+    const [items, setItems] =
+        React.useState<InvoiceItemDetailType[]>(defaultItems)
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
 
@@ -128,13 +108,13 @@ export default function TestCreateInvoice({
                             <Input className="w-auto" placeholder="Optional" />
                         </Label> */}
                     <div className="my-1 flex items-baseline space-x-2">
-                        <Label>ลูกหนี้</Label>
+                        <Label>คู่ค้า</Label>
                         <SelectSearchVendor
                             name="vendorId"
                             hasTextArea={true}
-                            placeholder="รหัสลูกหนี้"
+                            placeholder="รหัสคู่ค้า"
                             defaultValue={String(
-                                defaultDocumentDetails?.contactId
+                                defaultDocumentDetails?.contactId || ''
                             )}
                             defaultAddress={{
                                 address: defaultDocumentDetails?.address || '',

@@ -20,22 +20,13 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import PaginationClientComponent from '@/components/pagination-client-component'
+import { InvoiceItemDetailType } from './invoice-item-detail-type'
 
 type Props = {
     isOpen: boolean
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
     children?: React.ReactNode
-    onSelected: (data: {
-        barcode: string
-        skuMasterId: number
-        name: string
-        detail: string
-        price: number
-        quantityPerUnit: number
-        unit: string
-        partNumber: string
-        remaining: number
-    }) => void
+    onSelected: (data: InvoiceItemDetailType) => void
 }
 
 export default function SearchSkuDialog({
@@ -45,16 +36,7 @@ export default function SearchSkuDialog({
     onSelected,
 }: Props) {
     const [searchItems, setSearchItems] = React.useState<
-        {
-            barcode: string
-            name: string
-            detail: string
-            price: number
-            quantityPerUnit: number
-            unit: string
-            partNumber: string
-            remaining: number
-        }[]
+        InvoiceItemDetailType[]
     >([])
     const [searchKeyword, setSearchKeyword] = React.useState('')
     const [page, setPage] = React.useState(1)

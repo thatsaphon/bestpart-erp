@@ -1,29 +1,18 @@
 'use server'
 
 import prisma from '@/app/db/db'
-import { format } from 'date-fns'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
-import { generateDocumentNumber } from '@/app/actions/sales/create-invoice'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { InvoiceItemDetailType } from './invoice-item-detail-type'
 
 export const updatePurchaseInvoice = async (
     id: number,
     formData: FormData,
-    items: {
-        barcode: string
-        skuMasterId: number
-        name: string
-        detail: string
-        unit: string
-        quantityPerUnit: number
-        quantity: number
-        price: number
-        partNumber: string
-    }[]
+    items: InvoiceItemDetailType[]
 ) => {
     const validator = z.object({
         vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
@@ -78,10 +67,6 @@ export const updatePurchaseInvoice = async (
         throw new Error('goods not found')
     }
 
-    if (!documentId) {
-        documentId = await generateDocumentNumber('PINV', date)
-    }
-
     const session = await getServerSession(authOptions)
 
     const invoice = await prisma.document.findUnique({
@@ -132,10 +117,10 @@ export const updatePurchaseInvoice = async (
             remark: remark || undefined,
             ApSubledger: !!contact
                 ? {
-                      update: {
-                          contactId: Number(vendorId),
-                      },
-                  }
+                    update: {
+                        contactId: Number(vendorId),
+                    },
+                }
                 : undefined,
             GeneralLedger: {
                 update: [
@@ -170,7 +155,7 @@ export const updatePurchaseInvoice = async (
                                     (sum, item) =>
                                         sum +
                                         (item.quantity * item.price * 100) /
-                                            107,
+                                        107,
                                     0
                                 )
                                 .toFixed(2),
@@ -213,9 +198,7 @@ export const updatePurchaseInvoice = async (
                         },
                         data: {
                             date: new Date(date),
-                            goodsMasterId: goodsMasters.find(
-                                (master) => master.barcode === item.barcode
-                            )?.id,
+                            goodsMasterId: item.goodsMasterId,
                             skuMasterId: item.skuMasterId,
                             barcode: item.barcode,
                             unit: item.unit,

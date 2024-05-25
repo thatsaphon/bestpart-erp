@@ -2,37 +2,28 @@
 
 import prisma from '@/app/db/db'
 import { Prisma } from '@prisma/client'
+import { InvoiceItemDetailType } from './invoice-item-detail-type'
 
 export const searchSku = async (query: string, page: number = 1) => {
     const splitQuery = query.trim().split(' ')
 
     const items = await prisma.$queryRawUnsafe<
-        {
-            barcode: string
-            skuMasterId: number
-            name: string
-            detail: string
-            price: number
-            quantityPerUnit: number
-            unit: string
-            partNumber: string
-            remaining: number
-        }[]
+        InvoiceItemDetailType[]
     >(
-        `select "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "GoodsMaster".price, 
+        `select "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "GoodsMaster".price, 
     "GoodsMaster".quantity as "quantityPerUnit", "GoodsMaster".unit, "MainSku"."partNumber"
     from "MainSku"
     left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
     left join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
     ${query ? `where ` : ` `}
     ${splitQuery
-        .map((x, index) =>
-            x.trim()
-                ? `(LOWER("MainSku"."name") like $${index + 1} or LOWER("SkuMaster"."detail") like $${index + 1} or
+            .map((x, index) =>
+                x.trim()
+                    ? `(LOWER("MainSku"."name") like $${index + 1} or LOWER("SkuMaster"."detail") like $${index + 1} or
     LOWER("GoodsMaster"."barcode") like $${index + 1} or LOWER("MainSku"."searchKeyword") like $${index + 1})`
-                : ``
-        )
-        .join(' and ')}
+                    : ``
+            )
+            .join(' and ')}
     limit 10 offset ${(page - 1) * 10}
     `,
         ...splitQuery.map((x) => `%${x.toLowerCase()}%`)
@@ -52,13 +43,13 @@ export const searchSku = async (query: string, page: number = 1) => {
     left join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
     ${query ? `where ` : ` `}
     ${splitQuery
-        .map((x, index) =>
-            x.trim()
-                ? `(LOWER("MainSku"."name") like $${index + 1} or LOWER("SkuMaster"."detail") like $${index + 1} or
+            .map((x, index) =>
+                x.trim()
+                    ? `(LOWER("MainSku"."name") like $${index + 1} or LOWER("SkuMaster"."detail") like $${index + 1} or
     LOWER("GoodsMaster"."barcode") like $${index + 1} or LOWER("MainSku"."searchKeyword") like $${index + 1})`
-                : ``
-        )
-        .join(' and ')}
+                    : ``
+            )
+            .join(' and ')}
     limit 10 offset ${(page - 1) * 10}
     `,
         ...splitQuery.map((x) => `%${x.toLowerCase()}%`)
