@@ -17,7 +17,8 @@ export default function BlobProviderClient({ document }: Props) {
     }, [])
     return (
         <>
-            {isClient ? (
+            {!isClient && <Button disabled>Loading</Button>}
+            {isClient && (
                 <BlobProvider
                     document={<SalesInvoicePdf document={document} />}
                 >
@@ -35,8 +36,6 @@ export default function BlobProviderClient({ document }: Props) {
                         )
                     }
                 </BlobProvider>
-            ) : (
-                <Button disabled>Loading</Button>
             )}
         </>
     )
