@@ -19,6 +19,9 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
 import SelectSearchVendor from '../../../components/select-search-vendor'
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+import { BlobProvider } from '@react-pdf/renderer'
+import SalesInvoicePdf from '@/components/pdf/invoice-pdf'
+import BlobProviderClient from './blob-provider'
 
 type Props = {
     params: { documentId: string }
@@ -155,6 +158,9 @@ export default async function PurchaseInvoiceDetailPage({
                                 colSpan={6}
                                 className="space-x-1 text-right"
                             ></TableCell>
+                        </TableRow>
+                        <TableRow className="bg-background">
+                            <BlobProviderClient document={document} />
                         </TableRow>
                     </TableFooter>
                 </Table>

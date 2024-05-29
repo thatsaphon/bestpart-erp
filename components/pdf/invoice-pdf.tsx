@@ -30,7 +30,7 @@ export default function SalesInvoicePdf({ document }: Props) {
     const styles = StyleSheet.create({
         page: {
             flexDirection: 'column',
-            fontSize: 8,
+            fontSize: 3,
             gap: 5,
             fontFamily: 'Inter Sarabun',
             alignItems: 'center',
@@ -111,8 +111,8 @@ export default function SalesInvoicePdf({ document }: Props) {
     return (
         <Document>
             <Page
-                size={['396', '648']}
-                orientation="landscape"
+                size={{ width: 164 }} //บิลขายหน้าร้าน['396', '648']
+                // orientation="landscape"
                 style={styles.page}
                 fixed
             >
