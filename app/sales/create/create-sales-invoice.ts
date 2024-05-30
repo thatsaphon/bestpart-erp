@@ -188,8 +188,8 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
                         quantityPerUnit: item.quantityPerUnit,
                         quantity: item.quantity * item.quantityPerUnit,
                         cost: 0,
-                        price: +((100 / 107) * item.quantity * item.price).toFixed(2),
-                        vat: +((7 / 107) * item.quantity * item.price).toFixed(2),
+                        price: +((100 / 107) * item.price).toFixed(2),
+                        vat: +((7 / 107) * item.price).toFixed(2),
                         SkuInToOut: {
                             create: checkRemaining
                                 .filter(

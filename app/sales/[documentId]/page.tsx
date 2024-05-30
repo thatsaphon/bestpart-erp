@@ -13,12 +13,13 @@ import {
 } from '@/components/ui/table'
 import { Textarea } from '../../../components/ui/textarea'
 import { Button } from '../../../components/ui/button'
-import { getPurchaseInvoiceDetail } from '@/app/actions/purchase/purchase-invoice-detail'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
 import SelectSearchVendor from '../../../components/select-search-vendor'
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+import BlobProviderClient from './blob-provider'
+import { Suspense } from 'react'
 
 type Props = {
     params: { documentId: string }
@@ -122,7 +123,7 @@ export default async function PurchaseInvoiceDetailPage({
                                 <TableCell className="text-right">
                                     {item.quantity}
                                 </TableCell>
-                                <TableCell className="text-right">{`${item.unit}(${item.quantity})`}</TableCell>
+                                <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                 <TableCell className="text-right">
                                     {item.price + item.vat}
                                 </TableCell>
@@ -158,6 +159,7 @@ export default async function PurchaseInvoiceDetailPage({
                         </TableRow>
                     </TableFooter>
                 </Table>
+                <BlobProviderClient document={document} />
             </div>
         </>
     )
