@@ -41,6 +41,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^0.2.1",
+    "csv-string": "^4.1.1",
     "date-fns": "^3.6.0",
     "input-otp": "^1.2.2",
     "jsbarcode": "^3.11.6",

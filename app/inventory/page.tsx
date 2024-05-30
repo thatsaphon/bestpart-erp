@@ -18,6 +18,9 @@ import { ListBulletIcon } from '@radix-ui/react-icons'
 import { ListIcon } from 'lucide-react'
 import Link from 'next/link'
 import { createQueryString } from '@/lib/searchParams'
+import { uploadFile } from './import-inventory'
+import PaginationInventory from './pagination-inventory'
+import { redirect } from 'next/navigation'
 
 type Props = {
     searchParams: {
@@ -36,6 +39,17 @@ export default async function InventoryListPage({
     searchParams: { page = '1', limit = '10', search = '', remaining = '' },
 }: Props) {
     const mainSkus = await prisma.mainSku.findMany({
+        where: {
+            AND: search
+                .split(' ')
+                .filter((x) => x)
+                .map((x) => ({
+                    OR: [
+                        { name: { contains: x } },
+                        { searchKeyword: { contains: x } },
+                    ],
+                })),
+        },
         skip: (Number(page) - 1) * Number(limit),
         take: Number(limit),
         include: {
@@ -66,13 +80,22 @@ export default async function InventoryListPage({
                 <CreateMainSkuDialog />
             </h1>
             <div className="mt-2 grid w-full max-w-sm grid-cols-2 items-center gap-1.5">
-                <Input type="search" id="search" placeholder="Search" />
-                <ListIcon className="" />
-                <Link
-                    href={`?${createQueryString(new URLSearchParams(searchParams), 'remaining', 'true')}`}
+                <form
+                    action={async (formData) => {
+                        'use server'
+                        redirect(
+                            `?${createQueryString(new URLSearchParams(searchParams), 'search', String(formData.get('search') || ''))}`
+                        )
+                    }}
                 >
-                    <Button type="submit">ดูจำนวน</Button>
-                </Link>
+                    <Input
+                        name="search"
+                        type="search"
+                        id="search"
+                        placeholder="Search"
+                    />
+                    <Button type="submit">Submit</Button>
+                </form>
             </div>
             {true && (
                 <div className="mt-2 flex flex-wrap gap-3">
@@ -81,36 +104,14 @@ export default async function InventoryListPage({
                     ))}
                 </div>
             )}
-            <Pagination className="mt-4">
-                <PaginationContent>
-                    {page !== '1' && (
-                        <PaginationItem>
-                            <PaginationPrevious
-                                href={`?page=${+page - 1}&limit=${limit}`}
-                            />
-                        </PaginationItem>
-                    )}
-                    {Array.from({
-                        length: numberOfPage,
-                    }).map((_, index) => (
-                        <PaginationItem key={index}>
-                            <PaginationLink
-                                isActive={+page === index + 1}
-                                href={`?page=${index + 1}&limit=${limit}`}
-                            >
-                                {index + 1}
-                            </PaginationLink>
-                        </PaginationItem>
-                    ))}
-                    {page !== String(numberOfPage) && (
-                        <PaginationItem>
-                            <PaginationNext
-                                href={`?page=${+page + 1}&limit=${limit}`}
-                            />
-                        </PaginationItem>
-                    )}
-                </PaginationContent>
-            </Pagination>
+            <PaginationInventory
+                numberOfPage={numberOfPage}
+                searchParams={searchParams}
+            />
+            <form action={uploadFile}>
+                <input type="file" name="file" />
+                <button type="submit">Upload</button>
+            </form>
         </div>
     )
 }
