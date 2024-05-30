@@ -34,7 +34,7 @@ export default function SalesInvoicePdf({ document }: Props) {
     const styles = StyleSheet.create({
         page: {
             flexDirection: 'column',
-            fontSize: 5,
+            fontSize: 6,
             gap: 5,
             fontFamily: 'Inter Sarabun',
             alignItems: 'center',
@@ -61,8 +61,8 @@ export default function SalesInvoicePdf({ document }: Props) {
             flexDirection: 'row',
             gap: 5,
             width: '100%',
-            paddingLeft: 5,
-            paddingRight: 5,
+            // paddingLeft: 5,
+            // paddingRight: 5,
             alignItems: 'flex-start',
         },
         col1: {
@@ -118,12 +118,13 @@ export default function SalesInvoicePdf({ document }: Props) {
     return (
         <Document>
             <Page
-                size={{ width: 164, height: 2000 }} //บิลขายหน้าร้าน['396', '648']
+                // 2.28inch -> 164px, 1.89inch -> 136px, 8.3inch -> 597px 11.69inch -> 841px
+                size={{ width: 136, height: 597 }} //บิลขายหน้าร้าน['396', '648']
                 orientation="portrait"
                 style={styles.page}
                 fixed
             >
-                <View style={styles.title} fixed>
+                <View style={styles.title}>
                     <Text style={styles.header}>หจก.จ.สุพรรณบุรีอะไหล่</Text>
                     <Text style={styles.header}>
                         ใบกำกับภาษีอย่างย่อ/ใบเสร็จรับเงิน{' '}
@@ -143,7 +144,7 @@ export default function SalesInvoicePdf({ document }: Props) {
                     </Text>
                     <Text style={styles.header}>ราคารวมภาษีมูลค่าเพิ่ม</Text>
                 </View>
-                <View style={styles.row} fixed>
+                <View style={styles.row}>
                     <Text style={styles.col1}>ที่</Text>
                     {/* <Text style={styles.col2}>Barcode</Text> */}
                     <Text style={styles.col3}>ชื่อสินค้า</Text>
