@@ -14,13 +14,13 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Cross1Icon } from '@radix-ui/react-icons'
 import React from 'react'
 import toast from 'react-hot-toast'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { Prisma } from '@prisma/client'
+import { createBillingNote } from './create-billing-note'
 
 const documentWithGeneralLedgerArSubledger =
     Prisma.validator<Prisma.DocumentDefaultArgs>()({
@@ -73,11 +73,14 @@ export default function CreateBillingNote({
                 ref={formRef}
                 action={async (formData) => {
                     try {
+                        await createBillingNote(
+                            formData,
+                            items.map((item) => item.documentId)
+                        )
+                        setKey(String(Date.now()))
+                        setItems([])
+                        toast.success('บันทึกสําเร็จ')
                         if (!defaultItems.length) {
-                            // await createSalesInvoice(formData, items)
-                            // setKey(String(Date.now()))
-                            // setItems([])
-                            // toast.success('บันทึกสําเร็จ')
                         }
 
                         if (defaultDocumentDetails) {

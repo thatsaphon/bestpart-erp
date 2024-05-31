@@ -12,7 +12,7 @@ import {
 import { Prisma } from '@prisma/client'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
-import CreateBillingNote from './create-billing-note'
+import CreateBillingNote from './create-billing-note-component'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
@@ -62,13 +62,6 @@ export default function ReceivableTable({ documents }: Props) {
                                                     document.documentId
                                             ) && true
                                         }
-                                        // value={
-                                        //     selectItems.find(
-                                        //         (item) =>
-                                        //             item.documentId ===
-                                        //             document.documentId
-                                        //     ) && true
-                                        // }
                                         onCheckedChange={(bool) => {
                                             if (bool) {
                                                 setSelectItems([

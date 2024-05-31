@@ -32,7 +32,7 @@ export default async function ContactReceivablePage({ params: { id } }: Props) {
 
     return (
         <div className="mb-2 p-3">
-            <h1 className="text-3xl">{contact?.name}</h1>
+            <h1 className="text-3xl">{contact?.name} </h1>
             <ReceivableTable documents={documents} />
         </div>
     )
