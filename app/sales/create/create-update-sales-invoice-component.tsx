@@ -2,12 +2,6 @@
 
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import { Button } from '@/components/ui/button'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -30,6 +24,8 @@ import { createSalesInvoice } from './create-sales-invoice'
 import { InvoiceItemDetailType } from './invoice-item-detail-type'
 import { updateSalesInvoice } from './update-sales-invoice'
 import SelectSearchCustomer from '@/components/select-search-customer'
+import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 type Props = {
     defaultItems?: InvoiceItemDetailType[]
@@ -50,16 +46,29 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     defaultItems = [],
     defaultDocumentDetails,
 }: Props) {
+    const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
     const [items, setItems] =
         React.useState<InvoiceItemDetailType[]>(defaultItems)
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
+    const session = useSession()
 
     return (
         <div className="p-3" key={key}>
-            <Button variant="ghost">{`< Back`}</Button>
+            <div className="flex justify-between">
+                <Link href="/sales">
+                    <Button variant="ghost" className="mb-2">{`< Back`}</Button>
+                </Link>
+                <Link href="/sales/create">
+                    <Button
+                        variant="ghost"
+                        className="mb-2"
+                    >{`Create New`}</Button>
+                </Link>
+            </div>
             <form
+                ref={formRef}
                 action={async (formData) => {
                     try {
                         if (!defaultItems.length) {
@@ -209,6 +218,9 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Input
+                                        disabled={
+                                            session.data?.user.role !== 'ADMIN'
+                                        }
                                         id={`price-${index}`}
                                         className="w-16 text-right"
                                         type="number"
@@ -402,7 +414,14 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 colSpan={6}
                                 className="space-x-1 text-right"
                             >
-                                <Button variant="destructive" type="button">
+                                <Button
+                                    variant="destructive"
+                                    type="button"
+                                    onClick={(e) => {
+                                        setKey(String(Date.now()))
+                                        setItems(defaultItems)
+                                    }}
+                                >
                                     Reset
                                 </Button>
                                 <Button type="submit">Save</Button>

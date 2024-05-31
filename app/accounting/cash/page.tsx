@@ -24,7 +24,7 @@ export default async function CashPage({}: Props) {
             username: true,
             first_name: true,
             last_name: true,
-            AccountOwner: { select: { accountNumberId: true } },
+            AccountOwner: { select: { chartOfAccountId: true } },
             role: true,
             avatarUrl: true,
             flag: true,
