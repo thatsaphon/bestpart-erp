@@ -169,16 +169,23 @@ export default async function ContactPage({
                                     }
                                 </TableCell>
                                 <TableCell>
-                                    {contact.ArSubledger.reduce(
-                                        (acc, curr) =>
-                                            acc +
-                                            curr.Document.GeneralLedger.reduce(
-                                                (acc, curr) =>
-                                                    acc + curr.amount,
-                                                0
-                                            ),
-                                        0
-                                    )}
+                                    <Link
+                                        href={`/contact/${contact.id}/receivable`}
+                                    >
+                                        {contact.ArSubledger.filter(
+                                            ({ paymentStatus }) =>
+                                                paymentStatus === 'NotPaid'
+                                        ).reduce(
+                                            (acc, curr) =>
+                                                acc +
+                                                curr.Document.GeneralLedger.reduce(
+                                                    (acc, curr) =>
+                                                        acc + curr.amount,
+                                                    0
+                                                ),
+                                            0
+                                        )}
+                                    </Link>
                                 </TableCell>
                                 <TableCell>
                                     {

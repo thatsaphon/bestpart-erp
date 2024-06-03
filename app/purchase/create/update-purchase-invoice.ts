@@ -114,13 +114,13 @@ export const updatePurchaseInvoice = async (
             date: date ? new Date(date) : undefined,
             documentId: documentId || undefined,
             updatedBy: session?.user.username,
-            remark: remark || undefined,
+            remark: remark ? { create: { remark } } : undefined,
             ApSubledger: !!contact
                 ? {
-                    update: {
-                        contactId: Number(vendorId),
-                    },
-                }
+                      update: {
+                          contactId: Number(vendorId),
+                      },
+                  }
                 : undefined,
             GeneralLedger: {
                 update: [
@@ -155,7 +155,7 @@ export const updatePurchaseInvoice = async (
                                     (sum, item) =>
                                         sum +
                                         (item.quantity * item.price * 100) /
-                                        107,
+                                            107,
                                     0
                                 )
                                 .toFixed(2),

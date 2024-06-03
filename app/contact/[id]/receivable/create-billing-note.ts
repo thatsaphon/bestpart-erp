@@ -4,9 +4,13 @@ import { generateDocumentNumber } from '@/app/actions/sales/create-invoice'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import prisma from '@/app/db/db'
 import { getServerSession } from 'next-auth/next'
+import { create } from 'node:domain'
 import { z } from 'zod'
 
-export const createBillingNote = async (formData: FormData, documentIds: string[]) => {
+export const createBillingNote = async (
+    formData: FormData,
+    documentIds: string[]
+) => {
     const validator = z.object({
         customerId: z.string().trim(),
         address: z.string().trim().optional().nullable(),
@@ -26,16 +30,17 @@ export const createBillingNote = async (formData: FormData, documentIds: string[
         date,
         documentId,
         payment,
-        remark, } = validator.parse({
-            customerId: formData.get('customerId'),
-            address: formData.get('address'),
-            phone: formData.get('phone'),
-            taxId: formData.get('taxId'),
-            date: formData.get('date'),
-            documentId: formData.get('documentId'),
-            payment: formData.get('payment'),
-            remark: formData.get('remark'),
-        })
+        remark,
+    } = validator.parse({
+        customerId: formData.get('customerId'),
+        address: formData.get('address'),
+        phone: formData.get('phone'),
+        taxId: formData.get('taxId'),
+        date: formData.get('date'),
+        documentId: formData.get('documentId'),
+        payment: formData.get('payment'),
+        remark: formData.get('remark'),
+    })
     const documents = await prisma.document.findMany({
         where: {
             documentId: {
@@ -52,18 +57,27 @@ export const createBillingNote = async (formData: FormData, documentIds: string[
                 },
             },
             ArSubledger: true,
-        }
+        },
     })
 
     for (const document of documents) {
-        if (!documentIds.includes(document.documentId)) throw new Error(`${document.documentId} is not in documentIds`)
+        if (!documentIds.includes(document.documentId))
+            throw new Error(`${document.documentId} is not in documentIds`)
 
         if (document.ArSubledger?.contactId !== +customerId) {
-            throw new Error(`${document.documentId} is not linked to coustomerId: ${customerId}`)
+            throw new Error(
+                `${document.documentId} is not linked to coustomerId: ${customerId}`
+            )
         }
 
-        if (document.ArSubledger.paymentStatus === 'Paid' || document.ArSubledger.paymentStatus === 'Billed' || document.ArSubledger.paymentStatus === 'Cash') {
-            throw new Error(`${document.documentId} is already ${document.ArSubledger.paymentStatus}`)
+        if (
+            document.ArSubledger.paymentStatus === 'Paid' ||
+            document.ArSubledger.paymentStatus === 'Billed' ||
+            document.ArSubledger.paymentStatus === 'Cash'
+        ) {
+            throw new Error(
+                `${document.documentId} is already ${document.ArSubledger.paymentStatus}`
+            )
         }
     }
 
@@ -78,33 +92,52 @@ export const createBillingNote = async (formData: FormData, documentIds: string[
             address: address?.substring(address.indexOf('\n') + 1) || '',
             phone: phone || '',
             taxId: taxId || '',
+            type: 'BillingNote',
             date: new Date(date),
             documentId: documentId,
-            remark: remark || '',
+            remark: remark ? { create: { remark } } : undefined,
             createdBy: session?.user.username,
             updatedBy: session?.user.username,
             ArSubledger: {
                 create: {
                     contactId: +customerId,
-                    paymentStatus: 'Billed'
-                }
+                    paymentStatus: 'NotPaid',
+                },
             },
             GeneralLedger: {
-                connect: [...documents.map((document) => ({ id: document.GeneralLedger[0].id }))]
-            }
-        }
+                connect: [
+                    ...documents.map((document) => ({
+                        id: document.GeneralLedger[0].id,
+                    })),
+                ],
+            },
+        },
+        select: {
+            id: true,
+            documentId: true,
+        },
     })
 
     const updatePaymentStatus = prisma.arSubledger.updateMany({
         where: {
             documentId: {
                 in: documents.map((document) => document.id),
-            }
+            },
         },
         data: {
-            paymentStatus: 'Billed'
-        }
+            paymentStatus: 'Billed',
+        },
     })
 
-    await prisma.$transaction([createBillingNote, updatePaymentStatus])
+    const createRemark = prisma.documentRemark.createMany({
+        data: documents.map((document) => ({
+            remark: `วางบิลเลขที่ ${documentId}`,
+            documentId: document.id,
+        })),
+    })
+    const transaction = await prisma.$transaction([
+        createBillingNote,
+        updatePaymentStatus,
+        createRemark,
+    ])
 }

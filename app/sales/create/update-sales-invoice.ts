@@ -9,7 +9,11 @@ import { fromZodError } from 'zod-validation-error'
 import { InvoiceItemDetailType } from './invoice-item-detail-type'
 import { redirect } from 'next/navigation'
 
-export const updateSalesInvoice = async (id: number, formData: FormData, items: InvoiceItemDetailType[]) => {
+export const updateSalesInvoice = async (
+    id: number,
+    formData: FormData,
+    items: InvoiceItemDetailType[]
+) => {
     const validator = z.object({
         customerId: z.string().trim().optional().nullable(),
         address: z.string().trim().optional().nullable(),
@@ -109,7 +113,7 @@ export const updateSalesInvoice = async (id: number, formData: FormData, items: 
         having sum("SkuInToOut".quantity) < "SkuIn".quantity or sum("SkuInToOut".quantity) is null
         order by "SkuIn"."date", "SkuIn"."id" asc`
 
-    for (let i = 0;i < items.length;i++) {
+    for (let i = 0; i < items.length; i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === items[i].barcode
         )
@@ -124,7 +128,7 @@ export const updateSalesInvoice = async (id: number, formData: FormData, items: 
         if (
             remaining.length <= 0 ||
             remaining.reduce((sum, item) => sum + item.remaining, 0) <
-            items[i].quantity * items[i].quantityPerUnit
+                items[i].quantity * items[i].quantityPerUnit
         ) {
             throw new Error('insufficient inventory')
         }
@@ -148,15 +152,15 @@ export const updateSalesInvoice = async (id: number, formData: FormData, items: 
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
             documentId: documentId || undefined,
-            remark: remark || undefined,
+            remark: remark ? { create: { remark } } : undefined,
             ArSubledger: !!contact
                 ? {
-                    update: {
-                        contactId: Number(customerId),
-                        paymentStatus:
-                            payment === 'cash' ? 'Paid' : 'NotPaid',
-                    },
-                }
+                      update: {
+                          contactId: Number(customerId),
+                          paymentStatus:
+                              payment === 'cash' ? 'Paid' : 'NotPaid',
+                      },
+                  }
                 : undefined,
             GeneralLedger: {
                 update: [
@@ -176,7 +180,8 @@ export const updateSalesInvoice = async (id: number, formData: FormData, items: 
                                     : 11000,
                             amount: +items
                                 .reduce(
-                                    (sum, item) => sum + item.quantity * item.price,
+                                    (sum, item) =>
+                                        sum + item.quantity * item.price,
                                     0
                                 )
                                 .toFixed(2),
@@ -195,7 +200,9 @@ export const updateSalesInvoice = async (id: number, formData: FormData, items: 
                             amount: -items
                                 .reduce(
                                     (sum, item) =>
-                                        sum + (item.quantity * item.price * 100) / 107,
+                                        sum +
+                                        (item.quantity * item.price * 100) /
+                                            107,
                                     0
                                 )
                                 .toFixed(2),
@@ -214,7 +221,8 @@ export const updateSalesInvoice = async (id: number, formData: FormData, items: 
                             amount: -items
                                 .reduce(
                                     (sum, item) =>
-                                        sum + (item.quantity * item.price * 7) / 107,
+                                        sum +
+                                        (item.quantity * item.price * 7) / 107,
                                     0
                                 )
                                 .toFixed(2),
@@ -248,13 +256,20 @@ export const updateSalesInvoice = async (id: number, formData: FormData, items: 
                                 )
                                 ?.map(({ id, remaining }, index, array) => {
                                     if (index === 0) {
-                                        if (remaining > item.quantity * item.quantityPerUnit)
+                                        if (
+                                            remaining >
+                                            item.quantity * item.quantityPerUnit
+                                        )
                                             return {
                                                 skuInId: id,
                                                 quantity:
-                                                    item.quantity * item.quantityPerUnit,
+                                                    item.quantity *
+                                                    item.quantityPerUnit,
                                             }
-                                        if (remaining < item.quantity * item.quantityPerUnit)
+                                        if (
+                                            remaining <
+                                            item.quantity * item.quantityPerUnit
+                                        )
                                             return {
                                                 skuInId: id,
                                                 quantity: remaining,
@@ -277,13 +292,13 @@ export const updateSalesInvoice = async (id: number, formData: FormData, items: 
 
                                     if (
                                         item.quantity * item.quantityPerUnit -
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) >=
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) >=
                                         remaining
                                     )
                                         return {
@@ -294,19 +309,20 @@ export const updateSalesInvoice = async (id: number, formData: FormData, items: 
                                     // ครั้งที่ 2+ ตัดส่วนที่เหลือ
                                     if (
                                         item.quantity * item.quantityPerUnit -
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) <
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) <
                                         remaining
                                     )
                                         return {
                                             skuInId: id,
                                             quantity:
-                                                item.quantity * item.quantityPerUnit -
+                                                item.quantity *
+                                                    item.quantityPerUnit -
                                                 array
                                                     .slice(0, index)
                                                     .reduce(
@@ -319,7 +335,7 @@ export const updateSalesInvoice = async (id: number, formData: FormData, items: 
 
                                     return {
                                         skuInId: 0, // 0 will be filter out
-                                        quantity: 0
+                                        quantity: 0,
                                     }
                                 })
                                 .filter((item) => !!item.skuInId),

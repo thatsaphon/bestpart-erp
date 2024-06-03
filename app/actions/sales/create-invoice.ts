@@ -148,7 +148,8 @@ export const createInvoice = async (formData: FormData) => {
             taxId: taxId || '',
             date: new Date(date),
             documentId: documentId,
-            remark: remark || '',
+            // remark: remark || '',
+            remark: remark ? { create: { remark } } : undefined,
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             ArSubledger: !!contact

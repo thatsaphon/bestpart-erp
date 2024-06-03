@@ -28,7 +28,7 @@ export default async function EditPurchaseInvoicePage({
         unit: string
         quantityPerUnit: number
     }[] = await prisma.$queryRaw`
-        select "Document".id, "Document"."date", "Document"."documentId", "Contact"."id" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId", "Document"."remark",
+        select "Document".id, "Document"."date", "Document"."documentId", "Contact"."id" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
         "SkuOut".barcode, "SkuOut"."skuMasterId", "SkuOut"."goodsMasterId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuOut".quantity, ("SkuOut".price + "SkuOut".vat) as "price", "SkuOut".unit, "SkuOut"."quantityPerUnit" from "Document" 
         left join "ApSubledger" on "ApSubledger"."documentId" = "Document"."id"
         left join "Contact" on "Contact"."id" = "ApSubledger"."contactId"

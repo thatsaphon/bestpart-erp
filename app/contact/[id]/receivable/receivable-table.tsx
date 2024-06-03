@@ -83,7 +83,7 @@ export default function ReceivableTable({ documents }: Props) {
                                 </TableCell>
                                 <TableCell>
                                     <Link
-                                        href={`/sales/${document.documentId}`}
+                                        href={`/${document.type === 'Sales' ? 'sales' : 'billing'}/${document.documentId}`}
                                     >
                                         {document.documentId}
                                     </Link>

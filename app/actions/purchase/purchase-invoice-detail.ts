@@ -15,6 +15,7 @@ export const getPurchaseInvoiceDetail = async (documentId: string) => {
                 },
             },
             GeneralLedger: true,
+            remark: true,
         },
     })
 }

@@ -70,7 +70,6 @@ export const createPurchaseInvoice = async (
         throw new Error('goods not found')
     }
 
-
     if (!documentId) {
         documentId = await generateDocumentNumber('PINV', date)
     }
@@ -85,6 +84,7 @@ export const createPurchaseInvoice = async (
             taxId: taxId || '',
             date: new Date(date),
             documentId: documentId,
+            type: 'Purchase',
             createdBy: session?.user.username,
             updatedBy: session?.user.username,
             ApSubledger: {

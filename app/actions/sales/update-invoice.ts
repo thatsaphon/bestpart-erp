@@ -165,7 +165,7 @@ export const updateInvoice = async (id: number, formData: FormData) => {
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
             documentId: documentId || undefined,
-            remark: remark || undefined,
+            remark: remark ? { create: { remark } } : undefined,
             ArSubledger: !!contact
                 ? {
                       update: {
