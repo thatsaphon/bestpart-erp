@@ -106,7 +106,7 @@ model GeneralLedger {
   amount           Float
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @default(now()) @updatedAt
-  GeneralLedger    Document[]
+  Document         Document[]
 
   @@index([chartOfAccountId])
 }
