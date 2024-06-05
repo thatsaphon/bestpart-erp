@@ -18,7 +18,7 @@ export default async function RootLayout({
         <div className="grid flex-1 grid-cols-[200px_5px_1fr]">
             <div className="flex flex-col items-center text-center">
                 <Separator />
-                <SubMenuNavLink href="/sales" label="Sales" />
+                <SubMenuNavLink href="/sales" label="บิลขาย" />
                 <Separator />
                 <SubMenuNavLink href="/sales/bill" label="ใบวางบิล" />
                 <Separator />

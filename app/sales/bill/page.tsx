@@ -59,10 +59,10 @@ export default async function SalesListPage({
     return (
         <div className="mb-2 p-3">
             <h1 className="flex items-center gap-2 text-3xl text-primary">
-                <span>งานขายสินค้า</span>
-                <Link href={'/sales/create'}>
+                <span>ใบวางบิล</span>
+                <Link href={'/sales/bill/create'}>
                     <Button className="ml-3" variant={'outline'}>
-                        สร้างบิลขาย
+                        สร้างใบวางบิล
                     </Button>
                 </Link>
             </h1>

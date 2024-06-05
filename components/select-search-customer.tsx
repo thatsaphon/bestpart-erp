@@ -75,6 +75,7 @@ export default function SelectSearchCustomer<T>({
     const [selectedResult, setSelectedResult] = useState<
         Contact & { Address: Address[] }
     >()
+    const [canCreateNewCustomer, setCanCreateNewCustomer] = useState(false)
     const [address, setAddress] = useState<InvoiceAddress>(
         defaultAddress || {
             address: '',
@@ -218,25 +219,26 @@ export default function SelectSearchCustomer<T>({
                         >
                             <SearchIcon className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 hover:cursor-pointer" />
                         </PopoverTrigger>
-                        <PopoverTrigger
-                            asChild
-                            onClick={(e) => {
-                                if (popoverType === 'search' && isOpen)
-                                    e.preventDefault()
-                                setPopoverType('create')
-                            }}
-                        >
-                            {!disabled && (
-                                <Button
-                                    variant={'outline'}
-                                    type="button"
-                                    className="absolute top-1/2 ml-1 -translate-y-1/2 hover:cursor-pointer"
-                                >
-                                    สร้างลูกค้า
-                                </Button>
-                            )}
-                            {/* <SearchIcon className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 hover:cursor-pointer" /> */}
-                        </PopoverTrigger>
+                        {canCreateNewCustomer && (
+                            <PopoverTrigger
+                                asChild
+                                onClick={(e) => {
+                                    if (popoverType === 'search' && isOpen)
+                                        e.preventDefault()
+                                    setPopoverType('create')
+                                }}
+                            >
+                                {!disabled && (
+                                    <Button
+                                        variant={'outline'}
+                                        type="button"
+                                        className="absolute top-1/2 ml-1 -translate-y-1/2 hover:cursor-pointer"
+                                    >
+                                        สร้างลูกค้า
+                                    </Button>
+                                )}
+                            </PopoverTrigger>
+                        )}
                     </span>
                     {hasTextArea && (
                         <>
