@@ -51,9 +51,7 @@ export default async function SalesListPage({
 
     const documentCount = await prisma.document.count({
         where: {
-            documentId: {
-                startsWith: 'SINV',
-            },
+            type: 'BillingNote',
         },
     })
     const numberOfPage = Math.ceil(documentCount / Number(limit))

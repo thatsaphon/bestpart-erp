@@ -1,5 +1,16 @@
 import prisma from '@/app/db/db'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import {
     Table,
     TableBody,
@@ -36,16 +47,13 @@ export default async function page({ params: { documentId } }: Props) {
         },
     })
 
-    // const billingNote =
-    //     await prisma.$queryRaw`select "Document".*, "GeneralLdeger".* from "Document"
-    //     left join "_DocumentToGeneralLedger" on "_DocumentToGeneralLedger"."A" = "Document"."id"
-    //     left join "GeneralLedger" on "GeneralLedger"."id" = "_DocumentToGeneralLedger"."B"
-    //     left join "Document" as "SalesInvoice" on "SalesInvoice"."id" = "_DocumentToGeneralLedger"."A"
-    //     where "Document"."documentId" = ${documentId}
-    //     `
-
-    // console.log(billingNote[0].GeneralLedger.map((item) => item.Document))
     const salesInvoices = billingNote[0].GeneralLedger
+
+    const bankAccounts = await prisma.chartOfAccount.findMany({
+        where: {
+            AND: [{ id: { gte: 11000 } }, { id: { lte: 11299 } }],
+        },
+    })
 
     return (
         <div className="p-3">
@@ -107,6 +115,41 @@ export default async function page({ params: { documentId } }: Props) {
                     </TableRow>
                 </TableFooter>
             </Table>
+
+            <div className="mt-4">
+                <form action="">
+                    <div className="flex items-center justify-center gap-2">
+                        <span>รับเงิน:</span>
+                        <Input
+                            type="date"
+                            className="w-[180px]"
+                            name="date"
+                            defaultValue={new Date()
+                                .toISOString()
+                                .substring(0, 10)}
+                        />
+                        <Select name="bank">
+                            <SelectTrigger className="w-auto min-w-[300px]">
+                                <SelectValue placeholder="Select a Bank Account" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Bank Account</SelectLabel>
+                                    {bankAccounts.map((item) => (
+                                        <SelectItem
+                                            key={item.id}
+                                            value={String(item.id)}
+                                        >
+                                            {item.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        <Button variant={'outline'}>ยืนยัน</Button>
+                    </div>
+                </form>
+            </div>
         </div>
     )
 }
