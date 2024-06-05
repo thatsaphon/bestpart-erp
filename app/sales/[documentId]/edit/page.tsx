@@ -4,10 +4,10 @@ import CreateOrUpdateSalesInvoiceComponent from '../../create/create-update-sale
 
 type Props = { params: { documentId: string } }
 
-export default async function EditPurchaseInvoicePage({
+export default async function EditSalesInvoicePage({
     params: { documentId },
 }: Props) {
-    const purchaseInvoices: {
+    const salesInvoices: {
         id: number
         date: Date
         documentId: string
@@ -28,11 +28,11 @@ export default async function EditPurchaseInvoicePage({
         unit: string
         quantityPerUnit: number
     }[] = await prisma.$queryRaw`
-        select "Document".id, "Document"."date", "Document"."documentId", "Contact"."id" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
+        select "Document".id, "Document"."date", "Document"."documentId", "ArSubledger"."contactId" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
         "SkuOut".barcode, "SkuOut"."skuMasterId", "SkuOut"."goodsMasterId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuOut".quantity, ("SkuOut".price + "SkuOut".vat) as "price", "SkuOut".unit, "SkuOut"."quantityPerUnit" from "Document" 
-        left join "ApSubledger" on "ApSubledger"."documentId" = "Document"."id"
-        left join "Contact" on "Contact"."id" = "ApSubledger"."contactId"
-        left join "Address" on "Address"."contactId" = "Contact"."id"
+        left join "ArSubledger" on "ArSubledger"."documentId" = "Document"."id"
+        left join "Contact" on "Contact"."id" = "ArSubledger"."contactId"
+        -- left join "Address" on "Address"."contactId" = "Contact"."id"
         left join "SkuOut" on "SkuOut"."documentId" = "Document"."id"
         left join "SkuMaster" on "SkuMaster"."id" = "SkuOut"."skuMasterId"
         left join "MainSku" on "MainSku"."id" = "SkuMaster"."mainSkuId"
@@ -40,8 +40,8 @@ export default async function EditPurchaseInvoicePage({
 
     return (
         <CreateOrUpdateSalesInvoiceComponent
-            defaultItems={purchaseInvoices}
-            defaultDocumentDetails={purchaseInvoices[0]}
+            defaultItems={salesInvoices}
+            defaultDocumentDetails={salesInvoices[0]}
         />
     )
 }

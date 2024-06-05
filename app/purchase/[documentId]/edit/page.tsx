@@ -32,7 +32,7 @@ export default async function EditPurchaseInvoicePage({
         "SkuIn".barcode, "SkuIn"."skuMasterId", "SkuIn"."goodsMasterId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuIn".quantity, ("SkuIn".cost + "SkuIn".vat) as "price", "SkuIn".unit, "SkuIn"."quantityPerUnit" from "Document" 
         left join "ApSubledger" on "ApSubledger"."documentId" = "Document"."id"
         left join "Contact" on "Contact"."id" = "ApSubledger"."contactId"
-        left join "Address" on "Address"."contactId" = "Contact"."id"
+        -- left join "Address" on "Address"."contactId" = "Contact"."id"
         left join "SkuIn" on "SkuIn"."documentId" = "Document"."id"
         left join "SkuMaster" on "SkuMaster"."id" = "SkuIn"."skuMasterId"
         left join "MainSku" on "MainSku"."id" = "SkuMaster"."mainSkuId"
