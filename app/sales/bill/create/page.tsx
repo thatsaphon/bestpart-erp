@@ -15,6 +15,10 @@ import {
 import React, { useState } from 'react'
 import SearchDocumentDialogComponent from './search-document-dialog'
 import { fetchUnpaidSalesInvoice } from './fetch-unpaid-sales-invoice'
+import { Button } from '@/components/ui/button'
+import { createBillingNote } from '@/app/contact/[id]/receivable/create-billing-note'
+import toast from 'react-hot-toast'
+import { DatePickerWithPresets } from '@/components/date-picker-preset'
 
 type Props = {}
 
@@ -22,8 +26,35 @@ export default function CreateBillPage({}: Props) {
     const [selectedDocuments, setSelectedDocuments] = useState<
         Awaited<ReturnType<typeof fetchUnpaidSalesInvoice>>
     >([])
+
+    const ref = React.createRef<HTMLFormElement>()
     return (
-        <form className="p-3">
+        <form
+            ref={ref}
+            className="p-3"
+            action={async (formData) => {
+                try {
+                    await createBillingNote(
+                        formData,
+                        selectedDocuments.map((document) => document.documentId)
+                    )
+                    toast.success('Create billing note success')
+                    ref.current?.reset()
+
+                    setSelectedDocuments([])
+                } catch (err) {
+                    if (err instanceof Error) toast.error(err.message)
+                    toast.error('Something went wrong')
+                }
+            }}
+        >
+            <div className="flex items-baseline gap-2">
+                <span>วันที่</span>
+                <DatePickerWithPresets />
+                <span>เลขที่เอกสาร</span>
+                <Input name="documentId" className="w-auto" />
+                {/* <SelectSearchCustomer hasTextArea /> */}
+            </div>
             <div className="flex items-baseline gap-2">
                 <span>ลูกค้า</span>
                 <SelectSearchCustomer hasTextArea />
@@ -70,6 +101,9 @@ export default function CreateBillPage({}: Props) {
                     </TableRow>
                 </TableBody>
             </Table>
+            <div className="flex justify-end pr-[25%]">
+                <Button>บันทึก</Button>
+            </div>
         </form>
     )
 }

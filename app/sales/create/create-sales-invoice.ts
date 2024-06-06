@@ -9,6 +9,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { InvoiceItemDetailType } from './invoice-item-detail-type'
+import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 
 export const createSalesInvoice = async (
     formData: FormData,
@@ -297,19 +298,4 @@ export const createSalesInvoice = async (
     })
 
     revalidatePath('/sales')
-}
-
-export const generateDocumentNumber = async (prefix: string, date: string) => {
-    const todayFormat = `${prefix}${format(new Date(date), 'yyyyMMdd')}`
-    const lastInvoice = await prisma.document.findFirst({
-        where: { documentId: { contains: todayFormat } },
-        orderBy: { documentId: 'desc' },
-    })
-    if (!lastInvoice || !lastInvoice?.documentId.includes(todayFormat)) {
-        return `${todayFormat}001`
-    }
-    return (
-        todayFormat +
-        (+lastInvoice.documentId.slice(-3) + 1).toString().padStart(3, '0')
-    )
 }

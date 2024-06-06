@@ -21,6 +21,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import React from 'react'
+import ReceivedDialog from './received-dialog'
 
 type Props = {
     params: {
@@ -117,38 +118,11 @@ export default async function page({ params: { documentId } }: Props) {
             </Table>
 
             <div className="mt-4">
-                <form action="">
-                    <div className="flex items-center justify-center gap-2">
-                        <span>รับเงิน:</span>
-                        <Input
-                            type="date"
-                            className="w-[180px]"
-                            name="date"
-                            defaultValue={new Date()
-                                .toISOString()
-                                .substring(0, 10)}
-                        />
-                        <Select name="bank">
-                            <SelectTrigger className="w-auto min-w-[300px]">
-                                <SelectValue placeholder="Select a Bank Account" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Bank Account</SelectLabel>
-                                    {bankAccounts.map((item) => (
-                                        <SelectItem
-                                            key={item.id}
-                                            value={String(item.id)}
-                                        >
-                                            {item.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                        <Button variant={'outline'}>ยืนยัน</Button>
-                    </div>
-                </form>
+                <ReceivedDialog
+                    bankAccounts={bankAccounts}
+                    billAmount={salesInvoices.reduce((a, b) => a + b.amount, 0)}
+                    documentId={documentId}
+                />
             </div>
         </div>
     )

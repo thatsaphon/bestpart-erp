@@ -1,6 +1,6 @@
 'use server'
 
-import { generateDocumentNumber } from '@/app/actions/sales/create-invoice'
+import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import prisma from '@/app/db/db'
 import { getServerSession } from 'next-auth/next'
@@ -18,29 +18,20 @@ export const createBillingNote = async (
         taxId: z.string().trim().optional().nullable(),
         date: z.string().trim().min(1, 'date must not be empty'),
         documentId: z.string().trim().optional().nullable(),
-        payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
         remark: z.string().trim().optional().nullable(),
     })
 
-    let {
-        customerId,
-        address,
-        phone,
-        taxId,
-        date,
-        documentId,
-        payment,
-        remark,
-    } = validator.parse({
-        customerId: formData.get('customerId'),
-        address: formData.get('address'),
-        phone: formData.get('phone'),
-        taxId: formData.get('taxId'),
-        date: formData.get('date'),
-        documentId: formData.get('documentId'),
-        payment: formData.get('payment'),
-        remark: formData.get('remark'),
-    })
+    let { customerId, address, phone, taxId, date, documentId, remark } =
+        validator.parse({
+            customerId: formData.get('customerId'),
+            address: formData.get('address'),
+            phone: formData.get('phone'),
+            taxId: formData.get('taxId'),
+            date: formData.get('date'),
+            documentId: formData.get('documentId'),
+            payment: formData.get('payment'),
+            remark: formData.get('remark'),
+        })
     const documents = await prisma.document.findMany({
         where: {
             documentId: {

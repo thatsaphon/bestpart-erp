@@ -101,7 +101,10 @@ export default async function SalesListPage({
                                 {bill.ArSubledger?.paymentStatus || 'Paid'}
                             </TableCell>
                             <TableCell className="text-right">
-                                {bill.GeneralLedger[0]?.amount}
+                                {bill.GeneralLedger.reduce(
+                                    (total, item) => total + item.amount,
+                                    0
+                                )}
                             </TableCell>
                             <TableCell className="text-right">
                                 <Link href={`/sales/bill/${bill.documentId}`}>
