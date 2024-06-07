@@ -14,6 +14,7 @@ import PaginationComponent from '@/components/pagination-component'
 import { ViewIcon } from 'lucide-react'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import { Prisma } from '@prisma/client'
+import { Badge } from '@/components/ui/badge'
 
 type Props = {
     searchParams: {
@@ -56,7 +57,7 @@ export default async function SalesListPage({
             documentId: {
                 startsWith: 'SINV',
             },
-        }
+        },
     })
     const numberOfPage = Math.ceil(documentCount / Number(limit))
 
@@ -79,7 +80,7 @@ export default async function SalesListPage({
                             เลขที่เอกสาร
                         </TableHead>
                         <TableHead>ลูกค้า</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead className="text-center">Status</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
@@ -88,7 +89,6 @@ export default async function SalesListPage({
                     {sales.map((sale) => (
                         <TableRow key={sale.documentId}>
                             <TableCell>
-                                {/* {format(sale.date, 'dd/MM/yyyy')} */}
                                 {new Intl.DateTimeFormat('th-TH', {
                                     year: 'numeric',
                                     month: 'short',
@@ -99,10 +99,27 @@ export default async function SalesListPage({
                             </TableCell>
                             <TableCell>{sale.documentId}</TableCell>
                             <TableCell>
-                                {sale.ArSubledger?.Contact.name || 'เงินสด'}
+                                {sale.ArSubledger?.Contact.name || '-'}
                             </TableCell>
-                            <TableCell>
-                                {sale.ArSubledger?.paymentStatus || 'Paid'}
+                            <TableCell className="text-center">
+                                {sale.ArSubledger?.paymentStatus === 'Paid' ? (
+                                    <Badge className="bg-green-400">
+                                        จ่ายแล้ว
+                                    </Badge>
+                                ) : sale.ArSubledger?.paymentStatus ===
+                                  'Billed' ? (
+                                    <Badge variant={`secondary`}>
+                                        วางบิลแล้ว
+                                    </Badge>
+                                ) : !sale.ArSubledger ? (
+                                    <Badge className="bg-green-400">
+                                        เงินสด
+                                    </Badge>
+                                ) : (
+                                    <Badge variant={'destructive'}>
+                                        ยังไม่จ่าย
+                                    </Badge>
+                                )}
                             </TableCell>
                             <TableCell className="text-right">
                                 {sale.GeneralLedger[0]?.amount}

@@ -165,7 +165,7 @@ export const updateInvoice = async (id: number, formData: FormData) => {
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
             documentId: documentId || undefined,
-            remark: remark || undefined,
+            remark: remark ? { create: { remark } } : undefined,
             ArSubledger: !!contact
                 ? {
                       update: {
@@ -346,19 +346,4 @@ export const updateInvoice = async (id: number, formData: FormData) => {
 
     revalidatePath('/sales')
     revalidatePath(`/sales/${documentId}`)
-}
-
-export const generateDocumentNumber = async (prefix: string, date: string) => {
-    const todayFormat = `${prefix}${format(new Date(date), 'yyyyMMdd')}`
-    const lastInvoice = await prisma.document.findFirst({
-        where: { documentId: { contains: todayFormat } },
-        orderBy: { documentId: 'desc' },
-    })
-    if (!lastInvoice || !lastInvoice?.documentId.includes(todayFormat)) {
-        return `${todayFormat}001`
-    }
-    return (
-        todayFormat +
-        (+lastInvoice.documentId.slice(-3) + 1).toString().padStart(3, '0')
-    )
 }

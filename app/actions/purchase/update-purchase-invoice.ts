@@ -4,7 +4,7 @@ import prisma from '@/app/db/db'
 import { format } from 'date-fns'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
-import { generateDocumentNumber } from '../sales/create-invoice'
+import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 
@@ -97,23 +97,27 @@ export const updatePurchaseInvoice = async (id: number, formData: FormData) => {
 
     const invoice = await prisma.document.findUnique({
         where: {
-            id
+            id,
         },
         include: {
             SkuIn: { include: { SkuInToOut: true } },
-        }
+        },
     })
-
 
     const error = { message: '' }
     for (let item of invoice?.SkuIn || []) {
         if (item.SkuInToOut.length > 0) {
-            const mapQuantity = mapQuanties.find(mapQuantity => mapQuantity.skuMasterId === item.skuMasterId)
+            const mapQuantity = mapQuanties.find(
+                (mapQuantity) => mapQuantity.skuMasterId === item.skuMasterId
+            )
             if (!mapQuantity) {
                 error.message += `${item.barcode} ได้ถูกขายแล้ว ไม่สามารถลบได้\n`
                 continue
             }
-            if (mapQuantity.q * mapQuantity.quantity < item.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)) {
+            if (
+                mapQuantity.q * mapQuantity.quantity <
+                item.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)
+            ) {
                 error.message += `${item.barcode} ได้ถูกขายไปแล้ว ${item.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)} หน่วย ห้ามแก้ไขจำนวนต่ำกว่านี้\n`
                 continue
             }
@@ -124,7 +128,7 @@ export const updatePurchaseInvoice = async (id: number, formData: FormData) => {
 
     await prisma.document.update({
         where: {
-            id
+            id,
         },
         data: {
             contactName: address?.split('\n')[0] || '',

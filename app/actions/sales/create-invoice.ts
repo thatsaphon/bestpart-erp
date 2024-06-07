@@ -2,6 +2,7 @@
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import prisma from '@/app/db/db'
+import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 import { Contact, Prisma } from '@prisma/client'
 import { format } from 'date-fns'
 import { getServerSession } from 'next-auth'
@@ -148,7 +149,8 @@ export const createInvoice = async (formData: FormData) => {
             taxId: taxId || '',
             date: new Date(date),
             documentId: documentId,
-            remark: remark || '',
+            // remark: remark || '',
+            remark: remark ? { create: { remark } } : undefined,
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             ArSubledger: !!contact
@@ -293,19 +295,4 @@ export const createInvoice = async (formData: FormData) => {
     })
 
     revalidatePath('/sales')
-}
-
-export const generateDocumentNumber = async (prefix: string, date: string) => {
-    const todayFormat = `${prefix}${format(new Date(date), 'yyyyMMdd')}`
-    const lastInvoice = await prisma.document.findFirst({
-        where: { documentId: { contains: todayFormat } },
-        orderBy: { documentId: 'desc' },
-    })
-    if (!lastInvoice || !lastInvoice?.documentId.includes(todayFormat)) {
-        return `${todayFormat}001`
-    }
-    return (
-        todayFormat +
-        (+lastInvoice.documentId.slice(-3) + 1).toString().padStart(3, '0')
-    )
 }

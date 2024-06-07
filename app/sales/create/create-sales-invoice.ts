@@ -9,8 +9,12 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { InvoiceItemDetailType } from './invoice-item-detail-type'
+import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 
-export const createSalesInvoice = async (formData: FormData, items: InvoiceItemDetailType[]) => {
+export const createSalesInvoice = async (
+    formData: FormData,
+    items: InvoiceItemDetailType[]
+) => {
     const validator = z.object({
         customerId: z.string().trim().nullable(),
         address: z.string().trim().optional().nullable(),
@@ -96,7 +100,7 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
         throw new Error('goods not found')
     }
 
-    for (let i = 0;i < items.length;i++) {
+    for (let i = 0; i < items.length; i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === items[i].barcode
         )
@@ -111,7 +115,7 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
         if (
             remaining.length <= 0 ||
             remaining.reduce((sum, item) => sum + item.remaining, 0) <
-            items[i].quantity * items[i].quantityPerUnit
+                items[i].quantity * items[i].quantityPerUnit
         ) {
             throw new Error('insufficient inventory')
         }
@@ -131,17 +135,17 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
             taxId: taxId || '',
             date: new Date(date),
             documentId: documentId,
-            remark: remark || '',
+            remark: remark ? { create: { remark } } : undefined,
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             ArSubledger: !!contact
                 ? {
-                    create: {
-                        contactId: Number(customerId),
-                        paymentStatus:
-                            payment === 'cash' ? 'Paid' : 'NotPaid',
-                    },
-                }
+                      create: {
+                          contactId: Number(customerId),
+                          paymentStatus:
+                              payment === 'cash' ? 'Paid' : 'NotPaid',
+                      },
+                  }
                 : undefined,
             GeneralLedger: {
                 create: [
@@ -150,7 +154,10 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
                         chartOfAccountId:
                             !!contact && payment === 'credit' ? 12000 : 11000,
                         amount: +items
-                            .reduce((sum, item) => sum + item.quantity * item.price, 0)
+                            .reduce(
+                                (sum, item) => sum + item.quantity * item.price,
+                                0
+                            )
                             .toFixed(2),
                     },
                     // รายได้
@@ -159,7 +166,8 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
                         amount: -items
                             .reduce(
                                 (sum, item) =>
-                                    sum + (item.quantity * item.price * 100) / 107,
+                                    sum +
+                                    (item.quantity * item.price * 100) / 107,
                                 0
                             )
                             .toFixed(2),
@@ -170,7 +178,8 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
                         amount: -items
                             .reduce(
                                 (sum, item) =>
-                                    sum + (item.quantity * item.price * 7) / 107,
+                                    sum +
+                                    (item.quantity * item.price * 7) / 107,
                                 0
                             )
                             .toFixed(2),
@@ -198,13 +207,20 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
                                 )
                                 ?.map(({ id, remaining }, index, array) => {
                                     if (index === 0) {
-                                        if (remaining > item.quantity * item.quantityPerUnit)
+                                        if (
+                                            remaining >
+                                            item.quantity * item.quantityPerUnit
+                                        )
                                             return {
                                                 skuInId: id,
                                                 quantity:
-                                                    item.quantity * item.quantityPerUnit,
+                                                    item.quantity *
+                                                    item.quantityPerUnit,
                                             }
-                                        if (remaining < item.quantity * item.quantityPerUnit)
+                                        if (
+                                            remaining <
+                                            item.quantity * item.quantityPerUnit
+                                        )
                                             return {
                                                 skuInId: id,
                                                 quantity: remaining,
@@ -227,13 +243,13 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
 
                                     if (
                                         item.quantity * item.quantityPerUnit -
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) >=
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) >=
                                         remaining
                                     )
                                         return {
@@ -244,19 +260,20 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
                                     // ครั้งที่ 2+ ตัดส่วนที่เหลือ
                                     if (
                                         item.quantity * item.quantityPerUnit -
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) <
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) <
                                         remaining
                                     )
                                         return {
                                             skuInId: id,
                                             quantity:
-                                                item.quantity * item.quantityPerUnit -
+                                                item.quantity *
+                                                    item.quantityPerUnit -
                                                 array
                                                     .slice(0, index)
                                                     .reduce(
@@ -269,32 +286,16 @@ export const createSalesInvoice = async (formData: FormData, items: InvoiceItemD
 
                                     return {
                                         skuInId: 0, // 0 will be filter out
-                                        quantity: 0
+                                        quantity: 0,
                                     }
                                 })
                                 .filter((item) => !!item.skuInId),
                         },
                     }
                 }),
-
             },
         },
     })
 
     revalidatePath('/sales')
-}
-
-export const generateDocumentNumber = async (prefix: string, date: string) => {
-    const todayFormat = `${prefix}${format(new Date(date), 'yyyyMMdd')}`
-    const lastInvoice = await prisma.document.findFirst({
-        where: { documentId: { contains: todayFormat } },
-        orderBy: { documentId: 'desc' },
-    })
-    if (!lastInvoice || !lastInvoice?.documentId.includes(todayFormat)) {
-        return `${todayFormat}001`
-    }
-    return (
-        todayFormat +
-        (+lastInvoice.documentId.slice(-3) + 1).toString().padStart(3, '0')
-    )
 }

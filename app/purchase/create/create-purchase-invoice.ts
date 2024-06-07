@@ -4,7 +4,7 @@ import prisma from '@/app/db/db'
 import { format } from 'date-fns'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
-import { generateDocumentNumber } from '@/app/actions/sales/create-invoice'
+import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { InvoiceItemDetailType } from './invoice-item-detail-type'
@@ -70,7 +70,6 @@ export const createPurchaseInvoice = async (
         throw new Error('goods not found')
     }
 
-
     if (!documentId) {
         documentId = await generateDocumentNumber('PINV', date)
     }
@@ -85,6 +84,7 @@ export const createPurchaseInvoice = async (
             taxId: taxId || '',
             date: new Date(date),
             documentId: documentId,
+            type: 'Purchase',
             createdBy: session?.user.username,
             updatedBy: session?.user.username,
             ApSubledger: {

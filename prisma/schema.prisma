@@ -50,12 +50,32 @@ model Document {
   address     String
   phone       String
   taxId       String
-  remark      String @default("")
+  remark      DocumentRemark[]
+  type        DocumentType     @default(Sales)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
   createdBy String?
   updatedBy String?
+}
+
+enum DocumentType {
+  Sales
+  Purchase
+  BillingNote
+  Received
+  Payment
+  OtherInvoice
+}
+
+model DocumentRemark {
+  id Int @id @default(autoincrement())
+
+  Document   Document? @relation(fields: [documentId], references: [id])
+  documentId Int?
+  remark     String    @default("")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
 }
 
 model ChartOfAccount {
@@ -86,7 +106,7 @@ model GeneralLedger {
   amount           Float
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @default(now()) @updatedAt
-  GeneralLedger    Document[]
+  Document         Document[]
 
   @@index([chartOfAccountId])
 }
@@ -305,8 +325,9 @@ model ArSubledger {
 enum PaymentStatus {
   Cash
   Paid
-  NotPaid  @map("Not Paid")
-  WriteOff @map("Write Off")
+  PartialPaid
+  NotPaid     @map("Not Paid")
+  WriteOff    @map("Write Off")
   Billed
 }
 

@@ -92,7 +92,11 @@ export default async function PurchaseInvoiceDetailPage({
                 </div>
                 <Table className="mt-3">
                     <TableCaption>
-                        <Textarea defaultValue={document?.remark} />
+                        <Textarea
+                            defaultValue={document?.remark
+                                .map(({ remark }) => remark)
+                                .join('\n')}
+                        />
                     </TableCaption>
                     <TableHeader>
                         <TableRow>
