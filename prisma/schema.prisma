@@ -125,6 +125,8 @@ model Contact {
   isAr Boolean @default(true)
   isAp Boolean @default(false)
 
+  SkuMaster SkuMaster[] @relation("SkuMasterToVendor")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
@@ -182,6 +184,7 @@ model SkuMaster {
   GoodsMaster GoodsMaster[]
   SkuIn       SkuIn[]
   SkuOut      SkuOut[]
+  Vendor      Contact[]     @relation("SkuMasterToVendor")
 
   @@index([brandId])
   @@index([mainSkuId])

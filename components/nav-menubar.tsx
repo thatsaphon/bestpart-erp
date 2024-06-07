@@ -37,15 +37,26 @@ export function NavMenubar() {
                 </Link>
             </MenubarMenu>
             <MenubarMenu>
-                <Link href={'/sales'}>
-                    <MenubarTrigger
-                        className={cn(
-                            pathName.includes('/sales') && 'bg-accent'
-                        )}
-                    >
-                        งานขาย
-                    </MenubarTrigger>
-                </Link>
+                <MenubarTrigger
+                    className={cn(pathName.includes('/sales') && 'bg-accent')}
+                >
+                    งานขาย
+                </MenubarTrigger>
+                <MenubarContent>
+                    <Link href={'/sales'}>
+                        <MenubarItem>บิลขาย</MenubarItem>
+                    </Link>
+                    <Link href={'/sales/create'}>
+                        <MenubarItem>สร้างบิลขาย</MenubarItem>
+                    </Link>
+                    <MenubarSeparator />
+                    <Link href={'/sales/bill'}>
+                        <MenubarItem>ใบวางบิล</MenubarItem>
+                    </Link>
+                    <Link href={'/sales/bill/create'}>
+                        <MenubarItem>สร้างใบวางบิล</MenubarItem>
+                    </Link>
+                </MenubarContent>
             </MenubarMenu>
             <MenubarMenu>
                 <Link href={'/purchase'}>

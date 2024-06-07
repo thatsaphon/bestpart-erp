@@ -29,7 +29,7 @@ export default function PaginationInventory({
         <Pagination>
             <PaginationContent>
                 {page !== '1' && (
-                    <PaginationItem key={1}>
+                    <PaginationItem key={'first-page'}>
                         <PaginationPrevious
                             href={`?${new URLSearchParams({
                                 ...searchParams,
@@ -60,7 +60,7 @@ export default function PaginationInventory({
                 )}
                 {Array.from({ length: numberOfPage }).map((i, index) =>
                     index !== 0 && index > +page - 4 && index < +page + 3 ? (
-                        <PaginationItem key={index + 1}>
+                        <PaginationItem key={`page-${index + 1}`}>
                             <PaginationLink
                                 href={`?${new URLSearchParams({
                                     ...searchParams,

@@ -145,7 +145,10 @@ export default async function SalesListPage({
                                         (item) => item.amount < 0
                                     ) && 'text-destructive',
                                     bill.GeneralLedger.reduce(
-                                        (total, item) => total + item.amount,
+                                        (total, item) =>
+                                            item.chartOfAccountId === 12000
+                                                ? total + item.amount
+                                                : total,
                                         0
                                     ) === 0 && 'text-green-500'
                                 )}
@@ -218,9 +221,15 @@ export default async function SalesListPage({
                                                         </p>
                                                         <p>
                                                             {bill.GeneralLedger.reduce(
-                                                                (total, item) =>
-                                                                    total +
-                                                                    item.amount,
+                                                                (
+                                                                    total,
+                                                                    item
+                                                                ) =>
+                                                                    item.chartOfAccountId ===
+                                                                    12000
+                                                                        ? total +
+                                                                          item.amount
+                                                                        : total,
                                                                 0
                                                             )}
                                                         </p>
