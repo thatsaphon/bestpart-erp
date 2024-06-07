@@ -37,10 +37,13 @@ export default async function page({ params: { documentId } }: Props) {
         include: {
             ArSubledger: true,
             GeneralLedger: {
+                where: {
+                    chartOfAccountId: 12000,
+                },
                 include: {
                     Document: {
                         where: {
-                            type: 'Sales',
+                            OR: [{ type: 'Sales' }, { type: 'Received' }],
                         },
                     },
                 },
@@ -72,7 +75,10 @@ export default async function page({ params: { documentId } }: Props) {
                     >
                         {billingNote[0].ArSubledger?.paymentStatus === 'Paid'
                             ? 'จ่ายแล้ว'
-                            : 'ยังไม่จ่าย'}
+                            : billingNote[0].ArSubledger?.paymentStatus ===
+                                'PartialPaid'
+                              ? 'จ่ายบางส่วน'
+                              : 'ยังไม่จ่าย'}
                     </Badge>
                 </div>
                 <p>เลขที่: {billingNote[0].documentId}</p>
@@ -91,21 +97,25 @@ export default async function page({ params: { documentId } }: Props) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {salesInvoices.map((item) => (
-                        <TableRow key={item.id}>
-                            <TableCell>
-                                {Intl.DateTimeFormat('th-TH', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                    localeMatcher: 'best fit',
-                                }).format(new Date(item.Document[0].date))}
-                            </TableCell>
-                            <TableCell>{item.Document[0].documentId}</TableCell>
-                            <TableCell>{item.amount}</TableCell>
-                        </TableRow>
-                    ))}
+                    {salesInvoices
+                        .sort((a, b) => a.Document[0].id - b.Document[0].id)
+                        .map((item) => (
+                            <TableRow key={item.id}>
+                                <TableCell>
+                                    {Intl.DateTimeFormat('th-TH', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
+                                        localeMatcher: 'best fit',
+                                    }).format(new Date(item.Document[0].date))}
+                                </TableCell>
+                                <TableCell>
+                                    {item.Document[0].documentId}
+                                </TableCell>
+                                <TableCell>{item.amount}</TableCell>
+                            </TableRow>
+                        ))}
                 </TableBody>
                 <TableFooter>
                     <TableRow>

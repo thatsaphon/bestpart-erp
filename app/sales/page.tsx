@@ -103,14 +103,18 @@ export default async function SalesListPage({
                             </TableCell>
                             <TableCell className="text-center">
                                 {sale.ArSubledger?.paymentStatus === 'Paid' ? (
-                                    <Badge variant={'outline'}>จ่ายแล้ว</Badge>
+                                    <Badge className="bg-green-400">
+                                        จ่ายแล้ว
+                                    </Badge>
                                 ) : sale.ArSubledger?.paymentStatus ===
                                   'Billed' ? (
                                     <Badge variant={`secondary`}>
                                         วางบิลแล้ว
                                     </Badge>
                                 ) : !sale.ArSubledger ? (
-                                    <Badge variant={'outline'}>เงินสด</Badge>
+                                    <Badge className="bg-green-400">
+                                        เงินสด
+                                    </Badge>
                                 ) : (
                                     <Badge variant={'destructive'}>
                                         ยังไม่จ่าย

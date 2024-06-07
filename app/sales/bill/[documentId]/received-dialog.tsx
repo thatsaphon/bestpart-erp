@@ -55,23 +55,34 @@ export default function ReceivedDialog({
 
     const [remark, setRemark] = React.useState('')
     const [handleDifference, setHandleDifference] = React.useState<
-        'outstanding' | 'discount' | undefined
-    >()
+        'outstanding' | 'discount' | ''
+    >('')
+
+    const createReceivedFromBill = async () => {
+        if (payAmount !== billAmount && !handleDifference) {
+            toast.error('กรุณาเลือกวิธีจัดการกับส่วนต่าง')
+            return
+        }
+        try {
+            await receivedFromBill(
+                documentId,
+                date,
+                payAmount,
+                selectedBankAccount,
+                remark,
+                handleDifference || undefined
+            )
+            toast.success('บันทึกสําเร็จ')
+            setIsOpen(false)
+        } catch (err) {
+            if (err instanceof Error) {
+                return toast.error(err.message)
+            }
+            return toast.error('Something went wrong')
+        }
+    }
     return (
-        <form
-            action={async (formData) => {
-                try {
-                    await receivedFromBill(
-                        '',
-                        date,
-                        payAmount,
-                        selectedBankAccount,
-                        remark,
-                        handleDifference
-                    )
-                } catch (err) {}
-            }}
-        >
+        <form action={createReceivedFromBill}>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <div className="flex items-center justify-center gap-2">
                     <span>รับเงิน:</span>
@@ -168,7 +179,13 @@ export default function ReceivedDialog({
                         </span>
                         <span>จำนวนเงินคงเหลือ: {billAmount - payAmount}</span>
                         {billAmount - payAmount !== 0 && (
-                            <Select name="difference">
+                            <Select
+                                name="difference"
+                                onValueChange={(
+                                    value: 'outstanding' | 'discount'
+                                ) => setHandleDifference(value)}
+                                value={handleDifference}
+                            >
                                 <SelectTrigger className="w-auto min-w-[300px]">
                                     <SelectValue placeholder="จัดการกับส่วนต่าง" />
                                 </SelectTrigger>
@@ -201,19 +218,7 @@ export default function ReceivedDialog({
                         <Button
                             variant={'default'}
                             autoFocus
-                            onClick={async () => {
-                                try {
-                                    console.log('test')
-                                    await receivedFromBill(
-                                        '',
-                                        date,
-                                        payAmount,
-                                        selectedBankAccount,
-                                        remark,
-                                        handleDifference
-                                    )
-                                } catch (err) {}
-                            }}
+                            onClick={createReceivedFromBill}
                         >
                             ยืนยัน
                         </Button>

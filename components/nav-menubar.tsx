@@ -26,7 +26,7 @@ import { usePathname } from 'next/navigation'
 export function NavMenubar() {
     const pathName = usePathname()
     return (
-        <Menubar>
+        <Menubar className="space-x-2">
             <MenubarMenu>
                 <Link href={'/'}>
                     <MenubarTrigger

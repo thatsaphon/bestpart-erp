@@ -21,6 +21,7 @@ id,name,type
 31000,หุ้นสามัญ,Equity
 32000,กำไรสะสม,Equity
 41000,รายได้,Revenue
+41100,ส่วนลด,Revenue
 51000,ต้นทุนขาย,Expense
 61000,รายได้อื่น,OtherIncome
 71000,ค่าใช้จ่ายอื่นๆ,OtherExpense

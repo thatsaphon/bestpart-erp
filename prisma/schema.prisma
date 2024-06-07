@@ -325,8 +325,9 @@ model ArSubledger {
 enum PaymentStatus {
   Cash
   Paid
-  NotPaid  @map("Not Paid")
-  WriteOff @map("Write Off")
+  PartialPaid
+  NotPaid     @map("Not Paid")
+  WriteOff    @map("Write Off")
   Billed
 }
 

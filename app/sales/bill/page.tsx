@@ -14,6 +14,15 @@ import PaginationComponent from '@/components/pagination-component'
 import { ViewIcon } from 'lucide-react'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import { Prisma } from '@prisma/client'
+import { cn } from '@/lib/utils'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Fragment } from 'react'
+import { Badge } from '@/components/ui/badge'
 
 type Props = {
     searchParams: {
@@ -38,10 +47,20 @@ export default async function SalesListPage({
             },
             GeneralLedger: {
                 where: {
-                    chartOfAccountId: {
-                        in: [11000, 12000],
-                    },
+                    AND: [
+                        {
+                            chartOfAccountId: {
+                                gte: 11000,
+                            },
+                        },
+                        {
+                            chartOfAccountId: {
+                                lte: 12000,
+                            },
+                        },
+                    ],
                 },
+                include: { ChartOfAccount: true, Document: true },
             },
         },
         orderBy: [{ date: 'desc' }, { documentId: 'desc' }],
@@ -98,12 +117,128 @@ export default async function SalesListPage({
                                 {bill.ArSubledger?.Contact.name || 'เงินสด'}
                             </TableCell>
                             <TableCell>
-                                {bill.ArSubledger?.paymentStatus || 'Paid'}
+                                <Badge
+                                    variant={
+                                        bill.ArSubledger?.paymentStatus ===
+                                        'Paid'
+                                            ? 'default'
+                                            : 'destructive'
+                                    }
+                                    className={cn(
+                                        bill.ArSubledger?.paymentStatus ===
+                                            'Paid' && 'bg-green-400'
+                                    )}
+                                >
+                                    {bill.ArSubledger?.paymentStatus ===
+                                    'NotPaid'
+                                        ? 'ยังไม่จ่าย'
+                                        : bill.ArSubledger?.paymentStatus ===
+                                            'PartialPaid'
+                                          ? 'จ่ายบางส่วน'
+                                          : 'จ่ายแล้ว'}
+                                </Badge>
                             </TableCell>
-                            <TableCell className="text-right">
-                                {bill.GeneralLedger.reduce(
-                                    (total, item) => total + item.amount,
-                                    0
+                            <TableCell
+                                className={cn(
+                                    'text-right',
+                                    bill.GeneralLedger.find(
+                                        (item) => item.amount < 0
+                                    ) && 'text-destructive',
+                                    bill.GeneralLedger.reduce(
+                                        (total, item) => total + item.amount,
+                                        0
+                                    ) === 0 && 'text-green-500'
+                                )}
+                            >
+                                {bill.GeneralLedger.find(
+                                    (item) => item.amount < 0
+                                ) ? (
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                {bill.GeneralLedger.filter(
+                                                    (gl) =>
+                                                        gl.amount > 0 &&
+                                                        gl.chartOfAccountId ===
+                                                            12000
+                                                ).reduce(
+                                                    (total, item) =>
+                                                        total + item.amount,
+                                                    0
+                                                )}
+                                            </TooltipTrigger>
+                                            <TooltipContent className="p-2">
+                                                <div className="grid grid-cols-[auto_auto_auto_auto] gap-x-2 text-left">
+                                                    {bill.GeneralLedger.filter(
+                                                        (gl) =>
+                                                            gl.chartOfAccountId !==
+                                                            12000
+                                                    ).map((item) => (
+                                                        <Fragment key={item.id}>
+                                                            <p>
+                                                                {Intl.DateTimeFormat(
+                                                                    'th-TH',
+                                                                    {
+                                                                        year: 'numeric',
+                                                                        month: 'short',
+                                                                        day: 'numeric',
+                                                                        timeZone:
+                                                                            'Asia/Bangkok', // Set time zone to Bangkok
+                                                                        localeMatcher:
+                                                                            'best fit',
+                                                                    }
+                                                                ).format(
+                                                                    item.Document.find(
+                                                                        (
+                                                                            document
+                                                                        ) =>
+                                                                            document.type ===
+                                                                                'Sales' ||
+                                                                            document.type ===
+                                                                                'Received'
+                                                                    )?.date
+                                                                )}
+                                                            </p>
+                                                            <p>รับชำระ</p>
+                                                            <p className="text-center">
+                                                                {
+                                                                    item
+                                                                        .ChartOfAccount
+                                                                        .name
+                                                                }
+                                                            </p>
+                                                            <p>{item.amount}</p>
+                                                        </Fragment>
+                                                    ))}
+                                                    <Fragment key={'remaining'}>
+                                                        <p></p>
+                                                        <p></p>
+                                                        <p className="text-right">
+                                                            คงเหลือ
+                                                        </p>
+                                                        <p>
+                                                            {bill.GeneralLedger.reduce(
+                                                                (total, item) =>
+                                                                    total +
+                                                                    item.amount,
+                                                                0
+                                                            )}
+                                                        </p>
+                                                    </Fragment>
+                                                </div>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                ) : (
+                                    <>
+                                        {bill.GeneralLedger.filter(
+                                            (gl) => gl.amount > 0
+                                        ).reduce(
+                                            (total, item) =>
+                                                total + item.amount,
+                                            0
+                                        )}
+                                    </>
                                 )}
                             </TableCell>
                             <TableCell className="text-right">
