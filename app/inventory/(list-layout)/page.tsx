@@ -1,6 +1,18 @@
 import prisma from '@/app/db/db'
 import { InventoryCard } from '@/components/inventory-card'
 import PaginationInventory from '../pagination-inventory'
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import { ChevronDown, ExpandIcon } from 'lucide-react'
+import { searchDistinctMainSku } from './search-distinct-main-sku'
+// import { searchSku } from '@/app/sales/create/search-sku'
 
 type Props = {
     searchParams: {
@@ -8,6 +20,7 @@ type Props = {
         limit?: string
         search?: string
         remaining?: 'true' | 'false' | ''
+        view?: 'card' | 'table'
     }
 }
 
@@ -16,72 +29,146 @@ export const dynamic = 'force-dynamic'
 
 export default async function InventoryListPage({
     searchParams,
-    searchParams: { page = '1', limit = '10', search = '', remaining = '' },
+    searchParams: {
+        page = '1',
+        limit = '10',
+        search = '',
+        remaining = '',
+        view = 'card',
+    },
 }: Props) {
-    const mainSkus = await prisma.mainSku.findMany({
-        where: {
-            AND: search
-                .split(' ')
-                .filter((x) => x)
-                .map((x) => ({
-                    OR: [
-                        { name: { contains: x, mode: 'insensitive' } },
-                        { searchKeyword: { contains: x, mode: 'insensitive' } },
-                    ],
-                })),
-        },
-        skip: (Number(page) - 1) * Number(limit),
-        take: Number(limit),
-        include: {
-            CarModel: true,
-            SkuMaster: {
-                include: {
-                    Brand: true,
-                    GoodsMaster: true,
-                    Image: true,
-                    SkuIn: {
-                        include: {
-                            SkuInToOut: true,
-                        },
-                    },
-                },
-            },
-        },
-    })
+    // const mainSkus = await prisma.mainSku.findMany({
+    //     where: {
+    //         AND: search
+    //             .split(' ')
+    //             .filter((x) => x)
+    //             .map((x) => ({
+    //                 OR: [
+    //                     { name: { contains: x, mode: 'insensitive' } },
+    //                     { searchKeyword: { contains: x, mode: 'insensitive' } },
+    //                 ],
+    //             })),
+    //     },
+    //     skip: (Number(page) - 1) * Number(limit),
+    //     take: Number(limit),
+    //     include: {
+    //         CarModel: true,
+    //         SkuMaster: {
+    //             include: {
+    //                 Brand: true,
+    //                 GoodsMaster: true,
+    //                 Image: true,
+    //                 SkuIn: {
+    //                     include: {
+    //                         SkuInToOut: true,
+    //                     },
+    //                 },
+    //             },
+    //         },
+    //     },
+    // })
 
-    const skuCount = await prisma.mainSku.count({
-        where: {
-            AND: search
-                .split(' ')
-                .filter((x) => x)
-                .map((x) => ({
-                    OR: [
-                        { name: { contains: x, mode: 'insensitive' } },
-                        { searchKeyword: { contains: x, mode: 'insensitive' } },
-                    ],
-                })),
-        },
-    })
+    // const skuCount = await prisma.mainSku.count({
+    //     where: {
+    //         AND: search
+    //             .split(' ')
+    //             .filter((x) => x)
+    //             .map((x) => ({
+    //                 OR: [
+    //                     { name: { contains: x, mode: 'insensitive' } },
+    //                     { searchKeyword: { contains: x, mode: 'insensitive' } },
+    //                 ],
+    //             })),
+    //     },
+    // })
+    try {
+        const skuList = await searchDistinctMainSku(search, Number(page))
 
-    const numberOfPage = Math.ceil(skuCount / Number(limit))
+        const numberOfPage = Math.ceil(skuList.count / Number(limit))
 
-    return (
-        <>
-            {true && (
-                <div className="mt-2 flex flex-wrap gap-3">
-                    {mainSkus.map((item, index) => (
+        return (
+            <>
+                {view === 'card' ? (
+                    <div className="mt-2 flex flex-wrap gap-3">
+                        {/* {mainSkus.map((item, index) => (
                         <InventoryCard key={item.id} mainSku={item} />
-                    ))}
-                </div>
-            )}
-            <PaginationInventory
-                numberOfPage={numberOfPage}
-                searchParams={searchParams}
-            />
-            {/* <form action={uploadFile}>
+                    ))} */}
+                    </div>
+                ) : (
+                    <Table>
+                        <TableCaption>Table of inventory</TableCaption>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Part No.</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Detail</TableHead>
+                                <TableHead>หน่วย</TableHead>
+                                <TableHead>Stock</TableHead>
+                                <TableHead>Price</TableHead>
+                                <TableHead></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {skuList.items.map((item) => (
+                                <TableRow
+                                    key={item[0].goodsMasterId}
+                                    className="group"
+                                >
+                                    <p>{item[0].partNumber}</p>
+                                    <TableCell>
+                                        <p>{item[0].name}</p>
+                                    </TableCell>
+                                    <TableCell className="text-primary/50 group-hover:text-primary">
+                                        {item.map((goods) => (
+                                            <p key={'detail-' + goods.barcode}>
+                                                {goods.detail}
+                                            </p>
+                                        ))}
+                                    </TableCell>
+                                    <TableCell className="text-primary/50 group-hover:text-primary">
+                                        {item.map((goods) => (
+                                            <p key={'unit-' + goods.barcode}>
+                                                {`${goods.unit}`}
+                                            </p>
+                                        ))}
+                                    </TableCell>
+                                    <TableCell className="text-primary/50 group-hover:text-primary">
+                                        {item.map((goods) => (
+                                            <p
+                                                key={
+                                                    'remaining-' + goods.barcode
+                                                }
+                                            >
+                                                {goods.remaining}
+                                            </p>
+                                        ))}
+                                    </TableCell>
+                                    <TableCell className="text-primary/50 group-hover:text-primary">
+                                        {item.map((goods) => (
+                                            <p key={'price-' + goods.barcode}>
+                                                {goods.price}
+                                            </p>
+                                        ))}
+                                    </TableCell>
+                                    <TableCell className="text-primary/50 group-hover:text-primary">
+                                        {/* <ChevronDown /> */}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
+                <PaginationInventory
+                    numberOfPage={numberOfPage}
+                    searchParams={searchParams}
+                />
+                {/* <form action={uploadFile}>
                 <input type="file" name="file" />
                 <button type="submit">Upload</button>
             </form> */}
-        </>
-    )
+            </>
+        )
+    } catch (error) {
+        return <>ไม่พบสินค้าที่ต้องการ</>
+    }
 }

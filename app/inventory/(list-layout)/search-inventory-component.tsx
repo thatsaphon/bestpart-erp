@@ -16,6 +16,9 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Contact } from '@prisma/client'
+import { CardStackIcon, TableIcon } from '@radix-ui/react-icons'
+import { Table2Icon } from 'lucide-react'
+import Link from 'next/link'
 
 type Props = {
     contacts: Contact[]
@@ -24,6 +27,7 @@ type Props = {
 export default function SearchInventory({ contacts }: Props) {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const view = searchParams.get('view')
     return (
         <form
             action={async (formData) => {
@@ -32,7 +36,7 @@ export default function SearchInventory({ contacts }: Props) {
                 )
             }}
         >
-            <div className="flex w-full flex-wrap gap-2 ">
+            <div className="flex w-full flex-wrap items-center gap-2">
                 <Input
                     name="search"
                     type="search"
@@ -56,6 +60,19 @@ export default function SearchInventory({ contacts }: Props) {
                     </SelectContent>
                 </Select>
                 <Button type="submit">Submit</Button>
+                {view === 'table' ? (
+                    <Link
+                        href={`?${createQueryString(new URLSearchParams(searchParams), 'view', 'card')}`}
+                    >
+                        <CardStackIcon className="h-6 w-6" />
+                    </Link>
+                ) : (
+                    <Link
+                        href={`?${createQueryString(new URLSearchParams(searchParams), 'view', 'table')}`}
+                    >
+                        <Table2Icon className="h-6 w-6" />
+                    </Link>
+                )}
             </div>
         </form>
     )
