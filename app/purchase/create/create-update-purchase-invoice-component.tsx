@@ -28,10 +28,10 @@ import SearchSkuDialog from './search-sku-dialog'
 import SelectSearchVendor from '@/components/select-search-vendor'
 import { createPurchaseInvoice } from './create-purchase-invoice'
 import { updatePurchaseInvoice } from './update-purchase-invoice'
-import { InvoiceItemDetailType } from './invoice-item-detail-type'
+import { InventoryDetailType } from '@/types/inventory-detail'
 
 type Props = {
-    defaultItems?: InvoiceItemDetailType[]
+    defaultItems?: InventoryDetailType[]
     defaultDocumentDetails?: {
         id: number
         date: Date
@@ -51,7 +51,7 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
 }: Props) {
     const [open, setOpen] = React.useState(false)
     const [items, setItems] =
-        React.useState<InvoiceItemDetailType[]>(defaultItems)
+        React.useState<InventoryDetailType[]>(defaultItems)
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
 

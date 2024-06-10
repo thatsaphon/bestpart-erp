@@ -29,23 +29,27 @@ import toast from 'react-hot-toast'
 import SkuMasterCardForm from './sku-master-card-form'
 import { editMainSku } from '@/app/actions/inventory/editMainSku'
 import InventoryDialogContextMenu from './inventory-dialog-context-menu'
+import { InventoryDetailType } from '@/types/inventory-detail'
 
 type Props = {
-    mainSku: MainSku & {
-        SkuMaster: (SkuMaster & {
-            Brand?: Brand | null
-            CarModel?: CarModel | null
-            GoodsMaster: GoodsMaster[]
-            SkuIn?: SkuIn[]
-            Image: PrismaImage[]
-        })[]
-    }
+    mainSkus: InventoryDetailType[]
 }
 
-export default function EditMainSkuDialog({ mainSku }: Props) {
+export default function EditMainSkuDialog({ mainSkus }: Props) {
     const [isOpen, setIsOpen] = useState(false)
     const [isEdit, setIsEdit] = useState(false)
     const [addingNewSku, setAddingNewSku] = useState(false)
+
+    function groupBySkuMasters(mainSkus: InventoryDetailType[]) {
+        const groups: { [key: string]: InventoryDetailType[] } = {}
+        mainSkus.forEach((mainSku) => {
+            if (!groups[mainSku.skuMasterId]) {
+                groups[mainSku.skuMasterId] = []
+            }
+            groups[mainSku.skuMasterId].push(mainSku)
+        })
+        return groups
+    }
 
     return (
         <Dialog
@@ -75,16 +79,16 @@ export default function EditMainSkuDialog({ mainSku }: Props) {
                             type="text"
                             name="id"
                             hidden
-                            defaultValue={mainSku.id}
+                            defaultValue={mainSkus[0].id}
                         />
                         {isEdit ? (
                             <Input
-                                defaultValue={mainSku?.name}
+                                defaultValue={mainSkus[0].name}
                                 name="name"
                                 className="inline w-auto"
                             />
                         ) : (
-                            mainSku?.name
+                            mainSkus[0].name
                         )}
                         {isEdit && (
                             <Button
@@ -113,29 +117,27 @@ export default function EditMainSkuDialog({ mainSku }: Props) {
 
                         {isEdit ? (
                             <Input
-                                defaultValue={mainSku?.partNumber || ''}
+                                defaultValue={mainSkus[0].partNumber || ''}
                                 name="partNumber"
                                 className="inline w-auto"
                             />
                         ) : (
                             <div>
                                 <DialogDescription>
-                                    {mainSku?.partNumber}
+                                    {mainSkus[0].partNumber}
                                 </DialogDescription>
                             </div>
                         )}
                     </form>
                 </DialogHeader>
                 <div className="flex min-h-[400px] flex-col gap-2">
-                    {mainSku.SkuMaster.length > 0 &&
-                        mainSku.SkuMaster.map((skuMaster, index) => (
-                            <InventoryDialogContextMenu
-                                key={skuMaster.id}
-                                skuMaster={skuMaster}
-                            >
-                                <SkuMasterCardForm skuMaster={skuMaster} />
+                    {Object.entries(groupBySkuMasters(mainSkus)).map(
+                        ([skuMasterId, skuMasters]) => (
+                            <InventoryDialogContextMenu key={skuMasterId}>
+                                <SkuMasterCardForm mainSkus={skuMasters} />
                             </InventoryDialogContextMenu>
-                        ))}
+                        )
+                    )}
                     {!addingNewSku && (
                         <Button onClick={() => setAddingNewSku(true)}>
                             Add new SKU
@@ -144,6 +146,9 @@ export default function EditMainSkuDialog({ mainSku }: Props) {
                     {addingNewSku && (
                         <form
                             action={async (formData) => {
+                                if (formData.get('detail') === '') {
+                                    return toast.error('Detail cannot be empty')
+                                }
                                 try {
                                     const result =
                                         await createInventory(formData)
@@ -161,7 +166,7 @@ export default function EditMainSkuDialog({ mainSku }: Props) {
                             <input
                                 type="text"
                                 name="mainSkuId"
-                                defaultValue={mainSku?.id}
+                                defaultValue={mainSkus[0].id}
                                 className="hidden"
                             />
                             <div className="grid w-full items-center gap-4">

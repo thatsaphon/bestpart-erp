@@ -21,14 +21,14 @@ import toast from 'react-hot-toast'
 import SearchSkuDialog from './search-sku-dialog'
 import SelectSearchVendor from '@/components/select-search-vendor'
 import { createSalesInvoice } from './create-sales-invoice'
-import { InvoiceItemDetailType } from './invoice-item-detail-type'
+import { InventoryDetailType } from '@/types/inventory-detail'
 import { updateSalesInvoice } from './update-sales-invoice'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 
 type Props = {
-    defaultItems?: InvoiceItemDetailType[]
+    defaultItems?: InventoryDetailType[]
     defaultDocumentDetails?: {
         id: number
         date: Date
@@ -49,7 +49,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
     const [items, setItems] =
-        React.useState<InvoiceItemDetailType[]>(defaultItems)
+        React.useState<InventoryDetailType[]>(defaultItems)
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
     const session = useSession()

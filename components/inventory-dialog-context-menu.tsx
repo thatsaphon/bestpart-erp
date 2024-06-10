@@ -13,17 +13,9 @@ import { DialogFooter } from './ui/dialog'
 
 type Props = {
     children: React.ReactNode
-    skuMaster: SkuMaster & {
-        Brand?: Brand | null
-        CarModel?: CarModel | null
-        GoodsMaster: GoodsMaster[]
-    }
 }
 
-export default function InventoryDialogContextMenu({
-    children,
-    skuMaster,
-}: Props) {
+export default function InventoryDialogContextMenu({ children }: Props) {
     const ref = useRef<HTMLInputElement>(null)
     const [isOpen, setIsOpen] = useState(false)
     const [file, setFile] = useState<File | null>(null)

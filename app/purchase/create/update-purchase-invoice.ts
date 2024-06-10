@@ -7,12 +7,12 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { InvoiceItemDetailType } from './invoice-item-detail-type'
+import { InventoryDetailType } from '@/types/inventory-detail'
 
 export const updatePurchaseInvoice = async (
     id: number,
     formData: FormData,
-    items: InvoiceItemDetailType[]
+    items: InventoryDetailType[]
 ) => {
     const validator = z.object({
         vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
@@ -117,10 +117,10 @@ export const updatePurchaseInvoice = async (
             remark: remark ? { create: { remark } } : undefined,
             ApSubledger: !!contact
                 ? {
-                      update: {
-                          contactId: Number(vendorId),
-                      },
-                  }
+                    update: {
+                        contactId: Number(vendorId),
+                    },
+                }
                 : undefined,
             GeneralLedger: {
                 update: [
@@ -155,7 +155,7 @@ export const updatePurchaseInvoice = async (
                                     (sum, item) =>
                                         sum +
                                         (item.quantity * item.price * 100) /
-                                            107,
+                                        107,
                                     0
                                 )
                                 .toFixed(2),

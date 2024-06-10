@@ -7,11 +7,11 @@ import { fromZodError } from 'zod-validation-error'
 import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
-import { InvoiceItemDetailType } from './invoice-item-detail-type'
+import { InventoryDetailType } from '@/types/inventory-detail'
 
 export const createPurchaseInvoice = async (
     formData: FormData,
-    items: InvoiceItemDetailType[]
+    items: InventoryDetailType[]
 ) => {
     const validator = z.object({
         vendorId: z.string().trim().min(1, 'vendorId must not be empty'),

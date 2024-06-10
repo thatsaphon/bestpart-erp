@@ -2,15 +2,15 @@
 
 import prisma from '@/app/db/db'
 import { Prisma } from '@prisma/client'
-import { InvoiceItemDetailType } from './invoice-item-detail-type'
+import { InventoryDetailType } from '@/types/inventory-detail'
 
 export const searchSku = async (query: string, page: number = 1) => {
     const splitQuery = query.trim().split(' ')
 
     const items = await prisma.$queryRawUnsafe<
-        InvoiceItemDetailType[]
+        InventoryDetailType[]
     >(
-        `select "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "GoodsMaster".price, 
+        `select "MainSku".id, "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuMaster"."detail", "GoodsMaster".price, 
     "GoodsMaster".quantity as "quantityPerUnit", "GoodsMaster".unit, "MainSku"."partNumber"
     from "MainSku"
     left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"

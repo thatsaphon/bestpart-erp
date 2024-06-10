@@ -37,50 +37,6 @@ export default async function InventoryListPage({
         view = 'card',
     },
 }: Props) {
-    // const mainSkus = await prisma.mainSku.findMany({
-    //     where: {
-    //         AND: search
-    //             .split(' ')
-    //             .filter((x) => x)
-    //             .map((x) => ({
-    //                 OR: [
-    //                     { name: { contains: x, mode: 'insensitive' } },
-    //                     { searchKeyword: { contains: x, mode: 'insensitive' } },
-    //                 ],
-    //             })),
-    //     },
-    //     skip: (Number(page) - 1) * Number(limit),
-    //     take: Number(limit),
-    //     include: {
-    //         CarModel: true,
-    //         SkuMaster: {
-    //             include: {
-    //                 Brand: true,
-    //                 GoodsMaster: true,
-    //                 Image: true,
-    //                 SkuIn: {
-    //                     include: {
-    //                         SkuInToOut: true,
-    //                     },
-    //                 },
-    //             },
-    //         },
-    //     },
-    // })
-
-    // const skuCount = await prisma.mainSku.count({
-    //     where: {
-    //         AND: search
-    //             .split(' ')
-    //             .filter((x) => x)
-    //             .map((x) => ({
-    //                 OR: [
-    //                     { name: { contains: x, mode: 'insensitive' } },
-    //                     { searchKeyword: { contains: x, mode: 'insensitive' } },
-    //                 ],
-    //             })),
-    //     },
-    // })
     try {
         const skuList = await searchDistinctMainSku(search, Number(page))
 
@@ -90,9 +46,9 @@ export default async function InventoryListPage({
             <>
                 {view === 'card' ? (
                     <div className="mt-2 flex flex-wrap gap-3">
-                        {/* {mainSkus.map((item, index) => (
-                        <InventoryCard key={item.id} mainSku={item} />
-                    ))} */}
+                        {skuList.items.map((item, index) => (
+                            <InventoryCard key={item[0].name} mainSkus={item} />
+                        ))}
                     </div>
                 ) : (
                     <Table>

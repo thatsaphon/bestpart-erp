@@ -8,12 +8,12 @@ import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
-import { InvoiceItemDetailType } from './invoice-item-detail-type'
+import { InventoryDetailType } from '@/types/inventory-detail'
 import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 
 export const createSalesInvoice = async (
     formData: FormData,
-    items: InvoiceItemDetailType[]
+    items: InventoryDetailType[]
 ) => {
     const validator = z.object({
         customerId: z.string().trim().nullable(),
@@ -100,7 +100,7 @@ export const createSalesInvoice = async (
         throw new Error('goods not found')
     }
 
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0;i < items.length;i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === items[i].barcode
         )
@@ -115,7 +115,7 @@ export const createSalesInvoice = async (
         if (
             remaining.length <= 0 ||
             remaining.reduce((sum, item) => sum + item.remaining, 0) <
-                items[i].quantity * items[i].quantityPerUnit
+            items[i].quantity * items[i].quantityPerUnit
         ) {
             throw new Error('insufficient inventory')
         }
@@ -140,12 +140,12 @@ export const createSalesInvoice = async (
             updatedBy: session?.user.first_name,
             ArSubledger: !!contact
                 ? {
-                      create: {
-                          contactId: Number(customerId),
-                          paymentStatus:
-                              payment === 'cash' ? 'Paid' : 'NotPaid',
-                      },
-                  }
+                    create: {
+                        contactId: Number(customerId),
+                        paymentStatus:
+                            payment === 'cash' ? 'Paid' : 'NotPaid',
+                    },
+                }
                 : undefined,
             GeneralLedger: {
                 create: [
@@ -243,13 +243,13 @@ export const createSalesInvoice = async (
 
                                     if (
                                         item.quantity * item.quantityPerUnit -
-                                            array
-                                                .slice(0, index)
-                                                .reduce(
-                                                    (sum, item) =>
-                                                        sum + item.remaining,
-                                                    0
-                                                ) >=
+                                        array
+                                            .slice(0, index)
+                                            .reduce(
+                                                (sum, item) =>
+                                                    sum + item.remaining,
+                                                0
+                                            ) >=
                                         remaining
                                     )
                                         return {
@@ -260,20 +260,20 @@ export const createSalesInvoice = async (
                                     // ครั้งที่ 2+ ตัดส่วนที่เหลือ
                                     if (
                                         item.quantity * item.quantityPerUnit -
-                                            array
-                                                .slice(0, index)
-                                                .reduce(
-                                                    (sum, item) =>
-                                                        sum + item.remaining,
-                                                    0
-                                                ) <
+                                        array
+                                            .slice(0, index)
+                                            .reduce(
+                                                (sum, item) =>
+                                                    sum + item.remaining,
+                                                0
+                                            ) <
                                         remaining
                                     )
                                         return {
                                             skuInId: id,
                                             quantity:
                                                 item.quantity *
-                                                    item.quantityPerUnit -
+                                                item.quantityPerUnit -
                                                 array
                                                     .slice(0, index)
                                                     .reduce(

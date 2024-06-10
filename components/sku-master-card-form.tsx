@@ -32,35 +32,43 @@ import {
 import Image from 'next/image'
 import { addImageToTag } from '@/app/actions/inventory/addImageToFlag'
 import { uploadFile } from '@/lib/s3-client'
+import { InventoryDetailType } from '@/types/inventory-detail'
 
 type Props = {
-    skuMaster: SkuMaster & {
-        Brand?: Brand | null
-        CarModel?: CarModel | null
-        GoodsMaster: GoodsMaster[]
-        Image: PrismaImage[]
-    }
+    mainSkus: InventoryDetailType[]
 }
 
-export default function SkuMasterCardForm({ skuMaster }: Props) {
+export default function SkuMasterCardForm({ mainSkus }: Props) {
     const [isEdit, setIsEdit] = useState(false)
     const [file, setFile] = useState<File | null | undefined>(null)
     const [goodsMasters, setGoodsMasters] = useState<Partial<GoodsMaster>[]>(
-        skuMaster.GoodsMaster
+        mainSkus.map((mainSku) => ({
+            barcode: mainSku.barcode,
+            price: mainSku.price,
+            quantity: mainSku.quantityPerUnit,
+            unit: mainSku.unit,
+        }))
     )
 
     const [state, formAction] = useFormState(createOrUpdateGoodsMasters, {
         error: '',
     })
     useEffect(() => {
-        setGoodsMasters(skuMaster.GoodsMaster)
+        setGoodsMasters(
+            mainSkus.map((mainSku) => ({
+                barcode: mainSku.barcode,
+                price: mainSku.price,
+                quantity: mainSku.quantityPerUnit,
+                unit: mainSku.unit,
+            }))
+        )
         setIsEdit(false)
-    }, [skuMaster])
+    }, [mainSkus])
     return (
         <form action={formAction}>
             <input
                 type="text"
-                value={skuMaster.id}
+                value={mainSkus[0].skuMasterId}
                 readOnly
                 hidden
                 name="skuMasterId"
@@ -71,21 +79,21 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                         <CardTitle className="text-lg">
                             {isEdit ? (
                                 <Input
-                                    defaultValue={skuMaster.detail}
+                                    defaultValue={mainSkus[0].detail}
                                     name="detail"
                                 />
                             ) : (
-                                skuMaster.detail
+                                mainSkus[0].detail
                             )}
                         </CardTitle>
                         <CardDescription>
                             {isEdit ? (
                                 <Input
-                                    defaultValue={skuMaster.remark || ''}
+                                    defaultValue={mainSkus[0].remark || ''}
                                     name="remark"
                                 />
                             ) : (
-                                skuMaster.remark
+                                mainSkus[0].remark
                             )}
                         </CardDescription>
                     </div>
@@ -95,7 +103,7 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                             variant={'outline'}
                             onClick={() => {
                                 setIsEdit(!isEdit)
-                                setGoodsMasters(skuMaster.GoodsMaster)
+                                // setGoodsMasters(mainSkus.GoodsMaster)
                             }}
                             type="button"
                         >
@@ -263,6 +271,8 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                                                 const fileName =
                                                     window.crypto.randomUUID() +
                                                     '.jpeg'
+
+                                                console.log('first')
                                                 const result = await uploadFile(
                                                     fileName,
                                                     file,
@@ -274,22 +284,25 @@ export default function SkuMasterCardForm({ skuMaster }: Props) {
                                                         fileName
                                                     )
                                                 }
-                                            } catch (err) {}
+                                            } catch (err) {
+                                                console.log(err)
+                                            }
                                         }}
                                     >
                                         Submit
                                     </Button>
                                 )}
                                 <div className="grid grid-cols-3 gap-2">
-                                    {skuMaster.Image.map((image) => (
-                                        <Image
-                                            src={image.path}
-                                            alt={skuMaster.detail}
-                                            key={image.id}
-                                            width={500}
-                                            height={500}
-                                        />
-                                    ))}
+                                    {!!mainSkus[0].images &&
+                                        mainSkus[0]?.images.map((image) => (
+                                            <Image
+                                                src={image}
+                                                alt={mainSkus[0].detail}
+                                                key={image}
+                                                width={500}
+                                                height={500}
+                                            />
+                                        ))}
                                 </div>
                             </AccordionContent>
                         </AccordionItem>

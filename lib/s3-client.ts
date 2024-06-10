@@ -1,3 +1,5 @@
+'use server'
+
 import {
     S3Client,
     ListBucketsCommand,
@@ -19,6 +21,7 @@ export const uploadFile = async (
     fileContent: File,
     path?: string | undefined
 ) => {
+    console.log(fileName)
     const command = new PutObjectCommand({
         Bucket: process.env.NEXT_PUBLIC_BUCKET_NAME,
         Key: path ? `${path}/${fileName}` : `${fileName}`,
