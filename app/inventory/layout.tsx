@@ -20,11 +20,11 @@ export default async function Layout({
                 <Separator />
                 <SubMenuNavLink href="/inventory" label="Inventory" />
                 <Separator />
-                <SubMenuNavLink
+                {/* <SubMenuNavLink
                     href="/inventory/part-number"
                     label="Part Number"
                 />
-                <Separator />
+                <Separator /> */}
             </div>
             <Separator orientation="vertical" className="h-full" />
             {children}
