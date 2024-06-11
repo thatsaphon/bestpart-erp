@@ -76,7 +76,7 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
                     previousValue + currentValue.remaining,
                 0
             ),
-        images: images.filter((x) => x.skuMasterId === item.skuMasterId).map((x) => x.images)
+        images: images.filter((x) => x.skuMasterId === item.skuMasterId).map((x) => x.images).filter((x) => x)
     }))])
 
     return {

@@ -121,7 +121,7 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                     <div className="grid grid-cols-[165px_1fr_1fr] items-center border-b-2">
                         {goodsMasters.map((goodsMaster, i) =>
                             isEdit ? (
-                                <Fragment key={i}>
+                                <Fragment key={goodsMaster.barcode}>
                                     <input
                                         type="text"
                                         name="goodsMasterId"
@@ -250,7 +250,7 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                     <Image
                                         src={URL.createObjectURL(file)}
                                         alt="picture"
-                                        key={file.name}
+                                        key={file?.name}
                                         width={500}
                                         height={500}
                                     />
@@ -293,11 +293,11 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                     </Button>
                                 )}
                                 <div className="grid grid-cols-3 gap-2">
-                                    {!!mainSkus[0].images &&
-                                        mainSkus[0]?.images.map((image) => (
+                                    {mainSkus[0]?.images &&
+                                        mainSkus[0]?.images?.map((image) => (
                                             <Image
                                                 src={image}
-                                                alt={mainSkus[0].detail}
+                                                alt={mainSkus[0]?.detail}
                                                 key={image}
                                                 width={500}
                                                 height={500}

@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/table'
 import { ChevronDown, ExpandIcon } from 'lucide-react'
 import { searchDistinctMainSku } from './search-distinct-main-sku'
+import EditMainSkuDialog from '@/components/edit-main-sku-dialog'
 // import { searchSku } from '@/app/sales/create/search-sku'
 
 type Props = {
@@ -70,9 +71,14 @@ export default async function InventoryListPage({
                                     key={item[0].goodsMasterId}
                                     className="group"
                                 >
-                                    <p>{item[0].partNumber}</p>
+                                    <TableCell>{item[0].partNumber}</TableCell>
                                     <TableCell>
-                                        <p>{item[0].name}</p>
+                                        <p className="flex items-center">
+                                            {item[0].name}
+                                            <EditMainSkuDialog
+                                                mainSkus={item}
+                                            />
+                                        </p>
                                     </TableCell>
                                     <TableCell className="text-primary/50 group-hover:text-primary">
                                         {item.map((goods) => (
@@ -118,10 +124,6 @@ export default async function InventoryListPage({
                     numberOfPage={numberOfPage}
                     searchParams={searchParams}
                 />
-                {/* <form action={uploadFile}>
-                <input type="file" name="file" />
-                <button type="submit">Upload</button>
-            </form> */}
             </>
         )
     } catch (error) {
