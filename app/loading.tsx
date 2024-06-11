@@ -8,7 +8,7 @@ type Props = {}
 
 export default function loading({}: Props) {
     return (
-        <div className="grid flex-1 grid-cols-[200px_5px_1fr]">
+        <div className="grid flex-1 grid-cols-[200px_5px_1fr] p-4">
             <div className="flex flex-col items-center text-center"></div>
             <Separator orientation="vertical" className="h-full" />
             <Skeleton className="h-12 w-[250px]" />

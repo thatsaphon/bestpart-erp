@@ -28,8 +28,9 @@ import {
 import toast from 'react-hot-toast'
 import { useFormState } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChartOfAccount } from '@prisma/client'
+import { ChartOfAccount, DocumentType } from '@prisma/client'
 import { deleteKeyFromQueryString } from '@/lib/searchParams'
+import getChartOfAccountDetail from '@/app/accounting/get-chart-of-account-detail'
 
 type Props = {
     className?: string
@@ -59,9 +60,18 @@ export default function ChartOfAccountDetailDialog({
     })
     const params = useSearchParams()
     const router = useRouter()
+    const [history, setHistory] = React.useState<
+        { documentId: string; type: DocumentType; amount: number }[]
+    >([])
 
     useEffect(() => {
         const accountId = params.get('accountId')
+
+        async function fetchDocuments(id: number) {
+            const data = await getChartOfAccountDetail(id)
+
+            setHistory(data)
+        }
 
         if (
             account &&
@@ -69,6 +79,7 @@ export default function ChartOfAccountDetailDialog({
             account?.id === Number(params.get('accountId'))
         ) {
             setOpen(true)
+            fetchDocuments(Number(accountId))
         }
     }, [account, params])
 
@@ -102,72 +113,86 @@ export default function ChartOfAccountDetailDialog({
                     {label}
                 </Button> */}
             </DialogTrigger>
-            <DialogContent className="flex flex-col">
-                <form action={formAction}>
-                    <DialogHeader>
-                        <DialogTitle>Account Detail</DialogTitle>
-                        <DialogDescription>{}</DialogDescription>
-                    </DialogHeader>
-                    <Label className="mb-3">Account Type</Label>
-                    <Select
-                        name="accountType"
-                        defaultValue={account.type}
-                        disabled
-                    >
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Assets">Assets</SelectItem>
-                            <SelectItem value="Liabilities">
-                                Liabilities
-                            </SelectItem>
-                            <SelectItem value="Equity">Equity</SelectItem>
-                            <SelectItem value="Revenue">Revenue</SelectItem>
-                            <SelectItem value="Expense">Expense</SelectItem>
-                            <SelectItem value="OtherIncome">
-                                Other Income
-                            </SelectItem>
-                            <SelectItem value="OtherExpense">
-                                Other Expense
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-
-                    <Label className="mb-3">Account Number</Label>
-                    <Input
-                        name="accountNumber"
-                        type="number"
-                        defaultValue={account?.id}
-                    />
-                    <Label className="mb-3">Account Name</Label>
-                    <Input name="accountName" defaultValue={account?.name} />
-                    <DialogFooter className="mt-4">
-                        <Button
-                            type="submit"
-                            variant={'destructive'}
-                            formAction={async () => {
-                                try {
-                                    await deleteChartOfAccount(account.id)
-                                    setOpen(false)
-                                    router.push(
-                                        `?${deleteKeyFromQueryString(params.toString(), 'accountId')}`
-                                    )
-                                    toast.success(
-                                        `${account.id} - ${account.name} was deleted`
-                                    )
-                                } catch (error) {
-                                    toast.error('Error')
-                                }
-                            }}
+            <DialogContent className="flex max-w-[90vw] flex-col">
+                <div className="grid grid-cols-2 gap-2 divide-x p-1">
+                    <form action={formAction}>
+                        <DialogHeader>
+                            <DialogTitle>Account Detail</DialogTitle>
+                            <DialogDescription>{}</DialogDescription>
+                        </DialogHeader>
+                        <Label className="mb-3">Account Type</Label>
+                        <Select
+                            name="accountType"
+                            defaultValue={account.type}
+                            disabled
                         >
-                            Delete
-                        </Button>
-                        <Button type="submit" variant={'outline'}>
-                            Edit
-                        </Button>
-                    </DialogFooter>
-                </form>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Assets">Assets</SelectItem>
+                                <SelectItem value="Liabilities">
+                                    Liabilities
+                                </SelectItem>
+                                <SelectItem value="Equity">Equity</SelectItem>
+                                <SelectItem value="Revenue">Revenue</SelectItem>
+                                <SelectItem value="Expense">Expense</SelectItem>
+                                <SelectItem value="OtherIncome">
+                                    Other Income
+                                </SelectItem>
+                                <SelectItem value="OtherExpense">
+                                    Other Expense
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Label className="mb-3">Account Number</Label>
+                        <Input
+                            name="accountNumber"
+                            type="number"
+                            defaultValue={account?.id}
+                        />
+                        <Label className="mb-3">Account Name</Label>
+                        <Input
+                            name="accountName"
+                            defaultValue={account?.name}
+                        />
+                        <DialogFooter className="mt-4">
+                            <Button
+                                type="submit"
+                                variant={'destructive'}
+                                formAction={async () => {
+                                    try {
+                                        await deleteChartOfAccount(account.id)
+                                        setOpen(false)
+                                        router.push(
+                                            `?${deleteKeyFromQueryString(params.toString(), 'accountId')}`
+                                        )
+                                        toast.success(
+                                            `${account.id} - ${account.name} was deleted`
+                                        )
+                                    } catch (error) {
+                                        toast.error('Error')
+                                    }
+                                }}
+                            >
+                                Delete
+                            </Button>
+                            <Button type="submit" variant={'outline'}>
+                                Edit
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                    <div>
+                        {history.map((item) => (
+                            <div key={item.documentId} className="flex gap-2">
+                                <span>{item.documentId}</span>
+                                <span>{item.type}</span>
+                                <span>{item.amount}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </DialogContent>
         </Dialog>
     )
