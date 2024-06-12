@@ -35,8 +35,8 @@ export const findGoodsMasterByBarcode = async (barcode: string) => {
                         GoodsMaster: {
                             where: { barcode: { equals: barcode } },
                         },
-                        Brand: true,
                         Image: true,
+
                         SkuIn: {
                             include: { SkuInToOut: true },
                         },

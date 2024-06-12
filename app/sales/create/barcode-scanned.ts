@@ -5,7 +5,7 @@ import { InventoryDetailType } from '@/types/inventory-detail'
 
 export const getSkuByBarcode = async (barcode: string) => {
     const [result]: InventoryDetailType[] = await prisma.$queryRaw`
-            select "MainSku".id, "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "GoodsMaster".price,
+            select "MainSku".id as "mainSkuId", "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "GoodsMaster".price,
             "GoodsMaster".quantity as "quantityPerUnit", "GoodsMaster".unit, "MainSku"."partNumber" from "MainSku"
             left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
             left join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"

@@ -6,7 +6,7 @@ import {
 } from './ui/context-menu'
 import React, { Fragment, RefObject, useEffect, useRef, useState } from 'react'
 import { Input } from './ui/input'
-import { SkuMaster, Brand, CarModel, GoodsMaster } from '@prisma/client'
+import { SkuMaster, GoodsMaster } from '@prisma/client'
 import { Dialog, DialogContent } from './ui/dialog'
 import { Button } from './ui/button'
 import { DialogFooter } from './ui/dialog'

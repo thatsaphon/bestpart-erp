@@ -2,7 +2,7 @@
 
 import prisma from '@/app/db/db'
 import { InventoryDetailType } from '@/types/inventory-detail'
-import { Prisma } from '@prisma/client'
+import { MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
 
 export const searchDistinctMainSku = async (query: string, page: number = 1) => {
     const splitQuery = query.trim().split(' ')
@@ -31,7 +31,7 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
     console.log(items.length)
     if (!items.length) throw new Error('ไม่พบสินค้าที่ค้นหา')
 
-    const extendedItems: InventoryDetailType[] = await prisma.$queryRaw`select "MainSku".id, "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuMaster"."remark", "GoodsMaster".price, 
+    const extendedItems: InventoryDetailType[] = await prisma.$queryRaw`select "MainSku".id as "mainSkuId", "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuMaster"."remark", "GoodsMaster".price, 
     "GoodsMaster".quantity as "quantityPerUnit", "GoodsMaster".unit, "MainSku"."partNumber"
     from "MainSku"
     left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
@@ -46,7 +46,7 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
     group by "SkuIn"."id"
     having sum("SkuInToOut".quantity) < "SkuIn".quantity or sum("SkuInToOut".quantity) is null`
 
-    const images: { skuMasterId: number, images: string }[] = await prisma.$queryRaw`select "SkuMaster".id as "skuMasterId", "Image"."path" as "images" from "SkuMaster" left join "Image" on "SkuMaster"."id" = "Image"."skuMasterId" where "SkuMaster"."id" in (${Prisma.join(extendedItems.map((item) => item.skuMasterId))})`
+    const images: { skuMasterId: number, images: string }[] = await prisma.$queryRaw`select "SkuMaster".id as "skuMasterId", "SkuMasterImage"."path" as "images" from "SkuMaster" left join "SkuMasterImage" on "SkuMaster"."id" = "SkuMasterImage"."skuMasterId" where "SkuMaster"."id" in (${Prisma.join(extendedItems.map((item) => item.skuMasterId))})`
 
     const [{ count }] = await prisma.$queryRawUnsafe<{ count: number }[]>(
         `select count(distinct "MainSku".name) from "MainSku"
@@ -67,6 +67,23 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
         ...splitQuery.map((x) => `%${x.toLowerCase()}%`)
     )
 
+    console.log('extendedItems', extendedItems)
+
+    const mainSkuRemarks = await prisma.$queryRaw<
+        (MainSkuRemark & { mainSkuId: number })[]
+    >`select "MainSkuRemark".*, "MainSku"."id" as "mainSkuId" from "MainSkuRemark" 
+                            left join "_MainSkuToMainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
+                            left join "MainSku" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
+                            where "MainSku"."id" in (${Prisma.join(extendedItems.map((x) => x.mainSkuId))})`
+
+    const skuMasterRemarks = await prisma.$queryRaw<
+        (SkuMasterRemark & { skuMasterId: number })[]
+    >`select "SkuMasterRemark".*, "SkuMaster"."id" as "skuMasterId" from "SkuMasterRemark"
+                            left join "_SkuMasterToSkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id"
+                            left join "SkuMaster" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
+                            where "SkuMaster"."id" in (${Prisma.join(extendedItems.map((x) => x.skuMasterId))})`
+
+
     const returnItems = items.map((item) => [...extendedItems.filter((x) => x.name === item.name).map((item) => ({
         ...item,
         remaining: remaining
@@ -76,7 +93,13 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
                     previousValue + currentValue.remaining,
                 0
             ),
-        images: images.filter((x) => x.skuMasterId === item.skuMasterId).map((x) => x.images).filter((x) => x)
+        images: images.filter((x) => x.skuMasterId === item.skuMasterId).map((x) => x.images).filter((x) => x),
+        MainSkuRemarks: mainSkuRemarks.filter(
+            (y) => y.mainSkuId === item.mainSkuId
+        ),
+        SkuMasterRemarks: skuMasterRemarks.filter(
+            (y) => y.skuMasterId === item.skuMasterId
+        ),
     }))])
 
     return {

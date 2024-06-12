@@ -127,6 +127,7 @@ export default async function InventoryListPage({
             </>
         )
     } catch (error) {
+        console.log(error)
         return <>ไม่พบสินค้าที่ต้องการ</>
     }
 }

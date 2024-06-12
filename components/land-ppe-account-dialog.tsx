@@ -35,21 +35,11 @@ import { createChartOfAccounts } from '@/app/actions/accounting'
 type Props = {
     className?: string
     label?: string
-    type: 'Petty Cash' | 'Bank Account' | 'Cashier'
-    users: z.infer<typeof AuthPayloadSchema>[]
-}
-
-const typePrefix = {
-    'Petty Cash': '111',
-    'Bank Account': '112',
-    Cashier: '113',
 }
 
 export default function LandAndPPEAccountDialog({
     className,
     label = 'New Cash',
-    type,
-    users,
 }: Props) {
     const [open, setOpen] = useState(false)
     const [selectedUsers, setSelectedUsers] = useState<string[]>([])

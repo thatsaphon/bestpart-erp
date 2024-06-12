@@ -15,21 +15,18 @@ import {
 import { Label } from './ui/label'
 import { Pencil1Icon, Pencil2Icon } from '@radix-ui/react-icons'
 import { Button } from './ui/button'
-import {
-    MainSku,
-    SkuMaster,
-    Brand,
-    CarModel,
-    GoodsMaster,
-    SkuIn,
-    Image as PrismaImage,
-} from '@prisma/client'
 import { createInventory } from '@/app/actions/inventory/inventories'
 import toast from 'react-hot-toast'
 import SkuMasterCardForm from './sku-master-card-form'
 import { editMainSku } from '@/app/actions/inventory/editMainSku'
 import InventoryDialogContextMenu from './inventory-dialog-context-menu'
 import { InventoryDetailType } from '@/types/inventory-detail'
+import {
+    disconnectMainSkuRemark,
+    upsertMainSkuRemark,
+} from '@/app/inventory/remark-action/main-sku-remark'
+import { Badge } from './ui/badge'
+import { Trash2Icon } from 'lucide-react'
 
 type Props = {
     mainSkus: InventoryDetailType[]
@@ -79,7 +76,8 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
                             type="text"
                             name="id"
                             hidden
-                            defaultValue={mainSkus[0].id}
+                            defaultValue={mainSkus[0].mainSkuId}
+                            readOnly
                         />
                         {isEdit ? (
                             <Input
@@ -129,6 +127,47 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
                             </div>
                         )}
                     </form>
+                    <div className="flex flex-wrap gap-1">
+                        {mainSkus[0].MainSkuRemarks?.map((remark) => (
+                            <Badge key={remark.id} variant={'secondary'}>
+                                {remark.name}{' '}
+                                <Trash2Icon
+                                    className="ml-1 h-4 w-4"
+                                    onClick={async () => {
+                                        try {
+                                            await disconnectMainSkuRemark(
+                                                remark.id,
+                                                mainSkus[0].mainSkuId
+                                            )
+                                            toast.success('Remark updated')
+                                        } catch (err) {
+                                            if (err instanceof Error)
+                                                return toast.error(err.message)
+                                            toast.error('Something went wrong')
+                                        }
+                                    }}
+                                />
+                            </Badge>
+                        ))}
+                    </div>
+                    <form
+                        action={async (formData) => {
+                            try {
+                                await upsertMainSkuRemark(
+                                    formData.get('mainSkuRemark') as string,
+                                    mainSkus[0].mainSkuId
+                                )
+                                toast.success('Remark updated')
+                            } catch (err) {
+                                if (err instanceof Error)
+                                    toast.error(err.message)
+                                toast.error('Something went wrong')
+                            }
+                        }}
+                    >
+                        <Input name="mainSkuRemark" />
+                        <Button>Submit</Button>
+                    </form>
                 </DialogHeader>
                 <div className="flex min-h-[400px] flex-col gap-2">
                     {Object.entries(groupBySkuMasters(mainSkus)).map(
@@ -166,7 +205,7 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
                             <input
                                 type="text"
                                 name="mainSkuId"
-                                defaultValue={mainSkus[0].id}
+                                defaultValue={mainSkus[0].mainSkuId}
                                 className="hidden"
                             />
                             <div className="grid w-full items-center gap-4">

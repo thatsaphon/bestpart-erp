@@ -23,6 +23,7 @@ import SelectSearchVendor from '@/components/select-search-vendor'
 import { createPurchaseInvoice } from './create-purchase-invoice'
 import { updatePurchaseInvoice } from './update-purchase-invoice'
 import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentRemark } from '@prisma/client'
 
 type Props = {
     defaultItems?: InventoryDetailType[]
@@ -35,7 +36,7 @@ type Props = {
         address: string
         phone: string
         taxId: string
-        remark: string
+        documentRemarks: DocumentRemark[]
     }
 }
 

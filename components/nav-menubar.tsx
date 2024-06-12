@@ -18,7 +18,6 @@ import {
 import { cva } from 'class-variance-authority'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
-import { InventoryDialog } from './inventory-dialog'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 // import { navigationMenuTriggerStyle } from './ui/navigation-menu'

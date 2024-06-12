@@ -1,11 +1,14 @@
+import { MainSkuRemark, SkuMasterRemark } from '@prisma/client'
+
 export type InventoryDetailType = {
-    id: number
+    mainSkuId: number
     goodsMasterId: number
     barcode: string
     skuMasterId: number
     name: string
     detail: string
-    remark: string
+    MainSkuRemarks?: MainSkuRemark[]
+    SkuMasterRemarks?: SkuMasterRemark[]
     unit: string
     quantityPerUnit: number
     quantity: number

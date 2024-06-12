@@ -126,7 +126,7 @@ export const updateInvoice = async (id: number, formData: FormData) => {
         having sum("SkuInToOut".quantity) < "SkuIn".quantity or sum("SkuInToOut".quantity) is null
         order by "SkuIn"."date", "SkuIn"."id" asc`
 
-    for (let i = 0; i < barcodes.length; i++) {
+    for (let i = 0;i < barcodes.length;i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === barcodes[i]
         )
@@ -141,7 +141,7 @@ export const updateInvoice = async (id: number, formData: FormData) => {
         if (
             remaining.length <= 0 ||
             remaining.reduce((sum, item) => sum + item.remaining, 0) <
-                mapQuanties[i].q * mapQuanties[i].quantity
+            mapQuanties[i].q * mapQuanties[i].quantity
         ) {
             throw new Error('insufficient inventory')
         }
@@ -168,12 +168,12 @@ export const updateInvoice = async (id: number, formData: FormData) => {
             remark: remark ? { create: { remark } } : undefined,
             ArSubledger: !!contact
                 ? {
-                      update: {
-                          contactId: Number(customerId),
-                          paymentStatus:
-                              payment === 'cash' ? 'Paid' : 'NotPaid',
-                      },
-                  }
+                    update: {
+                        contactId: Number(customerId),
+                        paymentStatus:
+                            payment === 'cash' ? 'Paid' : 'NotPaid',
+                    },
+                }
                 : undefined,
             GeneralLedger: {
                 update: [
@@ -247,7 +247,7 @@ export const updateInvoice = async (id: number, formData: FormData) => {
                 },
                 create: mapQuanties.map((item) => {
                     return {
-                        date: date ? new Date(date) : undefined,
+                        date: date ? new Date(date) : new Date(),
                         goodsMasterId: item.id,
                         skuMasterId: item.skuMasterId,
                         barcode: String(item.barcode),
@@ -260,16 +260,14 @@ export const updateInvoice = async (id: number, formData: FormData) => {
                         SkuInToOut: {
                             create: checkRemaining
                                 .filter(
-                                    ({ skuMasterId }) =>
-                                        item.skuMasterId === skuMasterId
+                                    ({ skuMasterId }) => item.skuMasterId === skuMasterId
                                 )
                                 ?.map(({ id, remaining }, index, array) => {
                                     if (index === 0) {
                                         if (remaining > item.q * item.quantity)
                                             return {
                                                 skuInId: id,
-                                                quantity:
-                                                    item.q * item.quantity,
+                                                quantity: item.q * item.quantity,
                                             }
                                         if (remaining < item.q * item.quantity)
                                             return {
@@ -278,63 +276,53 @@ export const updateInvoice = async (id: number, formData: FormData) => {
                                             }
                                     }
                                     // ครั้งที่ 2+ ตัดยอดหมดแล้ว
-                                    if (
-                                        item.q * item.quantity <
+                                    if (item.q * item.quantity <
                                         array
                                             .slice(0, index)
                                             .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
+                                                (sum, item) => sum + item.remaining,
                                                 0
-                                            )
-                                    )
-                                        return undefined
+                                            ))
+                                        return { skuInId: 0, quantity: 0 }
 
                                     // ครั้งที่ 2+ ตัดทั้ง lot
-
-                                    if (
-                                        item.q * item.quantity -
-                                            array
-                                                .slice(0, index)
-                                                .reduce(
-                                                    (sum, item) =>
-                                                        sum + item.remaining,
-                                                    0
-                                                ) >=
-                                        remaining
-                                    )
+                                    if (item.q * item.quantity -
+                                        array
+                                            .slice(0, index)
+                                            .reduce(
+                                                (sum, item) => sum + item.remaining,
+                                                0
+                                            ) >=
+                                        remaining)
                                         return {
                                             skuInId: id,
                                             quantity: remaining,
                                         }
 
                                     // ครั้งที่ 2+ ตัดส่วนที่เหลือ
-                                    if (
-                                        item.q * item.quantity -
-                                            array
-                                                .slice(0, index)
-                                                .reduce(
-                                                    (sum, item) =>
-                                                        sum + item.remaining,
-                                                    0
-                                                ) <
-                                        remaining
-                                    )
+                                    if (item.q * item.quantity -
+                                        array
+                                            .slice(0, index)
+                                            .reduce(
+                                                (sum, item) => sum + item.remaining,
+                                                0
+                                            ) <
+                                        remaining)
                                         return {
                                             skuInId: id,
-                                            quantity:
-                                                item.q * item.quantity -
+                                            quantity: item.q * item.quantity -
                                                 array
                                                     .slice(0, index)
                                                     .reduce(
-                                                        (sum, item) =>
-                                                            sum +
+                                                        (sum, item) => sum +
                                                             item.remaining,
                                                         0
                                                     ),
                                         }
+
+                                    return { skuInId: 0, quantity: 0 }
                                 })
-                                .filter((item) => item),
+                                .filter((item) => item?.skuInId !== 0),
                         },
                     }
                 }),

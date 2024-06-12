@@ -1,12 +1,6 @@
 'use client'
 
-import {
-    Brand,
-    CarModel,
-    GoodsMaster,
-    Image as PrismaImage,
-    SkuMaster,
-} from '@prisma/client'
+import { GoodsMaster } from '@prisma/client'
 import { Fragment, useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import {

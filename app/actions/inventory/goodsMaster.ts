@@ -61,7 +61,7 @@ export const createOrUpdateGoodsMasters = async (
             where: { id: skuMasterId },
             data: {
                 detail,
-                remark,
+                // remark,
                 GoodsMaster: {
                     deleteMany: {
                         skuMasterId: skuMasterId,

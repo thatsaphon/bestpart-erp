@@ -17,7 +17,6 @@ export default async function searchGoodsMasters(
             SkuMaster: {
                 include: {
                     GoodsMaster: true,
-                    Brand: true,
                     Image: true,
                     SkuIn: {
                         include: {

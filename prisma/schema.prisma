@@ -36,14 +36,14 @@ enum Role {
 }
 
 model Document {
-  id            Int             @id @default(autoincrement())
-  documentId    String          @unique
+  id            Int              @id @default(autoincrement())
+  documentId    String           @unique
   date          DateTime
   SkuOut        SkuOut[]
   SkuIn         SkuIn[]
   ApSubledger   ApSubledger?
   ArSubledger   ArSubledger?
-  Image         Image[]
+  Image         SkuMasterImage[]
   GeneralLedger GeneralLedger[]
 
   contactName String
@@ -137,45 +137,38 @@ model MainSku {
   partNumber String?
   name       String  @unique
 
-  carModelId Int?
-
-  CarModel      CarModel? @relation(fields: [carModelId], references: [id])
+  remark        MainSkuRemark[]
   searchKeyword String?
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now()) @updatedAt
   SkuMaster SkuMaster[]
-
-  @@index([carModelId])
 }
 
 model SkuMaster {
   id     Int    @id @default(autoincrement())
   detail String
 
-  Brand   Brand? @relation(fields: [brandId], references: [id])
-  brandId Int?
+  remark SkuMasterRemark[]
 
   mainSkuId Int
   mainSku   MainSku @relation(fields: [mainSkuId], references: [id])
-  remark    String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  Image       Image[]
+  Image       SkuMasterImage[]
   GoodsMaster GoodsMaster[]
   SkuIn       SkuIn[]
   SkuOut      SkuOut[]
-  Vendor      Contact[]     @relation("SkuMasterToVendor")
+  Vendor      Contact[]        @relation("SkuMasterToVendor")
 
-  @@index([brandId])
   @@index([mainSkuId])
 }
 
-model CarModel {
+model MainSkuRemark {
   id   Int    @id @default(autoincrement())
-  name String
+  name String @unique
 
   MainSku MainSku[]
 
@@ -183,9 +176,9 @@ model CarModel {
   updatedAt DateTime @default(now()) @updatedAt
 }
 
-model Brand {
+model SkuMasterRemark {
   id   Int    @id @default(autoincrement())
-  name String
+  name String @unique
 
   SkuMaster SkuMaster[]
 
@@ -328,7 +321,7 @@ model AccountOwner {
   @@index([userId])
 }
 
-model Image {
+model SkuMasterImage {
   id          String     @id @default(uuid())
   path        String
   Document    Document?  @relation(fields: [documentId], references: [id])
