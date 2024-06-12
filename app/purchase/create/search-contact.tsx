@@ -41,6 +41,7 @@ type Props = {
     disabled?: boolean
 }
 type InvoiceAddress = {
+    name: string
     address: string
     phone: string
     taxId: string
@@ -67,6 +68,7 @@ export default function SearchContact({
     const [selectedResult, setSelectedResult] = useState<Contact>()
     const [address, setAddress] = useState<InvoiceAddress>(
         defaultAddress || {
+            name: '',
             address: '',
             phone: '',
             taxId: '',
@@ -109,6 +111,7 @@ export default function SearchContact({
 
     const setTextAreaFromData = (data: Contact) => {
         setAddress({
+            name: data.name,
             address: data.address,
             phone: data.phone,
             taxId: data.taxId || '',

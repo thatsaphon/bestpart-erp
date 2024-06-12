@@ -48,6 +48,7 @@ type Props<T> = {
 }
 
 type InvoiceAddress = {
+    name: string
     address: string
     phone: string
     taxId: string
@@ -74,6 +75,7 @@ export default function SelectSearchCustomer<T>({
     const [canCreateNewCustomer, setCanCreateNewCustomer] = useState(false)
     const [address, setAddress] = useState<InvoiceAddress>(
         defaultAddress || {
+            name: '',
             address: '',
             phone: '',
             taxId: '',
@@ -116,6 +118,7 @@ export default function SelectSearchCustomer<T>({
 
     const setTextAreaFromData = (data: Contact) => {
         setAddress({
+            name: data.name,
             address: data.address,
             phone: data.phone,
             taxId: data.taxId || '',
@@ -205,19 +208,32 @@ export default function SelectSearchCustomer<T>({
                     </span>
                     {hasTextArea && (
                         <>
-                            <Textarea
-                                value={address.address}
-                                name="address"
-                                placeholder="ที่อยู่"
-                                className="col-start-1 row-span-2"
-                                onChange={(e) =>
-                                    setAddress((prev) => ({
-                                        ...prev,
-                                        address: e.target.value,
-                                    }))
-                                }
-                                disabled={disabled}
-                            />
+                            <div className="col-start-1">
+                                <Input
+                                    name="name"
+                                    placeholder="ชื่อลูกค้า"
+                                    value={address.name}
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            name: e.target.value,
+                                        }))
+                                    }
+                                />
+                                <Textarea
+                                    value={address.address}
+                                    name="address"
+                                    placeholder="ที่อยู่"
+                                    className="col-start-1 row-span-2"
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            address: e.target.value,
+                                        }))
+                                    }
+                                    disabled={disabled}
+                                />
+                            </div>
                             <div>
                                 <Input
                                     name="phone"

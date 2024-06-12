@@ -123,6 +123,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 defaultDocumentDetails?.contactId || ''
                             )}
                             defaultAddress={{
+                                name: defaultDocumentDetails?.contactName || '',
                                 address: defaultDocumentDetails?.address || '',
                                 phone: defaultDocumentDetails?.phone || '',
                                 taxId: defaultDocumentDetails?.taxId || '',

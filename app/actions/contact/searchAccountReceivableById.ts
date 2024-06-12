@@ -8,9 +8,6 @@ export async function searchAccountReceivableById(id: string) {
             where: {
                 id: Number(id),
             },
-            include: {
-                Address: true,
-            },
         })
 
         if (!data) {

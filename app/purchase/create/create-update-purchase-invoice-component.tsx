@@ -2,12 +2,6 @@
 
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import { Button } from '@/components/ui/button'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -117,6 +111,7 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                                 defaultDocumentDetails?.contactId || ''
                             )}
                             defaultAddress={{
+                                name: defaultDocumentDetails?.contactName || '',
                                 address: defaultDocumentDetails?.address || '',
                                 phone: defaultDocumentDetails?.phone || '',
                                 taxId: defaultDocumentDetails?.taxId || '',

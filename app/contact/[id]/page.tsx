@@ -53,9 +53,6 @@ export default async function ContactDetailPage({ params: { id } }: Props) {
                         <p>{contact.searchKeyword}</p>
                     </CardFooter>
                 </Card>
-                <Card className="my-2 flex w-[350px] items-center justify-center">
-                    <EditAddressDialog contact={contact} />
-                </Card>
             </div>
         </div>
     )
