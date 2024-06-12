@@ -33,17 +33,9 @@ export const createNewContact = async (formData: FormData) => {
             isAr,
             isAp,
             searchKeyword,
-            Address: {
-                create: {
-                    isMain: true,
-                    name: fullName || name,
-                    phone,
-                    addressLine1: address.split('\n')[0] || undefined,
-                    addressLine2: address.split('\n')[1] || undefined,
-                    addressLine3: address.split('\n')[2] || undefined,
-                    taxId,
-                },
-            },
+            address,
+            phone,
+            taxId,
         },
     })
 

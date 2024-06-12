@@ -6,7 +6,6 @@ import { z } from 'zod'
 
 export default async function updateAddress(
     id: number,
-    addressId: number | undefined,
     formData: FormData
 ) {
     const validator = z.object({
@@ -28,46 +27,17 @@ export default async function updateAddress(
         isMain: formData.get('isMain'),
     })
 
-    if (addressId) {
-        await prisma.address.update({
-            where: {
-                id: Number(addressId),
-            },
-            data: {
-                addressLine1: address?.split('\n')[0],
-                addressLine2: address?.split('\n')[1],
-                addressLine3: address?.split('\n')[2],
-                phone,
-                taxId,
-                isMain,
-            },
-        })
-        if (isMain)
-            await prisma.address.updateMany({
-                where: { contactId: id, id: { not: addressId } },
-                data: { isMain: false },
-            })
-    }
+    await prisma.contact.update({
+        where: {
+            id
+        },
+        data: {
+            address,
+            phone,
+            taxId,
 
-    if (!addressId) {
-        const result = await prisma.address.create({
-            data: {
-                name: name || '',
-                addressLine1: address?.split('\n')[0] || undefined,
-                addressLine2: address?.split('\n')[1] || undefined,
-                addressLine3: address?.split('\n')[2] || undefined,
-                phone,
-                taxId,
-                isMain,
-                contactId: id,
-            },
-        })
-        if (isMain)
-            await prisma.address.updateMany({
-                where: { contactId: id, id: { not: result.id } },
-                data: { isMain: false },
-            })
-    }
+        },
+    })
 
     revalidatePath(`/contact/${id}`)
 }

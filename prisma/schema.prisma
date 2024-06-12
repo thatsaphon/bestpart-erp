@@ -112,9 +112,10 @@ model GeneralLedger {
 }
 
 model Contact {
-  id      Int       @id @default(autoincrement())
+  id      Int     @id @default(autoincrement())
   name    String
-  Address Address[]
+  address String
+  phone   String
   taxId   String?
 
   ApSubledger   ApSubledger[]
@@ -129,24 +130,6 @@ model Contact {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-}
-
-model Address {
-  id           Int     @id @default(autoincrement())
-  Contact      Contact @relation(fields: [contactId], references: [id])
-  contactId    Int
-  isMain       Boolean
-  name         String
-  addressLine1 String  @default("")
-  addressLine2 String  @default("")
-  addressLine3 String  @default("")
-  taxId        String  @default("")
-  phone        String  @default("")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@index([contactId])
 }
 
 model MainSku {

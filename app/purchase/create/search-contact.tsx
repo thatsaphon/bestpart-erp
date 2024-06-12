@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-import { Address, Contact } from '@prisma/client'
+import { Contact } from '@prisma/client'
 import { Label } from '@/components/ui/label'
 import {
     Popover,
@@ -62,13 +62,9 @@ export default function SearchContact({
     const [page, setPage] = useState(1)
     const [popoverType, setPopoverType] = useState<PopoverType>('search')
     const [searchValue, setSearchValue] = useState('')
-    const [searchResults, setSearchResults] = useState<
-        (Contact & { Address: Address[] })[]
-    >([])
+    const [searchResults, setSearchResults] = useState<Contact[]>([])
     const [selectedId, setSelectedId] = useState<string>(defaultValue || '')
-    const [selectedResult, setSelectedResult] = useState<
-        Contact & { Address: Address[] }
-    >()
+    const [selectedResult, setSelectedResult] = useState<Contact>()
     const [address, setAddress] = useState<InvoiceAddress>(
         defaultAddress || {
             address: '',
@@ -111,45 +107,12 @@ export default function SearchContact({
         fetchCustomerData(defaultValue || '')
     }, [defaultValue])
 
-    const setTextAreaFromData = (data: Contact & { Address: Address[] }) => {
-        const address = data.Address.find((address) => address.isMain)
-        if (data.Address.length === 0)
-            return setAddress({ address: '', phone: '', taxId: '' })
-        if (address) {
-            let addressText = `${address.name}`
-            addressText += address.addressLine1
-                ? `\n${address.addressLine1}`
-                : ''
-            addressText += address.addressLine2
-                ? `\n${address.addressLine2}`
-                : ''
-            addressText += address.addressLine3
-                ? `\n${address.addressLine3}`
-                : ''
-            setAddress((prev) => ({
-                address: addressText,
-                phone: address.phone,
-                taxId: address.taxId,
-            }))
-        }
-        if (!address) {
-            const someAddress = data.Address[0]
-            let addressText = `${someAddress.name}`
-            addressText += someAddress.addressLine1
-                ? `\n${someAddress.addressLine1}`
-                : ''
-            addressText += someAddress.addressLine2
-                ? `\n${someAddress.addressLine2}`
-                : ''
-            addressText += someAddress.addressLine3
-                ? `\n${someAddress.addressLine3}`
-                : ''
-            setAddress((prev) => ({
-                address: addressText,
-                phone: someAddress.phone,
-                taxId: someAddress.taxId,
-            }))
-        }
+    const setTextAreaFromData = (data: Contact) => {
+        setAddress({
+            address: data.address,
+            phone: data.phone,
+            taxId: data.taxId || '',
+        })
     }
 
     return (

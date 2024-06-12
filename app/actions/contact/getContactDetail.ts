@@ -8,7 +8,6 @@ export const getContactDetail = async (id: string) => {
             id: Number(id),
         },
         include: {
-            Address: true,
             ArSubledger: {
                 include: {
                     Document: {

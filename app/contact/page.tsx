@@ -42,7 +42,6 @@ export default async function ContactPage({
             isAp: type === 'ap' ? true : undefined,
         },
         include: {
-            Address: true,
             ArSubledger: {
                 include: {
                     Document: {
@@ -161,13 +160,7 @@ export default async function ContactPage({
                                         ''
                                     )}
                                 </TableCell>
-                                <TableCell>
-                                    {
-                                        contact.Address.find(
-                                            ({ isMain }) => isMain
-                                        )?.phone
-                                    }
-                                </TableCell>
+                                <TableCell>{contact.phone}</TableCell>
                                 <TableCell>
                                     <Link
                                         href={`/contact/${contact.id}/receivable`}
