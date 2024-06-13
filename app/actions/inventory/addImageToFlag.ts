@@ -16,7 +16,7 @@ export const addImageToTag = async (formData: FormData, fileName: string) => {
             data: {
                 Image: {
                     create: {
-                        path: `${process.env.NEXT_PUBLIC_S3_PUBLIC_URL}/sku/${fileName}`,
+                        path: `${process.env.S3_PUBLIC_URL}/sku%${fileName}`,
                     },
                 },
             },

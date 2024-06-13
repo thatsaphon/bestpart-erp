@@ -9,10 +9,10 @@ import {
 
 const s3 = new S3Client({
     region: 'auto',
-    endpoint: process.env.NEXT_PUBLIC_S3_API, // Cloudflare R2 endpoint URL
+    endpoint: process.env.S3_API, // Cloudflare R2 endpoint URL
     credentials: {
-        accessKeyId: process.env.NEXT_PUBLIC_S3_SECRET_KEY_ID,
-        secretAccessKey: process.env.NEXT_PUBLIC_S3_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.S3_SECRET_KEY_ID,
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
     },
 })
 
@@ -21,11 +21,13 @@ export const uploadFile = async (
     fileContent: File,
     path?: string | undefined
 ) => {
-    console.log(fileName)
+    // Convert file to buffer before uploading
+    const fileBuffer = await fileContent.arrayBuffer()
+    const fileContentBuffer = Buffer.from(fileBuffer)
     const command = new PutObjectCommand({
-        Bucket: process.env.NEXT_PUBLIC_BUCKET_NAME,
+        Bucket: process.env.BUCKET_NAME,
         Key: path ? `${path}/${fileName}` : `${fileName}`,
-        Body: fileContent,
+        Body: fileContentBuffer,
     })
     try {
         const { ETag } = await s3.send(command)
@@ -34,7 +36,7 @@ export const uploadFile = async (
     } catch (error) {
         console.log(error)
         console.error(
-            `Error uploading file ${fileName} to bucket ${process.env.NEXT_PUBLIC_BUCKET_NAME}`,
+            `Error uploading file ${fileName} to bucket ${process.env.BUCKET_NAME}`,
             error
         )
     }

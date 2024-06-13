@@ -27,6 +27,7 @@ import Image from 'next/image'
 import { addImageToTag } from '@/app/actions/inventory/addImageToFlag'
 import { uploadFile } from '@/lib/s3-client'
 import { InventoryDetailType } from '@/types/inventory-detail'
+import { uploadSkuMasterImage } from '@/app/inventory/upload-sku'
 
 type Props = {
     mainSkus: InventoryDetailType[]
@@ -80,7 +81,7 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                 mainSkus[0].detail
                             )}
                         </CardTitle>
-                        <CardDescription>
+                        {/* <CardDescription>
                             {isEdit ? (
                                 <Input
                                     defaultValue={mainSkus[0].remark || ''}
@@ -89,7 +90,7 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                             ) : (
                                 mainSkus[0].remark
                             )}
-                        </CardDescription>
+                        </CardDescription> */}
                     </div>
                     <div className="space-x-2">
                         {isEdit && <Button type="submit">บันทึก</Button>}
@@ -262,24 +263,22 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                     <Button
                                         formAction={async (formData) => {
                                             try {
-                                                const fileName =
-                                                    window.crypto.randomUUID() +
-                                                    '.jpeg'
-
-                                                console.log('first')
-                                                const result = await uploadFile(
-                                                    fileName,
-                                                    file,
-                                                    'sku'
+                                                formData.append(
+                                                    'fileName',
+                                                    mainSkus[0].name
                                                 )
-                                                if (result) {
-                                                    await addImageToTag(
-                                                        formData,
-                                                        fileName
+                                                const result =
+                                                    await uploadSkuMasterImage(
+                                                        formData
                                                     )
-                                                }
+                                                toast.success(
+                                                    'upload successfully'
+                                                )
                                             } catch (err) {
                                                 console.log(err)
+                                                toast.success(
+                                                    'Something went wrong'
+                                                )
                                             }
                                         }}
                                     >
