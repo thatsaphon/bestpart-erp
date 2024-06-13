@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/app/db/db'
-import { Prisma } from '@prisma/client'
+import { MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
 import { InventoryDetailType } from '@/types/inventory-detail'
 
 export const searchSku = async (query: string, page: number = 1) => {
@@ -54,6 +54,24 @@ export const searchSku = async (query: string, page: number = 1) => {
     `,
         ...splitQuery.map((x) => `%${x.toLowerCase()}%`)
     )
+
+    const images: { skuMasterId: number, images: string }[] = await prisma.$queryRaw`select "SkuMaster".id as "skuMasterId", "SkuMasterImage"."path" as "images" from "SkuMaster" left join "SkuMasterImage" on "SkuMaster"."id" = "SkuMasterImage"."skuMasterId" where "SkuMaster"."id" in (${Prisma.join(items.map(({ skuMasterId }) => skuMasterId))})`
+
+    const mainSkuRemarks = await prisma.$queryRaw<
+        (MainSkuRemark & { mainSkuId: number })[]
+    >`select "MainSkuRemark".*, "MainSku"."id" as "mainSkuId" from "MainSkuRemark" 
+                            left join "_MainSkuToMainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
+                            left join "MainSku" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
+                            where "MainSku"."id" in (${Prisma.join(items.map(({ mainSkuId }) => mainSkuId))})`
+
+    const skuMasterRemarks = await prisma.$queryRaw<
+        (SkuMasterRemark & { skuMasterId: number })[]
+    >`select "SkuMasterRemark".*, "SkuMaster"."id" as "skuMasterId" from "SkuMasterRemark"
+                            left join "_SkuMasterToSkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id"
+                            left join "SkuMaster" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
+                            where "SkuMaster"."id" in (${Prisma.join(items.map(({ skuMasterId }) => skuMasterId))})`
+
+
     return {
         items: items.map((item) => ({
             ...item,
@@ -64,6 +82,13 @@ export const searchSku = async (query: string, page: number = 1) => {
                         previousValue + currentValue.remaining,
                     0
                 ),
+            images: images.filter((x) => x.skuMasterId === item.skuMasterId).map((x) => x.images).filter((x) => x),
+            MainSkuRemarks: mainSkuRemarks.filter(
+                (y) => y.mainSkuId === item.mainSkuId
+            ),
+            SkuMasterRemarks: skuMasterRemarks.filter(
+                (y) => y.skuMasterId === item.skuMasterId
+            ),
         })),
         count: Number(count),
     }

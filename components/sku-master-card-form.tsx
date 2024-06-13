@@ -1,7 +1,7 @@
 'use client'
 
 import { GoodsMaster } from '@prisma/client'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { Button } from './ui/button'
 import {
     Card,
@@ -45,6 +45,8 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
         }))
     )
 
+    const ref = useRef<HTMLFormElement>(null)
+
     const [state, formAction] = useFormState(createOrUpdateGoodsMasters, {
         error: '',
     })
@@ -60,7 +62,7 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
         setIsEdit(false)
     }, [mainSkus])
     return (
-        <form action={formAction}>
+        <form action={formAction} ref={ref}>
             <input
                 type="text"
                 value={mainSkus[0].skuMasterId}
@@ -254,7 +256,6 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                     onChange={(e) =>
                                         setFile(e.target.files?.[0])
                                     }
-                                    // ref={ref}
                                     type="file"
                                     accept="image/*"
                                     name="file"
@@ -274,6 +275,7 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                                 toast.success(
                                                     'upload successfully'
                                                 )
+                                                ref.current?.reset()
                                             } catch (err) {
                                                 console.log(err)
                                                 toast.success(

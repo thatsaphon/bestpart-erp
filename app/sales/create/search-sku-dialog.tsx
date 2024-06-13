@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/table'
 import PaginationClientComponent from '@/components/pagination-client-component'
 import { InventoryDetailType } from '@/types/inventory-detail'
+import ImageToolTip from '@/components/image-tooltip'
 
 type Props = {
     isOpen: boolean
@@ -137,6 +138,9 @@ export default function SearchSkuDialog({
                                     </p>
                                     <p className="text-primary/50">
                                         {item.partNumber}
+                                    </p>
+                                    <p>
+                                        <ImageToolTip images={item.images} />
                                     </p>
                                 </TableCell>
                                 <TableCell>{`${item.unit}(${item.quantityPerUnit})`}</TableCell>

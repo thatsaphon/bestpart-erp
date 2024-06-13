@@ -67,8 +67,6 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
         ...splitQuery.map((x) => `%${x.toLowerCase()}%`)
     )
 
-    console.log('extendedItems', extendedItems)
-
     const mainSkuRemarks = await prisma.$queryRaw<
         (MainSkuRemark & { mainSkuId: number })[]
     >`select "MainSkuRemark".*, "MainSku"."id" as "mainSkuId" from "MainSkuRemark" 

@@ -26,6 +26,7 @@ import { updateSalesInvoice } from './update-sales-invoice'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import ImageToolTip from '@/components/image-tooltip'
 
 type Props = {
     defaultItems?: InventoryDetailType[]
@@ -157,6 +158,9 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                     </p>
                                     <p className="text-primary/50">
                                         {item.partNumber}
+                                    </p>
+                                    <p>
+                                        <ImageToolTip images={item.images} />
                                     </p>
                                 </TableCell>
                                 <TableCell className="text-right">
@@ -352,13 +356,17 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                                     {
                                                         ...result,
                                                         quantity,
-                                                        price: 0,
                                                     },
                                                 ])
                                                 setBarcodeInput('')
                                             } catch (error) {
-                                                toast.error('ไม่พบ Barcode นี้')
-                                                return
+                                                if (error instanceof Error)
+                                                    return toast.error(
+                                                        error.message
+                                                    )
+                                                return toast.error(
+                                                    'something went wrong'
+                                                )
                                             }
                                         }
                                         if (e.key === 'ArrowUp') {
