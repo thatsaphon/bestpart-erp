@@ -2,7 +2,7 @@
 
 import prisma from '@/app/db/db'
 import { InventoryDetailType } from '@/types/inventory-detail'
-import { MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
+import { Contact, MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
 
 export const searchDistinctMainSku = async (query: string, page: number = 1) => {
     const splitQuery = query.trim().split(' ')
@@ -85,6 +85,13 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
                             left join "SkuMaster" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
                             where "SkuMaster"."id" in (${Prisma.join(extendedItems.map((x) => x.skuMasterId))})`
 
+    const vendors = await prisma.$queryRaw<
+        (Contact & { skuMasterId: number })[]>`select "Contact".*, "SkuMaster"."id" as "skuMasterId" from "Contact"
+                            left join "_SkuMasterToVendor" on "_SkuMasterToVendor"."A" = "Contact"."id"
+                            left join "SkuMaster" on "SkuMaster"."id" = "_SkuMasterToVendor"."B"
+                            where "SkuMaster"."id" in (${Prisma.join(extendedItems.map((x) => x.skuMasterId))})`
+
+
 
     const returnItems = items.map((item) => [...extendedItems.filter((x) => x.name === item.name).map((item) => ({
         ...item,
@@ -102,6 +109,7 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
         SkuMasterRemarks: skuMasterRemarks.filter(
             (y) => y.skuMasterId === item.skuMasterId
         ),
+        Vendors: vendors.filter((y) => y.skuMasterId === item.skuMasterId),
     }))])
 
     return {

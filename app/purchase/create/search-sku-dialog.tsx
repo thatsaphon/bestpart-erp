@@ -21,6 +21,8 @@ import {
 } from '@/components/ui/table'
 import PaginationClientComponent from '@/components/pagination-client-component'
 import { InventoryDetailType } from '@/types/inventory-detail'
+import ImageToolTip from '@/components/image-tooltip'
+import { Badge } from '@/components/ui/badge'
 
 type Props = {
     isOpen: boolean
@@ -44,7 +46,7 @@ export default function SearchSkuDialog({
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             {children && <DialogTrigger>{children}</DialogTrigger>}
-            <DialogContent className="w-auto min-w-[70vw] max-w-[90vw]">
+            <DialogContent className="max-h-[90vh] w-auto min-w-[70vw] max-w-[90vw] overflow-scroll">
                 <DialogHeader>
                     <DialogTitle>ค้นหาสินค้า</DialogTitle>
                 </DialogHeader>
@@ -136,6 +138,19 @@ export default function SearchSkuDialog({
                                     </p>
                                     <p className="text-primary/50">
                                         {item.partNumber}
+                                    </p>
+                                    <div>
+                                        {item.MainSkuRemarks &&
+                                        item.SkuMasterRemarks &&
+                                        item.MainSkuRemarks.length > 0 &&
+                                        item.SkuMasterRemarks.length > 0 ? (
+                                            <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemarks?.map((remark) => remark.name), ...item.SkuMasterRemarks?.map((remark) => remark.name)].join(', ')}`}</p>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
+                                    <p>
+                                        <ImageToolTip images={item.images} />
                                     </p>
                                 </TableCell>
                                 <TableCell>{`${item.unit}(${item.quantityPerUnit})`}</TableCell>

@@ -159,6 +159,16 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                     <p className="text-primary/50">
                                         {item.partNumber}
                                     </p>
+                                    <div>
+                                        {item.MainSkuRemarks &&
+                                        item.SkuMasterRemarks &&
+                                        item.MainSkuRemarks.length > 0 &&
+                                        item.SkuMasterRemarks.length > 0 ? (
+                                            <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemarks?.map((remark) => remark.name), ...item.SkuMasterRemarks?.map((remark) => remark.name)].join(', ')}`}</p>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
                                     <p>
                                         <ImageToolTip images={item.images} />
                                     </p>

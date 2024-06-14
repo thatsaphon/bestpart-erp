@@ -122,7 +122,7 @@ export default async function SalesListPage({
                                 )}
                             </TableCell>
                             <TableCell className="text-right">
-                                {sale.GeneralLedger[0]?.amount}
+                                {sale.GeneralLedger[0]?.amount.toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
                                 <Link href={`/sales/${sale.documentId}`}>

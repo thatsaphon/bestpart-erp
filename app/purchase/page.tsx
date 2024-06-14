@@ -105,7 +105,9 @@ export default async function PurchasePage({
                                 {invoice.ApSubledger?.paymentStatus || 'Paid'}
                             </TableCell>
                             <TableCell className="text-right">
-                                {invoice.GeneralLedger[0]?.amount}
+                                {Math.abs(
+                                    invoice.GeneralLedger[0]?.amount
+                                ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
                                 <Link href={`/purchase/${invoice.documentId}`}>

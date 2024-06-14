@@ -14,7 +14,7 @@ import { Input } from './ui/input'
 import { PlusCircledIcon } from '@radix-ui/react-icons'
 import { createOrUpdateGoodsMasters } from '@/app/actions/inventory/goodsMaster'
 import { useFormState } from 'react-dom'
-import { Barcode } from 'lucide-react'
+import { Barcode, Trash2Icon } from 'lucide-react'
 import { generateBarcode } from '@/app/actions/inventory/generateBarcode'
 import toast from 'react-hot-toast'
 import {
@@ -28,6 +28,9 @@ import { addImageToTag } from '@/app/actions/inventory/addImageToFlag'
 import { uploadFile } from '@/lib/s3-client'
 import { InventoryDetailType } from '@/types/inventory-detail'
 import { uploadSkuMasterImage } from '@/app/inventory/upload-sku'
+import { Badge } from './ui/badge'
+import { disconnectSkuMasterRemark } from '@/app/inventory/remark-action/sku-master-remark'
+import AddSkuMasterRemarkInput from './add-sku-master-remark-input'
 
 type Props = {
     mainSkus: InventoryDetailType[]
@@ -83,6 +86,36 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                 mainSkus[0].detail
                             )}
                         </CardTitle>
+                        <div>
+                            {mainSkus[0].SkuMasterRemarks?.map((remark) => (
+                                <Badge key={remark.name} variant={'outline'}>
+                                    {remark.name}
+                                    <Trash2Icon
+                                        className="ml-1 h-4 w-4"
+                                        onClick={async () => {
+                                            try {
+                                                await disconnectSkuMasterRemark(
+                                                    remark.id,
+                                                    mainSkus[0].skuMasterId
+                                                )
+                                                toast.success('Remark updated')
+                                            } catch (err) {
+                                                if (err instanceof Error)
+                                                    return toast.error(
+                                                        err.message
+                                                    )
+                                                toast.error(
+                                                    'Something went wrong'
+                                                )
+                                            }
+                                        }}
+                                    />
+                                </Badge>
+                            ))}
+                            <AddSkuMasterRemarkInput
+                                skuMasterId={mainSkus[0].skuMasterId}
+                            />
+                        </div>
                         {/* <CardDescription>
                             {isEdit ? (
                                 <Input

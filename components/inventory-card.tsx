@@ -47,7 +47,17 @@ export function InventoryCard({ mainSkus }: Props) {
                     mainSku.skuMasterId ? (
                         <React.Fragment key={index}>
                             <div className="pb-2">
-                                <div className="">{mainSku?.detail}</div>
+                                <div className="flex items-center gap-1">
+                                    {mainSku?.detail}
+
+                                    {!!mainSku.Vendors?.length && (
+                                        <Badge variant={'outline'}>
+                                            {mainSku.Vendors?.map(
+                                                (vendor) => vendor.name
+                                            )}
+                                        </Badge>
+                                    )}
+                                </div>
                                 <div className="text-sm text-muted-foreground">
                                     {mainSku.SkuMasterRemarks?.map((remark) => (
                                         <Badge
@@ -61,7 +71,7 @@ export function InventoryCard({ mainSkus }: Props) {
                             </div>
                             <div
                                 key={index}
-                                className="grid w-full grid-cols-4 items-center gap-4 rounded-md border-b border-t bg-muted px-1 py-1"
+                                className="mb-2 grid w-full grid-cols-4 items-center gap-4 rounded-md border-b border-t bg-muted px-1 py-1"
                             >
                                 <React.Fragment key={index}>
                                     <div>{mainSku.remaining}</div>

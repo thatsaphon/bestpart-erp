@@ -27,6 +27,7 @@ import {
 } from '@/app/inventory/remark-action/main-sku-remark'
 import { Badge } from './ui/badge'
 import { Trash2Icon } from 'lucide-react'
+import AddMainSkuRemarkInput from './add-main-sku-remark-input'
 
 type Props = {
     mainSkus: InventoryDetailType[]
@@ -127,7 +128,7 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
                             </div>
                         )}
                     </form>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap items-center">
                         {mainSkus[0].MainSkuRemarks?.map((remark) => (
                             <Badge key={remark.id} variant={'secondary'}>
                                 {remark.name}{' '}
@@ -149,25 +150,10 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
                                 />
                             </Badge>
                         ))}
+                        <AddMainSkuRemarkInput
+                            mainSku={mainSkus[0].mainSkuId}
+                        />
                     </div>
-                    <form
-                        action={async (formData) => {
-                            try {
-                                await upsertMainSkuRemark(
-                                    formData.get('mainSkuRemark') as string,
-                                    mainSkus[0].mainSkuId
-                                )
-                                toast.success('Remark updated')
-                            } catch (err) {
-                                if (err instanceof Error)
-                                    toast.error(err.message)
-                                toast.error('Something went wrong')
-                            }
-                        }}
-                    >
-                        <Input name="mainSkuRemark" />
-                        <Button>Submit</Button>
-                    </form>
                 </DialogHeader>
                 <div className="flex min-h-[400px] flex-col gap-2">
                     {Object.entries(groupBySkuMasters(mainSkus)).map(

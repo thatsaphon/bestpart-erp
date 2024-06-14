@@ -150,6 +150,17 @@ export const createPurchaseInvoice = async (
         },
     })
 
+    await prisma.contact.update({
+        where: {
+            id: Number(vendorId),
+        },
+        data: {
+            SkuMaster: {
+                connect: items.map((item) => ({ id: item.skuMasterId })),
+            }
+        },
+    })
+
     revalidatePath('/purchase')
     redirect(`/purchase/${invoice.documentId}`)
 }

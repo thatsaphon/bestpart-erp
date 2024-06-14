@@ -187,16 +187,14 @@ export const updatePurchaseInvoice = async (
                 ],
             },
             SkuIn: {
-                update: items.map((item) => {
-                    const skuIn = invoice?.SkuIn.find(
-                        (skuIn) => skuIn.skuMasterId === item.skuMasterId
-                    )
-
+                update: items.filter((item) => invoice?.SkuIn.find(
+                    (skuIn) => skuIn.goodsMasterId === item.goodsMasterId
+                )).map((item) => {
                     return {
                         where: {
                             id: invoice?.SkuIn.find(
                                 (skuIn) =>
-                                    skuIn.skuMasterId === item.skuMasterId
+                                    skuIn.goodsMasterId === item.goodsMasterId
                             )?.id,
                         },
                         data: {
@@ -221,12 +219,43 @@ export const updatePurchaseInvoice = async (
                 delete: invoice?.SkuIn.filter(
                     (skuIn) =>
                         !items
-                            .map((item) => item.skuMasterId)
-                            .includes(skuIn.skuMasterId)
+                            .map((item) => item.goodsMasterId)
+                            .includes(skuIn.goodsMasterId)
                 ).map((skuIn) => ({
                     id: skuIn.id,
                 })),
+                create: items.filter((item) =>
+                    !invoice?.SkuIn.map((skuIn) => skuIn.goodsMasterId).includes(item.goodsMasterId)).map((item) => {
+                        return {
+                            date: new Date(date),
+                            goodsMasterId: item.goodsMasterId,
+                            skuMasterId: item.skuMasterId,
+                            barcode: item.barcode,
+                            unit: item.unit,
+                            quantityPerUnit: item.quantityPerUnit,
+                            quantity: item.quantity * item.quantityPerUnit,
+                            cost: +(
+                                ((100 / 107) * +item.price) /
+                                item.quantityPerUnit
+                            ).toFixed(2),
+                            vat: +(
+                                ((7 / 107) * +item.price) /
+                                item.quantityPerUnit
+                            ).toFixed(2),
+                        }
+                    }),
             },
+        },
+    })
+
+    await prisma.contact.update({
+        where: {
+            id: Number(vendorId),
+        },
+        data: {
+            SkuMaster: {
+                connect: items.map((item) => ({ id: item.skuMasterId })),
+            }
         },
     })
 

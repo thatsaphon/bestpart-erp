@@ -14,6 +14,13 @@ import EditMainSkuDialog from '@/components/edit-main-sku-dialog'
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import ImageToolTip from '@/components/image-tooltip'
+import { InfoCircledIcon } from '@radix-ui/react-icons'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 // import { searchSku } from '@/app/sales/create/search-sku'
 
 type Props = {
@@ -101,8 +108,40 @@ export default async function InventoryListPage({
                                     </TableCell>
                                     <TableCell className="text-primary/50 group-hover:text-primary">
                                         {item.map((goods) => (
-                                            <p key={'detail-' + goods.barcode}>
+                                            <p
+                                                key={'detail-' + goods.barcode}
+                                                className="flex items-center gap-1"
+                                            >
                                                 {goods.detail}
+                                                {!!goods.SkuMasterRemarks
+                                                    .length && (
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger>
+                                                                <InfoCircledIcon />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent className="space-x-1 p-2">
+                                                                {/* {item.map()} */}
+                                                                {goods.SkuMasterRemarks?.map(
+                                                                    (
+                                                                        remark
+                                                                    ) => (
+                                                                        <Badge
+                                                                            key={`remark-${goods.barcode}-${remark.name}`}
+                                                                            variant={
+                                                                                'outline'
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                remark.name
+                                                                            }
+                                                                        </Badge>
+                                                                    )
+                                                                )}
+                                                            </TooltipContent>{' '}
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                )}
                                             </p>
                                         ))}
                                     </TableCell>

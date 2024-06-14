@@ -24,6 +24,8 @@ import { createPurchaseInvoice } from './create-purchase-invoice'
 import { updatePurchaseInvoice } from './update-purchase-invoice'
 import { InventoryDetailType } from '@/types/inventory-detail'
 import { DocumentRemark } from '@prisma/client'
+import ImageToolTip from '@/components/image-tooltip'
+import { Badge } from '@/components/ui/badge'
 
 type Props = {
     defaultItems?: InventoryDetailType[]
@@ -155,6 +157,20 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                                     </p>
                                     <p className="text-primary/50">
                                         {item.partNumber}
+                                    </p>
+
+                                    <div>
+                                        {item.MainSkuRemarks &&
+                                        item.SkuMasterRemarks &&
+                                        item.MainSkuRemarks.length > 0 &&
+                                        item.SkuMasterRemarks.length > 0 ? (
+                                            <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemarks?.map((remark) => remark.name), ...item.SkuMasterRemarks?.map((remark) => remark.name)].join(', ')}`}</p>
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </div>
+                                    <p>
+                                        <ImageToolTip images={item.images} />
                                     </p>
                                 </TableCell>
                                 <TableCell className="text-right">
