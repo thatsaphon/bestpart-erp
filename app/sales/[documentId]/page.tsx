@@ -19,7 +19,6 @@ import Link from 'next/link'
 import SelectSearchVendor from '../../../components/select-search-vendor'
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import BlobProviderClient from './blob-provider'
-import { Suspense } from 'react'
 
 type Props = {
     params: { documentId: string }
@@ -150,7 +149,7 @@ export default async function PurchaseInvoiceDetailPage({
                                             (item) =>
                                                 item.chartOfAccountId ===
                                                     11000 ||
-                                                item.chartOfAccountId === 21000
+                                                item.chartOfAccountId === 12000
                                         )?.amount
                                     )
                                 )}

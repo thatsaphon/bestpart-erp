@@ -10,6 +10,7 @@ import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { InventoryDetailType } from '@/types/inventory-detail'
 import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
+import { redirect } from 'next/navigation'
 
 export const createSalesInvoice = async (
     formData: FormData,
@@ -298,4 +299,5 @@ export const createSalesInvoice = async (
     })
 
     revalidatePath('/sales')
+    redirect(`/sales/${invoice.documentId}`)
 }

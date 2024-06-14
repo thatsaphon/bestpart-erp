@@ -77,6 +77,7 @@ export default async function PurchasePage({
                         <TableHead className="w-[100px]">
                             เลขที่เอกสาร
                         </TableHead>
+                        <TableHead className="w-[100px]">Ref</TableHead>
                         <TableHead>คู่ค้า</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
@@ -96,6 +97,7 @@ export default async function PurchasePage({
                                 }).format(invoice.date)}
                             </TableCell>
                             <TableCell>{invoice.documentId}</TableCell>
+                            <TableCell>{invoice.referenceId}</TableCell>
                             <TableCell>
                                 {invoice.ApSubledger?.Contact.name || 'เงินสด'}
                             </TableCell>

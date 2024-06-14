@@ -1,7 +1,7 @@
 'use client'
 
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
-import SalesInvoicePdf from '@/components/pdf/invoice-pdf'
+import SalesInvoicePdf_5x9 from '@/components/pdf/invoice-5.5-9'
 import { Button } from '@/components/ui/button'
 import { BlobProvider } from '@react-pdf/renderer'
 import Link from 'next/link'
@@ -20,7 +20,7 @@ export default function BlobProviderClient({ document }: Props) {
             {!isClient && <Button disabled>Loading</Button>}
             {isClient && (
                 <BlobProvider
-                    document={<SalesInvoicePdf document={document} />}
+                    document={<SalesInvoicePdf_5x9 document={document} />}
                 >
                     {({ blob, url, loading, error }) =>
                         !url ? (

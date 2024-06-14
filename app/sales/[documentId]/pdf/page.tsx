@@ -1,8 +1,7 @@
 'use client'
 
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
-import SalesInvoicePdf from '@/components/pdf/invoice-pdf'
-import PDFViewerClient from '@/components/pdf/pdf-viewer-client'
+import SalesInvoicePdf_5x9 from '@/components/pdf/invoice-5.5-9'
 import dynamic from 'next/dynamic'
 
 const PDFViewer = dynamic(
@@ -37,7 +36,7 @@ export default function InvoicePDFPage({ params: { documentId } }: Props) {
                 height={'100vh'}
                 width={'100vw'}
             >
-                <SalesInvoicePdf
+                <SalesInvoicePdf_5x9
                     document={document}
                     key={new Date().getTime()}
                 />

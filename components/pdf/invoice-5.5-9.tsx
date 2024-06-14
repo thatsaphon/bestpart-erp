@@ -30,7 +30,7 @@ Font.register({
     fonts: [{ src: '/fonts/Inter-VariableFont_slnt,wght.ttf' }],
 })
 
-export default function CreditSalesInvoicePdf({ document }: Props) {
+export default function SalesInvoicePdf_5x9({ document }: Props) {
     const styles = StyleSheet.create({
         page: {
             flexDirection: 'column',
@@ -126,11 +126,8 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
                     </Text>
                 </View>
                 <View style={styles.header} fixed>
-                    <View style={{ flexDirection: 'column' }}>
-                        <Text>{document?.contactName}</Text>
-                        <Text>{document?.address}</Text>
-                        <Text>{`โทร: ${document?.phone}`}</Text>
-                        <Text>{`เลขประจำตัวผู้เสียภาษี: ${document?.taxId}`}</Text>
+                    <View style={styles.header}>
+                        <Text>หจก.จ.สุพรรณบุรีอะไหล่</Text>
                     </View>
                     <View style={{ marginLeft: '10', gap: 2 }}>
                         <Text>เลขที่: {document?.documentId}</Text>
@@ -169,43 +166,23 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
                         <Text style={styles.col4}>
                             {item.quantity / item.quantityPerUnit}
                         </Text>
-                        <Text
-                            style={styles.col5}
-                        >{`${item.unit}(${item.quantityPerUnit})`}</Text>
-                        <Text style={styles.col6}>{item.price + item.vat}</Text>
+                        <Text style={styles.col5}>{`${item.unit}`}</Text>
+                        <Text style={styles.col6}>
+                            {(item.price + item.vat) * item.quantity}
+                        </Text>
                     </View>
                 ))}
                 <View style={{ ...styles.footer }}>
-                    <View style={styles.sum}>
-                        <Text>
-                            จ่ายด้วยเงินสด{' '}
-                            {
-                                document?.GeneralLedger.find(
-                                    ({ chartOfAccountId }) =>
-                                        chartOfAccountId === 11000
-                                )?.amount
-                            }
-                        </Text>
-                        <Text>
-                            ลงบิล{' '}
-                            {
-                                document?.GeneralLedger.find(
-                                    ({ chartOfAccountId }) =>
-                                        chartOfAccountId === 12000
-                                )?.amount
-                            }
-                        </Text>
-                        <Text>
-                            {`(${bahttext(
-                                Number(
-                                    document?.SkuOut.reduce(
-                                        (a, b) => a + b.price,
-                                        0
-                                    )
+                    <Text>
+                        {`(${bahttext(
+                            Number(
+                                document?.SkuOut.reduce(
+                                    (a, b) => a + b.price,
+                                    0
                                 )
-                            )})`}
-                        </Text>
-                    </View>
+                            )
+                        )})`}
+                    </Text>
                     <View style={styles.sum}>
                         <Text>ราคาก่อนภาษี: </Text>
                         <Text>VAT 7%: </Text>
@@ -216,38 +193,32 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
                                 document?.SkuOut.reduce(
-                                    (a, b) => a + b.price + b.vat,
+                                    (a, b) => a + b.price * b.quantity,
                                     0
                                 )
                             }
                         >
-                            {document?.SkuOut.reduce(
-                                (a, b) => a + b.price + b.vat,
-                                0
-                            )}
-                        </Text>
-                        <Text
-                            render={({ pageNumber, totalPages }) =>
-                                pageNumber === totalPages &&
-                                document?.SkuOut.reduce((a, b) => a + b.vat, 0)
-                            }
-                        >
-                            {document?.SkuOut.reduce((a, b) => a + b.vat, 0)}
+                            {document?.SkuOut.reduce((a, b) => a + b.price, 0)}
                         </Text>
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
                                 document?.SkuOut.reduce(
-                                    (a, b) => a + b.price + b.vat,
+                                    (a, b) => a + b.vat * b.quantity,
                                     0
                                 )
                             }
-                        >
-                            {document?.SkuOut.reduce(
-                                (a, b) => a + b.price + b.vat,
-                                0
-                            )}
-                        </Text>
+                        ></Text>
+                        <Text
+                            render={({ pageNumber, totalPages }) =>
+                                pageNumber === totalPages &&
+                                document?.SkuOut.reduce(
+                                    (a, b) =>
+                                        a + (b.price + b.vat) * b.quantity,
+                                    0
+                                )
+                            }
+                        ></Text>
                     </View>
                 </View>
 

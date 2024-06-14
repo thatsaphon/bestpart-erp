@@ -8,6 +8,8 @@ import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { InventoryDetailType } from '@/types/inventory-detail'
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 export const createPurchaseInvoice = async (
     formData: FormData,
@@ -147,4 +149,7 @@ export const createPurchaseInvoice = async (
             },
         },
     })
+
+    revalidatePath('/purchase')
+    redirect(`/purchase/${invoice.documentId}`)
 }
