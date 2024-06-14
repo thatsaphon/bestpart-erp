@@ -9,18 +9,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { ChevronDown, ExpandIcon, ImageIcon } from 'lucide-react'
 import { searchDistinctMainSku } from './search-distinct-main-sku'
 import EditMainSkuDialog from '@/components/edit-main-sku-dialog'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { CardDescription } from '@/components/ui/card'
 import React from 'react'
-import Image from 'next/image'
+import { Badge } from '@/components/ui/badge'
+import ImageToolTip from '@/components/image-tooltip'
 // import { searchSku } from '@/app/sales/create/search-sku'
 
 type Props = {
@@ -81,62 +74,30 @@ export default async function InventoryListPage({
                                 >
                                     <TableCell>{item[0].partNumber}</TableCell>
                                     <TableCell>
-                                        <p className="flex items-center gap-1">
+                                        <div className="flex items-center gap-1">
                                             {item[0].name}
                                             <EditMainSkuDialog
                                                 mainSkus={item}
                                             />
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <CardDescription>
-                                                            <ImageIcon className="h-4 w-4" />
-                                                        </CardDescription>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <div className="grid w-[650px] grid-cols-3 gap-2 pb-2">
-                                                            {item.map(
-                                                                (
-                                                                    mainSku,
-                                                                    index
-                                                                ) => (
-                                                                    <React.Fragment
-                                                                        key={
-                                                                            index
-                                                                        }
-                                                                    >
-                                                                        {mainSku.images?.map(
-                                                                            (
-                                                                                image
-                                                                            ) => (
-                                                                                <Image
-                                                                                    src={
-                                                                                        image
-                                                                                    }
-                                                                                    alt={
-                                                                                        mainSku.name
-                                                                                    }
-                                                                                    key={
-                                                                                        image
-                                                                                    }
-                                                                                    unoptimized
-                                                                                    width={
-                                                                                        500
-                                                                                    }
-                                                                                    height={
-                                                                                        500
-                                                                                    }
-                                                                                />
-                                                                            )
-                                                                        )}
-                                                                    </React.Fragment>
-                                                                )
-                                                            )}
-                                                        </div>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </p>
+                                            <ImageToolTip
+                                                images={item
+                                                    .flatMap((i) => i.images)
+                                                    .filter((i) => i)}
+                                            />
+                                        </div>
+                                        <div className="flex flex-wrap gap-1">
+                                            {item[0].MainSkuRemarks?.map(
+                                                (remark) => (
+                                                    <Badge
+                                                        key={remark.name}
+                                                        variant={'outline'}
+                                                        className="text-primary/50 group-hover:text-primary"
+                                                    >
+                                                        {remark.name}
+                                                    </Badge>
+                                                )
+                                            )}
+                                        </div>
                                     </TableCell>
                                     <TableCell className="text-primary/50 group-hover:text-primary">
                                         {item.map((goods) => (

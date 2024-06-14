@@ -18,7 +18,7 @@ type Props = {
 export default function ImageToolTip({ images, alt = 'image' }: Props) {
     return (
         <>
-            {images ? (
+            {images && images.length ? (
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>

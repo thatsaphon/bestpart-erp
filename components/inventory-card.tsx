@@ -12,14 +12,7 @@ import {
 import { InventoryDetailType } from '@/types/inventory-detail'
 import EditMainSkuDialog from './edit-main-sku-dialog'
 import { Badge } from './ui/badge'
-import { ImageIcon } from '@radix-ui/react-icons'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from './ui/tooltip'
-import Image from 'next/image'
+import ImageToolTip from './image-tooltip'
 
 type Props = {
     mainSkus: InventoryDetailType[]
@@ -34,40 +27,20 @@ export function InventoryCard({ mainSkus }: Props) {
                     <EditMainSkuDialog mainSkus={mainSkus} />
                 </CardTitle>
                 <CardDescription>{mainSkus[0].partNumber}</CardDescription>
-                <CardDescription>
+                <div className="flex flex-wrap gap-1">
                     {mainSkus[0].MainSkuRemarks?.map((remark) => (
                         <Badge key={remark.name} variant={'outline'}>
                             {remark.name}
                         </Badge>
                     ))}
-                </CardDescription>
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <CardDescription>
-                                <ImageIcon className="h-4 w-4" />
-                            </CardDescription>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <div className="grid w-[650px] grid-cols-3 gap-2 pb-2">
-                                {mainSkus.map((mainSku, index) => (
-                                    <React.Fragment key={index}>
-                                        {mainSku.images?.map((image) => (
-                                            <Image
-                                                src={image}
-                                                alt={mainSku.name}
-                                                key={image}
-                                                unoptimized
-                                                width={500}
-                                                height={500}
-                                            />
-                                        ))}
-                                    </React.Fragment>
-                                ))}
-                            </div>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                </div>
+                <ImageToolTip
+                    images={
+                        mainSkus
+                            .flatMap((i) => i.images)
+                            .filter((i) => i) as string[]
+                    }
+                />
             </CardHeader>
             <CardContent>
                 {mainSkus.map((mainSku, index) =>
