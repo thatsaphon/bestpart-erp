@@ -58,7 +58,6 @@ export default function SearchSkuDialog({
                             if (e.key === 'Enter') {
                                 e.preventDefault()
                                 try {
-                                    console.log(searchKeyword)
                                     const result = await searchSku(
                                         e.currentTarget.value
                                     )

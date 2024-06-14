@@ -171,11 +171,14 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
                 </DialogHeader>
                 <div className="flex min-h-[400px] flex-col gap-2">
                     {Object.entries(groupBySkuMasters(mainSkus)).map(
-                        ([skuMasterId, skuMasters]) => (
-                            <InventoryDialogContextMenu key={skuMasterId}>
-                                <SkuMasterCardForm mainSkus={skuMasters} />
-                            </InventoryDialogContextMenu>
-                        )
+                        ([skuMasterId, skuMasters]) =>
+                            skuMasters[0].skuMasterId ? (
+                                <InventoryDialogContextMenu key={skuMasterId}>
+                                    <SkuMasterCardForm mainSkus={skuMasters} />
+                                </InventoryDialogContextMenu>
+                            ) : (
+                                <></>
+                            )
                     )}
                     {!addingNewSku && (
                         <Button onClick={() => setAddingNewSku(true)}>

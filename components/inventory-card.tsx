@@ -70,40 +70,45 @@ export function InventoryCard({ mainSkus }: Props) {
                 </TooltipProvider>
             </CardHeader>
             <CardContent>
-                {mainSkus.map((mainSku, index) => (
-                    <React.Fragment key={index}>
-                        <div className="pb-2">
-                            <div className="">{mainSku?.detail}</div>
-                            <div className="text-sm text-muted-foreground">
-                                {mainSku.SkuMasterRemarks?.map((remark) => (
-                                    <Badge
-                                        key={remark.name}
-                                        variant={'outline'}
-                                    >
-                                        {remark.name}
-                                    </Badge>
-                                ))}
+                {mainSkus.map((mainSku, index) =>
+                    mainSku.skuMasterId ? (
+                        <React.Fragment key={index}>
+                            <div className="pb-2">
+                                <div className="">{mainSku?.detail}</div>
+                                <div className="text-sm text-muted-foreground">
+                                    {mainSku.SkuMasterRemarks?.map((remark) => (
+                                        <Badge
+                                            key={remark.name}
+                                            variant={'outline'}
+                                        >
+                                            {remark.name}
+                                        </Badge>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                        <div
-                            key={index}
-                            className="grid w-full grid-cols-4 items-center gap-4 rounded-md border-b border-t bg-muted px-1 py-1"
-                        >
-                            <React.Fragment key={index}>
-                                <div>{mainSku.remaining}</div>
-                                <div className="col-start-2 text-sm">
-                                    {mainSku.barcode}
-                                </div>
-                                <div className="col-start-3 justify-self-end text-sm">
-                                    {mainSku.unit}({mainSku.quantityPerUnit})
-                                </div>
-                                <div className="col-start-4 justify-self-end text-sm">
-                                    {mainSku.price}
-                                </div>
-                            </React.Fragment>
-                        </div>
-                    </React.Fragment>
-                ))}
+                            <div
+                                key={index}
+                                className="grid w-full grid-cols-4 items-center gap-4 rounded-md border-b border-t bg-muted px-1 py-1"
+                            >
+                                <React.Fragment key={index}>
+                                    <div>{mainSku.remaining}</div>
+                                    <div className="col-start-2 text-sm">
+                                        {mainSku.barcode}
+                                    </div>
+                                    <div className="col-start-3 justify-self-end text-sm">
+                                        {mainSku.unit}({mainSku.quantityPerUnit}
+                                        )
+                                    </div>
+                                    <div className="col-start-4 justify-self-end text-sm">
+                                        {mainSku.price}
+                                    </div>
+                                </React.Fragment>
+                            </div>
+                        </React.Fragment>
+                    ) : (
+                        <></>
+                    )
+                )}
             </CardContent>
             <CardFooter className="flex justify-between"></CardFooter>
         </Card>

@@ -16,8 +16,6 @@ export async function uploadFile(formData: FormData) {
 
     const parsed = CSV.parse(text)
 
-    console.log(parsed)
-
     const createObjects = parsed.map(async (item) => {
         return {
             name: item[0],

@@ -15,7 +15,6 @@ export const receivedFromBill = async (
 ) => {
     const receivedId = await generateDocumentNumber('RV', date.toISOString())
 
-    console.log(billId)
     const bill = await prisma.document.findMany({
         where: { documentId: billId },
         include: {
@@ -29,7 +28,7 @@ export const receivedFromBill = async (
             }
         }
     })
-    console.log(bill)
+
     if (amount > bill[0].GeneralLedger.reduce((a, b) => a + b.amount, 0)) {
         throw new Error('Amount cannot be greater than bill amount')
     }

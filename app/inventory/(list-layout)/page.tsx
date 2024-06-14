@@ -1,4 +1,3 @@
-import prisma from '@/app/db/db'
 import { InventoryCard } from '@/components/inventory-card'
 import PaginationInventory from '../pagination-inventory'
 import {

@@ -10,17 +10,23 @@ export const searchSku = async (query: string, page: number = 1) => {
     const items = await prisma.$queryRawUnsafe<
         InventoryDetailType[]
     >(
-        `select "MainSku".id as "mainSkuId", "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuMaster"."remark", "GoodsMaster".price, 
+        `select "MainSku".id as "mainSkuId", "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", 
+        "MainSku"."name", "SkuMaster"."detail", "GoodsMaster".price, 
     "GoodsMaster".quantity as "quantityPerUnit", "GoodsMaster".unit, "MainSku"."partNumber"
     from "MainSku"
     left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
     left join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
+    left join "_MainSkuToMainSkuRemark" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
+    left join "MainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
+    left join "_SkuMasterToSkuMasterRemark" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
+    left join "SkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id"
     ${query ? `where ` : ` `}
     ${splitQuery
             .map((x, index) =>
                 x.trim()
                     ? `(LOWER("MainSku"."name") like $${index + 1} or LOWER("SkuMaster"."detail") like $${index + 1} or
-    LOWER("GoodsMaster"."barcode") like $${index + 1} or LOWER("MainSku"."searchKeyword") like $${index + 1})`
+    LOWER("GoodsMaster"."barcode") like $${index + 1} or LOWER("MainSku"."searchKeyword") like $${index + 1} or
+     LOWER("SkuMasterRemark"."name") like $${index + 1} or LOWER("MainSkuRemark"."name") like $${index + 1})`
                     : ``
             )
             .join(' and ')}

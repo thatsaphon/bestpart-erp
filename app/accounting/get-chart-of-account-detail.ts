@@ -4,21 +4,6 @@ import prisma from '@/app/db/db'
 import { DocumentType } from '@prisma/client'
 
 export default async function getChartOfAccountDetail(id: number) {
-    // const chartOfAccounts = await prisma.chartOfAccount.findUnique({
-    //     where: {
-    //         id,
-    //     },
-    //     select: {
-    //         GeneralLedger: {
-    //             select: {
-    //                 Document: true
-    //             }
-    //         }
-    //     }
-    // })
-    // console.log(chartOfAccounts?.GeneralLedger)
-    // chartOfAccounts?.GeneralLedger.map(console.log)
-    // return chartOfAccounts
 
     const documents: {
         documentId: string,

@@ -146,7 +146,7 @@ export const updateInvoice = async (id: number, formData: FormData) => {
             throw new Error('insufficient inventory')
         }
     }
-    console.log(mapQuanties)
+
     const deleteSkuInToOut = prisma.skuInToOut.deleteMany({
         where: {
             id: {

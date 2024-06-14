@@ -20,11 +20,6 @@ export default function InventoryDialogContextMenu({ children }: Props) {
     const [isOpen, setIsOpen] = useState(false)
     const [file, setFile] = useState<File | null>(null)
 
-    // useEffect(() => {
-    //     console.log(file)
-    //     if (file) setIsOpen(true)
-    // }, [file])
-
     return (
         <Fragment>
             <ContextMenu>

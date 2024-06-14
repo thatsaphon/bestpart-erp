@@ -12,7 +12,7 @@ export const uploadSkuMasterImage = async (formData: FormData) => {
 
     const uploadFileName =
         fileName + '-' + Date.now().toString() +
-        '.jpeg'
+        file.name.split('.').pop()
     // Upload to S3
     const result = await uploadFile(uploadFileName, file, 'sku')
 

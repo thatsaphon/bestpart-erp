@@ -95,6 +95,15 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                                     defaultDocumentDetails?.documentId
                                 }
                             />
+                            <span>Ref. </span>
+                            <Input
+                                className="w-auto"
+                                name="referenceId"
+                                placeholder="Optional"
+                                defaultValue={
+                                    defaultDocumentDetails?.documentId
+                                }
+                            />
                         </Label>
                     </div>
 

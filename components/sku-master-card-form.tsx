@@ -266,7 +266,7 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                             try {
                                                 formData.append(
                                                     'fileName',
-                                                    mainSkus[0].name
+                                                    `${mainSkus[0].name}-${mainSkus[0].detail}`
                                                 )
                                                 const result =
                                                     await uploadSkuMasterImage(

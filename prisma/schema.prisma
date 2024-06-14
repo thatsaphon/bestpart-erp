@@ -38,6 +38,7 @@ enum Role {
 model Document {
   id            Int              @id @default(autoincrement())
   documentId    String           @unique
+  referenceId   String?
   date          DateTime
   SkuOut        SkuOut[]
   SkuIn         SkuIn[]

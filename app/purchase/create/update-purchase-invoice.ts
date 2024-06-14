@@ -22,6 +22,7 @@ export const updatePurchaseInvoice = async (
         date: z.string().trim().min(1, 'date must not be empty'),
         documentId: z.string().trim().optional().nullable(),
         remark: z.string().trim().optional().nullable(),
+        referenceId: z.string().trim().optional().nullable(),
     })
 
     const result = validator.safeParse({
@@ -32,6 +33,7 @@ export const updatePurchaseInvoice = async (
         date: formData.get('date') || undefined,
         documentId: formData.get('documentId') || undefined,
         remark: formData.get('remark') || undefined,
+        referenceId: formData.get('referenceId') || undefined,
     })
 
     if (!result.success) {
@@ -44,7 +46,7 @@ export const updatePurchaseInvoice = async (
         )
     }
 
-    let { vendorId, address, phone, taxId, date, documentId, remark } =
+    let { vendorId, address, phone, taxId, date, documentId, remark, referenceId } =
         result.data
 
     const contact = await prisma.contact.findUnique({
@@ -113,6 +115,7 @@ export const updatePurchaseInvoice = async (
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
             documentId: documentId || undefined,
+            referenceId: referenceId || undefined,
             updatedBy: session?.user.username,
             remark: remark ? { create: { remark } } : undefined,
             ApSubledger: !!contact

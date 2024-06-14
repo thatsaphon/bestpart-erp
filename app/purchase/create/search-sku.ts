@@ -15,12 +15,17 @@ export const searchSku = async (query: string, page: number = 1) => {
     from "MainSku"
     left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
     left join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
+    left join "_MainSkuToMainSkuRemark" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
+    left join "MainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
+    left join "_SkuMasterToSkuMasterRemark" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
+    left join "SkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id"
     ${query ? `where ` : ` `}
     ${splitQuery
             .map((x, index) =>
                 x.trim()
                     ? `(LOWER("MainSku"."name") like $${index + 1} or LOWER("SkuMaster"."detail") like $${index + 1} or
-    LOWER("GoodsMaster"."barcode") like $${index + 1} or LOWER("MainSku"."searchKeyword") like $${index + 1})`
+    LOWER("GoodsMaster"."barcode") like $${index + 1} or LOWER("MainSku"."searchKeyword") like $${index + 1} or 
+    LOWER("SkuMasterRemark"."name") like $${index + 1} or LOWER("MainSkuRemark"."name") like $${index + 1})`
                     : ``
             )
             .join(' and ')}
