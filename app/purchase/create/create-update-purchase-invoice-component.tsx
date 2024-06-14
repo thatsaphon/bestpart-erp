@@ -169,9 +169,9 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                                             <></>
                                         )}
                                     </div>
-                                    <p>
+                                    <div>
                                         <ImageToolTip images={item.images} />
-                                    </p>
+                                    </div>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Input

@@ -82,7 +82,8 @@ export default async function PurchaseInvoiceDetailPage({
                                 document?.ApSubledger?.Contact.id + ''
                             }
                             defaultAddress={{
-                                address: `${document?.contactName}\n${document?.address}`,
+                                name: document?.contactName || '',
+                                address: document?.address || '',
                                 phone: document?.phone || '',
                                 taxId: document?.taxId || '',
                             }}

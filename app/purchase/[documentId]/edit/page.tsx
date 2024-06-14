@@ -57,14 +57,20 @@ export default async function EditPurchaseInvoicePage({
     >`select "MainSkuRemark".*, "MainSku"."id" as "mainSkuId" from "MainSkuRemark" 
                             left join "_MainSkuToMainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
                             left join "MainSku" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
-                            where "MainSku"."id" = (${Prisma.join(purchaseInvoices.map((x) => x.mainSkuId))})`
+                            where "MainSku"."id" in (${Prisma.join(purchaseInvoices.map((x) => x.mainSkuId))})`
 
     const skuMasterRemarks = await prisma.$queryRaw<
         (SkuMasterRemark & { skuMasterId: number })[]
     >`select "SkuMasterRemark".*, "SkuMaster"."id" as "skuMasterId" from "SkuMasterRemark"
                             left join "_SkuMasterToSkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id"
                             left join "SkuMaster" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
-                            where "SkuMaster"."id" = (${Prisma.join(purchaseInvoices.map((x) => x.skuMasterId))})`
+                            where "SkuMaster"."id" in (${Prisma.join(purchaseInvoices.map((x) => x.skuMasterId))})`
+
+    const images: { skuMasterId: number; images: string }[] =
+        await prisma.$queryRaw`
+        select "SkuMaster".id as "skuMasterId", "SkuMasterImage"."path" as "images" from "SkuMaster" 
+        left join "SkuMasterImage" on "SkuMaster"."id" = "SkuMasterImage"."skuMasterId" 
+        where "SkuMaster"."id" in (${Prisma.join(purchaseInvoices.map(({ skuMasterId }) => skuMasterId))})`
 
     return (
         <CreateOrUpdatePurchaseInvoiceComponent
@@ -76,6 +82,9 @@ export default async function EditPurchaseInvoicePage({
                 SkuMasterRemarks: skuMasterRemarks.filter(
                     (y) => y.skuMasterId === x.skuMasterId
                 ),
+                images: images
+                    .filter((y) => y.skuMasterId === x.skuMasterId)
+                    .map((y) => y.images),
             }))}
             defaultDocumentDetails={purchaseInvoices[0]}
         />

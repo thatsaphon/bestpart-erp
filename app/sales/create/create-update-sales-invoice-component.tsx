@@ -27,6 +27,7 @@ import SelectSearchCustomer from '@/components/select-search-customer'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ImageToolTip from '@/components/image-tooltip'
+import { DocumentRemark } from '@prisma/client'
 
 type Props = {
     defaultItems?: InventoryDetailType[]
@@ -39,7 +40,7 @@ type Props = {
         address: string
         phone: string
         taxId: string
-        remark: string
+        documentRemarks: DocumentRemark[]
     }
 }
 
@@ -169,9 +170,9 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                             <></>
                                         )}
                                     </div>
-                                    <p>
+                                    <div>
                                         <ImageToolTip images={item.images} />
-                                    </p>
+                                    </div>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Input

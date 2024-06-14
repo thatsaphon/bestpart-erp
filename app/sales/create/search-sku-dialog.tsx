@@ -146,9 +146,9 @@ export default function SearchSkuDialog({
                                     ) : (
                                         <></>
                                     )}
-                                    <p>
+                                    <div>
                                         <ImageToolTip images={item.images} />
-                                    </p>
+                                    </div>
                                 </TableCell>
                                 <TableCell>{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                 <TableCell className="text-right">
