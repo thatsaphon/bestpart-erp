@@ -91,25 +91,6 @@ export default function SearchSkuDialog({
                     </Button>
                 </div>
                 <Table>
-                    <TableCaption>
-                        <PaginationClientComponent
-                            limit={10}
-                            numberOfPage={Math.ceil(count / 10)}
-                            onPageClick={async (page: number) => {
-                                try {
-                                    const result = await searchSku(
-                                        searchKeyword,
-                                        page
-                                    )
-                                    setSearchItems(result.items)
-                                    setPage(page)
-                                } catch (error) {
-                                    toast.error('Something went wrong')
-                                }
-                            }}
-                            page={page}
-                        />
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead className="min-w-[50px] text-center">
@@ -166,6 +147,25 @@ export default function SearchSkuDialog({
                             </TableRow>
                         ))}
                     </TableBody>
+                    <TableCaption>
+                        <PaginationClientComponent
+                            limit={10}
+                            numberOfPage={Math.ceil(count / 10)}
+                            onPageClick={async (page: number) => {
+                                try {
+                                    const result = await searchSku(
+                                        searchKeyword,
+                                        page
+                                    )
+                                    setSearchItems(result.items)
+                                    setPage(page)
+                                } catch (error) {
+                                    toast.error('Something went wrong')
+                                }
+                            }}
+                            page={page}
+                        />
+                    </TableCaption>
                 </Table>
             </DialogContent>
         </Dialog>

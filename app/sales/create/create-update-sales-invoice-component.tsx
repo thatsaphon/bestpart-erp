@@ -15,7 +15,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { Cross1Icon } from '@radix-ui/react-icons'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { getSkuByBarcode } from './barcode-scanned'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from './search-sku-dialog'
@@ -56,8 +56,41 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     const [key, setKey] = React.useState('1')
     const session = useSession()
 
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Enter' && !open) {
+                event.preventDefault()
+            }
+            if (event.key === 'Tab' && !open) {
+                event.preventDefault()
+                const focusedElement = document.activeElement as HTMLElement
+
+                const focusableComponents = document.getElementById(
+                    key
+                ) as HTMLElement
+
+                const focusableElements = focusableComponents.querySelectorAll(
+                    'button, [href], input:not([type="hidden"]):not([hidden]), select, textarea, [tabindex]:not([tabindex="-1"])'
+                )
+                const focusedElementIndex =
+                    Array.from(focusableElements).indexOf(focusedElement)
+                const nextFocusedElementIndex =
+                    focusedElementIndex + (event.shiftKey ? -1 : 1)
+                const nextFocusedElement = focusableElements[
+                    (nextFocusedElementIndex + focusableElements.length) %
+                        focusableElements.length
+                ] as HTMLElement
+                nextFocusedElement.focus()
+            }
+        }
+        document.addEventListener('keydown', handleKeyDown)
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [key, open])
+
     return (
-        <div className="p-3" key={key}>
+        <div className="p-3" id={key} key={key}>
             <div className="flex justify-between">
                 <Link href="/sales">
                     <Button variant="ghost" className="mb-2">{`< Back`}</Button>
@@ -179,7 +212,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                         id={`quantity-${index}`}
                                         className="w-16 text-right"
                                         type="number"
-                                        value={item.quantity}
+                                        value={item.quantity || undefined}
                                         onChange={(e) => {
                                             const newItems = [...items]
                                             newItems[index].quantity = Number(
@@ -216,16 +249,6 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                                     )
                                                 previousElement?.focus()
                                             }
-                                            if (
-                                                e.key === 'ArrowRight' &&
-                                                !e.shiftKey
-                                            ) {
-                                                const priceElement =
-                                                    document.getElementById(
-                                                        `price-${index}`
-                                                    )
-                                                priceElement?.focus()
-                                            }
                                         }}
                                     />
                                 </TableCell>
@@ -240,7 +263,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                         id={`price-${index}`}
                                         className="w-16 text-right"
                                         type="number"
-                                        value={item.price}
+                                        value={item.price || undefined}
                                         onChange={(e) => {
                                             const newItems = [...items]
                                             newItems[index].price = Number(
@@ -278,16 +301,6 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                                 previousElement
                                                     ? previousElement.focus()
                                                     : null
-                                            }
-                                            if (
-                                                e.key === 'ArrowLeft' &&
-                                                !e.shiftKey
-                                            ) {
-                                                const quantityElement =
-                                                    document.getElementById(
-                                                        `quantity-${index}`
-                                                    )
-                                                quantityElement?.focus()
                                             }
                                         }}
                                     />
@@ -411,6 +424,11 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                         { ...data, quantity: 1 },
                                     ])
                                     setOpen(false)
+                                    setTimeout(() => {
+                                        document
+                                            .getElementById('barcode')
+                                            ?.focus()
+                                    }, 100)
                                 }}
                             />
                         </TableRow>
