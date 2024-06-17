@@ -10,25 +10,50 @@ import {
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import prisma from '../db/db'
+import prisma from '../../db/db'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import PaginationComponent from '@/components/pagination-component'
+import { format } from 'date-fns'
 
 type Props = {
     searchParams: {
         limit?: string
         page?: string
+        from?: string
+        to?: string
     }
 }
 
 export default async function PurchasePage({
-    searchParams: { limit = '10', page = '1' },
+    searchParams: {
+        limit = '10',
+        page = '1',
+        from = format(
+            new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+            'yyyy-MM-dd'
+        ),
+        to = format(new Date(), 'yyyy-MM-dd'),
+    },
 }: Props) {
     const purchaseInvoices = await prisma.document.findMany({
         where: {
             documentId: {
                 startsWith: 'PINV',
             },
+            AND: [
+                {
+                    date: {
+                        gte: new Date(from),
+                    },
+                },
+                {
+                    date: {
+                        lt: new Date(
+                            new Date(to).setDate(new Date(to).getDate() + 1)
+                        ),
+                    },
+                },
+            ],
         },
         include: {
             ApSubledger: {
@@ -60,15 +85,7 @@ export default async function PurchasePage({
     const numberOfPage = Math.ceil(documentCount / Number(limit))
 
     return (
-        <div className="mb-2 p-3">
-            <h1 className="flex items-center gap-2 text-3xl text-primary">
-                <span>งานซื้อสินค้า</span>
-                <Link href={'/purchase/create'}>
-                    <Button className="ml-3" variant={'outline'}>
-                        สร้างบิลซื้อ
-                    </Button>
-                </Link>
-            </h1>
+        <>
             <Table>
                 <TableCaption>A list of your recent invoices.</TableCaption>
                 <TableHeader>
@@ -123,6 +140,6 @@ export default async function PurchasePage({
                 limit={limit}
                 numberOfPage={numberOfPage}
             />
-        </div>
+        </>
     )
 }

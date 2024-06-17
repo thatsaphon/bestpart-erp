@@ -9,28 +9,53 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import Link from 'next/link'
-import prisma from '../db/db'
+import prisma from '../../db/db'
 import PaginationComponent from '@/components/pagination-component'
 import { ViewIcon } from 'lucide-react'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import { Prisma } from '@prisma/client'
 import { Badge } from '@/components/ui/badge'
+import { format } from 'date-fns'
 
 type Props = {
     searchParams: {
         limit?: string
         page?: string
+        from?: string
+        to?: string
     }
 }
 
 export default async function SalesListPage({
-    searchParams: { limit = '10', page = '1' },
+    searchParams: {
+        limit = '10',
+        page = '1',
+        from = format(
+            new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+            'yyyy-MM-dd'
+        ),
+        to = format(new Date(), 'yyyy-MM-dd'),
+    },
 }: Props) {
     const sales = await prisma.document.findMany({
         where: {
             documentId: {
                 startsWith: 'SINV',
             },
+            AND: [
+                {
+                    date: {
+                        gte: new Date(from),
+                    },
+                },
+                {
+                    date: {
+                        lt: new Date(
+                            new Date(to).setDate(new Date(to).getDate() + 1)
+                        ),
+                    },
+                },
+            ],
         },
         include: {
             ArSubledger: {
@@ -57,20 +82,37 @@ export default async function SalesListPage({
             documentId: {
                 startsWith: 'SINV',
             },
+            AND: [
+                {
+                    date: {
+                        gte: new Date(from),
+                    },
+                },
+                {
+                    date: {
+                        lt: new Date(
+                            new Date(to).setDate(new Date(to).getDate() + 1)
+                        ),
+                    },
+                },
+            ],
         },
     })
+    const documentSum = await prisma.$queryRaw<
+        { sum: number }[]
+    >`select COALESCE(sum("GeneralLedger"."amount"), 0) as "sum" from "GeneralLedger"
+             left join "_DocumentToGeneralLedger" on "_DocumentToGeneralLedger"."B" = "GeneralLedger"."id"
+             left join "Document" on "_DocumentToGeneralLedger"."A" = "Document"."id"
+             where "chartOfAccountId" in (11000, 12000) and "Document"."documentId" like 'SINV%' and 
+             "Document"."date" between ${new Date(from)} and ${new Date(new Date(to).setDate(new Date(to).getDate() + 1))}::date and
+             "Document"."documentId" like 'SINV%'`
+
+    console.log(documentSum)
+
     const numberOfPage = Math.ceil(documentCount / Number(limit))
 
     return (
-        <div className="mb-2 p-3">
-            <h1 className="flex items-center gap-2 text-3xl text-primary">
-                <span>งานขายสินค้า</span>
-                <Link href={'/sales/create'}>
-                    <Button className="ml-3" variant={'outline'}>
-                        สร้างบิลขาย
-                    </Button>
-                </Link>
-            </h1>
+        <>
             <Table>
                 <TableCaption>A list of your recent invoices.</TableCaption>
                 <TableHeader>
@@ -138,6 +180,47 @@ export default async function SalesListPage({
                 limit={limit}
                 numberOfPage={numberOfPage}
             />
-        </div>
+
+            <div className="flex w-full justify-end px-4">
+                <div className="w-[400px]">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead></TableHead>
+                                <TableHead>จำนวนบิล</TableHead>
+                                <TableHead>ยอดรวม</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell>หน้านี้</TableCell>
+                                <TableCell>
+                                    {documentCount > +limit
+                                        ? limit
+                                        : documentCount}
+                                </TableCell>
+                                <TableCell>
+                                    {sales
+                                        .reduce(
+                                            (total, sale) =>
+                                                total +
+                                                sale.GeneralLedger[0]?.amount,
+                                            0
+                                        )
+                                        .toLocaleString()}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>รวมทุกหน้า</TableCell>
+                                <TableCell>{documentCount}</TableCell>
+                                <TableCell>
+                                    {documentSum[0].sum.toLocaleString()}
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+        </>
     )
 }

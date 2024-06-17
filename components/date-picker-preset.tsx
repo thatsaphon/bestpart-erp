@@ -50,7 +50,7 @@ export function DatePickerWithPresets({
                         onChange={(e) => {
                             setDate(new Date(e.target.value))
                         }}
-                        value={date.toISOString().substring(0, 10)}
+                        value={date.toLocaleString()}
                     />
                     {date ? format(date, 'PPP') : <span>Pick a date</span>}
                 </Button>
@@ -61,9 +61,10 @@ export function DatePickerWithPresets({
                 onInteractOutside={(e) => e.preventDefault()}
             >
                 <Select
-                    onValueChange={(value) =>
+                    onValueChange={(value) => {
                         setDate(addDays(new Date(), parseInt(value)))
-                    }
+                        console.log(date)
+                    }}
                 >
                     <SelectTrigger>
                         <SelectValue placeholder="Select" />
@@ -80,7 +81,10 @@ export function DatePickerWithPresets({
                     <Calendar
                         mode="single"
                         selected={date}
-                        onSelect={(value) => !!value && setDate(value)}
+                        onSelect={(value) => {
+                            console.log(value)
+                            !!value && setDate(value)
+                        }}
                     />
                 </div>
             </PopoverContent>

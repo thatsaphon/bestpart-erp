@@ -1,7 +1,9 @@
 import SubMenuNavLink from '@/components/submenu-navlink'
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 
 export const metadata: Metadata = {
     title: 'Sales',
@@ -24,7 +26,7 @@ export default async function RootLayout({
                 <Separator />
             </div>
             <Separator orientation="vertical" className="h-full" />
-            {children}
+            <div className="mb-2 p-3">{children}</div>
         </div>
     )
 }

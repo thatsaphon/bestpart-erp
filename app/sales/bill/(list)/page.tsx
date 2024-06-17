@@ -9,7 +9,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import Link from 'next/link'
-import prisma from '../../db/db'
+import prisma from '../../../db/db'
 import PaginationComponent from '@/components/pagination-component'
 import { ViewIcon } from 'lucide-react'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
@@ -76,15 +76,7 @@ export default async function SalesListPage({
     const numberOfPage = Math.ceil(documentCount / Number(limit))
 
     return (
-        <div className="mb-2 p-3">
-            <h1 className="flex items-center gap-2 text-3xl text-primary">
-                <span>ใบวางบิล</span>
-                <Link href={'/sales/bill/create'}>
-                    <Button className="ml-3" variant={'outline'}>
-                        สร้างใบวางบิล
-                    </Button>
-                </Link>
-            </h1>
+        <>
             <Table>
                 <TableCaption>A list of your recent invoices.</TableCaption>
                 <TableHeader>
@@ -264,6 +256,6 @@ export default async function SalesListPage({
                 limit={limit}
                 numberOfPage={numberOfPage}
             />
-        </div>
+        </>
     )
 }
