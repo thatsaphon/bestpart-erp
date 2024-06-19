@@ -14,7 +14,7 @@ export const getSalesInvoiceDetail = async (documentId: string) => {
                     },
                 },
             },
-            GeneralLedger: true,
+            GeneralLedger: { include: { ChartOfAccount: true } },
             remark: true,
         },
     })

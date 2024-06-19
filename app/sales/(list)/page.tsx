@@ -107,8 +107,6 @@ export default async function SalesListPage({
              "Document"."date" between ${new Date(from)} and ${new Date(new Date(to).setDate(new Date(to).getDate() + 1))}::date and
              "Document"."documentId" like 'SINV%'`
 
-    console.log(documentSum)
-
     const numberOfPage = Math.ceil(documentCount / Number(limit))
 
     return (

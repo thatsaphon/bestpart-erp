@@ -13,12 +13,8 @@ export const searchSku = async (query: string, page: number = 1) => {
         `select "MainSku".id as "mainSkuId", "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuMaster"."detail", "GoodsMaster".price, 
     "GoodsMaster".quantity as "quantityPerUnit", "GoodsMaster".unit, "MainSku"."partNumber"
     from "MainSku"
-    left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
-    left join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
-    left join "_MainSkuToMainSkuRemark" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
-    left join "MainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
-    left join "_SkuMasterToSkuMasterRemark" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
-    left join "SkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id"
+    inner join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
+    inner join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
     ${query ? `where ` : ` `}
     ${splitQuery
             .map((x, index) =>

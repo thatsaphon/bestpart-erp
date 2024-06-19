@@ -5,6 +5,7 @@ import { MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
 import { InventoryDetailType } from '@/types/inventory-detail'
 
 export const searchSku = async (query: string, page: number = 1) => {
+    console.log('function searchSku called')
     const splitQuery = query.trim().split(' ')
 
     const items = await prisma.$queryRawUnsafe<
@@ -14,12 +15,8 @@ export const searchSku = async (query: string, page: number = 1) => {
         "MainSku"."name", "SkuMaster"."detail", "GoodsMaster".price, 
     "GoodsMaster".quantity as "quantityPerUnit", "GoodsMaster".unit, "MainSku"."partNumber"
     from "MainSku"
-    left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
-    left join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
-    left join "_MainSkuToMainSkuRemark" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
-    left join "MainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
-    left join "_SkuMasterToSkuMasterRemark" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
-    left join "SkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id"
+    inner join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
+    inner join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
     ${query ? `where ` : ` `}
     ${splitQuery
             .map((x, index) =>
@@ -35,6 +32,7 @@ export const searchSku = async (query: string, page: number = 1) => {
         ...splitQuery.map((x) => `%${x.toLowerCase()}%`)
     )
     if (!items.length) throw new Error('ไม่พบสินค้าที่ค้นหา')
+    console.log(items.map((item) => item.detail))
 
     const remaining: { skuMasterId: number; remaining: number }[] =
         await prisma.$queryRaw`select "SkuIn"."skuMasterId", SUM("SkuIn".quantity) - COALESCE(sum("SkuInToOut".quantity), 0)  as remaining 
@@ -56,7 +54,6 @@ export const searchSku = async (query: string, page: number = 1) => {
                     : ``
             )
             .join(' and ')}
-    limit 10 offset ${(page - 1) * 10}
     `,
         ...splitQuery.map((x) => `%${x.toLowerCase()}%`)
     )
@@ -76,7 +73,7 @@ export const searchSku = async (query: string, page: number = 1) => {
                             left join "SkuMaster" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
                             where "SkuMaster"."id" in (${Prisma.join(items.map(({ skuMasterId }) => skuMasterId))})`
 
-
+    console.log(count)
     return {
         items: items.map((item) => ({
             ...item,

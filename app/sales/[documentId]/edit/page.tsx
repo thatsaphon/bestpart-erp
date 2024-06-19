@@ -7,6 +7,7 @@ import {
     Prisma,
     SkuMasterRemark,
 } from '@prisma/client'
+import { getPaymentMethods } from '@/app/actions/accounting'
 
 type Props = { params: { documentId: string } }
 
@@ -38,7 +39,7 @@ export default async function EditSalesInvoicePage({
         quantityPerUnit: number
     }[] = await prisma.$queryRaw`
         select "Document".id, "Document"."date", "Document"."documentId", "ArSubledger"."contactId" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
-        "SkuOut".barcode, "SkuOut"."skuMasterId", "SkuOut"."goodsMasterId", "MainSku"."mainSkuId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuOut".quantity, ("SkuOut".price + "SkuOut".vat) as "price", "SkuOut".unit, "SkuOut"."quantityPerUnit" from "Document" 
+        "SkuOut".barcode, "SkuOut"."skuMasterId", "SkuOut"."goodsMasterId", "SkuMaster"."mainSkuId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuOut".quantity, ("SkuOut".price + "SkuOut".vat) as "price", "SkuOut".unit, "SkuOut"."quantityPerUnit" from "Document" 
         left join "ArSubledger" on "ArSubledger"."documentId" = "Document"."id"
         left join "Contact" on "Contact"."id" = "ArSubledger"."contactId"
         -- left join "Address" on "Address"."contactId" = "Contact"."id"
@@ -61,10 +62,31 @@ export default async function EditSalesInvoicePage({
                     left join "SkuMaster" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
                     where "SkuMaster"."id" in (${Prisma.join(salesInvoices.map((x) => x.skuMasterId))})`
 
-    const images: { skuMasterId: number; images: string }[] = await prisma.$queryRaw`
+    const images: { skuMasterId: number; images: string }[] =
+        await prisma.$queryRaw`
     select "SkuMaster".id as "skuMasterId", "SkuMasterImage"."path" as "images" from "SkuMaster" 
     left join "SkuMasterImage" on "SkuMaster"."id" = "SkuMasterImage"."skuMasterId" 
     where "SkuMaster"."id" in (${Prisma.join(salesInvoices.map(({ skuMasterId }) => skuMasterId))})`
+
+    const paymentMethods = await getPaymentMethods()
+
+    const defaultPayments = await prisma.generalLedger.findMany({
+        where: {
+            Document: { every: { id: salesInvoices[0].id } },
+            AND: [
+                { chartOfAccountId: { gte: 11000 } },
+                { chartOfAccountId: { lte: 12000 } },
+            ],
+        },
+        select: {
+            chartOfAccountId: true,
+            amount: true,
+        },
+    })
+
+    const defaultRemarks = await prisma.documentRemark.findMany({
+        where: { documentId: salesInvoices[0].id },
+    })
 
     return (
         <CreateOrUpdateSalesInvoiceComponent
@@ -81,6 +103,12 @@ export default async function EditSalesInvoicePage({
                     .map((y) => y.images),
             }))}
             defaultDocumentDetails={salesInvoices[0]}
+            paymentMethods={paymentMethods}
+            defaultPayments={defaultPayments.map((x) => ({
+                id: x.chartOfAccountId,
+                amount: x.amount,
+            }))}
+            defaultRemarks={defaultRemarks}
         />
     )
 }

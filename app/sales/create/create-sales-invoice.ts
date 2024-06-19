@@ -11,10 +11,16 @@ import { fromZodError } from 'zod-validation-error'
 import { InventoryDetailType } from '@/types/inventory-detail'
 import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 import { redirect } from 'next/navigation'
+import { calculatePaymentStatus } from '@/lib/calculate-payment-status'
 
 export const createSalesInvoice = async (
     formData: FormData,
-    items: InventoryDetailType[]
+    items: InventoryDetailType[],
+    payments: {
+        id: number,
+        amount: number
+    }[],
+    remarks: { id?: number, remark: string }[]
 ) => {
     const validator = z.object({
         customerId: z.string().trim().nullable(),
@@ -23,8 +29,8 @@ export const createSalesInvoice = async (
         taxId: z.string().trim().optional().nullable(),
         date: z.string().trim().min(1, 'date must not be empty'),
         documentId: z.string().trim().optional().nullable(),
-        payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
-        remark: z.string().trim().optional().nullable(),
+        // payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
+        // remark: z.string().trim().optional().nullable(),
     })
 
     const result = validator.safeParse({
@@ -34,8 +40,8 @@ export const createSalesInvoice = async (
         taxId: formData.get('taxId'),
         date: formData.get('date'),
         documentId: formData.get('documentId'),
-        payment: formData.get('payment'),
-        remark: formData.get('remark'),
+        // payment: formData.get('payment'),
+        // remark: formData.get('remark'),
     })
 
     if (!result.success) {
@@ -56,8 +62,8 @@ export const createSalesInvoice = async (
         taxId,
         date,
         documentId,
-        payment,
-        remark,
+        // payment,
+        // remark,
     } = result.data
 
     const getContact = async () => {
@@ -65,7 +71,7 @@ export const createSalesInvoice = async (
             const contact = await prisma.contact.findUnique({
                 where: {
                     id: Number(customerId),
-                },
+                }
             })
             if (!contact) {
                 throw new Error('contact not found')
@@ -74,6 +80,10 @@ export const createSalesInvoice = async (
         }
     }
     let contact: Contact | undefined = await getContact()
+
+    if (payments.find((payment) => payment.id === 12000) && (!contact || !contact.credit)) {
+        throw new Error(`${contact?.name || ''} ไม่สามารถขายเงินเชื่อได้`)
+    }
 
     const goodsMasters = await prisma.goodsMaster.findMany({
         where: {
@@ -128,6 +138,7 @@ export const createSalesInvoice = async (
 
     const session = await getServerSession(authOptions)
 
+
     const invoice = await prisma.document.create({
         data: {
             contactName: address?.split('\n')[0] || '',
@@ -136,31 +147,26 @@ export const createSalesInvoice = async (
             taxId: taxId || '',
             date: new Date(date),
             documentId: documentId,
-            remark: remark ? { create: { remark } } : undefined,
+            remark: { create: remarks },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             ArSubledger: !!contact
                 ? {
                     create: {
                         contactId: Number(customerId),
-                        paymentStatus:
-                            payment === 'cash' ? 'Paid' : 'NotPaid',
+                        paymentStatus: calculatePaymentStatus(payments),
                     },
                 }
                 : undefined,
             GeneralLedger: {
                 create: [
                     // 11000 = เงินสด, 12000 = ลูกหนี้
-                    {
-                        chartOfAccountId:
-                            !!contact && payment === 'credit' ? 12000 : 11000,
-                        amount: +items
-                            .reduce(
-                                (sum, item) => sum + item.quantity * item.price,
-                                0
-                            )
-                            .toFixed(2),
-                    },
+                    ...payments.map((payment) => {
+                        return {
+                            chartOfAccountId: payment.id,
+                            amount: payment.amount,
+                        }
+                    }),
                     // รายได้
                     {
                         chartOfAccountId: 41000,

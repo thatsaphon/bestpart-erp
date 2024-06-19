@@ -1,28 +1,31 @@
 'use server'
 
 import prisma from '@/app/db/db'
-import { Contact, Prisma } from '@prisma/client'
+import { Contact, DocumentRemark, Prisma } from '@prisma/client'
 import { format } from 'date-fns'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { InventoryDetailType } from '@/types/inventory-detail'
 import { redirect } from 'next/navigation'
+import { calculatePaymentStatus } from '@/lib/calculate-payment-status'
 
 export const updateSalesInvoice = async (
     id: number,
     formData: FormData,
-    items: InventoryDetailType[]
+    items: InventoryDetailType[],
+    payments: { id: number; amount: number }[],
+    remarks: { id?: number, remark: string }[]
 ) => {
     const validator = z.object({
         customerId: z.string().trim().optional().nullable(),
         address: z.string().trim().optional().nullable(),
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
-        date: z.string().trim().min(1, 'date must not be empty'),
+        date: z.string().trim().optional(),
         documentId: z.string().trim().optional().nullable(),
-        payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
-        remark: z.string().trim().optional().nullable(),
+        // payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
+        // remark: z.string().trim().optional().nullable(),
     })
 
     const result = validator.safeParse({
@@ -32,8 +35,8 @@ export const updateSalesInvoice = async (
         taxId: formData.get('taxId') || undefined,
         date: formData.get('date') || undefined,
         documentId: formData.get('documentId') || undefined,
-        payment: formData.get('payment') || undefined,
-        remark: formData.get('remark') || undefined,
+        // payment: formData.get('payment') || undefined,
+        // remark: formData.get('remark') || undefined,
     })
 
     if (!result.success) {
@@ -54,8 +57,8 @@ export const updateSalesInvoice = async (
         taxId,
         date,
         documentId,
-        payment,
-        remark,
+        // payment,
+        // remark,
     } = result.data
 
     const getContact = async () => {
@@ -72,6 +75,10 @@ export const updateSalesInvoice = async (
         }
     }
     let contact: Contact | undefined = await getContact()
+
+    if (payments.find((payment) => payment.id === 12000) && (!contact || !contact.credit)) {
+        throw new Error(`${contact?.name || ''} ไม่สามารถขายเงินเชื่อได้`)
+    }
 
     const goodsMasters = await prisma.goodsMaster.findMany({
         where: {
@@ -152,41 +159,29 @@ export const updateSalesInvoice = async (
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
             documentId: documentId || undefined,
-            remark: remark ? { create: { remark } } : undefined,
+            remark: { create: remarks.filter(({ id, remark }) => !id) },
             ArSubledger: !!contact
                 ? {
                     update: {
                         contactId: Number(customerId),
-                        paymentStatus:
-                            payment === 'cash' ? 'Paid' : 'NotPaid',
+                        paymentStatus: calculatePaymentStatus(payments)
                     },
                 }
                 : undefined,
             GeneralLedger: {
-                update: [
-                    // 11000 = เงินสด, 12000 = ลูกหนี้
+                deleteMany: [
                     {
-                        where: {
-                            id: invoice?.GeneralLedger.find(
-                                ({ chartOfAccountId }) =>
-                                    chartOfAccountId === 11000 ||
-                                    chartOfAccountId === 12000
-                            )?.id,
-                        },
-                        data: {
-                            chartOfAccountId:
-                                !!contact && payment === 'credit'
-                                    ? 12000
-                                    : 11000,
-                            amount: +items
-                                .reduce(
-                                    (sum, item) =>
-                                        sum + item.quantity * item.price,
-                                    0
-                                )
-                                .toFixed(2),
-                        },
-                    },
+                        AND: [
+                            { chartOfAccountId: { gte: 11000 } },
+                            { chartOfAccountId: { lte: 12000 } },
+                        ]
+                    }
+                ],
+                create: payments.map((payment) => ({
+                    chartOfAccountId: payment.id,
+                    amount: payment.amount,
+                })),
+                update: [
                     // รายได้
                     {
                         where: {
@@ -238,7 +233,7 @@ export const updateSalesInvoice = async (
                 },
                 create: items.map((item) => {
                     return {
-                        date: new Date(date),
+                        date: !!date ? new Date(date) : invoice.date,
                         goodsMasterId: item.goodsMasterId,
                         skuMasterId: item.skuMasterId,
                         barcode: String(item.barcode),

@@ -28,6 +28,16 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ImageToolTip from '@/components/image-tooltip'
 import { DocumentRemark } from '@prisma/client'
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { getPaymentMethods } from '@/app/actions/accounting'
 
 type Props = {
     defaultItems?: InventoryDetailType[]
@@ -42,11 +52,17 @@ type Props = {
         taxId: string
         documentRemarks: DocumentRemark[]
     }
+    paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
+    defaultPayments?: { id: number; amount: number }[]
+    defaultRemarks?: { id: number; remark: string }[]
 }
 
 export default function CreateOrUpdateSalesInvoiceComponent({
     defaultItems = [],
     defaultDocumentDetails,
+    paymentMethods,
+    defaultPayments,
+    defaultRemarks,
 }: Props) {
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
@@ -55,6 +71,19 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
     const session = useSession()
+    const [remarks, setRemarks] = React.useState<
+        { id?: number; remark: string }[]
+    >(defaultRemarks || [])
+    const [remarkInput, setRemarkInput] = React.useState<string>('')
+    const [selectedPayments, setSelectedPayments] = React.useState<
+        { id: number; amount: number }[]
+    >(defaultPayments || [])
+    const [selectedPayment, setSelectedPayment] = React.useState<
+        number | undefined
+    >()
+    const [paymentAmount, setPaymentAmount] = React.useState<
+        number | undefined
+    >()
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -89,6 +118,29 @@ export default function CreateOrUpdateSalesInvoiceComponent({
         }
     }, [key, open])
 
+    const addRemark = () => {
+        if (!remarkInput) return
+        setRemarks((prev) => [...prev, { remark: remarkInput }])
+        setRemarkInput('')
+    }
+
+    const removeRemark = (index: number) => {
+        setRemarks((prev) => prev.filter((_, i) => i !== index))
+    }
+
+    const addPayment = () => {
+        if (!selectedPayment || !paymentAmount) {
+            toast.error('กรุณาเลือกช่องทางการชําระเงินหรือจำนวนเงิน')
+            return
+        }
+        setSelectedPayments((prev) => [
+            ...prev,
+            { id: selectedPayment, amount: paymentAmount },
+        ])
+        setSelectedPayment(undefined)
+        setPaymentAmount(undefined)
+    }
+
     return (
         <div className="p-3" id={key} key={key}>
             <div className="flex justify-between">
@@ -106,8 +158,27 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                 ref={formRef}
                 action={async (formData) => {
                     try {
+                        if (
+                            selectedPayments.reduce(
+                                (a, b) => a + b.amount,
+                                0
+                            ) !==
+                            items.reduce(
+                                (acc, item) => acc + item.price * item.quantity,
+                                0
+                            )
+                        ) {
+                            return toast.error(
+                                'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
+                            )
+                        }
                         if (!defaultItems.length) {
-                            await createSalesInvoice(formData, items)
+                            await createSalesInvoice(
+                                formData,
+                                items,
+                                selectedPayments,
+                                remarks
+                            )
                             setKey(String(Date.now()))
                             setItems([])
                             toast.success('บันทึกสําเร็จ')
@@ -117,7 +188,9 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             await updateSalesInvoice(
                                 defaultDocumentDetails.id,
                                 formData,
-                                items
+                                items,
+                                selectedPayments,
+                                remarks
                             )
                             toast.success('บันทึกสําเร็จ')
                         }
@@ -167,7 +240,146 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                     </div>
                 </div>
                 <Table>
-                    <TableCaption className="space-x-1 text-right"></TableCaption>
+                    <TableCaption>
+                        <div className="w-[650px] space-y-1">
+                            <p className="text-left">ช่องทางชำระเงิน: </p>
+                            {selectedPayments.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary"
+                                >
+                                    <p>
+                                        {paymentMethods.find(
+                                            (p) => p.id === item.id
+                                        )?.id === 12000
+                                            ? 'เงินเชื่อ'
+                                            : paymentMethods.find(
+                                                  (p) => p.id === item.id
+                                              )?.name}
+                                    </p>
+                                    <p>{item.amount}</p>
+                                    <Cross1Icon
+                                        className="cursor-pointer text-destructive"
+                                        onClick={() =>
+                                            setSelectedPayments(
+                                                selectedPayments.filter(
+                                                    (p) => p.id !== item.id
+                                                )
+                                            )
+                                        }
+                                    />
+                                </div>
+                            ))}
+                            <div className="grid grid-cols-[1fr_1fr_140px] items-center gap-1">
+                                <Select
+                                    name="paymentMethodId"
+                                    onValueChange={(e) =>
+                                        setSelectedPayment(Number(e))
+                                    }
+                                    value={String(selectedPayment)}
+                                >
+                                    <SelectTrigger className="">
+                                        <SelectValue
+                                            placeholder={'เลือกช่องทางชำระเงิน'}
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>
+                                                ช่องทางชำระเงิน
+                                            </SelectLabel>
+                                            {paymentMethods
+                                                .filter(
+                                                    ({ id }) =>
+                                                        !selectedPayments.find(
+                                                            (p) => p.id === id
+                                                        )
+                                                )
+                                                .map((item) => (
+                                                    <SelectItem
+                                                        key={item.id}
+                                                        value={String(item.id)}
+                                                    >
+                                                        {item.id === 12000
+                                                            ? 'เงินเชื่อ'
+                                                            : item.name}
+                                                    </SelectItem>
+                                                ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <Input
+                                    name="amount"
+                                    type="number"
+                                    placeholder="จำนวนเงิน"
+                                    onChange={(e) =>
+                                        setPaymentAmount(Number(e.target.value))
+                                    }
+                                    value={paymentAmount || ''}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault()
+                                            addPayment()
+                                        }
+                                    }}
+                                />
+                                <Button
+                                    type="button"
+                                    onClick={() => addPayment()}
+                                >
+                                    เพิ่มการชำระเงิน
+                                </Button>
+                            </div>
+
+                            <p className="text-left">หมายเหตุ:</p>
+                            {remarks.map((remark, index) => (
+                                <p
+                                    className="grid grid-cols-[1fr_20px] items-center gap-1 text-left text-primary"
+                                    key={'remark-' + index}
+                                >
+                                    <span>{remark.remark}</span>
+                                    <Cross1Icon
+                                        className="font-bold text-destructive hover:cursor-pointer"
+                                        onClick={() => removeRemark(index)}
+                                    />
+                                </p>
+                            ))}
+                            <div className="grid grid-cols-[1fr_140px] items-center gap-1">
+                                <Input
+                                    name="remark"
+                                    onChange={(e) =>
+                                        setRemarkInput(e.target.value)
+                                    }
+                                    value={remarkInput}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault()
+                                            addRemark()
+                                        }
+                                    }}
+                                />
+                                <Button
+                                    type="button"
+                                    onClick={() => addRemark()}
+                                >
+                                    เพิ่มหมายเหตุ
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="mt-4 flex w-[600px] justify-end gap-1">
+                            <Button
+                                variant="destructive"
+                                type="button"
+                                onClick={(e) => {
+                                    setKey(String(Date.now()))
+                                    setItems(defaultItems)
+                                }}
+                            >
+                                Reset
+                            </Button>
+                            <Button type="submit">Save</Button>
+                        </div>
+                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>
@@ -447,7 +659,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             </TableCell>
                             <TableCell className="text-right"></TableCell>
                         </TableRow>
-                        <TableRow className="bg-background hover:bg-background">
+                        {/* <TableRow className="bg-background hover:bg-background">
                             <TableCell
                                 colSpan={6}
                                 className="space-x-1 text-right"
@@ -465,7 +677,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 <Button type="submit">Save</Button>
                             </TableCell>
                             <TableCell></TableCell>
-                        </TableRow>
+                        </TableRow> */}
                     </TableFooter>
                 </Table>
             </form>

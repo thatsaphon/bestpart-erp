@@ -460,7 +460,7 @@ export default function SelectSearchCustomer<T>({
                     </PopoverContent>
                 )}
             </Popover>
-            <input type="text" hidden value={credit} name="payment" readOnly />
+            {/* <input type="text" hidden value={credit} name="payment" readOnly />
             {selectedResult && selectedResult.credit && (
                 <ToggleGroup
                     type="single"
@@ -471,7 +471,7 @@ export default function SelectSearchCustomer<T>({
                     <ToggleGroupItem value="transfer">Transfer</ToggleGroupItem>
                     <ToggleGroupItem value="credit">Credit</ToggleGroupItem>
                 </ToggleGroup>
-            )}
+            )} */}
         </>
     )
 }

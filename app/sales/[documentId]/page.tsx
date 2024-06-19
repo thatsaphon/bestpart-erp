@@ -19,6 +19,18 @@ import Link from 'next/link'
 import SelectSearchVendor from '../../../components/select-search-vendor'
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import BlobProviderClient from './blob-provider'
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { getPaymentMethods } from '@/app/actions/accounting'
+import EditPaymentsComponents from './edit-payments-components'
+import { updateRemark } from './update-remarks'
 
 type Props = {
     params: { documentId: string }
@@ -29,6 +41,7 @@ export default async function PurchaseInvoiceDetailPage({
 }: Props) {
     const document = await getSalesInvoiceDetail(documentId)
     const session = await getServerSession(authOptions)
+    const paymentMethods = await getPaymentMethods()
 
     if (!document)
         return (
@@ -42,33 +55,41 @@ export default async function PurchaseInvoiceDetailPage({
     return (
         <>
             <div className="mb-2 p-3">
-                <div className="flex gap-3">
-                    <div className="space-x-2">
-                        <Label>วันที่</Label>
-                        <DatePickerWithPresets
-                            defaultDate={document?.date}
-                            disabled
-                        />
-                    </div>
-                    <div className="space-x-2">
-                        <Label>No.</Label>
-                        <Input
-                            className="w-auto"
-                            placeholder="Optional"
-                            defaultValue={document?.documentId}
-                            disabled
-                        />
-                    </div>
-
-                    {session?.user.role === 'ADMIN' && (
-                        <div>
-                            <Link href={`/sales/${document?.documentId}/edit`}>
-                                <Button type="button" variant={'destructive'}>
-                                    Edit
-                                </Button>
-                            </Link>
+                <div className="flex justify-between pr-4">
+                    <div className="flex gap-3">
+                        <div className="space-x-2">
+                            <Label>วันที่</Label>
+                            <DatePickerWithPresets
+                                defaultDate={document?.date}
+                                disabled
+                            />
                         </div>
-                    )}
+                        <div className="space-x-2">
+                            <Label>No.</Label>
+                            <Input
+                                className="w-auto"
+                                placeholder="Optional"
+                                defaultValue={document?.documentId}
+                                disabled
+                            />
+                        </div>
+
+                        {session?.user.role === 'ADMIN' && (
+                            <div>
+                                <Link
+                                    href={`/sales/${document?.documentId}/edit`}
+                                >
+                                    <Button
+                                        type="button"
+                                        variant={'destructive'}
+                                    >
+                                        Edit
+                                    </Button>
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                    <BlobProviderClient document={document} />
                 </div>
                 <div className="flex gap-3">
                     <div className="my-1 flex items-baseline space-x-2">
@@ -92,11 +113,36 @@ export default async function PurchaseInvoiceDetailPage({
                 </div>
                 <Table className="mt-3">
                     <TableCaption>
-                        <Textarea
-                            defaultValue={document?.remark
-                                .map(({ remark }) => remark)
-                                .join('\n')}
-                        />
+                        <div className="w-[600px] space-y-1">
+                            <EditPaymentsComponents
+                                document={document}
+                                paymentMethods={paymentMethods}
+                            />
+
+                            <p className="text-left">หมายเหตุ:</p>
+                            {document?.remark.map((remark) => (
+                                <p
+                                    className="text-left text-primary"
+                                    key={remark.id}
+                                >
+                                    {remark.remark}
+                                </p>
+                            ))}
+                            <form
+                                className="grid grid-cols-[500px_1fr] items-center gap-1"
+                                action={async (formData) => {
+                                    'use server'
+                                    const remark = formData.get('remark')
+                                    if (!remark || typeof remark !== 'string')
+                                        return
+
+                                    await updateRemark(document.id, remark)
+                                }}
+                            >
+                                <Input name="remark" />
+                                <Button className="">เพิ่มหมายเหตุ</Button>
+                            </form>
+                        </div>
                     </TableCaption>
                     <TableHeader>
                         <TableRow>
@@ -108,7 +154,6 @@ export default async function PurchaseInvoiceDetailPage({
                             <TableHead className="text-right">Unit</TableHead>
                             <TableHead className="text-right">Price</TableHead>
                             <TableHead className="text-right">Total</TableHead>
-                            <TableHead className="text-right"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -145,12 +190,12 @@ export default async function PurchaseInvoiceDetailPage({
                             <TableCell className="text-right">
                                 {Math.abs(
                                     Number(
-                                        document?.GeneralLedger.find(
+                                        document?.GeneralLedger.filter(
                                             (item) =>
-                                                item.chartOfAccountId ===
-                                                    11000 ||
-                                                item.chartOfAccountId === 12000
-                                        )?.amount
+                                                item.chartOfAccountId >=
+                                                    11000 &&
+                                                item.chartOfAccountId <= 12000
+                                        )?.reduce((a, b) => a + b.amount, 0)
                                     )
                                 )}
                             </TableCell>
@@ -163,7 +208,6 @@ export default async function PurchaseInvoiceDetailPage({
                         </TableRow>
                     </TableFooter>
                 </Table>
-                <BlobProviderClient document={document} />
             </div>
         </>
     )

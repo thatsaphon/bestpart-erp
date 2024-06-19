@@ -72,3 +72,9 @@ export async function deleteChartOfAccount(id: number) {
     ])
     revalidatePath('/accounting')
 }
+
+export async function getPaymentMethods() {
+    return await prisma.chartOfAccount.findMany({
+        where: { AND: [{ id: { gte: 11000 } }, { id: { lte: 12000 } }] }
+    })
+}
