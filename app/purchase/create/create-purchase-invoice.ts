@@ -17,6 +17,7 @@ export const createPurchaseInvoice = async (
 ) => {
     const validator = z.object({
         vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
+        contactName: z.string().trim().min(1, 'contactName must not be empty'),
         address: z.string().trim().optional().nullable(),
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
@@ -27,6 +28,7 @@ export const createPurchaseInvoice = async (
 
     const result = validator.safeParse({
         vendorId: formData.get('vendorId'),
+        contactName: formData.get('contactName'),
         address: formData.get('address'),
         phone: formData.get('phone'),
         taxId: formData.get('taxId'),
@@ -45,7 +47,7 @@ export const createPurchaseInvoice = async (
         )
     }
 
-    let { vendorId, address, phone, taxId, date, documentId, referenceId } = result.data
+    let { vendorId, contactName, address, phone, taxId, date, documentId, referenceId } = result.data
 
     const contact = await prisma.contact.findUnique({
         where: {
@@ -75,8 +77,8 @@ export const createPurchaseInvoice = async (
 
     const invoice = await prisma.document.create({
         data: {
-            contactName: address?.split('\n')[0] || '',
-            address: address?.substring(address.indexOf('\n') + 1) || '',
+            contactName: contactName || '',
+            address: address || '',
             phone: phone || '',
             taxId: taxId || '',
             date: new Date(date),

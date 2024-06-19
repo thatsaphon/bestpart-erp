@@ -1,6 +1,7 @@
 'use client'
 
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+import { Prisma } from '@prisma/client'
 import {
     Page,
     Text,
@@ -10,7 +11,22 @@ import {
     Font,
 } from '@react-pdf/renderer'
 
-type Props = { document: Awaited<ReturnType<typeof getSalesInvoiceDetail>> }
+const BillingNoteWithSubDocument =
+    Prisma.validator<Prisma.DocumentDefaultArgs>()({
+        include: {
+            ArSubledger: true,
+            GeneralLedger: {
+                include: {
+                    Document: true,
+                },
+            },
+        },
+    })
+type BillingNoteDetail = Prisma.DocumentGetPayload<
+    typeof BillingNoteWithSubDocument
+>
+
+type Props = { document: BillingNoteDetail }
 
 import { bahttext } from 'bahttext'
 
@@ -30,7 +46,7 @@ Font.register({
     fonts: [{ src: '/fonts/Inter-VariableFont_slnt,wght.ttf' }],
 })
 
-export default function SalesInvoicePdf_5x9({ document }: Props) {
+export default function BillingNotePdf({ document }: Props) {
     const styles = StyleSheet.create({
         page: {
             flexDirection: 'column',
@@ -112,6 +128,12 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
         },
     })
 
+    const getSalesInvoice = () => {
+        return document.GeneralLedger.sort(
+            (a, b) => a.Document[0].id - b.Document[0].id
+        )
+    }
+
     return (
         <Document>
             <Page
@@ -122,7 +144,7 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
             >
                 <View style={styles.title} fixed>
                     <Text style={{ textAlign: 'center', width: '100%' }}>
-                        ใบกำกับภาษีอย่างย่อ/ใบเสร็จรับเงิน{' '}
+                        ใบวางบิล
                     </Text>
                 </View>
                 <View style={styles.header} fixed>
@@ -156,25 +178,31 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                     <Text style={styles.col5}>หน่วย</Text>
                     <Text style={styles.col6}>รวม</Text>
                 </View>
-                {document?.SkuOut.map((item, index) => (
-                    <View style={styles.row} key={item.barcode} wrap={false}>
+                {getSalesInvoice().map((item, index) => (
+                    <View
+                        style={styles.row}
+                        key={item.Document[0].id}
+                        wrap={false}
+                    >
                         <Text style={styles.col1}>{index + 1}</Text>
-                        <Text style={styles.col2}>{item.barcode}</Text>
-                        <Text style={styles.col3}>
+                        <Text style={styles.col2}>
+                            {item.Document[0].documentId}
+                        </Text>
+                        {/* <Text style={styles.col3}>
                             {`${item.GoodsMaster.SkuMaster.mainSku.name} - ${item.GoodsMaster.SkuMaster.detail}`}
                         </Text>
                         <Text style={styles.col4}>
                             {item.quantity / item.quantityPerUnit}
                         </Text>
-                        <Text style={styles.col5}>{`${item.unit}`}</Text>
+                        <Text style={styles.col5}>{`${item.unit}`}</Text> */}
                         <Text style={styles.col6}>
-                            {(item.price + item.vat) * item.quantity}
+                            {item.amount.toLocaleString()}
                         </Text>
                     </View>
                 ))}
                 <View style={{ ...styles.footer }}>
                     <View style={styles.sum}>
-                        {document?.GeneralLedger.filter(
+                        {/* {document?.GeneralLedger.filter(
                             ({ chartOfAccountId }) =>
                                 chartOfAccountId >= 11000 &&
                                 chartOfAccountId <= 12000
@@ -194,12 +222,12 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                                     {`${item.amount.toLocaleString()}`} บาท
                                 </Text>
                             </View>
-                        ))}
+                        ))} */}
                         <Text>
                             {`(${bahttext(
                                 Number(
-                                    document?.SkuOut.reduce(
-                                        (a, b) => a + b.price,
+                                    getSalesInvoice().reduce(
+                                        (a, b) => a + b.amount,
                                         0
                                     )
                                 )
@@ -235,11 +263,9 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
-                                document?.SkuOut.reduce(
-                                    (a, b) =>
-                                        a + (b.price + b.vat) * b.quantity,
-                                    0
-                                ).toLocaleString()
+                                getSalesInvoice()
+                                    .reduce((a, b) => a + b.amount, 0)
+                                    .toLocaleString()
                             }
                         ></Text>
                     </View>

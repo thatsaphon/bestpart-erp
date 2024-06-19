@@ -19,6 +19,7 @@ export const updateSalesInvoice = async (
 ) => {
     const validator = z.object({
         customerId: z.string().trim().optional().nullable(),
+        contactName: z.string().trim().optional().nullable(),
         address: z.string().trim().optional().nullable(),
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
@@ -30,6 +31,7 @@ export const updateSalesInvoice = async (
 
     const result = validator.safeParse({
         customerId: formData.get('customerId') || undefined,
+        contactName: formData.get('contactName') || undefined,
         address: formData.get('address') || undefined,
         phone: formData.get('phone') || undefined,
         taxId: formData.get('taxId') || undefined,
@@ -52,6 +54,7 @@ export const updateSalesInvoice = async (
 
     let {
         customerId,
+        contactName,
         address,
         phone,
         taxId,
@@ -153,8 +156,8 @@ export const updateSalesInvoice = async (
     const updateInvoice = prisma.document.update({
         where: { id },
         data: {
-            contactName: address?.split('\n')[0] || undefined,
-            address: address?.substring(address.indexOf('\n') + 1) || undefined,
+            contactName: contactName || undefined,
+            address: address || undefined,
             phone: phone || undefined,
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,

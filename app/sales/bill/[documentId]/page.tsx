@@ -1,16 +1,5 @@
 import prisma from '@/app/db/db'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import {
     Table,
     TableBody,
@@ -20,8 +9,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import React from 'react'
 import ReceivedDialog from './received-dialog'
+import BillingNotePdf from '@/components/pdf/billing-note-pdf'
+import BlobProviderClient from '../../[documentId]/blob-provider'
 
 type Props = {
     params: {
@@ -62,30 +52,38 @@ export default async function page({ params: { documentId } }: Props) {
     return (
         <div className="p-3">
             <div>
-                {/* <div className="flex gap-2"></div> */}
-                <div className="flex items-center gap-2 text-xl font-bold">
-                    <h1>ใบวางบิล</h1>
-
-                    <Badge
-                        variant={
-                            billingNote[0].ArSubledger?.paymentStatus === 'Paid'
-                                ? 'outline'
-                                : 'destructive'
-                        }
-                    >
-                        {billingNote[0].ArSubledger?.paymentStatus === 'Paid'
-                            ? 'จ่ายแล้ว'
-                            : billingNote[0].ArSubledger?.paymentStatus ===
-                                'PartialPaid'
-                              ? 'จ่ายบางส่วน'
-                              : 'ยังไม่จ่าย'}
-                    </Badge>
+                <div>
+                    {/* <div className="flex gap-2"></div> */}
+                    <div className="flex items-center gap-2 text-xl font-bold">
+                        <h1>ใบวางบิล</h1>
+                        <Badge
+                            variant={
+                                billingNote[0].ArSubledger?.paymentStatus ===
+                                'Paid'
+                                    ? 'outline'
+                                    : 'destructive'
+                            }
+                        >
+                            {billingNote[0].ArSubledger?.paymentStatus ===
+                            'Paid'
+                                ? 'จ่ายแล้ว'
+                                : billingNote[0].ArSubledger?.paymentStatus ===
+                                    'PartialPaid'
+                                  ? 'จ่ายบางส่วน'
+                                  : 'ยังไม่จ่าย'}
+                        </Badge>
+                    </div>
+                    <p>เลขที่: {billingNote[0].documentId}</p>
+                    <p>ชื่อ: {billingNote[0].contactName}</p>
+                    <p>ที่อยู่: {billingNote[0].address}</p>
+                    <p>โทร: {billingNote[0].phone}</p>
+                    <p>เลขประจำตัวผู้เสียภาษี: {billingNote[0].taxId}</p>
                 </div>
-                <p>เลขที่: {billingNote[0].documentId}</p>
-                <p>ชื่อ: {billingNote[0].contactName}</p>
-                <p>ที่อยู่: {billingNote[0].address}</p>
-                <p>โทร: {billingNote[0].phone}</p>
-                <p>เลขประจำตัวผู้เสียภาษี: {billingNote[0].taxId}</p>
+                <BlobProviderClient
+                    key={new Date().getTime()}
+                    documentType="BillingNotePdf"
+                    document={billingNote[0]}
+                />
             </div>
 
             <Table>

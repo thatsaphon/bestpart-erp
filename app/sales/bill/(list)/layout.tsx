@@ -21,7 +21,7 @@ export default async function RootLayout({
         <>
             <h1 className="flex items-center gap-2 text-3xl text-primary">
                 <span>ใบวางบิล</span>
-                <Link href={'/sales/create'}>
+                <Link href={'/sales/bill/create'}>
                     <Button className="ml-3" variant={'outline'}>
                         สร้างใบวางบิล
                     </Button>

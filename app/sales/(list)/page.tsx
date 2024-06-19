@@ -67,7 +67,8 @@ export default async function SalesListPage({
             GeneralLedger: {
                 where: {
                     chartOfAccountId: {
-                        in: [11000, 12000],
+                        gte: 11000,
+                        lte: 12000,
                     },
                 },
             },
@@ -151,6 +152,11 @@ export default async function SalesListPage({
                                     <Badge variant={`secondary`}>
                                         วางบิลแล้ว
                                     </Badge>
+                                ) : sale.ArSubledger?.paymentStatus ===
+                                  'PartialPaid' ? (
+                                    <Badge variant={'destructive'}>
+                                        จ่ายบางส่วน
+                                    </Badge>
                                 ) : !sale.ArSubledger ? (
                                     <Badge className="bg-green-400">
                                         เงินสด
@@ -162,7 +168,10 @@ export default async function SalesListPage({
                                 )}
                             </TableCell>
                             <TableCell className="text-right">
-                                {sale.GeneralLedger[0]?.amount.toLocaleString()}
+                                {sale.GeneralLedger.reduce(
+                                    (acc, gl) => acc + gl.amount,
+                                    0
+                                ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
                                 <Link href={`/sales/${sale.documentId}`}>

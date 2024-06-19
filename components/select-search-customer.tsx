@@ -45,6 +45,7 @@ type Props<T> = {
     defaultValue?: string
     defaultAddress?: InvoiceAddress
     disabled?: boolean
+    canCreateNewCustomer?: boolean
 }
 
 type InvoiceAddress = {
@@ -64,6 +65,7 @@ export default function SelectSearchCustomer<T>({
     defaultValue,
     disabled,
     defaultAddress,
+    canCreateNewCustomer,
 }: Props<T>) {
     const [page, setPage] = useState(1)
     const [isOpen, setIsOpen] = useState(false)
@@ -72,7 +74,6 @@ export default function SelectSearchCustomer<T>({
     const [searchResults, setSearchResults] = useState<Contact[]>([])
     const [selectedId, setSelectedId] = useState<string>(defaultValue || '')
     const [selectedResult, setSelectedResult] = useState<Contact>()
-    const [canCreateNewCustomer, setCanCreateNewCustomer] = useState(false)
     const [address, setAddress] = useState<InvoiceAddress>(
         defaultAddress || {
             name: '',
@@ -210,7 +211,7 @@ export default function SelectSearchCustomer<T>({
                         <>
                             <div className="col-start-1">
                                 <Input
-                                    name="name"
+                                    name="contactName"
                                     placeholder="ชื่อลูกค้า"
                                     value={address.name}
                                     onChange={(e) =>
@@ -219,6 +220,7 @@ export default function SelectSearchCustomer<T>({
                                             name: e.target.value,
                                         }))
                                     }
+                                    disabled={disabled}
                                 />
                                 <Textarea
                                     value={address.address}

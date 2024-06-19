@@ -7,7 +7,9 @@ export async function fetchUnpaidSalesInvoice(contactId: number) {
         where: {
             type: 'Sales',
             ArSubledger: {
-                paymentStatus: 'NotPaid',
+                paymentStatus: {
+                    in: ['NotPaid', 'PartialPaid'],
+                },
                 contactId,
             },
         },

@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button'
 import toast from 'react-hot-toast'
 import { updateSalesInvoice } from '../create/update-sales-invoice'
 import { updatePayments } from './update-payments'
+import { cn } from '@/lib/utils'
 
 type Props = {
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
@@ -86,11 +87,17 @@ export default function EditPaymentsComponents({
 
     return (
         <>
-            <p className="text-left">ช่องทางชำระเงิน: </p>
+            <p className="text-left font-bold text-primary">
+                ช่องทางชำระเงิน:{' '}
+            </p>
             {selectedPayments.map((item) => (
                 <div
                     key={item.id}
-                    className="grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary"
+                    className={cn(
+                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary',
+                        document?.ArSubledger?.paymentStatus === 'Billed' &&
+                            'grid-cols-[1fr_140px] text-muted-foreground'
+                    )}
                 >
                     <p>
                         {paymentMethods.find((p) => p.id === item.id)?.id ===
@@ -101,7 +108,11 @@ export default function EditPaymentsComponents({
                     </p>
                     <p>{item.amount}</p>
                     <Cross1Icon
-                        className="cursor-pointer text-destructive"
+                        className={cn(
+                            'cursor-pointer text-destructive',
+                            document?.ArSubledger?.paymentStatus === 'Billed' &&
+                                'hidden'
+                        )}
                         onClick={() =>
                             setSelectedPayments(
                                 selectedPayments.filter((p) => p.id !== item.id)
@@ -110,7 +121,13 @@ export default function EditPaymentsComponents({
                     />
                 </div>
             ))}
-            <div className="grid grid-cols-[1fr_1fr_140px] items-center gap-1">
+            <div
+                className={cn(
+                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1',
+                    document?.ArSubledger?.paymentStatus === 'Billed' &&
+                        'hidden'
+                )}
+            >
                 <Select
                     name="paymentMethodId"
                     onValueChange={(e) => setSelectedPayment(Number(e))}
@@ -159,7 +176,24 @@ export default function EditPaymentsComponents({
                     เพิ่มการชำระเงิน
                 </Button>
             </div>
-            <Button onClick={() => submitPayment()}>ยืนยัน</Button>
+            <Button
+                className={cn(
+                    document?.ArSubledger?.paymentStatus === 'Billed' &&
+                        'hidden'
+                )}
+                onClick={() => submitPayment()}
+            >
+                ยืนยัน
+            </Button>
+            <p
+                className={cn(
+                    'text-destructive',
+                    document?.ArSubledger?.paymentStatus !== 'Billed' &&
+                        'hidden'
+                )}
+            >
+                วางบิลแล้ว
+            </p>
         </>
     )
 }

@@ -208,7 +208,7 @@ export default function SelectSearchVendor<T>({
                         <>
                             <div className="col-start-1">
                                 <Input
-                                    name="name"
+                                    name="contactName"
                                     placeholder="ชื่อคู่ค้า"
                                     value={address.name}
                                     onChange={(e) =>
@@ -458,18 +458,6 @@ export default function SelectSearchVendor<T>({
                     </PopoverContent>
                 )}
             </Popover>
-            <input type="text" hidden value={credit} name="payment" readOnly />
-            {selectedResult && selectedResult.credit && (
-                <ToggleGroup
-                    type="single"
-                    defaultValue="cash"
-                    onValueChange={(e: Payment) => setCredit(e)}
-                >
-                    <ToggleGroupItem value="cash">Cash</ToggleGroupItem>
-                    <ToggleGroupItem value="transfer">Transfer</ToggleGroupItem>
-                    <ToggleGroupItem value="credit">Credit</ToggleGroupItem>
-                </ToggleGroup>
-            )}
         </>
     )
 }

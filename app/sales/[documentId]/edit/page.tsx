@@ -8,6 +8,7 @@ import {
     SkuMasterRemark,
 } from '@prisma/client'
 import { getPaymentMethods } from '@/app/actions/accounting'
+import Link from 'next/link'
 
 type Props = { params: { documentId: string } }
 
@@ -72,7 +73,7 @@ export default async function EditSalesInvoicePage({
 
     const defaultPayments = await prisma.generalLedger.findMany({
         where: {
-            Document: { every: { id: salesInvoices[0].id } },
+            Document: { some: { id: salesInvoices[0].id } },
             AND: [
                 { chartOfAccountId: { gte: 11000 } },
                 { chartOfAccountId: { lte: 12000 } },
@@ -89,26 +90,44 @@ export default async function EditSalesInvoicePage({
     })
 
     return (
-        <CreateOrUpdateSalesInvoiceComponent
-            defaultItems={salesInvoices.map((x) => ({
-                ...x,
-                MainSkuRemarks: mainSkuRemarks.filter(
-                    (y) => y.mainSkuId === x.mainSkuId
-                ),
-                SkuMasterRemarks: skuMasterRemarks.filter(
-                    (y) => y.skuMasterId === x.skuMasterId
-                ),
-                images: images
-                    .filter((y) => y.skuMasterId === x.skuMasterId)
-                    .map((y) => y.images),
-            }))}
-            defaultDocumentDetails={salesInvoices[0]}
-            paymentMethods={paymentMethods}
-            defaultPayments={defaultPayments.map((x) => ({
-                id: x.chartOfAccountId,
-                amount: x.amount,
-            }))}
-            defaultRemarks={defaultRemarks}
-        />
+        <>
+            <div className="flex justify-between">
+                <Link
+                    href={`/sales/${documentId}`}
+                    className="text-primary/50 underline hover:text-primary"
+                >{`< ย้อนกลับ`}</Link>
+
+                {/* <Link href="/sales/create">
+                    <Button
+                        variant="ghost"
+                        className="mb-2"
+                    >{`Create New`}</Button>
+                </Link> */}
+            </div>
+            <h1 className="my-2 text-3xl transition-colors">
+                แก้ไขรายละเอียดบิลขาย
+            </h1>
+            <CreateOrUpdateSalesInvoiceComponent
+                defaultItems={salesInvoices.map((x) => ({
+                    ...x,
+                    MainSkuRemarks: mainSkuRemarks.filter(
+                        (y) => y.mainSkuId === x.mainSkuId
+                    ),
+                    SkuMasterRemarks: skuMasterRemarks.filter(
+                        (y) => y.skuMasterId === x.skuMasterId
+                    ),
+                    images: images
+                        .filter((y) => y.skuMasterId === x.skuMasterId)
+                        .map((y) => y.images),
+                }))}
+                defaultDocumentDetails={salesInvoices[0]}
+                paymentMethods={paymentMethods}
+                defaultPayments={defaultPayments.map((x) => ({
+                    id: x.chartOfAccountId,
+                    amount: x.amount,
+                }))}
+                defaultRemarks={defaultRemarks}
+            />
+        </>
     )
 }

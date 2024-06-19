@@ -24,7 +24,8 @@ export const createSalesInvoice = async (
 ) => {
     const validator = z.object({
         customerId: z.string().trim().nullable(),
-        address: z.string().trim().optional().nullable(),
+        contactName: z.string().trim().optional(),
+        address: z.string().trim().optional(),
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
         date: z.string().trim().min(1, 'date must not be empty'),
@@ -35,9 +36,10 @@ export const createSalesInvoice = async (
 
     const result = validator.safeParse({
         customerId: formData.get('customerId'),
-        address: formData.get('address'),
-        phone: formData.get('phone'),
-        taxId: formData.get('taxId'),
+        contactName: formData.get('contactName') || undefined,
+        address: formData.get('address') || undefined,
+        phone: formData.get('phone') || undefined,
+        taxId: formData.get('taxId') || undefined,
         date: formData.get('date'),
         documentId: formData.get('documentId'),
         // payment: formData.get('payment'),
@@ -57,6 +59,7 @@ export const createSalesInvoice = async (
 
     let {
         customerId,
+        contactName,
         address,
         phone,
         taxId,
@@ -141,8 +144,8 @@ export const createSalesInvoice = async (
 
     const invoice = await prisma.document.create({
         data: {
-            contactName: address?.split('\n')[0] || '',
-            address: address?.substring(address.indexOf('\n') + 1) || '',
+            contactName: contactName || '',
+            address: address || '',
             phone: phone || '',
             taxId: taxId || '',
             date: new Date(date),

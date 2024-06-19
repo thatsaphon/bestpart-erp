@@ -143,17 +143,6 @@ export default function CreateOrUpdateSalesInvoiceComponent({
 
     return (
         <div className="p-3" id={key} key={key}>
-            <div className="flex justify-between">
-                <Link href="/sales">
-                    <Button variant="ghost" className="mb-2">{`< Back`}</Button>
-                </Link>
-                <Link href="/sales/create">
-                    <Button
-                        variant="ghost"
-                        className="mb-2"
-                    >{`Create New`}</Button>
-                </Link>
-            </div>
             <form
                 ref={formRef}
                 action={async (formData) => {
