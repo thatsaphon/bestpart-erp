@@ -22,6 +22,7 @@ import EditPaymentsComponents from './edit-payments-components'
 import { updateRemark } from './update-remarks'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import SalesInvoicePdf_5x9 from '@/components/pdf/invoice-5.5-9'
+import { cn } from '@/lib/utils'
 
 type Props = {
     params: { documentId: string }
@@ -128,7 +129,11 @@ export default async function SalesInvoiceDetailPage({
                             </p>
                             {document?.remark.map((remark) => (
                                 <p
-                                    className="text-left text-primary"
+                                    className={cn(
+                                        'text-left text-primary',
+                                        remark.isDeleted &&
+                                            'text-primary/50 line-through'
+                                    )}
                                     key={remark.id}
                                 >
                                     {remark.remark}

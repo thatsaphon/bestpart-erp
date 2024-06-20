@@ -15,7 +15,7 @@ export const updateSalesInvoice = async (
     formData: FormData,
     items: InventoryDetailType[],
     payments: { id: number; amount: number }[],
-    remarks: { id?: number, remark: string }[]
+    remarks: { id?: number, remark: string, isDeleted?: boolean }[]
 ) => {
     const validator = z.object({
         customerId: z.string().trim().optional().nullable(),
@@ -107,6 +107,11 @@ export const updateSalesInvoice = async (
             },
         },
     })
+
+    if (invoice.ArSubledger?.paymentStatus === 'Billed') {
+        throw new Error('วางบิลแล้วไม่สามารถแก้ไขได้')
+    }
+
     const checkRemaining: {
         id: number
         skuMasterId: number
@@ -147,11 +152,9 @@ export const updateSalesInvoice = async (
     const deleteSkuInToOut = prisma.skuInToOut.deleteMany({
         where: {
             id: {
-                in: invoice.SkuOut.flatMap((item) =>
-                    item.SkuInToOut.map((item) => item.id)
-                ),
+                in: invoice.SkuOut.flatMap((item) => item.SkuInToOut.map((item) => item.id)),
             },
-        },
+        }
     })
     const updateInvoice = prisma.document.update({
         where: { id },
@@ -162,7 +165,10 @@ export const updateSalesInvoice = async (
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
             documentId: documentId || undefined,
-            remark: { create: remarks.filter(({ id, remark }) => !id) },
+            remark: {
+                create: remarks.filter(({ id }) => !id),
+                update: remarks.filter(({ id }) => id).map((remark) => ({ where: { id: remark.id }, data: { remark: remark.remark, isDeleted: remark.isDeleted } })),
+            },
             ArSubledger: !!contact
                 ? {
                     update: {

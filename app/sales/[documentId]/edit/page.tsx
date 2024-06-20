@@ -4,6 +4,7 @@ import CreateOrUpdateSalesInvoiceComponent from '../../create/create-update-sale
 import {
     DocumentRemark,
     MainSkuRemark,
+    PaymentStatus,
     Prisma,
     SkuMasterRemark,
 } from '@prisma/client'
@@ -38,9 +39,12 @@ export default async function EditSalesInvoicePage({
         price: number
         unit: string
         quantityPerUnit: number
+        paymentStatus: PaymentStatus
     }[] = await prisma.$queryRaw`
         select "Document".id, "Document"."date", "Document"."documentId", "ArSubledger"."contactId" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
-        "SkuOut".barcode, "SkuOut"."skuMasterId", "SkuOut"."goodsMasterId", "SkuMaster"."mainSkuId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuOut".quantity, ("SkuOut".price + "SkuOut".vat) as "price", "SkuOut".unit, "SkuOut"."quantityPerUnit" from "Document" 
+        "SkuOut".barcode, "SkuOut"."skuMasterId", "SkuOut"."goodsMasterId", "SkuMaster"."mainSkuId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", 
+        "MainSku"."name", "SkuMaster"."detail", "SkuOut".quantity, ("SkuOut".price + "SkuOut".vat) as "price", "SkuOut".unit, "SkuOut"."quantityPerUnit", "ArSubledger"."paymentStatus" 
+        from "Document"
         left join "ArSubledger" on "ArSubledger"."documentId" = "Document"."id"
         left join "Contact" on "Contact"."id" = "ArSubledger"."contactId"
         -- left join "Address" on "Address"."contactId" = "Contact"."id"

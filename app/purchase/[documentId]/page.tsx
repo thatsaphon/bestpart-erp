@@ -41,6 +41,15 @@ export default async function PurchaseInvoiceDetailPage({
     return (
         <>
             <div className="mb-2 p-3">
+                <div className="flex justify-between">
+                    <Link
+                        href={`/purchase`}
+                        className="text-primary/50 underline hover:text-primary"
+                    >{`< ย้อนกลับ`}</Link>
+                </div>
+                <h1 className="my-2 text-3xl transition-colors">
+                    รายละเอียดบิลซื้อ
+                </h1>
                 <div className="flex gap-3">
                     <div className="space-x-2">
                         <Label>วันที่</Label>

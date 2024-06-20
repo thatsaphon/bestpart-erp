@@ -217,6 +217,7 @@ export default function SelectSearchVendor<T>({
                                             name: e.target.value,
                                         }))
                                     }
+                                    disabled={disabled}
                                 />
                                 <Textarea
                                     value={address.address}

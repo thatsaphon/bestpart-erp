@@ -1,5 +1,5 @@
 import prisma from '@/app/db/db'
-import React from 'react'
+import React, { Suspense } from 'react'
 import CreateOrUpdatePurchaseInvoiceComponent from '../../create/create-update-purchase-invoice-component'
 import {
     DocumentRemark,
@@ -7,6 +7,8 @@ import {
     Prisma,
     SkuMasterRemark,
 } from '@prisma/client'
+import Link from 'next/link'
+import Loading from './Loading'
 
 type Props = { params: { documentId: string } }
 
@@ -73,20 +75,30 @@ export default async function EditPurchaseInvoicePage({
         where "SkuMaster"."id" in (${Prisma.join(purchaseInvoices.map(({ skuMasterId }) => skuMasterId))})`
 
     return (
-        <CreateOrUpdatePurchaseInvoiceComponent
-            defaultItems={purchaseInvoices.map((x) => ({
-                ...x,
-                MainSkuRemarks: mainSkuRemarks.filter(
-                    (y) => y.mainSkuId === x.mainSkuId
-                ),
-                SkuMasterRemarks: skuMasterRemarks.filter(
-                    (y) => y.skuMasterId === x.skuMasterId
-                ),
-                images: images
-                    .filter((y) => y.skuMasterId === x.skuMasterId)
-                    .map((y) => y.images),
-            }))}
-            defaultDocumentDetails={purchaseInvoices[0]}
-        />
+        <>
+            {' '}
+            <div className="flex justify-between">
+                <Link
+                    href={`/purchase/${documentId}`}
+                    className="text-primary/50 underline hover:text-primary"
+                >{`< ย้อนกลับ`}</Link>
+            </div>
+            <h1 className="my-2 text-3xl transition-colors">สร้างบิลซื้อ</h1>
+            <CreateOrUpdatePurchaseInvoiceComponent
+                defaultItems={purchaseInvoices.map((x) => ({
+                    ...x,
+                    MainSkuRemarks: mainSkuRemarks.filter(
+                        (y) => y.mainSkuId === x.mainSkuId
+                    ),
+                    SkuMasterRemarks: skuMasterRemarks.filter(
+                        (y) => y.skuMasterId === x.skuMasterId
+                    ),
+                    images: images
+                        .filter((y) => y.skuMasterId === x.skuMasterId)
+                        .map((y) => y.images),
+                }))}
+                defaultDocumentDetails={purchaseInvoices[0]}
+            />{' '}
+        </>
     )
 }

@@ -20,10 +20,14 @@ import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
+import { getServerSession } from 'next-auth'
+import { useSession } from 'next-auth/react'
 // import { navigationMenuTriggerStyle } from './ui/navigation-menu'
 
 export function NavMenubar() {
     const pathName = usePathname()
+    const session = useSession()
     return (
         <Menubar className="space-x-2">
             <MenubarMenu>
@@ -101,6 +105,19 @@ export function NavMenubar() {
                     </MenubarTrigger>
                 </Link>
             </MenubarMenu>
+            {session.data?.user.role === 'ADMIN' && (
+                <MenubarMenu>
+                    <Link href={'/admin'}>
+                        <MenubarTrigger
+                            className={cn(
+                                pathName.includes('/admin') && 'bg-accent'
+                            )}
+                        >
+                            ผู้ดูแลระบบ
+                        </MenubarTrigger>
+                    </Link>
+                </MenubarMenu>
+            )}
         </Menubar>
     )
 }

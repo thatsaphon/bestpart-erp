@@ -14,13 +14,6 @@ export default async function CreateSalesInvoicePage({}: Props) {
                     href={`/sales`}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
-
-                {/* <Link href="/sales/create">
-                    <Button
-                        variant="ghost"
-                        className="mb-2"
-                    >{`Create New`}</Button>
-                </Link> */}
             </div>
             <h1 className="my-2 text-3xl transition-colors">สร้างบิลขาย</h1>
             <CreateOrUpdateSalesInvoiceComponent

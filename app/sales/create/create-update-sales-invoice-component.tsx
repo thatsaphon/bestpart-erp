@@ -19,7 +19,6 @@ import React, { useEffect } from 'react'
 import { getSkuByBarcode } from './barcode-scanned'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from './search-sku-dialog'
-import SelectSearchVendor from '@/components/select-search-vendor'
 import { createSalesInvoice } from './create-sales-invoice'
 import { InventoryDetailType } from '@/types/inventory-detail'
 import { updateSalesInvoice } from './update-sales-invoice'
@@ -27,7 +26,7 @@ import SelectSearchCustomer from '@/components/select-search-customer'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ImageToolTip from '@/components/image-tooltip'
-import { DocumentRemark } from '@prisma/client'
+import { DocumentRemark, PaymentStatus } from '@prisma/client'
 import {
     Select,
     SelectContent,
@@ -38,6 +37,8 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { getPaymentMethods } from '@/app/actions/accounting'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 type Props = {
     defaultItems?: InventoryDetailType[]
@@ -51,10 +52,11 @@ type Props = {
         phone: string
         taxId: string
         documentRemarks: DocumentRemark[]
+        paymentStatus: PaymentStatus
     }
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
     defaultPayments?: { id: number; amount: number }[]
-    defaultRemarks?: { id: number; remark: string }[]
+    defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
 }
 
 export default function CreateOrUpdateSalesInvoiceComponent({
@@ -72,7 +74,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     const [key, setKey] = React.useState('1')
     const session = useSession()
     const [remarks, setRemarks] = React.useState<
-        { id?: number; remark: string }[]
+        { id?: number; remark: string; isDeleted?: boolean }[]
     >(defaultRemarks || [])
     const [remarkInput, setRemarkInput] = React.useState<string>('')
     const [selectedPayments, setSelectedPayments] = React.useState<
@@ -125,7 +127,19 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     }
 
     const removeRemark = (index: number) => {
-        setRemarks((prev) => prev.filter((_, i) => i !== index))
+        // setRemarks((prev) => prev.filter((_, i) => i !== index))
+        const remarkToRemove = remarks[index]
+        if (remarkToRemove.id) {
+            setRemarks((prev) =>
+                prev.map((remark) =>
+                    remark.id === remarkToRemove.id
+                        ? { ...remark, isDeleted: true }
+                        : remark
+                )
+            )
+        } else {
+            setRemarks((prev) => prev.filter((_, i) => i !== index))
+        }
     }
 
     const addPayment = () => {
@@ -231,11 +245,43 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                 <Table>
                     <TableCaption>
                         <div className="w-[650px] space-y-1">
-                            <p className="text-left">ช่องทางชำระเงิน: </p>
+                            <div className="flex items-center gap-1 text-left">
+                                ช่องทางชำระเงิน:{' '}
+                                {!defaultDocumentDetails ? (
+                                    <></>
+                                ) : defaultDocumentDetails?.paymentStatus ===
+                                  'Paid' ? (
+                                    <Badge className="bg-green-400">
+                                        จ่ายแล้ว
+                                    </Badge>
+                                ) : defaultDocumentDetails?.paymentStatus ===
+                                  'Billed' ? (
+                                    <Badge variant={`secondary`}>
+                                        วางบิลแล้ว
+                                    </Badge>
+                                ) : defaultDocumentDetails?.paymentStatus ===
+                                  'PartialPaid' ? (
+                                    <Badge variant={'destructive'}>
+                                        จ่ายบางส่วน
+                                    </Badge>
+                                ) : !defaultDocumentDetails?.paymentStatus ? (
+                                    <Badge className="bg-green-400">
+                                        เงินสด
+                                    </Badge>
+                                ) : (
+                                    <Badge variant={'destructive'}>
+                                        ยังไม่จ่าย
+                                    </Badge>
+                                )}
+                            </div>
                             {selectedPayments.map((item) => (
                                 <div
                                     key={item.id}
-                                    className="grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary"
+                                    className={cn(
+                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary',
+                                        defaultDocumentDetails?.paymentStatus ===
+                                            'Billed' && 'grid-cols-2'
+                                    )}
                                 >
                                     <p>
                                         {paymentMethods.find(
@@ -248,7 +294,11 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                     </p>
                                     <p>{item.amount}</p>
                                     <Cross1Icon
-                                        className="cursor-pointer text-destructive"
+                                        className={cn(
+                                            'cursor-pointer text-destructive',
+                                            defaultDocumentDetails?.paymentStatus ===
+                                                'Billed' && 'hidden'
+                                        )}
                                         onClick={() =>
                                             setSelectedPayments(
                                                 selectedPayments.filter(
@@ -259,7 +309,13 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                     />
                                 </div>
                             ))}
-                            <div className="grid grid-cols-[1fr_1fr_140px] items-center gap-1">
+                            <div
+                                className={cn(
+                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1',
+                                    defaultDocumentDetails?.paymentStatus ===
+                                        'Billed' && 'hidden'
+                                )}
+                            >
                                 <Select
                                     name="paymentMethodId"
                                     onValueChange={(e) =>
@@ -319,16 +375,27 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                     เพิ่มการชำระเงิน
                                 </Button>
                             </div>
+                            {defaultDocumentDetails?.paymentStatus ===
+                                'Billed' && (
+                                <p className="text-destructive">วางบิลแล้ว</p>
+                            )}
 
                             <p className="text-left">หมายเหตุ:</p>
                             {remarks.map((remark, index) => (
                                 <p
-                                    className="grid grid-cols-[1fr_20px] items-center gap-1 text-left text-primary"
+                                    className={cn(
+                                        'grid grid-cols-[1fr_20px] items-center gap-1 text-left text-primary',
+                                        remark.isDeleted &&
+                                            'text-primary/50 line-through'
+                                    )}
                                     key={'remark-' + index}
                                 >
                                     <span>{remark.remark}</span>
                                     <Cross1Icon
-                                        className="font-bold text-destructive hover:cursor-pointer"
+                                        className={cn(
+                                            'font-bold text-destructive hover:cursor-pointer',
+                                            remark.isDeleted && 'hidden'
+                                        )}
                                         onClick={() => removeRemark(index)}
                                     />
                                 </p>
@@ -648,25 +715,6 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             </TableCell>
                             <TableCell className="text-right"></TableCell>
                         </TableRow>
-                        {/* <TableRow className="bg-background hover:bg-background">
-                            <TableCell
-                                colSpan={6}
-                                className="space-x-1 text-right"
-                            >
-                                <Button
-                                    variant="destructive"
-                                    type="button"
-                                    onClick={(e) => {
-                                        setKey(String(Date.now()))
-                                        setItems(defaultItems)
-                                    }}
-                                >
-                                    Reset
-                                </Button>
-                                <Button type="submit">Save</Button>
-                            </TableCell>
-                            <TableCell></TableCell>
-                        </TableRow> */}
                     </TableFooter>
                 </Table>
             </form>
