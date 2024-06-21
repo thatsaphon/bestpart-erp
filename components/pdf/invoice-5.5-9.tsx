@@ -199,7 +199,8 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                             {`(${bahttext(
                                 Number(
                                     document?.SkuOut.reduce(
-                                        (a, b) => a + b.price,
+                                        (a, b) =>
+                                            a + (b.price + b.vat) * b.quantity,
                                         0
                                     )
                                 )
