@@ -137,8 +137,8 @@ export default function BillingNotePdf({ document }: Props) {
     return (
         <Document>
             <Page
-                size={['396', '648']}
-                orientation="landscape"
+                size={['648', '396']}
+                orientation="portrait"
                 style={styles.page}
                 fixed
             >
