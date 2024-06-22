@@ -9,10 +9,9 @@ import {
     StyleSheet,
     Font,
 } from '@react-pdf/renderer'
+import { bahttext } from 'bahttext'
 
 type Props = { document: Awaited<ReturnType<typeof getSalesInvoiceDetail>> }
-
-import { bahttext } from 'bahttext'
 
 Font.register({
     family: 'Inter Sarabun',

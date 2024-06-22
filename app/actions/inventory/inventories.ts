@@ -56,8 +56,12 @@ export async function createInventory(formData: FormData) {
                 detail: result.data.detail,
                 // remark: result.data.remark,
                 remark: {
-                    connectOrCreate: result.data.remark.filter((remark) => remark).map((remark) => ({ create: { name: remark as string }, where: { name: remark as string } })),
-                    // connectOrCreate: [{ create: { name: '' }, where: { name: '' } }]
+                    connectOrCreate: result.data.remark
+                        .filter((remark) => remark !== undefined)
+                        .map((remark) => ({
+                            create: { name: remark },
+                            where: { name: remark },
+                        })),
                 },
                 mainSkuId: result.data.mainSkuId,
             },

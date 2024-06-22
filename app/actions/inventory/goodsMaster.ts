@@ -15,7 +15,11 @@ export const createOrUpdateGoodsMasters = async (
         remark: z.string().trim().optional().nullable(),
         skuMasterId: z.number().positive().int(),
         goodsMasterId: z.array(
-            z.coerce.number().positive().int().or(z.string())
+            z
+                .number()
+                .positive()
+                .int()
+                .or(z.string().pipe(z.coerce.number().positive().int()))
         ),
         barcode: z.array(z.string().trim().min(1, 'barcode must not be empty')),
         unit: z.array(z.string().trim().min(1, 'unit must not be empty')),
