@@ -33,11 +33,13 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
     const styles = StyleSheet.create({
         page: {
             flexDirection: 'column',
-            fontSize: 8,
+            fontSize: 9,
             gap: 5,
             fontFamily: 'Inter Sarabun',
             alignItems: 'center',
             padding: 40,
+            paddingLeft: 20,
+            paddingRight: 30,
             paddingBottom: 120,
         },
         title: {
@@ -57,9 +59,8 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
             flexDirection: 'row',
             gap: 5,
             width: '100%',
-            paddingLeft: 20,
-            paddingRight: 30,
             alignItems: 'flex-start',
+            justifyContent: 'space-between',
         },
         col1: {
             width: 20,
@@ -86,7 +87,7 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
         footer: {
             position: 'absolute',
             left: 0,
-            right: 70,
+            right: 30,
             bottom: 80,
             flexDirection: 'row',
             alignItems: 'flex-end',
@@ -101,20 +102,18 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
         },
         footer2: {
             position: 'absolute',
-            left: 50,
-            right: 0,
-            bottom: 50,
+            left: 20,
+            right: 30,
+            bottom: 40,
             flexDirection: 'row',
-            // alignItems: 'flex-end',
-            columnGap: 150,
-            // justifyContent: 'space-around',
+            justifyContent: 'space-between',
         },
     })
 
     return (
         <Document>
             <Page
-                size={['648', '396']}
+                size={['612', '396']}
                 orientation="portrait"
                 style={styles.page}
                 fixed
@@ -125,10 +124,10 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                     </Text>
                 </View>
                 <View style={styles.header} fixed>
-                    <View style={styles.header}>
+                    <View>
                         <Text>หจก.จ.สุพรรณบุรีอะไหล่</Text>
                     </View>
-                    <View style={{ marginLeft: '10', gap: 2 }}>
+                    <View style={{ gap: 2 }}>
                         <Text>เลขที่: {document?.documentId}</Text>
                         <Text>
                             วันที่:{' '}
@@ -207,31 +206,9 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                         </Text>
                     </View>
                     <View style={styles.sum}>
-                        {/* <Text>ราคาก่อนภาษี: </Text>
-                        <Text>VAT 7%: </Text> */}
                         <Text>รวมเป็นเงินทั้งสิ้น: </Text>
                     </View>
                     <View style={styles.sum}>
-                        {/* <Text
-                            render={({ pageNumber, totalPages }) =>
-                                pageNumber === totalPages &&
-                                document?.SkuOut.reduce(
-                                    (a, b) => a + b.price * b.quantity,
-                                    0
-                                )
-                            }
-                        >
-                            {document?.SkuOut.reduce((a, b) => a + b.price, 0)}
-                        </Text>
-                        <Text
-                            render={({ pageNumber, totalPages }) =>
-                                pageNumber === totalPages &&
-                                document?.SkuOut.reduce(
-                                    (a, b) => a + b.vat * b.quantity,
-                                    0
-                                )
-                            }
-                        ></Text> */}
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
@@ -254,9 +231,13 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                 ></Text>
 
                 <View style={{ ...styles.footer2 }}>
-                    <Text>ผู้รับสินค้า</Text>
-                    <Text>ผู้จัดสินค้า</Text>
-                    <Text>ผู้รับเงิน</Text>
+                    <Text style={{ width: 120 }}>
+                        ผู้คิดเงิน:{`\n`}
+                        {document?.createdBy}
+                    </Text>
+                    <Text style={{ width: 120 }}>ผู้จัดสินค้า</Text>
+                    <Text style={{ width: 120 }}>ผู้รับเงิน</Text>
+                    <Text style={{ width: 120 }}>ผู้รับสินค้า</Text>
                 </View>
             </Page>
         </Document>

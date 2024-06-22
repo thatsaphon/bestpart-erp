@@ -21,7 +21,6 @@ import { getPaymentMethods } from '@/app/actions/accounting'
 import EditPaymentsComponents from './edit-payments-components'
 import { updateRemark } from './update-remarks'
 import SelectSearchCustomer from '@/components/select-search-customer'
-import SalesInvoicePdf_5x9 from '@/components/pdf/invoice-5.5-9'
 import { cn } from '@/lib/utils'
 
 type Props = {

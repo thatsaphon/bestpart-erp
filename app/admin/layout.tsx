@@ -18,6 +18,10 @@ export default async function RootLayout({
                 <Separator />
                 <SubMenuNavLink href="/admin" label="หน้าหลัก" />
                 <Separator />
+                <SubMenuNavLink href="/admin/user" label="ผู้ใช้งาน" />
+                <Separator />
+                <SubMenuNavLink href="/admin/dashboard" label="Dashboard" />
+                <Separator />
             </div>
             <Separator orientation="vertical" className="h-full" />
             <div className="mb-2 p-3">{children}</div>
