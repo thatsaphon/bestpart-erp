@@ -28,7 +28,7 @@ export default function LandAndPPE({}: Props) {
                         <AccordionTrigger>Land</AccordionTrigger>
                         <AccordionContent>
                             <div className="text-right">
-                                <LandAndPPEAccountDialog />
+                                {/* <LandAndPPEAccountDialog /> */}
                             </div>
                             <div className="mt-3 grid grid-cols-2 px-3">
                                 {/* {chartOfAccount

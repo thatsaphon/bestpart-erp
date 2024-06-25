@@ -16,6 +16,7 @@ import { EyeOpenIcon } from '@radix-ui/react-icons'
 import { Prisma } from '@prisma/client'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
+import { Avatar } from '@/components/ui/avatar'
 
 type Props = {
     searchParams: {
@@ -121,6 +122,7 @@ export default async function SalesListPage({
                             เลขที่เอกสาร
                         </TableHead>
                         <TableHead>ลูกค้า</TableHead>
+                        <TableHead>สร้างโดย</TableHead>
                         <TableHead className="text-center">Status</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
@@ -142,6 +144,7 @@ export default async function SalesListPage({
                             <TableCell>
                                 {sale.ArSubledger?.Contact.name || '-'}
                             </TableCell>
+                            <TableCell>{sale.createdBy}</TableCell>
                             <TableCell className="text-center">
                                 {sale.ArSubledger?.paymentStatus === 'Paid' ? (
                                     <Badge className="bg-green-400">

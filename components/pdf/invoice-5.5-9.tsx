@@ -38,7 +38,7 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
             fontFamily: 'Inter Sarabun',
             alignItems: 'center',
             padding: 40,
-            paddingLeft: 20,
+            paddingLeft: 40,
             paddingRight: 30,
             paddingBottom: 120,
         },
@@ -102,7 +102,7 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
         },
         footer2: {
             position: 'absolute',
-            left: 20,
+            left: 40,
             right: 30,
             bottom: 40,
             flexDirection: 'row',
@@ -122,10 +122,16 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                     <Text style={{ textAlign: 'center', width: '100%' }}>
                         ใบกำกับภาษีอย่างย่อ/ใบเสร็จรับเงิน{' '}
                     </Text>
+                    <Text style={{ textAlign: 'center', width: '100%' }}>
+                        หจก.จ.สุพรรณบุรีอะไหล่
+                    </Text>
+                    <Text style={{ textAlign: 'center', width: '100%' }}>
+                        เลขประจำตัวผู้เสียภาษี: 123456789012{' '}
+                    </Text>
                 </View>
                 <View style={styles.header} fixed>
-                    <View>
-                        <Text>หจก.จ.สุพรรณบุรีอะไหล่</Text>
+                    <View style={{ gap: 2 }}>
+                        <Text>{document?.contactName}</Text>
                     </View>
                     <View style={{ gap: 2 }}>
                         <Text>เลขที่: {document?.documentId}</Text>
