@@ -7,10 +7,13 @@ export const updateRemark = async (documentId: number, remark: string) => {
     const document = await prisma.documentRemark.create({
         data: {
             documentId,
-            remark
+            remark,
+        },
+        include: {
+            Document: true,
         },
     })
 
-    revalidatePath(`/sales/${document.documentId}`)
+    revalidatePath(`/sales/${document.Document?.documentNo}`)
     return document
 }

@@ -45,7 +45,7 @@ type Props = {
     defaultDocumentDetails?: {
         id: number
         date: Date
-        documentId: string
+        documentNo: string
         contactId: number
         contactName: string
         address: string
@@ -216,10 +216,10 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             <p className="">No. </p>
                             <Input
                                 className="w-auto"
-                                name="documentId"
+                                name="documentNo"
                                 placeholder="Optional"
                                 defaultValue={
-                                    defaultDocumentDetails?.documentId
+                                    defaultDocumentDetails?.documentNo
                                 }
                             />
                         </Label>

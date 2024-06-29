@@ -30,13 +30,14 @@ import { updateChartOfAccountAssetType } from './update-chart-of-account-asset-t
 
 type Props = {
     chartOfAccounts: (ChartOfAccount & {
-        assetTypeToChartOfAccount?: AssetTypeToChartOfAccount
+        AssetTypeToChartOfAccount: AssetTypeToChartOfAccount | null
     })[]
 }
 
 export default function AssetTypeToChartOfAccountSetup({
     chartOfAccounts,
 }: Props) {
+    console.log(chartOfAccounts)
     return (
         <Table className="max-w-[80vw]">
             <TableCaption>Chart of Accounts</TableCaption>
@@ -51,7 +52,7 @@ export default function AssetTypeToChartOfAccountSetup({
 
             <TableBody>
                 {chartOfAccounts.map(
-                    ({ id, name, type, assetTypeToChartOfAccountId }) => (
+                    ({ id, name, type, AssetTypeToChartOfAccount }) => (
                         <TableRow key={id}>
                             <TableCell>{id}</TableCell>
                             <TableCell>{name}</TableCell>
@@ -59,7 +60,8 @@ export default function AssetTypeToChartOfAccountSetup({
                             <TableCell>
                                 <Select
                                     defaultValue={String(
-                                        assetTypeToChartOfAccountId || 'none'
+                                        AssetTypeToChartOfAccount?.AssetType ||
+                                            'none'
                                     )}
                                     onValueChange={async (value) => {
                                         try {
@@ -93,7 +95,7 @@ export default function AssetTypeToChartOfAccountSetup({
                                                 Asset Types
                                             </SelectLabel>
                                             <SelectItem value="none">
-                                                Disabled
+                                                -
                                             </SelectItem>
                                             {Object.entries(
                                                 $Enums.AssetType

@@ -17,10 +17,10 @@ export const createSalesInvoice = async (
     formData: FormData,
     items: InventoryDetailType[],
     payments: {
-        id: number,
+        id: number
         amount: number
     }[],
-    remarks: { id?: number, remark: string }[]
+    remarks: { id?: number; remark: string }[]
 ) => {
     const validator = z.object({
         customerId: z.string().trim().nullable(),
@@ -29,7 +29,7 @@ export const createSalesInvoice = async (
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
         date: z.string().trim().min(1, 'date must not be empty'),
-        documentId: z.string().trim().optional().nullable(),
+        documentNo: z.string().trim().optional().nullable(),
         // payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
         // remark: z.string().trim().optional().nullable(),
     })
@@ -41,7 +41,7 @@ export const createSalesInvoice = async (
         phone: formData.get('phone') || undefined,
         taxId: formData.get('taxId') || undefined,
         date: formData.get('date'),
-        documentId: formData.get('documentId'),
+        documentNo: formData.get('documentNo'),
         // payment: formData.get('payment'),
         // remark: formData.get('remark'),
     })
@@ -64,7 +64,7 @@ export const createSalesInvoice = async (
         phone,
         taxId,
         date,
-        documentId,
+        documentNo,
         // payment,
         // remark,
     } = result.data
@@ -74,7 +74,7 @@ export const createSalesInvoice = async (
             const contact = await prisma.contact.findUnique({
                 where: {
                     id: Number(customerId),
-                }
+                },
             })
             if (!contact) {
                 throw new Error('contact not found')
@@ -84,7 +84,10 @@ export const createSalesInvoice = async (
     }
     let contact: Contact | undefined = await getContact()
 
-    if (payments.find((payment) => payment.id === 12000) && (!contact || !contact.credit)) {
+    if (
+        payments.find((payment) => payment.id === 12000) &&
+        (!contact || !contact.credit)
+    ) {
         throw new Error(`${contact?.name || ''} ไม่สามารถขายเงินเชื่อได้`)
     }
 
@@ -114,7 +117,7 @@ export const createSalesInvoice = async (
         throw new Error('goods not found')
     }
 
-    for (let i = 0;i < items.length;i++) {
+    for (let i = 0; i < items.length; i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === items[i].barcode
         )
@@ -129,18 +132,17 @@ export const createSalesInvoice = async (
         if (
             remaining.length <= 0 ||
             remaining.reduce((sum, item) => sum + item.remaining, 0) <
-            items[i].quantity * items[i].quantityPerUnit
+                items[i].quantity * items[i].quantityPerUnit
         ) {
             throw new Error('insufficient inventory')
         }
     }
 
-    if (!documentId) {
-        documentId = await generateDocumentNumber('SINV', date)
+    if (!documentNo) {
+        documentNo = await generateDocumentNumber('SINV', date)
     }
 
     const session = await getServerSession(authOptions)
-
 
     const invoice = await prisma.document.create({
         data: {
@@ -149,17 +151,17 @@ export const createSalesInvoice = async (
             phone: phone || '',
             taxId: taxId || '',
             date: new Date(date),
-            documentId: documentId,
+            documentNo: documentNo,
             remark: { create: remarks },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             ArSubledger: !!contact
                 ? {
-                    create: {
-                        contactId: Number(customerId),
-                        paymentStatus: calculatePaymentStatus(payments),
-                    },
-                }
+                      create: {
+                          contactId: Number(customerId),
+                          paymentStatus: calculatePaymentStatus(payments),
+                      },
+                  }
                 : undefined,
             GeneralLedger: {
                 create: [
@@ -253,13 +255,13 @@ export const createSalesInvoice = async (
 
                                     if (
                                         item.quantity * item.quantityPerUnit -
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) >=
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) >=
                                         remaining
                                     )
                                         return {
@@ -270,20 +272,20 @@ export const createSalesInvoice = async (
                                     // ครั้งที่ 2+ ตัดส่วนที่เหลือ
                                     if (
                                         item.quantity * item.quantityPerUnit -
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) <
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) <
                                         remaining
                                     )
                                         return {
                                             skuInId: id,
                                             quantity:
                                                 item.quantity *
-                                                item.quantityPerUnit -
+                                                    item.quantityPerUnit -
                                                 array
                                                     .slice(0, index)
                                                     .reduce(
@@ -308,5 +310,5 @@ export const createSalesInvoice = async (
     })
 
     revalidatePath('/sales')
-    redirect(`/sales/${invoice.documentId}`)
+    redirect(`/sales/${invoice.documentNo}`)
 }

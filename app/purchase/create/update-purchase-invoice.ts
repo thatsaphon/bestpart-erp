@@ -20,9 +20,9 @@ export const updatePurchaseInvoice = async (
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
         date: z.string().trim().min(1, 'date must not be empty'),
-        documentId: z.string().trim().optional().nullable(),
+        documentNo: z.string().trim().optional().nullable(),
         remark: z.string().trim().optional().nullable(),
-        referenceId: z.string().trim().optional().nullable(),
+        referenceNo: z.string().trim().optional().nullable(),
     })
 
     const result = validator.safeParse({
@@ -31,9 +31,9 @@ export const updatePurchaseInvoice = async (
         phone: formData.get('phone') || undefined,
         taxId: formData.get('taxId') || undefined,
         date: formData.get('date') || undefined,
-        documentId: formData.get('documentId') || undefined,
+        documentNo: formData.get('documentNo') || undefined,
         remark: formData.get('remark') || undefined,
-        referenceId: formData.get('referenceId') || undefined,
+        referenceNo: formData.get('referenceNo') || undefined,
     })
 
     if (!result.success) {
@@ -46,8 +46,16 @@ export const updatePurchaseInvoice = async (
         )
     }
 
-    let { vendorId, address, phone, taxId, date, documentId, remark, referenceId } =
-        result.data
+    let {
+        vendorId,
+        address,
+        phone,
+        taxId,
+        date,
+        documentNo,
+        remark,
+        referenceNo,
+    } = result.data
 
     const contact = await prisma.contact.findUnique({
         where: {
@@ -114,16 +122,16 @@ export const updatePurchaseInvoice = async (
             phone: phone || undefined,
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
-            documentId: documentId || undefined,
-            referenceId: referenceId || undefined,
+            documentNo: documentNo || undefined,
+            referenceNo: referenceNo || undefined,
             updatedBy: session?.user.username,
             remark: remark ? { create: { remark } } : undefined,
             ApSubledger: !!contact
                 ? {
-                    update: {
-                        contactId: Number(vendorId),
-                    },
-                }
+                      update: {
+                          contactId: Number(vendorId),
+                      },
+                  }
                 : undefined,
             GeneralLedger: {
                 update: [
@@ -158,7 +166,7 @@ export const updatePurchaseInvoice = async (
                                     (sum, item) =>
                                         sum +
                                         (item.quantity * item.price * 100) /
-                                        107,
+                                            107,
                                     0
                                 )
                                 .toFixed(2),
@@ -187,35 +195,41 @@ export const updatePurchaseInvoice = async (
                 ],
             },
             SkuIn: {
-                update: items.filter((item) => invoice?.SkuIn.find(
-                    (skuIn) => skuIn.goodsMasterId === item.goodsMasterId
-                )).map((item) => {
-                    return {
-                        where: {
-                            id: invoice?.SkuIn.find(
-                                (skuIn) =>
-                                    skuIn.goodsMasterId === item.goodsMasterId
-                            )?.id,
-                        },
-                        data: {
-                            date: new Date(date),
-                            goodsMasterId: item.goodsMasterId,
-                            skuMasterId: item.skuMasterId,
-                            barcode: item.barcode,
-                            unit: item.unit,
-                            quantityPerUnit: item.quantityPerUnit,
-                            quantity: item.quantity * item.quantityPerUnit,
-                            cost: +(
-                                ((100 / 107) * +item.price) /
-                                item.quantityPerUnit
-                            ).toFixed(2),
-                            vat: +(
-                                ((7 / 107) * +item.price) /
-                                item.quantityPerUnit
-                            ).toFixed(2),
-                        },
-                    }
-                }),
+                update: items
+                    .filter((item) =>
+                        invoice?.SkuIn.find(
+                            (skuIn) =>
+                                skuIn.goodsMasterId === item.goodsMasterId
+                        )
+                    )
+                    .map((item) => {
+                        return {
+                            where: {
+                                id: invoice?.SkuIn.find(
+                                    (skuIn) =>
+                                        skuIn.goodsMasterId ===
+                                        item.goodsMasterId
+                                )?.id,
+                            },
+                            data: {
+                                date: new Date(date),
+                                goodsMasterId: item.goodsMasterId,
+                                skuMasterId: item.skuMasterId,
+                                barcode: item.barcode,
+                                unit: item.unit,
+                                quantityPerUnit: item.quantityPerUnit,
+                                quantity: item.quantity * item.quantityPerUnit,
+                                cost: +(
+                                    ((100 / 107) * +item.price) /
+                                    item.quantityPerUnit
+                                ).toFixed(2),
+                                vat: +(
+                                    ((7 / 107) * +item.price) /
+                                    item.quantityPerUnit
+                                ).toFixed(2),
+                            },
+                        }
+                    }),
                 delete: invoice?.SkuIn.filter(
                     (skuIn) =>
                         !items
@@ -224,8 +238,14 @@ export const updatePurchaseInvoice = async (
                 ).map((skuIn) => ({
                     id: skuIn.id,
                 })),
-                create: items.filter((item) =>
-                    !invoice?.SkuIn.map((skuIn) => skuIn.goodsMasterId).includes(item.goodsMasterId)).map((item) => {
+                create: items
+                    .filter(
+                        (item) =>
+                            !invoice?.SkuIn.map(
+                                (skuIn) => skuIn.goodsMasterId
+                            ).includes(item.goodsMasterId)
+                    )
+                    .map((item) => {
                         return {
                             date: new Date(date),
                             goodsMasterId: item.goodsMasterId,
@@ -255,11 +275,11 @@ export const updatePurchaseInvoice = async (
         data: {
             SkuMaster: {
                 connect: items.map((item) => ({ id: item.skuMasterId })),
-            }
+            },
         },
     })
 
     revalidatePath('/purchase')
-    revalidatePath(`/purchase/${documentId}`)
-    redirect(`/purchase/${documentId}`)
+    revalidatePath(`/purchase/${documentNo}`)
+    redirect(`/purchase/${documentNo}`)
 }

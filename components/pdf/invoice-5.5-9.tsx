@@ -134,7 +134,7 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                         <Text>{document?.contactName}</Text>
                     </View>
                     <View style={{ gap: 2 }}>
-                        <Text>เลขที่: {document?.documentId}</Text>
+                        <Text>เลขที่: {document?.documentNo}</Text>
                         <Text>
                             วันที่:{' '}
                             {new Intl.DateTimeFormat('th-TH', {

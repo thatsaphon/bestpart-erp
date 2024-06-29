@@ -22,7 +22,7 @@ export const updatePurchaseInvoice = async (id: number, formData: FormData) => {
         ),
         prices: z.array(z.coerce.number().or(z.string())),
         date: z.string().trim().min(1, 'date must not be empty'),
-        documentId: z.string().trim().optional().nullable(),
+        documentNo: z.string().trim().optional().nullable(),
     })
 
     const result = validator.safeParse({
@@ -34,7 +34,7 @@ export const updatePurchaseInvoice = async (id: number, formData: FormData) => {
         quanties: formData.getAll('quantity') || undefined,
         prices: formData.getAll('price') || undefined,
         date: formData.get('date') || undefined,
-        documentId: formData.get('documentId') || undefined,
+        documentNo: formData.get('documentNo') || undefined,
     })
 
     if (!result.success) {
@@ -56,7 +56,7 @@ export const updatePurchaseInvoice = async (id: number, formData: FormData) => {
         quanties,
         prices,
         date,
-        documentId,
+        documentNo,
     } = result.data
 
     const contact = await prisma.contact.findUnique({
@@ -89,8 +89,8 @@ export const updatePurchaseInvoice = async (id: number, formData: FormData) => {
         }
     })
 
-    if (!documentId) {
-        documentId = await generateDocumentNumber('PINV', date)
+    if (!documentNo) {
+        documentNo = await generateDocumentNumber('PINV', date)
     }
 
     const session = await getServerSession(authOptions)
@@ -136,7 +136,7 @@ export const updatePurchaseInvoice = async (id: number, formData: FormData) => {
             phone: phone || '',
             taxId: taxId || '',
             date: new Date(date),
-            documentId: documentId,
+            documentNo: documentNo,
             createdBy: session?.user.username,
             updatedBy: session?.user.username,
             ApSubledger: {

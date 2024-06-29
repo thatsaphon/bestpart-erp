@@ -52,14 +52,14 @@ export default function ReceivableTable({ documents }: Props) {
                     </TableHeader>
                     <TableBody>
                         {documents.map((document) => (
-                            <TableRow key={document.documentId}>
+                            <TableRow key={document.documentNo}>
                                 <TableCell>
                                     <Checkbox
                                         checked={
                                             selectItems.find(
                                                 (item) =>
-                                                    item.documentId ===
-                                                    document.documentId
+                                                    item.documentNo ===
+                                                    document.documentNo
                                             ) && true
                                         }
                                         onCheckedChange={(bool) => {
@@ -73,8 +73,8 @@ export default function ReceivableTable({ documents }: Props) {
                                                 setSelectItems((prev) =>
                                                     prev.filter(
                                                         (item) =>
-                                                            item.documentId !==
-                                                            document.documentId
+                                                            item.documentNo !==
+                                                            document.documentNo
                                                     )
                                                 )
                                             }
@@ -83,9 +83,9 @@ export default function ReceivableTable({ documents }: Props) {
                                 </TableCell>
                                 <TableCell>
                                     <Link
-                                        href={`/${document.type === 'Sales' ? 'sales' : 'billing'}/${document.documentId}`}
+                                        href={`/${document.type === 'Sales' ? 'sales' : 'billing'}/${document.documentNo}`}
                                     >
-                                        {document.documentId}
+                                        {document.documentNo}
                                     </Link>
                                 </TableCell>
                                 <TableCell>

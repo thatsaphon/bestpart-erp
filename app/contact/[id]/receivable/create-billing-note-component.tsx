@@ -35,7 +35,7 @@ type Props = {
     defaultDocumentDetails?: {
         id: number
         date: Date
-        documentId: string
+        documentNo: string
         contactId: number
         contactName: string
         address: string
@@ -75,7 +75,7 @@ export default function CreateBillingNote({
                     try {
                         await createBillingNote(
                             formData,
-                            items.map((item) => item.documentId)
+                            items.map((item) => item.documentNo)
                         )
                         setKey(String(Date.now()))
                         setItems([])
@@ -110,10 +110,10 @@ export default function CreateBillingNote({
                             <p className="">No. </p>
                             <Input
                                 className="w-auto"
-                                name="documentId"
+                                name="documentNo"
                                 placeholder="Optional"
                                 defaultValue={
-                                    defaultDocumentDetails?.documentId
+                                    defaultDocumentDetails?.documentNo
                                 }
                             />
                         </Label>
@@ -149,7 +149,7 @@ export default function CreateBillingNote({
                     </TableHeader>
                     <TableBody>
                         {items.map((item, index) => (
-                            <TableRow key={item.documentId}>
+                            <TableRow key={item.documentNo}>
                                 <TableCell>
                                     {new Intl.DateTimeFormat('th-TH', {
                                         year: 'numeric',
@@ -160,7 +160,7 @@ export default function CreateBillingNote({
                                     }).format(item.date)}
                                 </TableCell>
                                 <TableCell>
-                                    <p>{item.documentId}</p>
+                                    <p>{item.documentNo}</p>
                                 </TableCell>
 
                                 <TableCell className="text-right">

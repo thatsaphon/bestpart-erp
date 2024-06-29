@@ -133,7 +133,7 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
                         <Text>{`เลขประจำตัวผู้เสียภาษี: ${document?.taxId}`}</Text>
                     </View>
                     <View style={{ marginLeft: '10', gap: 2 }}>
-                        <Text>เลขที่: {document?.documentId}</Text>
+                        <Text>เลขที่: {document?.documentNo}</Text>
                         <Text>
                             วันที่:{' '}
                             {new Intl.DateTimeFormat('th-TH', {

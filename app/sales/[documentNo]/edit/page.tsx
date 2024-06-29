@@ -11,15 +11,15 @@ import {
 import { getPaymentMethods } from '@/app/actions/accounting'
 import Link from 'next/link'
 
-type Props = { params: { documentId: string } }
+type Props = { params: { documentNo: string } }
 
 export default async function EditSalesInvoicePage({
-    params: { documentId },
+    params: { documentNo },
 }: Props) {
     const salesInvoices: {
         id: number
         date: Date
-        documentId: string
+        documentNo: string
         contactId: number
         contactName: string
         address: string
@@ -41,17 +41,17 @@ export default async function EditSalesInvoicePage({
         quantityPerUnit: number
         paymentStatus: PaymentStatus
     }[] = await prisma.$queryRaw`
-        select "Document".id, "Document"."date", "Document"."documentId", "ArSubledger"."contactId" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
+        select "Document".id, "Document"."date", "Document"."documentNo", "ArSubledger"."contactId" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
         "SkuOut".barcode, "SkuOut"."skuMasterId", "SkuOut"."goodsMasterId", "SkuMaster"."mainSkuId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", 
         "MainSku"."name", "SkuMaster"."detail", "SkuOut".quantity, ("SkuOut".price + "SkuOut".vat) as "price", "SkuOut".unit, "SkuOut"."quantityPerUnit", "ArSubledger"."paymentStatus" 
         from "Document"
-        left join "ArSubledger" on "ArSubledger"."documentId" = "Document"."id"
+        left join "ArSubledger" on "ArSubledger"."documentNo" = "Document"."id"
         left join "Contact" on "Contact"."id" = "ArSubledger"."contactId"
         -- left join "Address" on "Address"."contactId" = "Contact"."id"
-        left join "SkuOut" on "SkuOut"."documentId" = "Document"."id"
+        left join "SkuOut" on "SkuOut"."documentNo" = "Document"."id"
         left join "SkuMaster" on "SkuMaster"."id" = "SkuOut"."skuMasterId"
         left join "MainSku" on "MainSku"."id" = "SkuMaster"."mainSkuId"
-        where "Document"."documentId" = ${documentId}`
+        where "Document"."documentNo" = ${documentNo}`
 
     const mainSkuRemarks = await prisma.$queryRaw<
         (MainSkuRemark & { mainSkuId: number })[]
@@ -97,7 +97,7 @@ export default async function EditSalesInvoicePage({
         <>
             <div className="flex justify-between">
                 <Link
-                    href={`/sales/${documentId}`}
+                    href={`/sales/${documentNo}`}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
 

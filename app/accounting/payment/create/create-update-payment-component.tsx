@@ -23,10 +23,10 @@ export default function CreateUpdatePaymentComponent({}: Props) {
                         <p className="">No. </p>
                         <Input
                             className="w-auto"
-                            name="documentId"
+                            name="documentNo"
                             placeholder="Optional"
                             // defaultValue={
-                            //     defaultDocumentDetails?.documentId
+                            //     defaultDocumentDetails?.documentNo
                             // }
                         />
                     </Label>

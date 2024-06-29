@@ -63,7 +63,7 @@ export default async function SalesListPage({
                 include: { ChartOfAccount: true, Document: true },
             },
         },
-        orderBy: [{ date: 'desc' }, { documentId: 'desc' }],
+        orderBy: [{ date: 'desc' }, { documentNo: 'desc' }],
         take: +limit,
         skip: (Number(page) - 1) * Number(limit),
     })
@@ -93,7 +93,7 @@ export default async function SalesListPage({
                 </TableHeader>
                 <TableBody>
                     {billingNotes.map((bill) => (
-                        <TableRow key={bill.documentId}>
+                        <TableRow key={bill.documentNo}>
                             <TableCell>
                                 {/* {format(sale.date, 'dd/MM/yyyy')} */}
                                 {new Intl.DateTimeFormat('th-TH', {
@@ -104,7 +104,7 @@ export default async function SalesListPage({
                                     localeMatcher: 'best fit',
                                 }).format(bill.date)}
                             </TableCell>
-                            <TableCell>{bill.documentId}</TableCell>
+                            <TableCell>{bill.documentNo}</TableCell>
                             <TableCell>
                                 {bill.ArSubledger?.Contact.name || 'เงินสด'}
                             </TableCell>
@@ -243,7 +243,7 @@ export default async function SalesListPage({
                                 )}
                             </TableCell>
                             <TableCell className="text-right">
-                                <Link href={`/sales/bill/${bill.documentId}`}>
+                                <Link href={`/sales/bill/${bill.documentNo}`}>
                                     <EyeOpenIcon />
                                 </Link>
                             </TableCell>

@@ -119,7 +119,7 @@ export default function SearchDocumentDialogComponent({
                                             localeMatcher: 'best fit',
                                         }).format(item.date)}
                                     </TableCell>
-                                    <TableCell>{item.documentId}</TableCell>
+                                    <TableCell>{item.documentNo}</TableCell>
                                     <TableCell>
                                         {item.GeneralLedger[0].amount}
                                     </TableCell>

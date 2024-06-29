@@ -14,20 +14,20 @@ const PDFViewer = dynamic(
 import React, { Suspense, useEffect, useState } from 'react'
 
 type Props = {
-    params: { documentId: string }
+    params: { documentNo: string }
 }
 
-export default function InvoicePDFPage({ params: { documentId } }: Props) {
+export default function InvoicePDFPage({ params: { documentNo } }: Props) {
     const [document, setDocument] =
         useState<Awaited<ReturnType<typeof getSalesInvoiceDetail>>>(null)
 
     useEffect(() => {
-        async function fetchInvoice(documentId: string) {
-            const result = await getSalesInvoiceDetail(documentId)
+        async function fetchInvoice(documentNo: string) {
+            const result = await getSalesInvoiceDetail(documentNo)
             setDocument(result)
         }
-        fetchInvoice(documentId)
-    }, [documentId])
+        fetchInvoice(documentNo)
+    }, [documentNo])
 
     return (
         <div>

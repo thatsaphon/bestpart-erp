@@ -8,17 +8,16 @@ import {
     SkuMasterRemark,
 } from '@prisma/client'
 import Link from 'next/link'
-import Loading from './Loading'
 
-type Props = { params: { documentId: string } }
+type Props = { params: { documentNo: string } }
 
 export default async function EditPurchaseInvoicePage({
-    params: { documentId },
+    params: { documentNo },
 }: Props) {
     const purchaseInvoices: {
         id: number
         date: Date
-        documentId: string
+        documentNo: string
         contactId: number
         contactName: string
         address: string
@@ -39,14 +38,14 @@ export default async function EditPurchaseInvoicePage({
         unit: string
         quantityPerUnit: number
     }[] = await prisma.$queryRaw`
-        select "Document".id, "Document"."date", "Document"."documentId", "Contact"."id" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
+        select "Document".id, "Document"."date", "Document"."documentNo", "Contact"."id" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
         "SkuIn".barcode, "SkuIn"."skuMasterId", "SkuIn"."goodsMasterId", "MainSku"."id" as "mainSkuId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuIn".quantity, ("SkuIn".cost + "SkuIn".vat) as "price", "SkuIn".unit, "SkuIn"."quantityPerUnit" from "Document" 
-        left join "ApSubledger" on "ApSubledger"."documentId" = "Document"."id"
+        left join "ApSubledger" on "ApSubledger"."documentNo" = "Document"."id"
         left join "Contact" on "Contact"."id" = "ApSubledger"."contactId"
-        left join "SkuIn" on "SkuIn"."documentId" = "Document"."id"
+        left join "SkuIn" on "SkuIn"."documentNo" = "Document"."id"
         left join "SkuMaster" on "SkuMaster"."id" = "SkuIn"."skuMasterId"
         left join "MainSku" on "MainSku"."id" = "SkuMaster"."mainSkuId"
-        where "Document"."documentId" = ${documentId}`
+        where "Document"."documentNo" = ${documentNo}`
 
     purchaseInvoices[0].documentRemarks = await prisma.documentRemark.findMany({
         where: {
@@ -79,7 +78,7 @@ export default async function EditPurchaseInvoicePage({
             {' '}
             <div className="flex justify-between">
                 <Link
-                    href={`/purchase/${documentId}`}
+                    href={`/purchase/${documentNo}`}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
             </div>

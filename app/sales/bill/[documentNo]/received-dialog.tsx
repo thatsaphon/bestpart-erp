@@ -31,7 +31,7 @@ import { receivedFromBill } from './received-from-bill'
 type Props = {
     bankAccounts?: ChartOfAccount[]
     billAmount: number
-    documentId: string
+    documentNo: string
 }
 
 export default function ReceivedDialog({
@@ -45,7 +45,7 @@ export default function ReceivedDialog({
         },
     ],
     billAmount,
-    documentId,
+    documentNo,
 }: Props) {
     const [date, setDate] = React.useState(new Date())
     const [payAmount, setPayAmount] = React.useState(0)
@@ -65,7 +65,7 @@ export default function ReceivedDialog({
         }
         try {
             await receivedFromBill(
-                documentId,
+                documentNo,
                 date,
                 payAmount,
                 selectedBankAccount,
@@ -165,7 +165,7 @@ export default function ReceivedDialog({
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>ยืนยันการชำระเงิน</DialogTitle>
-                        <DialogDescription>{documentId}</DialogDescription>
+                        <DialogDescription>{documentNo}</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <span>จำนวนเงินทั้งหมด: {billAmount}</span>

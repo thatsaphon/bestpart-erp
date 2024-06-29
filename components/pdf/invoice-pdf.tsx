@@ -130,7 +130,7 @@ export default function SalesInvoicePdf({ document }: Props) {
                         ใบกำกับภาษีอย่างย่อ/ใบเสร็จรับเงิน{' '}
                     </Text>
                     <Text style={styles.header}>
-                        เลขที่: {document?.documentId}
+                        เลขที่: {document?.documentNo}
                     </Text>
                     <Text style={styles.header}>
                         วันที่:{' '}

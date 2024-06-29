@@ -24,13 +24,13 @@ import SelectSearchCustomer from '@/components/select-search-customer'
 import { cn } from '@/lib/utils'
 
 type Props = {
-    params: { documentId: string }
+    params: { documentNo: string }
 }
 
 export default async function SalesInvoiceDetailPage({
-    params: { documentId },
+    params: { documentNo },
 }: Props) {
-    const document = await getSalesInvoiceDetail(documentId)
+    const document = await getSalesInvoiceDetail(documentNo)
     const session = await getServerSession(authOptions)
     const paymentMethods = await getPaymentMethods()
 
@@ -67,7 +67,7 @@ export default async function SalesInvoiceDetailPage({
                             <Input
                                 className="w-auto"
                                 placeholder="Optional"
-                                defaultValue={document?.documentId}
+                                defaultValue={document?.documentNo}
                                 disabled
                             />
                         </div>
@@ -75,7 +75,7 @@ export default async function SalesInvoiceDetailPage({
                         {session?.user.role === 'ADMIN' && (
                             <div>
                                 <Link
-                                    href={`/sales/${document?.documentId}/edit`}
+                                    href={`/sales/${document?.documentNo}/edit`}
                                 >
                                     <Button
                                         type="button"

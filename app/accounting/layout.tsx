@@ -33,7 +33,7 @@ export default async function RootLayout({
                 />
                 <Separator />
                 <SubMenuNavLink
-                    href="/accounting/other-expense"
+                    href="/accounting/other-invoice"
                     label="ค่าใช้จ่ายอื่น"
                 />
                 <Separator />

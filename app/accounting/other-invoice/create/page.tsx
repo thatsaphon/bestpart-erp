@@ -8,8 +8,18 @@ type Props = {}
 export default async function CreateOtherExpensePage({}: Props) {
     const otherExpenses = await prisma.chartOfAccount.findMany({
         where: {
-            type: { in: ['Assets', 'Expense', 'OtherExpense'] },
-            AND: [{ id: { gt: 14000 } }, { id: { not: 15100 } }],
+            OR: [
+                {
+                    type: { in: ['Expense', 'OtherExpense'] },
+                },
+                {
+                    AssetTypeToChartOfAccount: { isNot: null },
+                },
+            ],
+            // AND: [{ id: { gt: 14000 } }, { id: { not: 15100 } }],
+        },
+        include: {
+            AssetTypeToChartOfAccount: true,
         },
         orderBy: { id: 'asc' },
     })

@@ -6,14 +6,14 @@ import { format } from 'date-fns'
 export const generateDocumentNumber = async (prefix: string, date: string) => {
     const todayFormat = `${prefix}${format(new Date(date), 'yyyyMM')}`
     const lastInvoice = await prisma.document.findFirst({
-        where: { documentId: { contains: todayFormat } },
-        orderBy: { documentId: 'desc' },
+        where: { documentNo: { contains: todayFormat } },
+        orderBy: { documentNo: 'desc' },
     })
-    if (!lastInvoice || !lastInvoice?.documentId.includes(todayFormat)) {
+    if (!lastInvoice || !lastInvoice?.documentNo.includes(todayFormat)) {
         return `${todayFormat}001`
     }
     return (
         todayFormat +
-        (+lastInvoice.documentId.slice(-3) + 1).toString().padStart(3, '0')
+        (+lastInvoice.documentNo.slice(-3) + 1).toString().padStart(3, '0')
     )
 }

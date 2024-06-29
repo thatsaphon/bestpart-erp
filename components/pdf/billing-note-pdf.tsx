@@ -152,7 +152,7 @@ export default function BillingNotePdf({ document }: Props) {
                         <Text>หจก.จ.สุพรรณบุรีอะไหล่</Text>
                     </View>
                     <View style={{ marginLeft: '10', gap: 2 }}>
-                        <Text>เลขที่: {document?.documentId}</Text>
+                        <Text>เลขที่: {document?.documentNo}</Text>
                         <Text>
                             วันที่:{' '}
                             {new Intl.DateTimeFormat('th-TH', {
@@ -186,7 +186,7 @@ export default function BillingNotePdf({ document }: Props) {
                     >
                         <Text style={styles.col1}>{index + 1}</Text>
                         <Text style={styles.col2}>
-                            {item.Document[0].documentId}
+                            {item.Document[0].documentNo}
                         </Text>
                         {/* <Text style={styles.col3}>
                             {`${item.GoodsMaster.SkuMaster.mainSku.name} - ${item.GoodsMaster.SkuMaster.detail}`}

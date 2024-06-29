@@ -9,7 +9,7 @@ import { z } from 'zod'
 
 export const createBillingNote = async (
     formData: FormData,
-    documentIds: string[]
+    documentNos: string[]
 ) => {
     const validator = z.object({
         customerId: z.string().trim(),
@@ -17,25 +17,25 @@ export const createBillingNote = async (
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
         date: z.string().trim().min(1, 'date must not be empty'),
-        documentId: z.string().trim().optional().nullable(),
+        documentNo: z.string().trim().optional().nullable(),
         remark: z.string().trim().optional().nullable(),
     })
 
-    let { customerId, address, phone, taxId, date, documentId, remark } =
+    let { customerId, address, phone, taxId, date, documentNo, remark } =
         validator.parse({
             customerId: formData.get('customerId'),
             address: formData.get('address'),
             phone: formData.get('phone'),
             taxId: formData.get('taxId'),
             date: formData.get('date'),
-            documentId: formData.get('documentId'),
+            documentNo: formData.get('documentNo'),
             payment: formData.get('payment'),
             remark: formData.get('remark'),
         })
     const documents = await prisma.document.findMany({
         where: {
-            documentId: {
-                in: documentIds,
+            documentNo: {
+                in: documentNos,
             },
         },
         include: {
@@ -52,12 +52,12 @@ export const createBillingNote = async (
     })
 
     for (const document of documents) {
-        if (!documentIds.includes(document.documentId))
-            throw new Error(`${document.documentId} is not in documentIds`)
+        if (!documentNos.includes(document.documentNo))
+            throw new Error(`${document.documentNo} is not in documentNos`)
 
         if (document.ArSubledger?.contactId !== +customerId) {
             throw new Error(
-                `${document.documentId} is not linked to coustomerId: ${customerId}`
+                `${document.documentNo} is not linked to coustomerId: ${customerId}`
             )
         }
 
@@ -67,13 +67,13 @@ export const createBillingNote = async (
             document.ArSubledger.paymentStatus === 'Cash'
         ) {
             throw new Error(
-                `${document.documentId} is already ${document.ArSubledger.paymentStatus}`
+                `${document.documentNo} is already ${document.ArSubledger.paymentStatus}`
             )
         }
     }
 
-    if (!documentId) {
-        documentId = await generateDocumentNumber('BILL', date)
+    if (!documentNo) {
+        documentNo = await generateDocumentNumber('BILL', date)
     }
     const session = await getServerSession(authOptions)
 
@@ -85,7 +85,7 @@ export const createBillingNote = async (
             taxId: taxId || '',
             type: 'BillingNote',
             date: new Date(date),
-            documentId: documentId,
+            documentNo: documentNo,
             remark: remark ? { create: { remark } } : undefined,
             createdBy: session?.user.username,
             updatedBy: session?.user.username,
@@ -105,7 +105,7 @@ export const createBillingNote = async (
         },
         select: {
             id: true,
-            documentId: true,
+            documentNo: true,
         },
     })
 
@@ -122,8 +122,8 @@ export const createBillingNote = async (
 
     const createRemark = prisma.documentRemark.createMany({
         data: documents.map((document) => ({
-            remark: `วางบิลเลขที่ ${documentId}`,
-            documentId: document.id,
+            remark: `วางบิลเลขที่ ${documentNo}`,
+            documentNo: document.id,
         })),
     })
     const transaction = await prisma.$transaction([

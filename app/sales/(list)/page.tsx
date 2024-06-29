@@ -40,7 +40,7 @@ export default async function SalesListPage({
 }: Props) {
     const sales = await prisma.document.findMany({
         where: {
-            documentId: {
+            documentNo: {
                 startsWith: 'SINV',
             },
             AND: [
@@ -74,14 +74,14 @@ export default async function SalesListPage({
                 },
             },
         },
-        orderBy: [{ date: 'desc' }, { documentId: 'desc' }],
+        orderBy: [{ date: 'desc' }, { documentNo: 'desc' }],
         take: +limit,
         skip: (Number(page) - 1) * Number(limit),
     })
 
     const documentCount = await prisma.document.count({
         where: {
-            documentId: {
+            documentNo: {
                 startsWith: 'SINV',
             },
             AND: [
@@ -105,9 +105,9 @@ export default async function SalesListPage({
     >`select COALESCE(sum("GeneralLedger"."amount"), 0) as "sum" from "GeneralLedger"
              left join "_DocumentToGeneralLedger" on "_DocumentToGeneralLedger"."B" = "GeneralLedger"."id"
              left join "Document" on "_DocumentToGeneralLedger"."A" = "Document"."id"
-             where "chartOfAccountId" in (11000, 12000) and "Document"."documentId" like 'SINV%' and 
+             where "chartOfAccountId" in (11000, 12000) and "Document"."documentNo" like 'SINV%' and 
              "Document"."date" between ${new Date(from)} and ${new Date(new Date(to).setDate(new Date(to).getDate() + 1))}::date and
-             "Document"."documentId" like 'SINV%'`
+             "Document"."documentNo" like 'SINV%'`
 
     const numberOfPage = Math.ceil(documentCount / Number(limit))
 
@@ -130,7 +130,7 @@ export default async function SalesListPage({
                 </TableHeader>
                 <TableBody>
                     {sales.map((sale) => (
-                        <TableRow key={sale.documentId}>
+                        <TableRow key={sale.documentNo}>
                             <TableCell>
                                 {new Intl.DateTimeFormat('th-TH', {
                                     year: 'numeric',
@@ -140,7 +140,7 @@ export default async function SalesListPage({
                                     localeMatcher: 'best fit',
                                 }).format(sale.date)}
                             </TableCell>
-                            <TableCell>{sale.documentId}</TableCell>
+                            <TableCell>{sale.documentNo}</TableCell>
                             <TableCell>
                                 {sale.ArSubledger?.Contact.name || '-'}
                             </TableCell>
@@ -177,7 +177,7 @@ export default async function SalesListPage({
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
-                                <Link href={`/sales/${sale.documentId}`}>
+                                <Link href={`/sales/${sale.documentNo}`}>
                                     <EyeOpenIcon />
                                 </Link>
                             </TableCell>

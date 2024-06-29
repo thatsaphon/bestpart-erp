@@ -20,13 +20,13 @@ import Link from 'next/link'
 import SelectSearchVendor from '../../../components/select-search-vendor'
 
 type Props = {
-    params: { documentId: string }
+    params: { documentNo: string }
 }
 
 export default async function PurchaseInvoiceDetailPage({
-    params: { documentId },
+    params: { documentNo },
 }: Props) {
-    const document = await getPurchaseInvoiceDetail(documentId)
+    const document = await getPurchaseInvoiceDetail(documentNo)
     const session = await getServerSession(authOptions)
 
     if (!document)
@@ -63,7 +63,7 @@ export default async function PurchaseInvoiceDetailPage({
                         <Input
                             className="w-auto"
                             placeholder="Optional"
-                            defaultValue={document?.documentId}
+                            defaultValue={document?.documentNo}
                             disabled
                         />
                     </div>
@@ -71,7 +71,7 @@ export default async function PurchaseInvoiceDetailPage({
                     {session?.user.role === 'ADMIN' && (
                         <div>
                             <Link
-                                href={`/purchase/${document?.documentId}/edit`}
+                                href={`/purchase/${document?.documentNo}/edit`}
                             >
                                 <Button type="button" variant={'destructive'}>
                                     Edit

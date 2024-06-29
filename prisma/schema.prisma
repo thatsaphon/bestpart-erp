@@ -37,8 +37,8 @@ enum Role {
 
 model Document {
   id            Int              @id @default(autoincrement())
-  documentId    String           @unique
-  referenceId   String?
+  documentNo    String           @unique
+  referenceNo   String?
   date          DateTime
   SkuOut        SkuOut[]
   SkuIn         SkuIn[]
@@ -90,9 +90,8 @@ model ChartOfAccount {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @default(now()) @updatedAt
 
-  AccountOwner                AccountOwner[]
-  AssetTypeToChartOfAccount   AssetTypeToChartOfAccount? @relation(fields: [assetTypeToChartOfAccountId], references: [id])
-  assetTypeToChartOfAccountId Int?
+  AccountOwner              AccountOwner[]
+  AssetTypeToChartOfAccount AssetTypeToChartOfAccount?
 }
 
 enum AccountType {
@@ -387,9 +386,10 @@ model AssetRegistrationDocument {
 }
 
 model AssetTypeToChartOfAccount {
-  id             Int              @id @default(autoincrement())
-  AssetType      AssetType
-  chartOfAccount ChartOfAccount[]
+  id               Int            @id @default(autoincrement())
+  AssetType        AssetType
+  chartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
+  chartOfAccountId Int            @unique
 }
 
 model AssetMovement {

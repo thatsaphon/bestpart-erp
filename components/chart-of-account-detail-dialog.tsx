@@ -61,7 +61,7 @@ export default function ChartOfAccountDetailDialog({
     const params = useSearchParams()
     const router = useRouter()
     const [history, setHistory] = React.useState<
-        { documentId: string; type: DocumentType; amount: number }[]
+        { documentNo: string; type: DocumentType; amount: number }[]
     >([])
 
     useEffect(() => {
@@ -185,8 +185,8 @@ export default function ChartOfAccountDetailDialog({
                     </form>
                     <div>
                         {history.map((item) => (
-                            <div key={item.documentId} className="flex gap-2">
-                                <span>{item.documentId}</span>
+                            <div key={item.documentNo} className="flex gap-2">
+                                <span>{item.documentNo}</span>
                                 <span>{item.type}</span>
                                 <span>{item.amount}</span>
                             </div>

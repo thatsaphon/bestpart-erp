@@ -24,12 +24,21 @@ import {
     TableHead,
     TableCaption,
 } from '@/components/ui/table'
-import { AccountType, ChartOfAccount } from '@prisma/client'
+import {
+    AccountType,
+    AssetType,
+    AssetTypeToChartOfAccount,
+    ChartOfAccount,
+} from '@prisma/client'
 import { XIcon } from 'lucide-react'
 import React, { useEffect } from 'react'
+import { createOtherInvoice } from './create-other-invoice'
+import toast from 'react-hot-toast'
 
 type Props = {
-    chartOfAccounts: ChartOfAccount[]
+    chartOfAccounts: (ChartOfAccount & {
+        AssetTypeToChartOfAccount: AssetTypeToChartOfAccount | null
+    })[]
 }
 
 export default function CreateUpdateOtherExpenseComponent({
@@ -38,48 +47,33 @@ export default function CreateUpdateOtherExpenseComponent({
     const [select, setSelect] = React.useState<string | undefined>()
     const [items, setItems] = React.useState<
         {
-            id: number
-            name: string
-            amount: number | undefined
-            type: AccountType
+            chartOfAccountId: number
+            chartOfAccountName: string
+            amount: number
+            chartOfAccountType: AccountType
+            assetName?: string
+            assetUsefulLife?: number
+            assetResidualValue?: number
+            assetType: AssetType | undefined
         }[]
     >([])
 
-    // const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    //     if (
-    //         event.key === 'ArrowUp' ||
-    //         event.key === 'ArrowDown' ||
-    //         event.key === 'Enter'
-    //     ) {
-    //         event.preventDefault()
-    //     }
-    // }
-
-    // useEffect(() => {
-    //     const handleKeyDown = (event: KeyboardEvent) => {
-    //         if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-    //             event.preventDefault()
-    //         }
-    //         if (event.key === 'Enter') {
-    //             event.preventDefault()
-    //         }
-    //     }
-    //     const inputElements = document.querySelectorAll<HTMLInputElement>(
-    //         'input[type="number"]'
-    //     )
-    //     inputElements.forEach((element) => {
-    //         element.addEventListener('keydown', handleKeyDown)
-    //     })
-
-    //     return () => {
-    //         inputElements.forEach((element) => {
-    //             element.removeEventListener('keydown', handleKeyDown)
-    //         })
-    //     }
-    // }, [items])
-
     return (
-        <form className="p-3">
+        <form
+            className="p-3"
+            action={async (formData) => {
+                try {
+                    const result = await createOtherInvoice(formData, items)
+                    toast.success('บันทึกสําเร็จ')
+                } catch (err) {
+                    if (err instanceof Error) {
+                        return toast.error(err.message)
+                    }
+
+                    return toast.error('Something went wrong')
+                }
+            }}
+        >
             <div className="flex flex-col gap-2">
                 <div className="flex gap-3">
                     <Label className="flex items-center gap-2 ">
@@ -92,11 +86,11 @@ export default function CreateUpdateOtherExpenseComponent({
                         <p className="">No. </p>
                         <Input
                             className="w-auto"
-                            name="documentId"
+                            name="documentNo"
                             placeholder=""
                             disabled
                             // defaultValue={
-                            //     defaultDocumentDetails?.documentId
+                            //     defaultDocumentDetails?.documentNo
                             // }
                         />
                     </Label>
@@ -107,10 +101,27 @@ export default function CreateUpdateOtherExpenseComponent({
                             name="referenceNo"
                             // placeholder="Optional"
                             // defaultValue={
-                            //     defaultDocumentDetails?.documentId
+                            //     defaultDocumentDetails?.documentNo
                             // }
                         />
                     </Label>
+                </div>
+                <div className="my-1 flex items-baseline space-x-2">
+                    <Label>เจ้าหนี้</Label>
+                    <SelectSearchVendor
+                        name="contactId"
+                        hasTextArea={true}
+                        placeholder="รหัสคู่ค้า"
+                        // defaultValue={String(
+                        //     defaultDocumentDetails?.contactId || ''
+                        // )}
+                        // defaultAddress={{
+                        //     name: defaultDocumentDetails?.contactName || '',
+                        //     address: defaultDocumentDetails?.address || '',
+                        //     phone: defaultDocumentDetails?.phone || '',
+                        //     taxId: defaultDocumentDetails?.taxId || '',
+                        // }}
+                    />
                 </div>
 
                 {/* <div className="my-1 flex items-baseline space-x-2">
@@ -138,6 +149,7 @@ export default function CreateUpdateOtherExpenseComponent({
                         <TableHead>รหัส</TableHead>
                         <TableHead>รายการ</TableHead>
                         <TableHead className="text-right">จำนวนเงิน</TableHead>
+                        <TableHead>ชื่อสินทรัพย์</TableHead>
                         <TableHead>อายุการใช้งาน (ปี)</TableHead>
                         <TableHead>มูลค่าซาก</TableHead>
                         <TableHead></TableHead>
@@ -146,8 +158,8 @@ export default function CreateUpdateOtherExpenseComponent({
                 <TableBody>
                     {items.map((item, index) => (
                         <TableRow key={index}>
-                            <TableCell>{item.id}</TableCell>
-                            <TableCell>{item.name}</TableCell>
+                            <TableCell>{item.chartOfAccountId}</TableCell>
+                            <TableCell>{item.chartOfAccountName}</TableCell>
                             <TableCell className="text-rignt">
                                 <Input
                                     type="number"
@@ -163,7 +175,7 @@ export default function CreateUpdateOtherExpenseComponent({
                                                           amount:
                                                               Number(
                                                                   e.target.value
-                                                              ) || undefined,
+                                                              ) || 0,
                                                       }
                                                     : item
                                             )
@@ -174,16 +186,71 @@ export default function CreateUpdateOtherExpenseComponent({
                             </TableCell>
                             <TableCell>
                                 <Input
-                                    disabled={item.type !== 'Assets'}
-                                    type="number"
-                                    // onKeyDown={handleKeyDown}
+                                    disabled={
+                                        item.chartOfAccountType !== 'Assets'
+                                    }
+                                    value={item.assetName}
+                                    onChange={(e) =>
+                                        setItems(
+                                            items.map((item, i) =>
+                                                i === index
+                                                    ? {
+                                                          ...item,
+                                                          assetName:
+                                                              e.target.value,
+                                                      }
+                                                    : item
+                                            )
+                                        )
+                                    }
                                 />
                             </TableCell>
                             <TableCell>
                                 <Input
-                                    disabled={item.type !== 'Assets'}
+                                    disabled={
+                                        item.chartOfAccountType !== 'Assets'
+                                    }
                                     type="number"
-                                    // onKeyDown={handleKeyDown}
+                                    value={item.assetUsefulLife || ''}
+                                    onChange={(e) =>
+                                        setItems(
+                                            items.map((item, i) =>
+                                                i === index
+                                                    ? {
+                                                          ...item,
+                                                          assetUsefulLife:
+                                                              Number(
+                                                                  e.target.value
+                                                              ) || undefined,
+                                                      }
+                                                    : item
+                                            )
+                                        )
+                                    }
+                                />
+                            </TableCell>
+                            <TableCell>
+                                <Input
+                                    disabled={
+                                        item.chartOfAccountType !== 'Assets'
+                                    }
+                                    type="number"
+                                    value={item.assetResidualValue || ''}
+                                    onChange={(e) =>
+                                        setItems(
+                                            items.map((item, i) =>
+                                                i === index
+                                                    ? {
+                                                          ...item,
+                                                          assetResidualValue:
+                                                              Number(
+                                                                  e.target.value
+                                                              ) || undefined,
+                                                      }
+                                                    : item
+                                            )
+                                        )
+                                    }
                                 />
                             </TableCell>
                             <TableCell>
@@ -236,16 +303,21 @@ export default function CreateUpdateOtherExpenseComponent({
                                     setItems([
                                         ...items,
                                         {
-                                            id: +select,
-                                            name:
+                                            chartOfAccountId: +select,
+                                            chartOfAccountName:
                                                 chartOfAccounts.find(
                                                     ({ id }) => id === +select
                                                 )?.name || '',
-                                            amount: undefined,
-                                            type:
+                                            amount: 0,
+                                            chartOfAccountType:
                                                 chartOfAccounts.find(
                                                     ({ id }) => id === +select
                                                 )?.type || 'OtherExpense',
+                                            assetType:
+                                                chartOfAccounts.find(
+                                                    ({ id }) => id === +select
+                                                )?.AssetTypeToChartOfAccount
+                                                    ?.AssetType || undefined,
                                         },
                                     ])
                                 }}
@@ -257,6 +329,9 @@ export default function CreateUpdateOtherExpenseComponent({
                 </TableBody>
                 <TableFooter></TableFooter>
             </Table>
+            <div className="mx-[20%] flex justify-end">
+                <Button>ยืนยัน</Button>
+            </div>
         </form>
     )
 }

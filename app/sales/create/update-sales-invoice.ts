@@ -15,7 +15,7 @@ export const updateSalesInvoice = async (
     formData: FormData,
     items: InventoryDetailType[],
     payments: { id: number; amount: number }[],
-    remarks: { id?: number, remark: string, isDeleted?: boolean }[]
+    remarks: { id?: number; remark: string; isDeleted?: boolean }[]
 ) => {
     const validator = z.object({
         customerId: z.string().trim().optional().nullable(),
@@ -24,7 +24,7 @@ export const updateSalesInvoice = async (
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
         date: z.string().trim().optional(),
-        documentId: z.string().trim().optional().nullable(),
+        documentNo: z.string().trim().optional().nullable(),
         // payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
         // remark: z.string().trim().optional().nullable(),
     })
@@ -36,7 +36,7 @@ export const updateSalesInvoice = async (
         phone: formData.get('phone') || undefined,
         taxId: formData.get('taxId') || undefined,
         date: formData.get('date') || undefined,
-        documentId: formData.get('documentId') || undefined,
+        documentNo: formData.get('documentNo') || undefined,
         // payment: formData.get('payment') || undefined,
         // remark: formData.get('remark') || undefined,
     })
@@ -59,7 +59,7 @@ export const updateSalesInvoice = async (
         phone,
         taxId,
         date,
-        documentId,
+        documentNo,
         // payment,
         // remark,
     } = result.data
@@ -79,7 +79,10 @@ export const updateSalesInvoice = async (
     }
     let contact: Contact | undefined = await getContact()
 
-    if (payments.find((payment) => payment.id === 12000) && (!contact || !contact.credit)) {
+    if (
+        payments.find((payment) => payment.id === 12000) &&
+        (!contact || !contact.credit)
+    ) {
         throw new Error(`${contact?.name || ''} ไม่สามารถขายเงินเชื่อได้`)
     }
 
@@ -128,7 +131,7 @@ export const updateSalesInvoice = async (
         having sum("SkuInToOut".quantity) < "SkuIn".quantity or sum("SkuInToOut".quantity) is null
         order by "SkuIn"."date", "SkuIn"."id" asc`
 
-    for (let i = 0;i < items.length;i++) {
+    for (let i = 0; i < items.length; i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === items[i].barcode
         )
@@ -143,7 +146,7 @@ export const updateSalesInvoice = async (
         if (
             remaining.length <= 0 ||
             remaining.reduce((sum, item) => sum + item.remaining, 0) <
-            items[i].quantity * items[i].quantityPerUnit
+                items[i].quantity * items[i].quantityPerUnit
         ) {
             throw new Error('insufficient inventory')
         }
@@ -152,9 +155,11 @@ export const updateSalesInvoice = async (
     const deleteSkuInToOut = prisma.skuInToOut.deleteMany({
         where: {
             id: {
-                in: invoice.SkuOut.flatMap((item) => item.SkuInToOut.map((item) => item.id)),
+                in: invoice.SkuOut.flatMap((item) =>
+                    item.SkuInToOut.map((item) => item.id)
+                ),
             },
-        }
+        },
     })
     const updateInvoice = prisma.document.update({
         where: { id },
@@ -164,18 +169,26 @@ export const updateSalesInvoice = async (
             phone: phone || undefined,
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
-            documentId: documentId || undefined,
+            documentNo: documentNo || undefined,
             remark: {
                 create: remarks.filter(({ id }) => !id),
-                update: remarks.filter(({ id }) => id).map((remark) => ({ where: { id: remark.id }, data: { remark: remark.remark, isDeleted: remark.isDeleted } })),
+                update: remarks
+                    .filter(({ id }) => id)
+                    .map((remark) => ({
+                        where: { id: remark.id },
+                        data: {
+                            remark: remark.remark,
+                            isDeleted: remark.isDeleted,
+                        },
+                    })),
             },
             ArSubledger: !!contact
                 ? {
-                    update: {
-                        contactId: Number(customerId),
-                        paymentStatus: calculatePaymentStatus(payments)
-                    },
-                }
+                      update: {
+                          contactId: Number(customerId),
+                          paymentStatus: calculatePaymentStatus(payments),
+                      },
+                  }
                 : undefined,
             GeneralLedger: {
                 deleteMany: [
@@ -183,8 +196,8 @@ export const updateSalesInvoice = async (
                         AND: [
                             { chartOfAccountId: { gte: 11000 } },
                             { chartOfAccountId: { lte: 12000 } },
-                        ]
-                    }
+                        ],
+                    },
                 ],
                 create: payments.map((payment) => ({
                     chartOfAccountId: payment.id,
@@ -206,7 +219,7 @@ export const updateSalesInvoice = async (
                                     (sum, item) =>
                                         sum +
                                         (item.quantity * item.price * 100) /
-                                        107,
+                                            107,
                                     0
                                 )
                                 .toFixed(2),
@@ -296,13 +309,13 @@ export const updateSalesInvoice = async (
 
                                     if (
                                         item.quantity * item.quantityPerUnit -
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) >=
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) >=
                                         remaining
                                     )
                                         return {
@@ -313,20 +326,20 @@ export const updateSalesInvoice = async (
                                     // ครั้งที่ 2+ ตัดส่วนที่เหลือ
                                     if (
                                         item.quantity * item.quantityPerUnit -
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            ) <
+                                            array
+                                                .slice(0, index)
+                                                .reduce(
+                                                    (sum, item) =>
+                                                        sum + item.remaining,
+                                                    0
+                                                ) <
                                         remaining
                                     )
                                         return {
                                             skuInId: id,
                                             quantity:
                                                 item.quantity *
-                                                item.quantityPerUnit -
+                                                    item.quantityPerUnit -
                                                 array
                                                     .slice(0, index)
                                                     .reduce(
@@ -353,6 +366,6 @@ export const updateSalesInvoice = async (
     await prisma.$transaction([deleteSkuInToOut, updateInvoice])
 
     revalidatePath('/sales')
-    revalidatePath(`/sales/${documentId}`)
-    redirect(`/sales/${documentId}`)
+    revalidatePath(`/sales/${documentNo}`)
+    redirect(`/sales/${documentNo}`)
 }

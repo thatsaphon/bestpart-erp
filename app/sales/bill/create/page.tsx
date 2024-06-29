@@ -36,7 +36,7 @@ export default function CreateBillPage({}: Props) {
                 try {
                     await createBillingNote(
                         formData,
-                        selectedDocuments.map((document) => document.documentId)
+                        selectedDocuments.map((document) => document.documentNo)
                     )
                     toast.success('Create billing note success')
                     ref.current?.reset()
@@ -52,7 +52,7 @@ export default function CreateBillPage({}: Props) {
                 <span>วันที่</span>
                 <DatePickerWithPresets />
                 <span>เลขที่เอกสาร</span>
-                <Input name="documentId" className="w-auto" />
+                <Input name="documentNo" className="w-auto" />
                 {/* <SelectSearchCustomer hasTextArea /> */}
             </div>
             <div className="flex items-baseline gap-2">
@@ -83,7 +83,7 @@ export default function CreateBillPage({}: Props) {
                                         day: 'numeric',
                                     }).format(document.date)}
                                 </TableCell>
-                                <TableCell>{document.documentId}</TableCell>
+                                <TableCell>{document.documentNo}</TableCell>
                                 <TableCell>
                                     {document.GeneralLedger[0].amount}
                                 </TableCell>

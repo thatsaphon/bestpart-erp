@@ -11,18 +11,18 @@ import {
 } from '@/components/ui/table'
 import ReceivedDialog from './received-dialog'
 import BillingNotePdf from '@/components/pdf/billing-note-pdf'
-import BlobProviderClient from '../../[documentId]/blob-provider'
+import BlobProviderClient from '../../[documentNo]/blob-provider'
 
 type Props = {
     params: {
-        documentId: string
+        documentNo: string
     }
 }
 
-export default async function page({ params: { documentId } }: Props) {
+export default async function page({ params: { documentNo } }: Props) {
     const billingNote = await prisma.document.findMany({
         where: {
-            documentId,
+            documentNo,
         },
         include: {
             ArSubledger: true,
@@ -73,7 +73,7 @@ export default async function page({ params: { documentId } }: Props) {
                                   : 'ยังไม่จ่าย'}
                         </Badge>
                     </div>
-                    <p>เลขที่: {billingNote[0].documentId}</p>
+                    <p>เลขที่: {billingNote[0].documentNo}</p>
                     <p>ชื่อ: {billingNote[0].contactName}</p>
                     <p>ที่อยู่: {billingNote[0].address}</p>
                     <p>โทร: {billingNote[0].phone}</p>
@@ -109,7 +109,7 @@ export default async function page({ params: { documentId } }: Props) {
                                     }).format(new Date(item.Document[0].date))}
                                 </TableCell>
                                 <TableCell>
-                                    {item.Document[0].documentId}
+                                    {item.Document[0].documentNo}
                                 </TableCell>
                                 <TableCell>{item.amount}</TableCell>
                             </TableRow>
@@ -129,7 +129,7 @@ export default async function page({ params: { documentId } }: Props) {
                 <ReceivedDialog
                     bankAccounts={bankAccounts}
                     billAmount={salesInvoices.reduce((a, b) => a + b.amount, 0)}
-                    documentId={documentId}
+                    documentNo={documentNo}
                 />
             </div>
         </div>

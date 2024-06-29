@@ -8,6 +8,7 @@ export const updateChartOfAccountAssetType = async (
     chartOfAccountId: number,
     assetType: $Enums.AssetType | 'none'
 ) => {
+    console.log(chartOfAccountId, assetType)
     const chartOfAccount = await prisma.chartOfAccount.findFirst({
         where: {
             id: chartOfAccountId,
@@ -24,7 +25,7 @@ export const updateChartOfAccountAssetType = async (
             },
             data: {
                 AssetTypeToChartOfAccount: {
-                    delete: {},
+                    disconnect: {},
                 },
             },
         })
@@ -37,7 +38,7 @@ export const updateChartOfAccountAssetType = async (
             AssetTypeToChartOfAccount: {
                 upsert: {
                     where: {
-                        id: chartOfAccountId,
+                        chartOfAccountId,
                     },
                     create: {
                         AssetType: assetType,

@@ -2,9 +2,9 @@
 
 import prisma from '@/app/db/db'
 
-export const getSalesInvoiceDetail = async (documentId: string) => {
+export const getSalesInvoiceDetail = async (documentNo: string) => {
     return await prisma.document.findUnique({
-        where: { documentId },
+        where: { documentNo },
         include: {
             ArSubledger: { include: { Contact: true } },
             SkuOut: {

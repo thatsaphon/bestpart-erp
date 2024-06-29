@@ -22,8 +22,8 @@ export const createPurchaseInvoice = async (
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
         date: z.string().trim().min(1, 'date must not be empty'),
-        documentId: z.string().trim().optional().nullable(),
-        referenceId: z.string().trim().optional().nullable(),
+        documentNo: z.string().trim().optional().nullable(),
+        referenceNo: z.string().trim().optional().nullable(),
     })
 
     const result = validator.safeParse({
@@ -33,8 +33,8 @@ export const createPurchaseInvoice = async (
         phone: formData.get('phone'),
         taxId: formData.get('taxId'),
         date: formData.get('date'),
-        documentId: formData.get('documentId'),
-        referenceId: formData.get('referenceId'),
+        documentNo: formData.get('documentNo'),
+        referenceNo: formData.get('referenceNo'),
     })
 
     if (!result.success) {
@@ -47,7 +47,16 @@ export const createPurchaseInvoice = async (
         )
     }
 
-    let { vendorId, contactName, address, phone, taxId, date, documentId, referenceId } = result.data
+    let {
+        vendorId,
+        contactName,
+        address,
+        phone,
+        taxId,
+        date,
+        documentNo,
+        referenceNo,
+    } = result.data
 
     const contact = await prisma.contact.findUnique({
         where: {
@@ -69,8 +78,8 @@ export const createPurchaseInvoice = async (
         throw new Error('goods not found')
     }
 
-    if (!documentId) {
-        documentId = await generateDocumentNumber('PINV', date)
+    if (!documentNo) {
+        documentNo = await generateDocumentNumber('PINV', date)
     }
 
     const session = await getServerSession(authOptions)
@@ -82,8 +91,8 @@ export const createPurchaseInvoice = async (
             phone: phone || '',
             taxId: taxId || '',
             date: new Date(date),
-            documentId: documentId,
-            referenceId: referenceId,
+            documentNo: documentNo,
+            referenceNo: referenceNo,
             type: 'Purchase',
             createdBy: session?.user.username,
             updatedBy: session?.user.username,
@@ -159,10 +168,10 @@ export const createPurchaseInvoice = async (
         data: {
             SkuMaster: {
                 connect: items.map((item) => ({ id: item.skuMasterId })),
-            }
+            },
         },
     })
 
     revalidatePath('/purchase')
-    redirect(`/purchase/${invoice.documentId}`)
+    redirect(`/purchase/${invoice.documentNo}`)
 }

@@ -37,7 +37,7 @@ export default async function APPaymentPage({
 }: Props) {
     const payments = await prisma.document.findMany({
         where: {
-            documentId: {
+            documentNo: {
                 startsWith: 'PAY',
             },
             AND: [
@@ -70,14 +70,14 @@ export default async function APPaymentPage({
                 },
             },
         },
-        orderBy: [{ date: 'desc' }, { documentId: 'desc' }],
+        orderBy: [{ date: 'desc' }, { documentNo: 'desc' }],
         take: +limit,
         skip: (Number(page) - 1) * Number(limit),
     })
 
     const documentCount = await prisma.document.count({
         where: {
-            documentId: {
+            documentNo: {
                 startsWith: 'PINV',
             },
         },
@@ -103,7 +103,7 @@ export default async function APPaymentPage({
                 </TableHeader>
                 {/* <TableBody>
                     {purchaseInvoices.map((invoice) => (
-                        <TableRow key={invoice.documentId}>
+                        <TableRow key={invoice.documentNo}>
                             <TableCell>
                                 {new Intl.DateTimeFormat('th-TH', {
                                     year: 'numeric',
@@ -113,8 +113,8 @@ export default async function APPaymentPage({
                                     localeMatcher: 'best fit',
                                 }).format(invoice.date)}
                             </TableCell>
-                            <TableCell>{invoice.documentId}</TableCell>
-                            <TableCell>{invoice.referenceId}</TableCell>
+                            <TableCell>{invoice.documentNo}</TableCell>
+                            <TableCell>{invoice.referenceNo}</TableCell>
                             <TableCell>
                                 {invoice.ApSubledger?.Contact.name || 'เงินสด'}
                             </TableCell>
@@ -127,7 +127,7 @@ export default async function APPaymentPage({
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
-                                <Link href={`/purchase/${invoice.documentId}`}>
+                                <Link href={`/purchase/${invoice.documentNo}`}>
                                     <EyeOpenIcon />
                                 </Link>
                             </TableCell>
