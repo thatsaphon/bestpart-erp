@@ -413,3 +413,20 @@ model AssetMovement {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
+
+model Knowledge {
+  id             Int              @id @default(autoincrement())
+  content        String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
+  KnowledgeImage KnowledgeImage[]
+}
+
+model KnowledgeImage {
+  id          String    @id @default(uuid())
+  path        String
+  Knowledge   Knowledge @relation(fields: [knowledgeId], references: [id])
+  knowledgeId Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+}

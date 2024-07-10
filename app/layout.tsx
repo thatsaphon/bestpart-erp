@@ -59,11 +59,7 @@ export default async function RootLayout({
                         {session && (
                             <LayoutComponent>{children}</LayoutComponent>
                         )}
-                        {!session && (
-                            <main className="h-screen w-screen p-36">
-                                <LoginComponent />
-                            </main>
-                        )}
+                        {!session && children}
                     </SessionProvider>
 
                     <Toaster />
