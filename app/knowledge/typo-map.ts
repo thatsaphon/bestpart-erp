@@ -38,5 +38,7 @@ const typoList = [
 export const typoMap = (word: string) => {
     const result = typoList.filter((typo) => typo.includes(word)).flat()
 
-    return result || [word]
+    if (!result.length) return [word]
+
+    return result
 }
