@@ -11,7 +11,7 @@ import { fromZodError } from 'zod-validation-error'
 import { InventoryDetailType } from '@/types/inventory-detail'
 import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 import { redirect } from 'next/navigation'
-import { calculatePaymentStatus } from '@/lib/calculate-payment-status'
+import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 
 export const createSalesInvoice = async (
     formData: FormData,
@@ -159,7 +159,7 @@ export const createSalesInvoice = async (
                 ? {
                       create: {
                           contactId: Number(customerId),
-                          paymentStatus: calculatePaymentStatus(payments),
+                          paymentStatus: calculateArPaymentStatus(payments),
                       },
                   }
                 : undefined,

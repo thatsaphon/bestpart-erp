@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/app/db/db'
-import { calculatePaymentStatus } from '@/lib/calculate-payment-status'
+import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 import { revalidatePath } from 'next/cache'
 
 export const updatePayments = async (
@@ -37,7 +37,7 @@ export const updatePayments = async (
         ) !== payments.reduce((acc, payment) => acc + payment.amount, 0)
     )
         throw new Error('จำนวนเงินไม่ถูกต้อง')
-    const paymentStatus = await calculatePaymentStatus(payments)
+    const paymentStatus = await calculateArPaymentStatus(payments)
 
     await prisma.document.update({
         where: { id },

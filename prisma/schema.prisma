@@ -112,6 +112,7 @@ model GeneralLedger {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @default(now()) @updatedAt
   Document         Document[]
+  AssetMovement    AssetMovement?
 
   @@index([chartOfAccountId])
 }
@@ -366,6 +367,8 @@ model AssetRegistration {
   type            AssetType
   acquisitionDate DateTime
   usefulLife      Int?
+  cost            Float
+  residualValue   Float     @default(0)
   remark          String
   isWriteOff      Boolean   @default(false)
 
@@ -401,6 +404,9 @@ model AssetMovement {
 
   Document   Document @relation(fields: [documentId], references: [id])
   documentId Int
+
+  GeneralLedger   GeneralLedger @relation(fields: [generalLedgerId], references: [id])
+  generalLedgerId Int           @unique
 
   value Float
 

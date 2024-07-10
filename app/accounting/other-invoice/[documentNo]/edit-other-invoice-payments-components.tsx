@@ -16,10 +16,9 @@ import { Input } from '@/components/ui/input'
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import toast from 'react-hot-toast'
-import { updateSalesInvoice } from '../create/update-sales-invoice'
-import { updatePayments } from './update-payments'
+import { updateOtherInvoicePayments } from './update-payments'
 import { cn } from '@/lib/utils'
-import { ArSubledger, Prisma } from '@prisma/client'
+import { ApSubledger, Prisma } from '@prisma/client'
 
 const documentWithGeneralLedger =
     Prisma.validator<Prisma.DocumentDefaultArgs>()({
@@ -32,23 +31,22 @@ type DocumentWithGeneralLedger = Prisma.DocumentGetPayload<
 type Props = {
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
     document: DocumentWithGeneralLedger & {
-        ArSubledger?: ArSubledger | null
+        ApSubledger?: ApSubledger | null
     }
 }
 
-export default function EditPaymentsComponents({
+export default function EditOtherInvoicePaymentsComponents({
     paymentMethods,
     document,
 }: Props) {
     const [selectedPayments, setSelectedPayments] = React.useState<
         { id: number; amount: number }[]
     >(
-        document?.GeneralLedger.filter(
-            ({ chartOfAccountId }) =>
-                chartOfAccountId <= 12000 && chartOfAccountId >= 11000
+        document?.GeneralLedger.filter(({ chartOfAccountId }) =>
+            paymentMethods.some(({ id }) => id === chartOfAccountId)
         ).map(({ chartOfAccountId, amount }) => ({
             id: chartOfAccountId,
-            amount,
+            amount: -amount,
         })) || []
     )
     const [selectedPayment, setSelectedPayment] = React.useState<
@@ -87,7 +85,7 @@ export default function EditPaymentsComponents({
         }
         if (document) {
             try {
-                await updatePayments(document.id, selectedPayments)
+                await updateOtherInvoicePayments(document.id, selectedPayments)
                 toast.success('แก้ไขการชำระเงินสำเร็จ')
             } catch (err) {
                 if (err instanceof Error) return toast.error(err.message)
@@ -106,7 +104,7 @@ export default function EditPaymentsComponents({
                     key={item.id}
                     className={cn(
                         'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary',
-                        document?.ArSubledger?.paymentStatus === 'Billed' &&
+                        document?.ApSubledger?.paymentStatus === 'Billed' &&
                             'grid-cols-[1fr_140px] text-muted-foreground'
                     )}
                 >
@@ -121,7 +119,7 @@ export default function EditPaymentsComponents({
                     <Cross1Icon
                         className={cn(
                             'cursor-pointer text-destructive',
-                            document?.ArSubledger?.paymentStatus === 'Billed' &&
+                            document?.ApSubledger?.paymentStatus === 'Billed' &&
                                 'hidden'
                         )}
                         onClick={() =>
@@ -135,7 +133,7 @@ export default function EditPaymentsComponents({
             <div
                 className={cn(
                     'grid grid-cols-[1fr_1fr_140px] items-center gap-1',
-                    document?.ArSubledger?.paymentStatus === 'Billed' &&
+                    document?.ApSubledger?.paymentStatus === 'Billed' &&
                         'hidden'
                 )}
             >
@@ -189,7 +187,7 @@ export default function EditPaymentsComponents({
             </div>
             <Button
                 className={cn(
-                    document?.ArSubledger?.paymentStatus === 'Billed' &&
+                    document?.ApSubledger?.paymentStatus === 'Billed' &&
                         'hidden'
                 )}
                 onClick={() => submitPayment()}
@@ -199,7 +197,7 @@ export default function EditPaymentsComponents({
             <p
                 className={cn(
                     'text-destructive',
-                    document?.ArSubledger?.paymentStatus !== 'Billed' &&
+                    document?.ApSubledger?.paymentStatus !== 'Billed' &&
                         'hidden'
                 )}
             >

@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { InventoryDetailType } from '@/types/inventory-detail'
 import { redirect } from 'next/navigation'
-import { calculatePaymentStatus } from '@/lib/calculate-payment-status'
+import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 
 export const updateSalesInvoice = async (
     id: number,
@@ -186,7 +186,7 @@ export const updateSalesInvoice = async (
                 ? {
                       update: {
                           contactId: Number(customerId),
-                          paymentStatus: calculatePaymentStatus(payments),
+                          paymentStatus: calculateArPaymentStatus(payments),
                       },
                   }
                 : undefined,

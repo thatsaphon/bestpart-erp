@@ -1,3 +1,4 @@
+import prisma from '@/app/db/db'
 import {
     Accordion,
     AccordionItem,
@@ -18,8 +19,18 @@ import React from 'react'
 
 type Props = {}
 
-export default function AssetManagementPage({}: Props) {
-    AssetType
+export default async function AssetManagementPage({}: Props) {
+    // AssetType
+    const assets = await prisma.assetRegistration.findMany({
+        include: {
+            AssetMovement: {
+                include: {
+                    Document: true,
+                },
+            },
+            AssetRegistrationDocument: true,
+        },
+    })
 
     return (
         <main className="h-full w-full p-3">
@@ -33,7 +44,9 @@ export default function AssetManagementPage({}: Props) {
                 >
                     {Object.entries(AssetType).map(([key, value]) => (
                         <AccordionItem key={key} value={key}>
-                            <AccordionTrigger>{key}</AccordionTrigger>
+                            <AccordionTrigger>
+                                {key.replaceAll('_', ' ')}
+                            </AccordionTrigger>
                             <AccordionContent>
                                 <Table>
                                     <TableCaption></TableCaption>
@@ -46,7 +59,48 @@ export default function AssetManagementPage({}: Props) {
                                             <TableHead>Useful Life</TableHead>
                                         </TableRow>
                                     </TableHeader>
-                                    <TableBody></TableBody>
+                                    <TableBody>
+                                        {assets
+                                            .filter((asset) => {
+                                                return asset.type === value
+                                            })
+                                            .map((asset) => (
+                                                <TableRow key={asset.id}>
+                                                    <TableCell>
+                                                        {asset.name}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {asset.description}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {asset.AssetMovement.find(
+                                                            (movement) =>
+                                                                movement.value >
+                                                                0
+                                                        )?.value.toLocaleString()}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {new Intl.DateTimeFormat(
+                                                            'th-TH',
+                                                            {
+                                                                year: 'numeric',
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                timeZone:
+                                                                    'Asia/Bangkok', // Set time zone to Bangkok
+                                                                localeMatcher:
+                                                                    'best fit',
+                                                            }
+                                                        ).format(
+                                                            asset.acquisitionDate
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {asset.usefulLife}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                    </TableBody>
                                 </Table>
                             </AccordionContent>
                         </AccordionItem>

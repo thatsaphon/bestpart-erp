@@ -29,20 +29,57 @@ import {
     AssetType,
     AssetTypeToChartOfAccount,
     ChartOfAccount,
+    DocumentRemark,
+    PaymentStatus,
 } from '@prisma/client'
 import { XIcon } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { createOtherInvoice } from './create-other-invoice'
 import toast from 'react-hot-toast'
+import { getPaymentMethods } from '@/app/actions/accounting'
+import { InventoryDetailType } from '@/types/inventory-detail'
+import PaymentRemark from '@/components/table-caption/payment-remark'
+import { updateOtherInvoice } from '../[documentNo]/edit/update-other-invoice'
 
 type Props = {
     chartOfAccounts: (ChartOfAccount & {
         AssetTypeToChartOfAccount: AssetTypeToChartOfAccount | null
     })[]
+    defaultItems?: {
+        chartOfAccountId: number
+        chartOfAccountName: string
+        amount: number
+        chartOfAccountType: AccountType
+        assetName?: string
+        assetUsefulLife?: number
+        assetResidualValue?: number
+        assetType: AssetType | undefined
+    }[]
+    defaultDocumentDetails?: {
+        id: number
+        date: Date
+        documentNo: string
+        referenceNo?: string
+        contactId: number
+        contactName: string
+        address: string
+        phone: string
+        taxId: string
+        documentRemarks: DocumentRemark[]
+        paymentStatus: PaymentStatus
+    }
+    paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
+    defaultPayments?: { id: number; amount: number }[]
+    defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
 }
 
 export default function CreateUpdateOtherExpenseComponent({
     chartOfAccounts,
+    defaultItems = [],
+    defaultDocumentDetails,
+    paymentMethods,
+    defaultPayments,
+    defaultRemarks,
 }: Props) {
     const [select, setSelect] = React.useState<string | undefined>()
     const [items, setItems] = React.useState<
@@ -56,14 +93,44 @@ export default function CreateUpdateOtherExpenseComponent({
             assetResidualValue?: number
             assetType: AssetType | undefined
         }[]
-    >([])
+    >(defaultItems || [])
+    const [remarks, setRemarks] = React.useState<
+        { id?: number; remark: string; isDeleted?: boolean }[]
+    >(defaultRemarks || [])
+    const [selectedPayments, setSelectedPayments] = React.useState<
+        { id: number; amount: number }[]
+    >(defaultPayments || [])
 
     return (
         <form
             className="p-3"
             action={async (formData) => {
                 try {
-                    const result = await createOtherInvoice(formData, items)
+                    if (
+                        selectedPayments.reduce((a, b) => a + b.amount, 0) !==
+                        items.reduce((acc, item) => acc + item.amount, 0)
+                    ) {
+                        return toast.error(
+                            'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
+                        )
+                    }
+
+                    if (defaultDocumentDetails) {
+                        await updateOtherInvoice(
+                            formData,
+                            defaultDocumentDetails.id,
+                            items,
+                            selectedPayments,
+                            remarks
+                        )
+                        return
+                    }
+                    const result = await createOtherInvoice(
+                        formData,
+                        items,
+                        selectedPayments,
+                        remarks
+                    )
                     toast.success('บันทึกสําเร็จ')
                 } catch (err) {
                     if (err instanceof Error) {
@@ -79,7 +146,7 @@ export default function CreateUpdateOtherExpenseComponent({
                     <Label className="flex items-center gap-2 ">
                         <p>วันที่</p>
                         <DatePickerWithPresets
-                        // defaultDate={defaultDocumentDetails?.date}
+                            defaultDate={defaultDocumentDetails?.date}
                         />
                     </Label>
                     <Label className="flex items-center gap-2">
@@ -89,9 +156,7 @@ export default function CreateUpdateOtherExpenseComponent({
                             name="documentNo"
                             placeholder=""
                             disabled
-                            // defaultValue={
-                            //     defaultDocumentDetails?.documentNo
-                            // }
+                            defaultValue={defaultDocumentDetails?.documentNo}
                         />
                     </Label>
                     <Label className="flex items-center gap-2">
@@ -99,28 +164,26 @@ export default function CreateUpdateOtherExpenseComponent({
                         <Input
                             className="w-auto"
                             name="referenceNo"
-                            // placeholder="Optional"
-                            // defaultValue={
-                            //     defaultDocumentDetails?.documentNo
-                            // }
+                            placeholder="Optional"
+                            defaultValue={defaultDocumentDetails?.referenceNo}
                         />
                     </Label>
                 </div>
                 <div className="my-1 flex items-baseline space-x-2">
-                    <Label>เจ้าหนี้</Label>
+                    <Label>คู่ค้า</Label>
                     <SelectSearchVendor
                         name="contactId"
                         hasTextArea={true}
                         placeholder="รหัสคู่ค้า"
-                        // defaultValue={String(
-                        //     defaultDocumentDetails?.contactId || ''
-                        // )}
-                        // defaultAddress={{
-                        //     name: defaultDocumentDetails?.contactName || '',
-                        //     address: defaultDocumentDetails?.address || '',
-                        //     phone: defaultDocumentDetails?.phone || '',
-                        //     taxId: defaultDocumentDetails?.taxId || '',
-                        // }}
+                        defaultValue={String(
+                            defaultDocumentDetails?.contactId || ''
+                        )}
+                        defaultAddress={{
+                            name: defaultDocumentDetails?.contactName || '',
+                            address: defaultDocumentDetails?.address || '',
+                            phone: defaultDocumentDetails?.phone || '',
+                            taxId: defaultDocumentDetails?.taxId || '',
+                        }}
                     />
                 </div>
 
@@ -143,7 +206,17 @@ export default function CreateUpdateOtherExpenseComponent({
                 </div> */}
             </div>
             <Table>
-                <TableCaption></TableCaption>
+                <PaymentRemark
+                    paymentMethods={paymentMethods}
+                    defaultDocumentDetails={defaultDocumentDetails}
+                    defaultPayments={defaultPayments}
+                    defaultRemarks={defaultRemarks}
+                    selectedPayments={selectedPayments}
+                    setSelectedPayments={setSelectedPayments}
+                    remarks={remarks}
+                    setRemarks={setRemarks}
+                />
+                {/* <TableCaption></TableCaption> */}
                 <TableHeader>
                     <TableRow>
                         <TableHead>รหัส</TableHead>
@@ -266,7 +339,7 @@ export default function CreateUpdateOtherExpenseComponent({
                         </TableRow>
                     ))}
                     <TableRow>
-                        <TableCell colSpan={5}>
+                        <TableCell colSpan={6}>
                             <Select
                                 value={select}
                                 onValueChange={(value) => {
@@ -327,10 +400,19 @@ export default function CreateUpdateOtherExpenseComponent({
                         </TableCell>
                     </TableRow>
                 </TableBody>
-                <TableFooter></TableFooter>
+                <TableFooter>
+                    <TableRow>
+                        <TableCell colSpan={2} className="text-right">
+                            รวม
+                        </TableCell>
+                        <TableCell className="text-right">
+                            {items.reduce((sum, item) => sum + item.amount, 0)}
+                        </TableCell>
+                    </TableRow>
+                </TableFooter>
             </Table>
             <div className="mx-[20%] flex justify-end">
-                <Button>ยืนยัน</Button>
+                <Button disabled={items.length === 0}>ยืนยัน</Button>
             </div>
         </form>
     )

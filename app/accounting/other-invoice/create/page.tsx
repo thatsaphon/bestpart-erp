@@ -2,6 +2,7 @@ import Link from 'next/link'
 import React from 'react'
 import CreateUpdateOtherExpenseComponent from './create-update-other-expense'
 import prisma from '@/app/db/db'
+import { getPaymentMethods } from '@/app/actions/accounting'
 
 type Props = {}
 
@@ -16,7 +17,6 @@ export default async function CreateOtherExpensePage({}: Props) {
                     AssetTypeToChartOfAccount: { isNot: null },
                 },
             ],
-            // AND: [{ id: { gt: 14000 } }, { id: { not: 15100 } }],
         },
         include: {
             AssetTypeToChartOfAccount: true,
@@ -36,6 +36,7 @@ export default async function CreateOtherExpensePage({}: Props) {
             </h1>
             <CreateUpdateOtherExpenseComponent
                 chartOfAccounts={otherExpenses}
+                paymentMethods={await getPaymentMethods()}
             />
         </>
     )
