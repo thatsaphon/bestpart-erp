@@ -3,14 +3,10 @@ import { Input } from '@/components/ui/input'
 import {
     Table,
     TableBody,
-    TableHeader,
     TableRow,
-    TableHead,
-    TableFooter,
     TableCell,
     TableCaption,
 } from '@/components/ui/table'
-import React from 'react'
 import {
     Pagination,
     PaginationContent,
@@ -25,10 +21,8 @@ import {
     Dialog,
     DialogTrigger,
     DialogContent,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogClose,
 } from '@/components/ui/dialog'
 import AddNewKnowledgeForm from './add-new-knowledge-form'
 import {
@@ -37,20 +31,14 @@ import {
     AccordionTrigger,
     AccordionContent,
 } from '@/components/ui/accordion'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import UpdateKnowledgeForm from './update-knowledge-form'
-import { TrashIcon } from '@radix-ui/react-icons'
 import DeleteAlert from './delete-alert'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'จ.สุพรรณบุรีอะไหล่',
+    description: 'บันทึก ค้นหา ข้อมูลเกี่ยวกับอะไหล่รถยนต์',
+}
 
 type Props = {
     searchParams: {
