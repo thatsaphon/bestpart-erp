@@ -34,6 +34,9 @@ import {
 import UpdateKnowledgeForm from './update-knowledge-form'
 import DeleteAlert from './delete-alert'
 import { Metadata } from 'next'
+import UpdateKnowledgeDialog from './update-knowledge-dialog'
+import { Knowledge, KnowledgeImage } from '@prisma/client'
+import Image from 'next/image'
 
 export const metadata: Metadata = {
     title: 'จ.สุพรรณบุรีอะไหล่',
@@ -57,16 +60,21 @@ export default async function page({
                 ...q
                     .split(' ')
                     .filter((splited) => splited)
-                    .map((splited) => ({
-                        OR: [
-                            {
-                                content: {
-                                    contains: splited,
-                                    mode: 'insensitive',
-                                },
-                            },
-                        ],
-                    })),
+                    .map(
+                        (splited) =>
+                            ({
+                                OR: [
+                                    {
+                                        content: {
+                                            contains: splited,
+                                            mode: 'insensitive',
+                                        },
+                                    },
+                                ],
+                            }) as unknown as {
+                                OR: { content: { contains: string } }[]
+                            }
+                    ),
             ],
         },
         include: { KnowledgeImage: true },
@@ -81,16 +89,21 @@ export default async function page({
                 ...q
                     .split(' ')
                     .filter((splited) => splited)
-                    .map((splited) => ({
-                        OR: [
-                            {
-                                content: {
-                                    contains: splited,
-                                    mode: 'insensitive',
-                                },
-                            },
-                        ],
-                    })),
+                    .map(
+                        (splited) =>
+                            ({
+                                OR: [
+                                    {
+                                        content: {
+                                            contains: splited,
+                                            mode: 'insensitive',
+                                        },
+                                    },
+                                ],
+                            }) as unknown as {
+                                OR: { content: { contains: string } }[]
+                            }
+                    ),
             ],
         },
     })
@@ -119,10 +132,10 @@ export default async function page({
                 <TableBody>
                     {data.map((item) => (
                         <TableRow key={item.id}>
-                            {item.KnowledgeImage.length === 0 && (
+                            {item.KnowledgeImage?.length === 0 && (
                                 <TableCell>{item.content}</TableCell>
                             )}
-                            {item.KnowledgeImage.length > 0 && (
+                            {item.KnowledgeImage?.length > 0 && (
                                 <TableCell>
                                     <Accordion type="single" collapsible>
                                         <AccordionItem value={item.content}>
@@ -130,27 +143,28 @@ export default async function page({
                                                 {item.content}
                                             </AccordionTrigger>
                                             <AccordionContent>
-                                                test
+                                                <div className="mt-2 flex flex-wrap gap-1">
+                                                    {item.KnowledgeImage?.map(
+                                                        (image) => (
+                                                            <Image
+                                                                key={image.id}
+                                                                src={image.path}
+                                                                alt={`knowledge-${item.content}-${image.id}`}
+                                                                width={250}
+                                                                height={250}
+                                                                unoptimized
+                                                                className="max-h-[300px]"
+                                                            />
+                                                        )
+                                                    )}
+                                                </div>
                                             </AccordionContent>
                                         </AccordionItem>
                                     </Accordion>
                                 </TableCell>
                             )}
                             <TableCell className="w-[100px] text-right">
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button>แก้ไข</Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <div className="flex items-center justify-between pr-5">
-                                                <DialogTitle>แก้ไข</DialogTitle>
-                                                <DeleteAlert id={item.id} />
-                                            </div>
-                                        </DialogHeader>
-                                        <UpdateKnowledgeForm knowledge={item} />
-                                    </DialogContent>
-                                </Dialog>
+                                <UpdateKnowledgeDialog knowledge={item} />
                             </TableCell>
                         </TableRow>
                     ))}

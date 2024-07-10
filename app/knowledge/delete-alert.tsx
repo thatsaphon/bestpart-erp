@@ -15,15 +15,19 @@ import {
 import { TrashIcon } from '@radix-ui/react-icons'
 import { deleteKnowledge } from './delete-knowledge'
 import toast from 'react-hot-toast'
+import { KnowledgeImage } from '@prisma/client'
 
 type Props = {
-    id: number
+    knowledge: { id: number; content: string; KnowledgeImage: KnowledgeImage[] }
 }
 
-export default function DeleteAlert({ id }: Props) {
+export default function DeleteAlert({ knowledge }: Props) {
     return (
         <AlertDialog>
-            <AlertDialogTrigger asChild>
+            <AlertDialogTrigger
+                asChild
+                disabled={knowledge.KnowledgeImage.length > 0}
+            >
                 <TrashIcon className="h-5 w-5" />
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -40,7 +44,7 @@ export default function DeleteAlert({ id }: Props) {
                     <AlertDialogAction
                         onClick={async () => {
                             try {
-                                await deleteKnowledge(id)
+                                await deleteKnowledge(knowledge.id)
                                 toast.success('ลบสำเร็จ')
                             } catch (err) {
                                 toast.error('ไม่สามารถลบได้')
