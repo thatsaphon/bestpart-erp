@@ -58,7 +58,14 @@ export default async function page({
                     .split(' ')
                     .filter((splited) => splited)
                     .map((splited) => ({
-                        OR: [{ content: { contains: splited } }],
+                        OR: [
+                            {
+                                content: {
+                                    contains: splited,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        ],
                     })),
             ],
         },
@@ -75,7 +82,14 @@ export default async function page({
                     .split(' ')
                     .filter((splited) => splited)
                     .map((splited) => ({
-                        OR: [{ content: { contains: splited } }],
+                        OR: [
+                            {
+                                content: {
+                                    contains: splited,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        ],
                     })),
             ],
         },
