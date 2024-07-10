@@ -37,6 +37,7 @@ import { Metadata } from 'next'
 import UpdateKnowledgeDialog from './update-knowledge-dialog'
 import { Knowledge, KnowledgeImage } from '@prisma/client'
 import Image from 'next/image'
+import { typoMap } from './typo-map'
 
 export const metadata: Metadata = {
     title: 'จ.สุพรรณบุรีอะไหล่',
@@ -63,14 +64,12 @@ export default async function page({
                     .map(
                         (splited) =>
                             ({
-                                OR: [
-                                    {
-                                        content: {
-                                            contains: splited,
-                                            mode: 'insensitive',
-                                        },
+                                OR: typoMap(splited).map((typo) => ({
+                                    content: {
+                                        contains: typo,
+                                        mode: 'insensitive',
                                     },
-                                ],
+                                })),
                             }) as unknown as {
                                 OR: { content: { contains: string } }[]
                             }
@@ -92,14 +91,12 @@ export default async function page({
                     .map(
                         (splited) =>
                             ({
-                                OR: [
-                                    {
-                                        content: {
-                                            contains: splited,
-                                            mode: 'insensitive',
-                                        },
+                                OR: typoMap(splited).map((typo) => ({
+                                    content: {
+                                        contains: typo,
+                                        mode: 'insensitive',
                                     },
-                                ],
+                                })),
                             }) as unknown as {
                                 OR: { content: { contains: string } }[]
                             }
