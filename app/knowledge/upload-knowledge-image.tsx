@@ -21,6 +21,11 @@ export default function UploadKnowledgeImage({ knowledge }: Props) {
                 <Input type="file" name="file" />
                 <Button
                     formAction={async (formData) => {
+                        if (
+                            (!formData.get('file') as unknown as File).size ===
+                            0
+                        )
+                            return toast.error('File not found')
                         try {
                             formData.append(
                                 'fileName',
@@ -34,7 +39,7 @@ export default function UploadKnowledgeImage({ knowledge }: Props) {
                             ref.current?.reset()
                         } catch (err) {
                             console.log(err)
-                            toast.success('Something went wrong')
+                            toast.error('Something went wrong')
                         }
                     }}
                 >
