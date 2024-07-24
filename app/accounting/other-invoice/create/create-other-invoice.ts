@@ -12,6 +12,7 @@ import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import deleteOtherInvoice from '../[documentNo]/delete-other-invoice'
 
 export type OtherInvoiceItems = {}
 
@@ -90,31 +91,6 @@ export const createOtherInvoice = async (
                             chartOfAccountId: item.chartOfAccountId,
                             amount: item.amount,
                         })),
-                    ...items
-                        .filter((item) => item.assetType)
-                        .map((item) => ({
-                            chartOfAccountId: item.chartOfAccountId,
-                            amount: item.amount,
-                            AssetMovement: {
-                                create: items
-                                    .filter((item) => item.assetType)
-                                    .map((item) => ({
-                                        AssetRegistration: {
-                                            create: {
-                                                acquisitionDate: new Date(date),
-                                                name: item.assetName as string,
-                                                description: '',
-                                                remark: '',
-                                                type: item.assetType as AssetType,
-                                                usefulLife:
-                                                    item.assetUsefulLife,
-                                            },
-                                        },
-                                        date: new Date(date),
-                                        value: item.amount,
-                                    })),
-                            },
-                        })),
                     ...payments.map((payment) => {
                         return {
                             chartOfAccountId: payment.id,
@@ -123,9 +99,6 @@ export const createOtherInvoice = async (
                     }),
                 ],
             },
-            // ApSubledger: !!contactId
-            //     ? { create: { contactId: Number(contactId) } }
-            //     : undefined,
             ApSubledger: !!contactId
                 ? {
                       create: {
@@ -134,26 +107,58 @@ export const createOtherInvoice = async (
                       },
                   }
                 : undefined,
-            // AssetMovement: {
-            //     create: items
-            //         .filter((item) => item.assetType)
-            //         .map((item) => ({
-            //             AssetRegistration: {
-            //                 create: {
-            //                     acquisitionDate: new Date(date),
-            //                     name: item.assetName as string,
-            //                     description: '',
-            //                     remark: '',
-            //                     type: item.assetType as AssetType,
-            //                     usefulLife: item.assetUsefulLife,
-            //                 },
-            //             },
-            //             date: new Date(date),
-            //             value: item.amount,
-            //         })),
-            // },
+            AssetMovement: {
+                create: items
+                    .filter((item) => item.assetType)
+                    .map((item) => ({
+                        AssetRegistration: {
+                            create: {
+                                name: item.assetName as string,
+                                description: '',
+                                type: item.assetType as AssetType,
+                                acquisitionDate: new Date(date),
+                                usefulLife: item.assetUsefulLife,
+                                cost: item.amount,
+                                remark: '',
+                                residualValue: item.assetResidualValue,
+                            },
+                        },
+                        date: new Date(date),
+                        value: item.amount,
+                        GeneralLedger: {
+                            create: {
+                                chartOfAccountId: item.chartOfAccountId,
+                                amount: item.amount,
+                            },
+                        },
+                    })),
+            },
+        },
+        include: {
+            AssetMovement: { include: { GeneralLedger: true } },
         },
     })
+
+    try {
+        await prisma.$queryRawUnsafe(`
+            INSERT INTO "_DocumentToGeneralLedger" ("A", "B") VALUES ${document.AssetMovement.map(
+                (item) => `(${document.id}, ${item.GeneralLedger.id})`
+            ).join(', ')}
+            `)
+    } catch (err) {
+        await deleteOtherInvoice(documentNo)
+        await prisma.generalLedger.deleteMany({
+            where: {
+                id: {
+                    in: document.AssetMovement.map(
+                        (item) => item.GeneralLedger.id
+                    ),
+                },
+            },
+        })
+
+        throw err
+    }
 
     revalidatePath('/accounting/other-invoice')
     redirect('/accounting/other-invoice/')

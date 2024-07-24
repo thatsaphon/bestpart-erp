@@ -23,6 +23,7 @@ import { getOtherInvoiceDetail } from './getOtherInvoiceDetail'
 import SelectSearchVendor from '@/components/select-search-vendor'
 import { updateRemark } from '@/app/sales/[documentNo]/update-remarks'
 import EditOtherInvoicePaymentsComponents from './edit-other-invoice-payments-components'
+import DeleteOtherInvoiceButton from './delete-other-invoice-button'
 
 type Props = {
     params: { documentNo: string }
@@ -75,16 +76,9 @@ export default async function OtherInvoiceDetailPage({
 
                         {session?.user.role === 'ADMIN' && (
                             <div>
-                                <Link
-                                    href={`/accounting/other-invoice/${document?.documentNo}/edit`}
-                                >
-                                    <Button
-                                        type="button"
-                                        variant={'destructive'}
-                                    >
-                                        Edit
-                                    </Button>
-                                </Link>
+                                <DeleteOtherInvoiceButton
+                                    documentNo={documentNo}
+                                />
                             </div>
                         )}
                     </div>
