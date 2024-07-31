@@ -40,9 +40,9 @@ export default async function EditPurchaseInvoicePage({
     }[] = await prisma.$queryRaw`
         select "Document".id, "Document"."date", "Document"."documentNo", "Contact"."id" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
         "SkuIn".barcode, "SkuIn"."skuMasterId", "SkuIn"."goodsMasterId", "MainSku"."id" as "mainSkuId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "SkuIn".quantity, ("SkuIn".cost + "SkuIn".vat) as "price", "SkuIn".unit, "SkuIn"."quantityPerUnit" from "Document" 
-        left join "ApSubledger" on "ApSubledger"."documentNo" = "Document"."id"
+        left join "ApSubledger" on "ApSubledger"."documentId" = "Document"."id"
         left join "Contact" on "Contact"."id" = "ApSubledger"."contactId"
-        left join "SkuIn" on "SkuIn"."documentNo" = "Document"."id"
+        left join "SkuIn" on "SkuIn"."documentId" = "Document"."id"
         left join "SkuMaster" on "SkuMaster"."id" = "SkuIn"."skuMasterId"
         left join "MainSku" on "MainSku"."id" = "SkuMaster"."mainSkuId"
         where "Document"."documentNo" = ${documentNo}`

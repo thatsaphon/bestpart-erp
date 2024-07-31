@@ -10,8 +10,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import ReceivedDialog from './received-dialog'
-import BillingNotePdf from '@/components/pdf/billing-note-pdf'
-import BlobProviderClient from '../../[documentNo]/blob-provider'
+import BillInvoiceLinkComponent from './bill-invoice-link-component'
 
 type Props = {
     params: {
@@ -79,11 +78,7 @@ export default async function page({ params: { documentNo } }: Props) {
                     <p>โทร: {billingNote[0].phone}</p>
                     <p>เลขประจำตัวผู้เสียภาษี: {billingNote[0].taxId}</p>
                 </div>
-                <BlobProviderClient
-                    key={new Date().getTime()}
-                    documentType="BillingNotePdf"
-                    document={billingNote[0]}
-                />
+                <BillInvoiceLinkComponent document={billingNote[0]} />
             </div>
 
             <Table>

@@ -22,6 +22,8 @@ export default async function RootLayout({
                 <Separator />
                 <SubMenuNavLink href="/sales" label="บิลขาย" />
                 <Separator />
+                <SubMenuNavLink href="/sales/return" label="รับคืนสินค้า" />
+                <Separator />
                 <SubMenuNavLink href="/sales/bill" label="ใบวางบิล" />
                 <Separator />
             </div>

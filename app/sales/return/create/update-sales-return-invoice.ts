@@ -1,57 +1,52 @@
 'use server'
 
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import prisma from '@/app/db/db'
-import { Contact, Prisma } from '@prisma/client'
+import { Contact, DocumentRemark, Prisma } from '@prisma/client'
 import { format } from 'date-fns'
-import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { InventoryDetailType } from '@/types/inventory-detail'
-import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 import { redirect } from 'next/navigation'
 import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 
-export const createSalesInvoice = async (
+export const updateSalesInvoice = async (
+    id: number,
     formData: FormData,
     items: InventoryDetailType[],
-    payments: {
-        id: number
-        amount: number
-    }[],
-    remarks: { id?: number; remark: string }[]
+    payments: { id: number; amount: number }[],
+    remarks: { id?: number; remark: string; isDeleted?: boolean }[]
 ) => {
     const validator = z.object({
-        customerId: z.string().trim().nullable(),
-        contactName: z.string().trim().optional(),
-        address: z.string().trim().optional(),
+        customerId: z.string().trim().optional().nullable(),
+        contactName: z.string().trim().optional().nullable(),
+        address: z.string().trim().optional().nullable(),
         phone: z.string().trim().optional().nullable(),
         taxId: z.string().trim().optional().nullable(),
-        date: z.string().trim().min(1, 'date must not be empty'),
+        date: z.string().trim().optional(),
         documentNo: z.string().trim().optional().nullable(),
         // payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
         // remark: z.string().trim().optional().nullable(),
     })
 
     const result = validator.safeParse({
-        customerId: formData.get('customerId'),
+        customerId: formData.get('customerId') || undefined,
         contactName: formData.get('contactName') || undefined,
         address: formData.get('address') || undefined,
         phone: formData.get('phone') || undefined,
         taxId: formData.get('taxId') || undefined,
-        date: formData.get('date'),
-        documentNo: formData.get('documentNo'),
-        // payment: formData.get('payment'),
-        // remark: formData.get('remark'),
+        date: formData.get('date') || undefined,
+        documentNo: formData.get('documentNo') || undefined,
+        // payment: formData.get('payment') || undefined,
+        // remark: formData.get('remark') || undefined,
     })
 
     if (!result.success) {
         throw new Error(
             fromZodError(result.error, {
-                prefix: '- ',
-                prefixSeparator: ' ',
-                includePath: false,
+                // prefix: '- ',
+                // prefixSeparator: ' ',
+                // includePath: false,
                 issueSeparator: '\n',
             }).message
         )
@@ -98,6 +93,27 @@ export const createSalesInvoice = async (
             },
         },
     })
+    if (goodsMasters.length !== items.length) {
+        throw new Error('goods not found')
+    }
+
+    const invoice = await prisma.document.findUniqueOrThrow({
+        where: { id },
+        include: {
+            GeneralLedger: true,
+            ArSubledger: true,
+            SkuOut: {
+                include: {
+                    GoodsMaster: true,
+                    SkuInToOut: true,
+                },
+            },
+        },
+    })
+
+    if (invoice.ArSubledger?.paymentStatus === 'Billed') {
+        throw new Error('วางบิลแล้วไม่สามารถแก้ไขได้')
+    }
 
     const checkRemaining: {
         id: number
@@ -109,20 +125,18 @@ export const createSalesInvoice = async (
         select "SkuIn".id, "SkuIn"."skuMasterId", "SkuIn".barcode, "SkuIn".quantity, "SkuIn".quantity - COALESCE(sum("SkuInToOut".quantity), 0)  as remaining 
         from "SkuIn" left join "SkuInToOut" on "SkuIn"."id" = "SkuInToOut"."skuInId" 
         where "SkuIn"."skuMasterId" in (${Prisma.join(goodsMasters.map((item) => item.skuMasterId))})
+        and ("SkuInToOut".id not in (${Prisma.join(invoice.SkuOut.flatMap((item) => item.SkuInToOut.map((item) => item.id)))})
+        or "SkuInToOut".id is null)
         group by "SkuIn".id 
         having sum("SkuInToOut".quantity) < "SkuIn".quantity or sum("SkuInToOut".quantity) is null
         order by "SkuIn"."date", "SkuIn"."id" asc`
-
-    if (goodsMasters.length !== items.length) {
-        throw new Error('goods not found')
-    }
 
     for (let i = 0; i < items.length; i++) {
         const goodsMaster = goodsMasters.find(
             (goods) => goods.barcode === items[i].barcode
         )
         if (!goodsMaster) {
-            throw new Error(`barcode ${items[i].barcode} not found`)
+            throw new Error('goods not found')
         }
 
         const remaining = checkRemaining.filter(
@@ -138,70 +152,110 @@ export const createSalesInvoice = async (
         }
     }
 
-    if (!documentNo) {
-        documentNo = await generateDocumentNumber('SINV', date)
-    }
-
-    const session = await getServerSession(authOptions)
-
-    const invoice = await prisma.document.create({
+    const deleteSkuInToOut = prisma.skuInToOut.deleteMany({
+        where: {
+            id: {
+                in: invoice.SkuOut.flatMap((item) =>
+                    item.SkuInToOut.map((item) => item.id)
+                ),
+            },
+        },
+    })
+    const updateInvoice = prisma.document.update({
+        where: { id },
         data: {
-            contactName: contactName || '',
-            address: address || '',
-            phone: phone || '',
-            taxId: taxId || '',
-            date: new Date(date),
-            documentNo: documentNo,
-            remark: { create: remarks },
-            createdBy: session?.user.first_name,
-            updatedBy: session?.user.first_name,
+            contactName: contactName || undefined,
+            address: address || undefined,
+            phone: phone || undefined,
+            taxId: taxId || undefined,
+            date: date ? new Date(date) : undefined,
+            documentNo: documentNo || undefined,
+            remark: {
+                create: remarks.filter(({ id }) => !id),
+                update: remarks
+                    .filter(({ id }) => id)
+                    .map((remark) => ({
+                        where: { id: remark.id },
+                        data: {
+                            remark: remark.remark,
+                            isDeleted: remark.isDeleted,
+                        },
+                    })),
+            },
             ArSubledger: !!contact
                 ? {
-                      create: {
+                      update: {
                           contactId: Number(customerId),
                           paymentStatus: calculateArPaymentStatus(payments),
                       },
                   }
                 : undefined,
             GeneralLedger: {
-                create: [
-                    // 11000 = เงินสด, 12000 = ลูกหนี้
-                    ...payments.map((payment) => {
-                        return {
-                            chartOfAccountId: payment.id,
-                            amount: payment.amount,
-                        }
-                    }),
-                    // ขาย
+                deleteMany: [
                     {
-                        chartOfAccountId: 41000,
-                        amount: -items
-                            .reduce(
-                                (sum, item) =>
-                                    sum +
-                                    (item.quantity * item.price * 100) / 107,
-                                0
-                            )
-                            .toFixed(2),
+                        AND: [
+                            { chartOfAccountId: { gte: 11000 } },
+                            { chartOfAccountId: { lte: 12000 } },
+                        ],
+                    },
+                ],
+                create: payments.map((payment) => ({
+                    chartOfAccountId: payment.id,
+                    amount: payment.amount,
+                })),
+                update: [
+                    // รายได้
+                    {
+                        where: {
+                            id: invoice?.GeneralLedger.find(
+                                ({ chartOfAccountId }) =>
+                                    chartOfAccountId === 41000
+                            )?.id,
+                        },
+                        data: {
+                            chartOfAccountId: 41000,
+                            amount: -items
+                                .reduce(
+                                    (sum, item) =>
+                                        sum +
+                                        (item.quantity * item.price * 100) /
+                                            107,
+                                    0
+                                )
+                                .toFixed(2),
+                        },
                     },
                     // ภาษีขาย
                     {
-                        chartOfAccountId: 23100,
-                        amount: -items
-                            .reduce(
-                                (sum, item) =>
-                                    sum +
-                                    (item.quantity * item.price * 7) / 107,
-                                0
-                            )
-                            .toFixed(2),
+                        where: {
+                            id: invoice?.GeneralLedger.find(
+                                ({ chartOfAccountId }) =>
+                                    chartOfAccountId === 23100
+                            )?.id,
+                        },
+                        data: {
+                            chartOfAccountId: 23100,
+                            amount: -items
+                                .reduce(
+                                    (sum, item) =>
+                                        sum +
+                                        (item.quantity * item.price * 7) / 107,
+                                    0
+                                )
+                                .toFixed(2),
+                        },
                     },
                 ],
             },
             SkuOut: {
+                deleteMany: {
+                    id: {
+                        in: invoice.SkuOut.flatMap((item) => item.id),
+                    },
+                },
                 create: items.map((item) => {
                     return {
-                        date: new Date(date),
+                        date: !!date ? new Date(date) : invoice.date,
                         goodsMasterId: item.goodsMasterId,
                         skuMasterId: item.skuMasterId,
                         barcode: String(item.barcode),
@@ -309,6 +363,9 @@ export const createSalesInvoice = async (
         },
     })
 
+    await prisma.$transaction([deleteSkuInToOut, updateInvoice])
+
     revalidatePath('/sales')
-    redirect(`/sales/${invoice.documentNo}`)
+    revalidatePath(`/sales/${documentNo}`)
+    redirect(`/sales/${documentNo}`)
 }

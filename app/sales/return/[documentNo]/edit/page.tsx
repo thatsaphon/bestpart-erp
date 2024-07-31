@@ -1,6 +1,5 @@
 import prisma from '@/app/db/db'
 import React from 'react'
-import CreateOrUpdateSalesInvoiceComponent from '../../create/create-update-sales-invoice-component'
 import {
     DocumentRemark,
     MainSkuRemark,
@@ -11,6 +10,7 @@ import {
 import { getPaymentMethods } from '@/app/actions/accounting'
 import Link from 'next/link'
 import { getDate, isBefore, startOfDay } from 'date-fns'
+import CreateOrUpdateSalesReturnInvoiceComponent from '../../create/create-update-sales-return-invoice-component'
 
 type Props = { params: { documentNo: string } }
 
@@ -121,7 +121,7 @@ export default async function EditSalesInvoicePage({
             <h1 className="my-2 text-3xl transition-colors">
                 แก้ไขรายละเอียดบิลขาย
             </h1>
-            <CreateOrUpdateSalesInvoiceComponent
+            <CreateOrUpdateSalesReturnInvoiceComponent
                 defaultItems={salesInvoices.map((x) => ({
                     ...x,
                     MainSkuRemarks: mainSkuRemarks.filter(

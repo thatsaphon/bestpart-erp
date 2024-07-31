@@ -13,7 +13,7 @@ import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
 import { redirect } from 'next/navigation'
 import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 
-export const createSalesInvoice = async (
+export const createSalesReturnInvoice = async (
     formData: FormData,
     items: InventoryDetailType[],
     payments: {
@@ -139,7 +139,7 @@ export const createSalesInvoice = async (
     }
 
     if (!documentNo) {
-        documentNo = await generateDocumentNumber('SINV', date)
+        documentNo = await generateDocumentNumber('CN', date)
     }
 
     const session = await getServerSession(authOptions)
@@ -169,13 +169,13 @@ export const createSalesInvoice = async (
                     ...payments.map((payment) => {
                         return {
                             chartOfAccountId: payment.id,
-                            amount: payment.amount,
+                            amount: -payment.amount,
                         }
                     }),
-                    // ขาย
+                    // รับคืนสินค้า
                     {
-                        chartOfAccountId: 41000,
-                        amount: -items
+                        chartOfAccountId: 41200,
+                        amount: +items
                             .reduce(
                                 (sum, item) =>
                                     sum +
@@ -184,10 +184,10 @@ export const createSalesInvoice = async (
                             )
                             .toFixed(2),
                     },
-                    // ภาษีขาย
+                    // ภาษีขาย (ย้อนกลับ)
                     {
                         chartOfAccountId: 23100,
-                        amount: -items
+                        amount: +items
                             .reduce(
                                 (sum, item) =>
                                     sum +
@@ -198,114 +198,129 @@ export const createSalesInvoice = async (
                     },
                 ],
             },
-            SkuOut: {
+            SkuIn: {
                 create: items.map((item) => {
                     return {
                         date: new Date(date),
                         goodsMasterId: item.goodsMasterId,
                         skuMasterId: item.skuMasterId,
-                        barcode: String(item.barcode),
+                        barcode: item.barcode,
                         unit: item.unit,
                         quantityPerUnit: item.quantityPerUnit,
                         quantity: item.quantity * item.quantityPerUnit,
-                        cost: 0,
-                        price: +((100 / 107) * item.price).toFixed(2),
+                        cost: +((100 / 107) * item.price).toFixed(2),
                         vat: +((7 / 107) * item.price).toFixed(2),
-                        SkuInToOut: {
-                            create: checkRemaining
-                                .filter(
-                                    ({ skuMasterId }) =>
-                                        item.skuMasterId === skuMasterId
-                                )
-                                ?.map(({ id, remaining }, index, array) => {
-                                    if (index === 0) {
-                                        if (
-                                            remaining >
-                                            item.quantity * item.quantityPerUnit
-                                        )
-                                            return {
-                                                skuInId: id,
-                                                quantity:
-                                                    item.quantity *
-                                                    item.quantityPerUnit,
-                                            }
-                                        if (
-                                            remaining <
-                                            item.quantity * item.quantityPerUnit
-                                        )
-                                            return {
-                                                skuInId: id,
-                                                quantity: remaining,
-                                            }
-                                    }
-                                    // ครั้งที่ 2+ ตัดยอดหมดแล้ว
-                                    if (
-                                        item.quantity * item.quantityPerUnit <
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            )
-                                    )
-                                        return { skuInId: 0, quantity: 0 } // 0 will be filter out
-
-                                    // ครั้งที่ 2+ ตัดทั้ง lot
-
-                                    if (
-                                        item.quantity * item.quantityPerUnit -
-                                            array
-                                                .slice(0, index)
-                                                .reduce(
-                                                    (sum, item) =>
-                                                        sum + item.remaining,
-                                                    0
-                                                ) >=
-                                        remaining
-                                    )
-                                        return {
-                                            skuInId: id,
-                                            quantity: remaining,
-                                        }
-
-                                    // ครั้งที่ 2+ ตัดส่วนที่เหลือ
-                                    if (
-                                        item.quantity * item.quantityPerUnit -
-                                            array
-                                                .slice(0, index)
-                                                .reduce(
-                                                    (sum, item) =>
-                                                        sum + item.remaining,
-                                                    0
-                                                ) <
-                                        remaining
-                                    )
-                                        return {
-                                            skuInId: id,
-                                            quantity:
-                                                item.quantity *
-                                                    item.quantityPerUnit -
-                                                array
-                                                    .slice(0, index)
-                                                    .reduce(
-                                                        (sum, item) =>
-                                                            sum +
-                                                            item.remaining,
-                                                        0
-                                                    ),
-                                        }
-
-                                    return {
-                                        skuInId: 0, // 0 will be filter out
-                                        quantity: 0,
-                                    }
-                                })
-                                .filter((item) => !!item.skuInId),
-                        },
                     }
                 }),
             },
+            // SkuOut: {
+            //     create: items.map((item) => {
+            //         return {
+            //             date: new Date(date),
+            //             goodsMasterId: item.goodsMasterId,
+            //             skuMasterId: item.skuMasterId,
+            //             barcode: String(item.barcode),
+            //             unit: item.unit,
+            //             quantityPerUnit: item.quantityPerUnit,
+            //             quantity: item.quantity * item.quantityPerUnit,
+            //             cost: 0,
+            //             price: +((100 / 107) * item.price).toFixed(2),
+            //             vat: +((7 / 107) * item.price).toFixed(2),
+            //             SkuInToOut: {
+            //                 create: checkRemaining
+            //                     .filter(
+            //                         ({ skuMasterId }) =>
+            //                             item.skuMasterId === skuMasterId
+            //                     )
+            //                     ?.map(({ id, remaining }, index, array) => {
+            //                         if (index === 0) {
+            //                             if (
+            //                                 remaining >
+            //                                 item.quantity * item.quantityPerUnit
+            //                             )
+            //                                 return {
+            //                                     skuInId: id,
+            //                                     quantity:
+            //                                         item.quantity *
+            //                                         item.quantityPerUnit,
+            //                                 }
+            //                             if (
+            //                                 remaining <
+            //                                 item.quantity * item.quantityPerUnit
+            //                             )
+            //                                 return {
+            //                                     skuInId: id,
+            //                                     quantity: remaining,
+            //                                 }
+            //                         }
+            //                         // ครั้งที่ 2+ ตัดยอดหมดแล้ว
+            //                         if (
+            //                             item.quantity * item.quantityPerUnit <
+            //                             array
+            //                                 .slice(0, index)
+            //                                 .reduce(
+            //                                     (sum, item) =>
+            //                                         sum + item.remaining,
+            //                                     0
+            //                                 )
+            //                         )
+            //                             return { skuInId: 0, quantity: 0 } // 0 will be filter out
+
+            //                         // ครั้งที่ 2+ ตัดทั้ง lot
+
+            //                         if (
+            //                             item.quantity * item.quantityPerUnit -
+            //                                 array
+            //                                     .slice(0, index)
+            //                                     .reduce(
+            //                                         (sum, item) =>
+            //                                             sum + item.remaining,
+            //                                         0
+            //                                     ) >=
+            //                             remaining
+            //                         )
+            //                             return {
+            //                                 skuInId: id,
+            //                                 quantity: remaining,
+            //                             }
+
+            //                         // ครั้งที่ 2+ ตัดส่วนที่เหลือ
+            //                         if (
+            //                             item.quantity * item.quantityPerUnit -
+            //                                 array
+            //                                     .slice(0, index)
+            //                                     .reduce(
+            //                                         (sum, item) =>
+            //                                             sum + item.remaining,
+            //                                         0
+            //                                     ) <
+            //                             remaining
+            //                         )
+            //                             return {
+            //                                 skuInId: id,
+            //                                 quantity:
+            //                                     item.quantity *
+            //                                         item.quantityPerUnit -
+            //                                     array
+            //                                         .slice(0, index)
+            //                                         .reduce(
+            //                                             (sum, item) =>
+            //                                                 sum +
+            //                                                 item.remaining,
+            //                                             0
+            //                                         ),
+            //                             }
+
+            //                         return {
+            //                             skuInId: 0, // 0 will be filter out
+            //                             quantity: 0,
+            //                         }
+            //                     })
+            //                     .filter((item) => !!item.skuInId),
+            //             },
+            //         }
+            //     }),
+            // },
         },
     })
 

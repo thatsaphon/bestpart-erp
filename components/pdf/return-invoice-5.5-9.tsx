@@ -1,7 +1,6 @@
 'use client'
 
-import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
-import { Prisma } from '@prisma/client'
+import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/return-invoice-detail'
 import {
     Page,
     Text,
@@ -10,25 +9,11 @@ import {
     StyleSheet,
     Font,
 } from '@react-pdf/renderer'
-
-const BillingNoteWithSubDocument =
-    Prisma.validator<Prisma.DocumentDefaultArgs>()({
-        include: {
-            ArSubledger: true,
-            GeneralLedger: {
-                include: {
-                    Document: true,
-                },
-            },
-        },
-    })
-export type BillingNoteDetail = Prisma.DocumentGetPayload<
-    typeof BillingNoteWithSubDocument
->
-
-type Props = { document: BillingNoteDetail }
-
 import { bahttext } from 'bahttext'
+
+type Props = {
+    document: Awaited<ReturnType<typeof getSalesReturnInvoiceDetail>>
+}
 
 Font.register({
     family: 'Inter Sarabun',
@@ -46,15 +31,17 @@ Font.register({
     fonts: [{ src: '/fonts/Inter-VariableFont_slnt,wght.ttf' }],
 })
 
-export default function BillingNotePdf({ document }: Props) {
+export default function SalesReturnInvoicePdf_5x9({ document }: Props) {
     const styles = StyleSheet.create({
         page: {
             flexDirection: 'column',
-            fontSize: 8,
+            fontSize: 9,
             gap: 5,
             fontFamily: 'Inter Sarabun',
             alignItems: 'center',
             padding: 40,
+            paddingLeft: 40,
+            paddingRight: 30,
             paddingBottom: 120,
         },
         title: {
@@ -74,9 +61,8 @@ export default function BillingNotePdf({ document }: Props) {
             flexDirection: 'row',
             gap: 5,
             width: '100%',
-            paddingLeft: 20,
-            paddingRight: 30,
             alignItems: 'flex-start',
+            justifyContent: 'space-between',
         },
         col1: {
             width: 20,
@@ -103,7 +89,7 @@ export default function BillingNotePdf({ document }: Props) {
         footer: {
             position: 'absolute',
             left: 0,
-            right: 70,
+            right: 30,
             bottom: 80,
             flexDirection: 'row',
             alignItems: 'flex-end',
@@ -118,40 +104,38 @@ export default function BillingNotePdf({ document }: Props) {
         },
         footer2: {
             position: 'absolute',
-            left: 50,
-            right: 0,
-            bottom: 50,
+            left: 40,
+            right: 30,
+            bottom: 40,
             flexDirection: 'row',
-            // alignItems: 'flex-end',
-            columnGap: 150,
-            // justifyContent: 'space-around',
+            justifyContent: 'space-between',
         },
     })
-
-    const getSalesInvoice = () => {
-        return document.GeneralLedger.sort(
-            (a, b) => a.Document[0].id - b.Document[0].id
-        )
-    }
 
     return (
         <Document>
             <Page
-                size={['648', '396']}
+                size={['612', '396']}
                 orientation="portrait"
                 style={styles.page}
                 fixed
             >
                 <View style={styles.title} fixed>
                     <Text style={{ textAlign: 'center', width: '100%' }}>
-                        ใบวางบิล
+                        ใบรับคืนสินค้า/ใบลดหนี้
+                    </Text>
+                    <Text style={{ textAlign: 'center', width: '100%' }}>
+                        หจก.จ.สุพรรณบุรีอะไหล่
+                    </Text>
+                    <Text style={{ textAlign: 'center', width: '100%' }}>
+                        เลขประจำตัวผู้เสียภาษี: 123456789012{' '}
                     </Text>
                 </View>
                 <View style={styles.header} fixed>
-                    <View style={styles.header}>
-                        <Text>หจก.จ.สุพรรณบุรีอะไหล่</Text>
+                    <View style={{ gap: 2 }}>
+                        <Text>{document?.contactName}</Text>
                     </View>
-                    <View style={{ marginLeft: '10', gap: 2 }}>
+                    <View style={{ gap: 2 }}>
                         <Text>เลขที่: {document?.documentNo}</Text>
                         <Text>
                             วันที่:{' '}
@@ -178,31 +162,28 @@ export default function BillingNotePdf({ document }: Props) {
                     <Text style={styles.col5}>หน่วย</Text>
                     <Text style={styles.col6}>รวม</Text>
                 </View>
-                {getSalesInvoice().map((item, index) => (
-                    <View
-                        style={styles.row}
-                        key={item.Document[0].id}
-                        wrap={false}
-                    >
+                {document?.SkuIn.map((item, index) => (
+                    <View style={styles.row} key={item.barcode} wrap={false}>
                         <Text style={styles.col1}>{index + 1}</Text>
-                        <Text style={styles.col2}>
-                            {item.Document[0].documentNo}
-                        </Text>
-                        {/* <Text style={styles.col3}>
+                        <Text style={styles.col2}>{item.barcode}</Text>
+                        <Text style={styles.col3}>
                             {`${item.GoodsMaster.SkuMaster.mainSku.name} - ${item.GoodsMaster.SkuMaster.detail}`}
                         </Text>
                         <Text style={styles.col4}>
                             {item.quantity / item.quantityPerUnit}
                         </Text>
-                        <Text style={styles.col5}>{`${item.unit}`}</Text> */}
+                        <Text style={styles.col5}>{`${item.unit}`}</Text>
                         <Text style={styles.col6}>
-                            {item.amount.toLocaleString()}
+                            {(
+                                (item.cost + item.vat) *
+                                item.quantity
+                            ).toLocaleString()}
                         </Text>
                     </View>
                 ))}
                 <View style={{ ...styles.footer }}>
                     <View style={styles.sum}>
-                        {/* {document?.GeneralLedger.filter(
+                        {document?.GeneralLedger.filter(
                             ({ chartOfAccountId }) =>
                                 chartOfAccountId >= 11000 &&
                                 chartOfAccountId <= 12000
@@ -216,18 +197,19 @@ export default function BillingNotePdf({ document }: Props) {
                                 }}
                             >
                                 <Text style={{ textAlign: 'right' }}>
-                                    {`${item.chartOfAccountId === 12000 ? 'เงินเชื่อ' : item.ChartOfAccount?.name} :`}
+                                    {`${item.chartOfAccountId === 12000 ? 'หักลบเงินเชื่อ' : item.chartOfAccountId === 11000 ? 'คืนเป็นเงินสด' : item.ChartOfAccount?.name} :`}
                                 </Text>
                                 <Text style={{ width: 50, textAlign: 'right' }}>
-                                    {`${item.amount.toLocaleString()}`} บาท
+                                    {`${-item.amount.toLocaleString()}`} บาท
                                 </Text>
                             </View>
-                        ))} */}
+                        ))}
                         <Text>
                             {`(${bahttext(
                                 Number(
-                                    getSalesInvoice().reduce(
-                                        (a, b) => a + b.amount,
+                                    document?.SkuIn.reduce(
+                                        (a, b) =>
+                                            a + (b.cost + b.vat) * b.quantity,
                                         0
                                     )
                                 )
@@ -235,37 +217,16 @@ export default function BillingNotePdf({ document }: Props) {
                         </Text>
                     </View>
                     <View style={styles.sum}>
-                        {/* <Text>ราคาก่อนภาษี: </Text>
-                        <Text>VAT 7%: </Text> */}
                         <Text>รวมเป็นเงินทั้งสิ้น: </Text>
                     </View>
                     <View style={styles.sum}>
-                        {/* <Text
-                            render={({ pageNumber, totalPages }) =>
-                                pageNumber === totalPages &&
-                                document?.SkuOut.reduce(
-                                    (a, b) => a + b.price * b.quantity,
-                                    0
-                                )
-                            }
-                        >
-                            {document?.SkuOut.reduce((a, b) => a + b.price, 0)}
-                        </Text>
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
-                                document?.SkuOut.reduce(
-                                    (a, b) => a + b.vat * b.quantity,
+                                document?.SkuIn.reduce(
+                                    (a, b) => a + (b.cost + b.vat) * b.quantity,
                                     0
-                                )
-                            }
-                        ></Text> */}
-                        <Text
-                            render={({ pageNumber, totalPages }) =>
-                                pageNumber === totalPages &&
-                                getSalesInvoice()
-                                    .reduce((a, b) => a + b.amount, 0)
-                                    .toLocaleString()
+                                ).toLocaleString()
                             }
                         ></Text>
                     </View>
@@ -280,9 +241,13 @@ export default function BillingNotePdf({ document }: Props) {
                 ></Text>
 
                 <View style={{ ...styles.footer2 }}>
-                    <Text>ผู้รับสินค้า</Text>
-                    <Text>ผู้จัดสินค้า</Text>
-                    <Text>ผู้รับเงิน</Text>
+                    <Text style={{ width: 120 }}>
+                        ผู้คิดเงิน:{`\n`}
+                        {document?.createdBy}
+                    </Text>
+                    <Text style={{ width: 120 }}>ผู้จัดสินค้า</Text>
+                    <Text style={{ width: 120 }}>ผู้รับเงิน</Text>
+                    <Text style={{ width: 120 }}>ผู้รับสินค้า</Text>
                 </View>
             </Page>
         </Document>
