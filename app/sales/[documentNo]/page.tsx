@@ -29,9 +29,19 @@ import {
 } from '@/components/ui/tooltip'
 import { isBefore, startOfDay } from 'date-fns'
 import SalesInvoiceLinkComponent from './sales-invoice-link-component'
+import { Metadata, ResolvingMetadata } from 'next'
 
 type Props = {
     params: { documentNo: string }
+}
+
+export async function generateMetadata(
+    { params }: Props,
+    parent: ResolvingMetadata
+): Promise<Metadata> {
+    return {
+        title: `รายละเอียดบิลขาย - ${params.documentNo}`,
+    }
 }
 
 export default async function SalesInvoiceDetailPage({

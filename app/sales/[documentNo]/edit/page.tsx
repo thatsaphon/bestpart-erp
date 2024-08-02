@@ -11,8 +11,18 @@ import {
 import { getPaymentMethods } from '@/app/actions/accounting'
 import Link from 'next/link'
 import { getDate, isBefore, startOfDay } from 'date-fns'
+import { Metadata, ResolvingMetadata } from 'next'
 
 type Props = { params: { documentNo: string } }
+
+export async function generateMetadata(
+    { params }: Props,
+    parent: ResolvingMetadata
+): Promise<Metadata> {
+    return {
+        title: `แก้ไขบิลขาย - ${params.documentNo}`,
+    }
+}
 
 export default async function EditSalesInvoicePage({
     params: { documentNo },

@@ -15,6 +15,7 @@ import Link from 'next/link'
 import CreateBillingNote from './create-billing-note-component'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 const documentWithGeneralLedgerArSubledger =
     Prisma.validator<Prisma.DocumentDefaultArgs>()({
@@ -47,7 +48,7 @@ export default function ReceivableTable({ documents }: Props) {
                             <TableHead>เลขที่</TableHead>
                             <TableHead>วันที่</TableHead>
                             <TableHead>จำนวนเงิน</TableHead>
-                            <TableHead>สถานะ</TableHead>
+                            <TableHead className="text-center">สถานะ</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -83,7 +84,17 @@ export default function ReceivableTable({ documents }: Props) {
                                 </TableCell>
                                 <TableCell>
                                     <Link
-                                        href={`/${document.type === 'Sales' ? 'sales' : 'billing'}/${document.documentNo}`}
+                                        href={`/${
+                                            document.documentNo.startsWith(
+                                                'INV'
+                                            )
+                                                ? 'sales'
+                                                : document.documentNo.startsWith(
+                                                        'CN'
+                                                    )
+                                                  ? 'sales/return'
+                                                  : 'sales/bill'
+                                        }/${document.documentNo}`}
                                     >
                                         {document.documentNo}
                                     </Link>
@@ -98,10 +109,45 @@ export default function ReceivableTable({ documents }: Props) {
                                     }).format(document.date)}
                                 </TableCell>
                                 <TableCell>
-                                    {document.GeneralLedger[0].amount}
+                                    {document.GeneralLedger?.reduce(
+                                        (acc, curr) => acc + curr.amount,
+                                        0
+                                    )}
                                 </TableCell>
-                                <TableCell>
-                                    {document.ArSubledger?.paymentStatus}
+                                <TableCell className="text-center">
+                                    {/* {document.ArSubledger?.paymentStatus} */}
+                                    {document.ArSubledger?.paymentStatus ===
+                                    'Billed' ? (
+                                        <Badge className="bg-green-500">
+                                            วางบิลแล้ว
+                                        </Badge>
+                                    ) : document.documentNo.startsWith('CN') &&
+                                      document.ArSubledger?.paymentStatus ===
+                                          'Paid' ? (
+                                        <Badge className="bg-green-500">
+                                            คืนเงินแล้ว
+                                        </Badge>
+                                    ) : document.ArSubledger?.paymentStatus ===
+                                      'Paid' ? (
+                                        <Badge className="bg-green-500">
+                                            จ่ายแล้ว
+                                        </Badge>
+                                    ) : document.ArSubledger?.paymentStatus ===
+                                      'PartialPaid' ? (
+                                        <Badge variant={'destructive'}>
+                                            จ่ายแล้วบางส่วน
+                                        </Badge>
+                                    ) : document.documentNo.startsWith('CN') &&
+                                      document.ArSubledger?.paymentStatus ===
+                                          'NotPaid' ? (
+                                        <Badge className="bg-yellow-400">
+                                            ยังไม่ได้คืนเงิน
+                                        </Badge>
+                                    ) : (
+                                        <Badge variant={'destructive'}>
+                                            ยังไม่จ่าย
+                                        </Badge>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))}

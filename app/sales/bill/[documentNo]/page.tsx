@@ -11,10 +11,20 @@ import {
 } from '@/components/ui/table'
 import ReceivedDialog from './received-dialog'
 import BillInvoiceLinkComponent from './bill-invoice-link-component'
+import { Metadata, ResolvingMetadata } from 'next'
 
 type Props = {
     params: {
         documentNo: string
+    }
+}
+
+export async function generateMetadata(
+    { params }: Props,
+    parent: ResolvingMetadata
+): Promise<Metadata> {
+    return {
+        title: `รายละเอียดใบวางบิล - ${params.documentNo}`,
     }
 }
 

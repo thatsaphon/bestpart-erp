@@ -3,8 +3,13 @@ import React from 'react'
 import { getPaymentMethods } from '@/app/actions/accounting'
 import Link from 'next/link'
 import CreateOrUpdateSalesReturnInvoiceComponent from './create-update-sales-return-invoice-component'
+import { Metadata } from 'next'
 
 type Props = {}
+
+export const metadata: Metadata = {
+    title: 'สร้างใบรับคืนสินค้า',
+}
 
 export default async function CreateSalesInvoicePage({}: Props) {
     const paymentMethods = await getPaymentMethods()

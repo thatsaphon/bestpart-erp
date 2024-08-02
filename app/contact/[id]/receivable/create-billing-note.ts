@@ -86,9 +86,8 @@ export const createBillingNote = async (
             type: 'BillingNote',
             date: new Date(date),
             documentNo: documentNo,
-            remark: remark ? { create: { remark } } : undefined,
-            createdBy: session?.user.username,
-            updatedBy: session?.user.username,
+            createdBy: session?.user.first_name,
+            updatedBy: session?.user.first_name,
             ArSubledger: {
                 create: {
                     contactId: +customerId,
@@ -102,10 +101,6 @@ export const createBillingNote = async (
                     })),
                 ],
             },
-        },
-        select: {
-            id: true,
-            documentNo: true,
         },
     })
 
@@ -123,7 +118,7 @@ export const createBillingNote = async (
     const createRemark = prisma.documentRemark.createMany({
         data: documents.map((document) => ({
             remark: `วางบิลเลขที่ ${documentNo}`,
-            documentNo: document.id,
+            documentId: document.id,
         })),
     })
     const transaction = await prisma.$transaction([

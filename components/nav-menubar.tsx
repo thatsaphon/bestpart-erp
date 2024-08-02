@@ -47,14 +47,21 @@ export function NavMenubar() {
                 </MenubarTrigger>
                 <MenubarContent>
                     <Link href={'/sales'}>
-                        <MenubarItem>บิลขาย</MenubarItem>
+                        <MenubarItem>รายการขาย</MenubarItem>
                     </Link>
                     <Link href={'/sales/create'}>
                         <MenubarItem>สร้างบิลขาย</MenubarItem>
                     </Link>
                     <MenubarSeparator />
+                    <Link href={'/sales/return'}>
+                        <MenubarItem>รายการคืนสินค้า</MenubarItem>
+                    </Link>
+                    <Link href={'/sales/return/create'}>
+                        <MenubarItem>สร้างใบรับคืนสินค้า</MenubarItem>
+                    </Link>
+                    <MenubarSeparator />
                     <Link href={'/sales/bill'}>
-                        <MenubarItem>ใบวางบิล</MenubarItem>
+                        <MenubarItem>รายการใบวางบิล</MenubarItem>
                     </Link>
                     <Link href={'/sales/bill/create'}>
                         <MenubarItem>สร้างใบวางบิล</MenubarItem>

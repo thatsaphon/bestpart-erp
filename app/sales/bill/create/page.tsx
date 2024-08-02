@@ -19,8 +19,13 @@ import { Button } from '@/components/ui/button'
 import { createBillingNote } from '@/app/contact/[id]/receivable/create-billing-note'
 import toast from 'react-hot-toast'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
+import { Metadata } from 'next'
 
 type Props = {}
+
+// export const metadata: Metadata = {
+//     title: 'สร้างใบวางบิล',
+// }
 
 export default function CreateBillPage({}: Props) {
     const [selectedDocuments, setSelectedDocuments] = useState<

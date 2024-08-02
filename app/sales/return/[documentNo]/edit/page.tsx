@@ -11,8 +11,18 @@ import { getPaymentMethods } from '@/app/actions/accounting'
 import Link from 'next/link'
 import { getDate, isBefore, startOfDay } from 'date-fns'
 import CreateOrUpdateSalesReturnInvoiceComponent from '../../create/create-update-sales-return-invoice-component'
+import { ResolvingMetadata, Metadata } from 'next'
 
 type Props = { params: { documentNo: string } }
+
+export async function generateMetadata(
+    { params }: Props,
+    parent: ResolvingMetadata
+): Promise<Metadata> {
+    return {
+        title: `แก้ไขใบรับคืนสินค้า - ${params.documentNo}`,
+    }
+}
 
 export default async function EditSalesInvoicePage({
     params: { documentNo },

@@ -29,9 +29,19 @@ import { isBefore, startOfDay } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/return-invoice-detail'
 import ReturnInvoicePdfLinkComponent from './pdf-link-component'
+import { ResolvingMetadata, Metadata } from 'next'
 
 type Props = {
     params: { documentNo: string }
+}
+
+export async function generateMetadata(
+    { params }: Props,
+    parent: ResolvingMetadata
+): Promise<Metadata> {
+    return {
+        title: `รายละเอียดใบรับคืนสินค้า - ${params.documentNo}`,
+    }
 }
 
 export default async function SalesInvoiceDetailPage({
