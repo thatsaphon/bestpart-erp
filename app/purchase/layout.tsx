@@ -18,7 +18,14 @@ export default async function RootLayout({
         <div className="grid flex-1 grid-cols-[200px_5px_1fr]">
             <div className="flex flex-col items-center text-center">
                 <Separator />
-                <SubMenuNavLink href="/purchase" label="Purchase" />
+                <SubMenuNavLink
+                    href="/purchase/purchase-order"
+                    label="ใบสั่งซื้อ"
+                />
+                <Separator />
+                <SubMenuNavLink href="/purchase" label="รับสินค้า" />
+                <Separator />
+                <SubMenuNavLink href="/purchase/payment" label="ใบสำคัญจ่าย" />
                 <Separator />
             </div>
             <Separator orientation="vertical" className="h-full" />

@@ -10,7 +10,7 @@ import {
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import prisma from '../../db/db'
+import prisma from '@/app/db/db'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import PaginationComponent from '@/components/pagination-component'
 import { format } from 'date-fns'
@@ -25,7 +25,7 @@ type Props = {
     }
 }
 
-export default async function PurchasePage({
+export default async function PurchaseOrderPage({
     searchParams: {
         limit = '10',
         page = '1',

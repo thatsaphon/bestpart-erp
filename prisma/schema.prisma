@@ -55,11 +55,13 @@ model Document {
   DocumentFile DocumentFile[]
   type         DocumentType     @default(Sales)
 
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @default(now()) @updatedAt
-  createdBy     String?
-  updatedBy     String?
-  AssetMovement AssetMovement[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now()) @updatedAt
+  createdBy         String?
+  updatedBy         String?
+  AssetMovement     AssetMovement[]
+  PurchaseOrderItem PurchaseOrderItem[]
+  CustomerOrder     CustomerOrder?
 }
 
 enum DocumentType {
@@ -134,8 +136,9 @@ model Contact {
 
   SkuMaster SkuMaster[] @relation("SkuMasterToVendor")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  CustomerOrder CustomerOrder[]
 }
 
 model MainSku {
@@ -163,11 +166,12 @@ model SkuMaster {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  Image       SkuMasterImage[]
-  GoodsMaster GoodsMaster[]
-  SkuIn       SkuIn[]
-  SkuOut      SkuOut[]
-  Vendor      Contact[]        @relation("SkuMasterToVendor")
+  Image             SkuMasterImage[]
+  GoodsMaster       GoodsMaster[]
+  SkuIn             SkuIn[]
+  SkuOut            SkuOut[]
+  Vendor            Contact[]           @relation("SkuMasterToVendor")
+  PurchaseOrderItem PurchaseOrderItem[]
 
   @@index([mainSkuId])
 }
@@ -205,8 +209,9 @@ model GoodsMaster {
   SkuOut SkuOut[]
   SkuIn  SkuIn[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now()) @updatedAt
+  PurchaseOrderItem PurchaseOrderItem[]
 
   @@index([skuMasterId])
 }
@@ -219,6 +224,7 @@ model SkuOut {
   GoodsMaster   GoodsMaster @relation(fields: [goodsMasterId], references: [id])
   goodsMasterId Int
   SkuMaster     SkuMaster   @relation(fields: [skuMasterId], references: [id])
+  skuMasterId   Int
 
   barcode         String
   unit            String
@@ -229,10 +235,9 @@ model SkuOut {
   price    Float
   vat      Float
 
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now()) @updatedAt
-  skuMasterId Int
-  SkuInToOut  SkuInToOut[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @default(now()) @updatedAt
+  SkuInToOut SkuInToOut[]
 
   @@index([skuMasterId])
   @@index([goodsMasterId])
@@ -429,4 +434,57 @@ model KnowledgeImage {
   knowledgeId Int
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) @updatedAt
+}
+
+model PurchaseOrderItem {
+  id Int @id @default(autoincrement())
+
+  Document      Document    @relation(fields: [documentId], references: [id])
+  documentId    Int
+  GoodsMaster   GoodsMaster @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId Int
+  SkuMaster     SkuMaster   @relation(fields: [skuMasterId], references: [id])
+  skuMasterId   Int
+
+  barcode         String
+  unit            String
+  quantityPerUnit Float  @default(1)
+
+  quantity Float
+  cost     Float
+  vat      Float
+
+  estimatedDeliveryDate DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model CustomerOrder {
+  id Int @id @default(autoincrement())
+
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+  Contact    Contact  @relation(fields: [contactId], references: [id])
+  contactId  Int
+
+  deposit Float
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now()) @updatedAt
+  CustomerOrderItem CustomerOrderItem[]
+}
+
+model CustomerOrderItem {
+  id Int @id @default(autoincrement())
+
+  CustomerOrder   CustomerOrder @relation(fields: [customerOrderId], references: [id])
+  customerOrderId Int
+
+  description String
+  quantity    String
+  price       Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }

@@ -6,7 +6,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-    title: 'Purchase',
+    title: 'รายการใบสั่งซื้อ',
 }
 
 export default async function RootLayout({
@@ -17,10 +17,10 @@ export default async function RootLayout({
     return (
         <>
             <h1 className="flex items-center gap-2 text-3xl text-primary">
-                <span>งานซื้อสินค้า</span>
-                <Link href={'/purchase/create'}>
+                <span>รายการใบสั่งซื้อ</span>
+                <Link href={'/purchase/purchase-order/create'}>
                     <Button className="ml-3" variant={'outline'}>
-                        สร้างบิลซื้อ
+                        สร้างใบสั่งซื้อ
                     </Button>
                 </Link>
             </h1>

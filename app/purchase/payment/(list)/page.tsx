@@ -10,11 +10,11 @@ import {
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import prisma from '../../db/db'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import PaginationComponent from '@/components/pagination-component'
 import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
+import prisma from '@/app/db/db'
 
 type Props = {
     searchParams: {
@@ -25,7 +25,7 @@ type Props = {
     }
 }
 
-export default async function PurchasePage({
+export default async function PaymentPage({
     searchParams: {
         limit = '10',
         page = '1',
