@@ -21,7 +21,6 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-// import { searchSku } from '@/app/sales/create/search-sku'
 
 type Props = {
     searchParams: {

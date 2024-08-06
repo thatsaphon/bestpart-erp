@@ -1,6 +1,6 @@
 'use server'
 
-import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
+import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
 import prisma from '@/app/db/db'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'

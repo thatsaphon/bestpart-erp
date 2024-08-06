@@ -68,7 +68,7 @@ export default async function EditSalesInvoicePage({
         return (
             <div>
                 <p>ไม่สามารถแก้ไขย้อนหลังได้</p>
-                <Link href={`/sales/${documentNo}`}>Back</Link>
+                <Link href={`/sales/sales-order/${documentNo}`}>Back</Link>
             </div>
         )
     }
@@ -117,7 +117,7 @@ export default async function EditSalesInvoicePage({
         <>
             <div className="flex justify-between">
                 <Link
-                    href={`/sales/${documentNo}`}
+                    href={`/sales/sales-order/${documentNo}`}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
 

@@ -365,7 +365,7 @@ export const updateSalesInvoice = async (
 
     await prisma.$transaction([deleteSkuInToOut, updateInvoice])
 
-    revalidatePath('/sales')
-    revalidatePath(`/sales/${documentNo}`)
-    redirect(`/sales/${documentNo}`)
+    revalidatePath('/sales/sales-order')
+    revalidatePath(`/sales/sales-order/${documentNo}`)
+    redirect(`/sales/sales-order/${documentNo}`)
 }

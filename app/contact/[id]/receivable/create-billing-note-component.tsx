@@ -59,7 +59,7 @@ export default function CreateBillingNote({
     return (
         <div className="p-3" key={key}>
             <div className="flex justify-between">
-                <Link href="/sales">
+                <Link href="/sales/sales-order">
                     <Button variant="ghost" className="mb-2">{`< Back`}</Button>
                 </Link>
                 <Link href="/sales/create">
@@ -182,96 +182,8 @@ export default function CreateBillingNote({
                                     onChange={(e) => {
                                         setBarcodeInput(e.target.value)
                                     }}
-                                    // onKeyDown={async (e) => {
-                                    //     if (e.key === 'Enter') {
-                                    //         e.preventDefault()
-                                    //         let splitedBarcode =
-                                    //             e.currentTarget.value.split('*')
-                                    //         let barcode =
-                                    //             splitedBarcode[0].trim()
-                                    //         let quantity = 1
-                                    //         if (splitedBarcode.length > 1) {
-                                    //             barcode =
-                                    //                 splitedBarcode[1].trim()
-                                    //             quantity = parseFloat(
-                                    //                 splitedBarcode[0].trim()
-                                    //             )
-                                    //         }
-                                    //         if (!barcode.trim()) {
-                                    //             return
-                                    //         }
-                                    //         const isExist = items.find(
-                                    //             (item) =>
-                                    //                 item.barcode === barcode
-                                    //         )
-                                    //         if (isExist) {
-                                    //             setItems(
-                                    //                 items.map((item) =>
-                                    //                     item.barcode === barcode
-                                    //                         ? {
-                                    //                               ...item,
-                                    //                               quantity:
-                                    //                                   item.quantity +
-                                    //                                   quantity,
-                                    //                           }
-                                    //                         : item
-                                    //                 )
-                                    //             )
-                                    //             setBarcodeInput('')
-                                    //             return
-                                    //         }
-                                    //         try {
-                                    //             const result =
-                                    //                 await getSkuByBarcode(
-                                    //                     barcode
-                                    //                 )
-                                    //             setItems([
-                                    //                 ...items,
-                                    //                 {
-                                    //                     ...result,
-                                    //                     quantity,
-                                    //                     price: 0,
-                                    //                 },
-                                    //             ])
-                                    //             setBarcodeInput('')
-                                    //         } catch (error) {
-                                    //             toast.error('ไม่พบ Barcode นี้')
-                                    //             return
-                                    //         }
-                                    //     }
-                                    //     if (e.key === 'ArrowUp') {
-                                    //         document
-                                    //             .getElementById(
-                                    //                 `quantity-${items.length - 1}`
-                                    //             )
-                                    //             ?.focus()
-                                    //     }
-                                    //     if (e.code === 'Slash' && e.shiftKey) {
-                                    //         e.preventDefault()
-                                    //         setOpen(true)
-                                    //     }
-                                    // }}
                                 />
                             </TableCell>
-                            {/* <SearchSkuDialog
-                                isOpen={open}
-                                setIsOpen={setOpen}
-                                onSelected={(data) => {
-                                    const isExist = items.find(
-                                        (item) => item.barcode === data.barcode
-                                    )
-                                    if (isExist) {
-                                        return toast.error(
-                                            'มีรายการนี้อยู่แล้ว'
-                                        )
-                                    }
-                                    setItems([
-                                        ...items,
-                                        { ...data, quantity: 1 },
-                                    ])
-                                    setOpen(false)
-                                }}
-                            /> */}
                         </TableRow>
                     </TableBody>
                     <TableFooter>

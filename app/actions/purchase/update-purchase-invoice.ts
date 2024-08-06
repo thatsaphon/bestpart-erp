@@ -4,7 +4,7 @@ import prisma from '@/app/db/db'
 import { format } from 'date-fns'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
-import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
+import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 

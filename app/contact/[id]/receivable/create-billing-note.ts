@@ -1,6 +1,6 @@
 'use server'
 
-import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
+import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import prisma from '@/app/db/db'
 import { getServerSession } from 'next-auth/next'

@@ -9,7 +9,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import Link from 'next/link'
-import prisma from '../../db/db'
+import prisma from '@/app/db/db'
 import PaginationComponent from '@/components/pagination-component'
 import { ViewIcon } from 'lucide-react'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
@@ -177,7 +177,9 @@ export default async function SalesListPage({
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
-                                <Link href={`/sales/${sale.documentNo}`}>
+                                <Link
+                                    href={`/sales/sales-order/${sale.documentNo}`}
+                                >
                                     <EyeOpenIcon />
                                 </Link>
                             </TableCell>

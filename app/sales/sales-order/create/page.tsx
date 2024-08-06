@@ -16,7 +16,7 @@ export default async function CreateSalesInvoicePage({}: Props) {
         <>
             <div className="flex justify-between">
                 <Link
-                    href={`/sales`}
+                    href={`/sales/sales-order`}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
             </div>

@@ -16,29 +16,16 @@ import {
 } from '@/components/ui/table'
 import { Cross1Icon } from '@radix-ui/react-icons'
 import React, { useEffect } from 'react'
-import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from '@/components/search-sku-dialog'
-import { createSalesReturnInvoice } from './create-sales-return-invoice'
 import { InventoryDetailType } from '@/types/inventory-detail'
-import { updateSalesInvoice } from './update-sales-return-invoice'
 import SelectSearchCustomer from '@/components/select-search-customer'
-import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ImageToolTip from '@/components/image-tooltip'
-import { DocumentRemark, PaymentStatus } from '@prisma/client'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import { getPaymentMethods } from '@/app/actions/accounting'
-import { Badge } from '@/components/ui/badge'
+import { DocumentRemark } from '@prisma/client'
 import { cn } from '@/lib/utils'
+import { getSkuByBarcode } from '@/actions/barcode-scanned'
+import { createQuotation } from './create-quotation'
 
 type Props = {
     defaultItems?: InventoryDetailType[]
@@ -52,18 +39,13 @@ type Props = {
         phone: string
         taxId: string
         documentRemarks: DocumentRemark[]
-        paymentStatus: PaymentStatus
     }
-    paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
-    defaultPayments?: { id: number; amount: number }[]
     defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
 }
 
-export default function CreateOrUpdateSalesReturnInvoiceComponent({
+export default function CreateOrUpdateQuotationComponent({
     defaultItems = [],
     defaultDocumentDetails,
-    paymentMethods,
-    defaultPayments,
     defaultRemarks,
 }: Props) {
     const formRef = React.useRef<HTMLFormElement>(null)
@@ -77,15 +59,6 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
         { id?: number; remark: string; isDeleted?: boolean }[]
     >(defaultRemarks || [])
     const [remarkInput, setRemarkInput] = React.useState<string>('')
-    const [selectedPayments, setSelectedPayments] = React.useState<
-        { id: number; amount: number }[]
-    >(defaultPayments || [])
-    const [selectedPayment, setSelectedPayment] = React.useState<
-        number | undefined
-    >()
-    const [paymentAmount, setPaymentAmount] = React.useState<
-        number | undefined
-    >()
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -142,59 +115,26 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
         }
     }
 
-    const addPayment = () => {
-        if (!selectedPayment || !paymentAmount) {
-            toast.error('กรุณาเลือกช่องทางการชําระเงินหรือจำนวนเงิน')
-            return
-        }
-        setSelectedPayments((prev) => [
-            ...prev,
-            { id: selectedPayment, amount: paymentAmount },
-        ])
-        setSelectedPayment(undefined)
-        setPaymentAmount(undefined)
-    }
-
     return (
         <div className="p-3" id={key} key={key}>
             <form
                 ref={formRef}
                 action={async (formData) => {
                     try {
-                        if (
-                            selectedPayments.reduce(
-                                (a, b) => a + b.amount,
-                                0
-                            ) !==
-                            items.reduce(
-                                (acc, item) => acc + item.price * item.quantity,
-                                0
-                            )
-                        ) {
-                            return toast.error(
-                                'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
-                            )
-                        }
                         if (!defaultItems.length) {
-                            await createSalesReturnInvoice(
-                                formData,
-                                items,
-                                selectedPayments,
-                                remarks
-                            )
+                            await createQuotation(formData, items, remarks)
                             setKey(String(Date.now()))
                             setItems([])
                             toast.success('บันทึกสําเร็จ')
                         }
-
                         if (defaultDocumentDetails) {
-                            await updateSalesInvoice(
-                                defaultDocumentDetails.id,
-                                formData,
-                                items,
-                                selectedPayments,
-                                remarks
-                            )
+                            // await updateSalesInvoice(
+                            //     defaultDocumentDetails.id,
+                            //     formData,
+                            //     items,
+                            //     selectedPayments,
+                            //     remarks
+                            // )
                             toast.success('บันทึกสําเร็จ')
                         }
                     } catch (err) {
@@ -245,141 +185,6 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                 <Table>
                     <TableCaption>
                         <div className="w-[650px] space-y-1">
-                            <div className="flex items-center gap-1 text-left">
-                                ช่องทางชำระเงิน:{' '}
-                                {!defaultDocumentDetails ? (
-                                    <></>
-                                ) : defaultDocumentDetails?.paymentStatus ===
-                                  'Paid' ? (
-                                    <Badge className="bg-green-400">
-                                        จ่ายแล้ว
-                                    </Badge>
-                                ) : defaultDocumentDetails?.paymentStatus ===
-                                  'Billed' ? (
-                                    <Badge variant={`secondary`}>
-                                        วางบิลแล้ว
-                                    </Badge>
-                                ) : defaultDocumentDetails?.paymentStatus ===
-                                  'PartialPaid' ? (
-                                    <Badge variant={'destructive'}>
-                                        จ่ายบางส่วน
-                                    </Badge>
-                                ) : !defaultDocumentDetails?.paymentStatus ? (
-                                    <Badge className="bg-green-400">
-                                        เงินสด
-                                    </Badge>
-                                ) : (
-                                    <Badge variant={'destructive'}>
-                                        ยังไม่จ่าย
-                                    </Badge>
-                                )}
-                            </div>
-                            {selectedPayments.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className={cn(
-                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary',
-                                        defaultDocumentDetails?.paymentStatus ===
-                                            'Billed' && 'grid-cols-2'
-                                    )}
-                                >
-                                    <p>
-                                        {paymentMethods.find(
-                                            (p) => p.id === item.id
-                                        )?.id === 12000
-                                            ? 'เงินเชื่อ'
-                                            : paymentMethods.find(
-                                                  (p) => p.id === item.id
-                                              )?.name}
-                                    </p>
-                                    <p>{item.amount}</p>
-                                    <Cross1Icon
-                                        className={cn(
-                                            'cursor-pointer text-destructive',
-                                            defaultDocumentDetails?.paymentStatus ===
-                                                'Billed' && 'hidden'
-                                        )}
-                                        onClick={() =>
-                                            setSelectedPayments(
-                                                selectedPayments.filter(
-                                                    (p) => p.id !== item.id
-                                                )
-                                            )
-                                        }
-                                    />
-                                </div>
-                            ))}
-                            <div
-                                className={cn(
-                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1',
-                                    defaultDocumentDetails?.paymentStatus ===
-                                        'Billed' && 'hidden'
-                                )}
-                            >
-                                <Select
-                                    name="paymentMethodId"
-                                    onValueChange={(e) =>
-                                        setSelectedPayment(Number(e))
-                                    }
-                                    value={String(selectedPayment)}
-                                >
-                                    <SelectTrigger className="">
-                                        <SelectValue
-                                            placeholder={'เลือกช่องทางชำระเงิน'}
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>
-                                                ช่องทางชำระเงิน
-                                            </SelectLabel>
-                                            {paymentMethods
-                                                .filter(
-                                                    ({ id }) =>
-                                                        !selectedPayments.find(
-                                                            (p) => p.id === id
-                                                        )
-                                                )
-                                                .map((item) => (
-                                                    <SelectItem
-                                                        key={item.id}
-                                                        value={String(item.id)}
-                                                    >
-                                                        {item.id === 12000
-                                                            ? 'เงินเชื่อ'
-                                                            : item.name}
-                                                    </SelectItem>
-                                                ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                                <Input
-                                    name="amount"
-                                    type="number"
-                                    placeholder="จำนวนเงิน"
-                                    onChange={(e) =>
-                                        setPaymentAmount(Number(e.target.value))
-                                    }
-                                    value={paymentAmount || ''}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault()
-                                            addPayment()
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="button"
-                                    onClick={() => addPayment()}
-                                >
-                                    เพิ่มการชำระเงิน
-                                </Button>
-                            </div>
-                            {defaultDocumentDetails?.paymentStatus ===
-                                'Billed' && (
-                                <p className="text-destructive">วางบิลแล้ว</p>
-                            )}
-
                             <p className="text-left">หมายเหตุ:</p>
                             {remarks.map((remark, index) => (
                                 <p

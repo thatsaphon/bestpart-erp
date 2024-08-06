@@ -14,6 +14,6 @@ export const updateRemark = async (documentId: number, remark: string) => {
         },
     })
 
-    revalidatePath(`/sales/${document.Document?.documentNo}`)
+    revalidatePath(`/sales/sales-order/${document.Document?.documentNo}`)
     return document
 }

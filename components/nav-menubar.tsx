@@ -46,7 +46,7 @@ export function NavMenubar() {
                     งานขาย
                 </MenubarTrigger>
                 <MenubarContent>
-                    <Link href={'/sales'}>
+                    <Link href={'/sales/sales-order'}>
                         <MenubarItem>รายการขาย</MenubarItem>
                     </Link>
                     <Link href={'/sales/create'}>

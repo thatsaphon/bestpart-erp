@@ -6,7 +6,7 @@ import {
     calculateApPaymentStatus,
     calculateArPaymentStatus,
 } from '@/lib/calculate-payment-status'
-import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
+import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
 import { AccountType, AssetType, Prisma } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'

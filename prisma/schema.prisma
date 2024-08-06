@@ -62,6 +62,7 @@ model Document {
   AssetMovement     AssetMovement[]
   PurchaseOrderItem PurchaseOrderItem[]
   CustomerOrder     CustomerOrder?
+  Quotation         Quotation?
 }
 
 enum DocumentType {
@@ -71,6 +72,9 @@ enum DocumentType {
   Received
   Payment
   OtherInvoice
+  Quotation
+  CustomerOrder
+  PurchaseOrder
 }
 
 model DocumentRemark {
@@ -139,6 +143,7 @@ model Contact {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @default(now()) @updatedAt
   CustomerOrder CustomerOrder[]
+  Quotation     Quotation[]
 }
 
 model MainSku {
@@ -172,6 +177,7 @@ model SkuMaster {
   SkuOut            SkuOut[]
   Vendor            Contact[]           @relation("SkuMasterToVendor")
   PurchaseOrderItem PurchaseOrderItem[]
+  QuotationItem     QuotationItem[]
 
   @@index([mainSkuId])
 }
@@ -212,6 +218,7 @@ model GoodsMaster {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @default(now()) @updatedAt
   PurchaseOrderItem PurchaseOrderItem[]
+  QuotationItem     QuotationItem[]
 
   @@index([skuMasterId])
 }
@@ -484,6 +491,44 @@ model CustomerOrderItem {
   description String
   quantity    String
   price       Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Quotation {
+  id Int @id @default(autoincrement())
+
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+
+  Contact   Contact? @relation(fields: [contactId], references: [id])
+  contactId Int?
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  QuotationItem QuotationItem[]
+}
+
+model QuotationItem {
+  id Int @id @default(autoincrement())
+
+  Quotation   Quotation @relation(fields: [quotationId], references: [id])
+  quotationId Int
+
+  GoodsMaster   GoodsMaster? @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId Int?
+  SkuMaster     SkuMaster?   @relation(fields: [skuMasterId], references: [id])
+  skuMasterId   Int?
+
+  barcode         String?
+  unit            String?
+  quantityPerUnit Float   @default(1)
+  description     String?
+
+  quantity Float
+  price    Float
+  vat      Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

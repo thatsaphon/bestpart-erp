@@ -1,6 +1,8 @@
+import { getPaymentMethods } from '@/app/actions/accounting'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
+import prisma from '@/app/db/db'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import SelectSearchCustomer from '@/components/select-search-customer'
 import {
     Table,
     TableBody,
@@ -11,43 +13,35 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Button } from '../../../components/ui/button'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
-import Link from 'next/link'
-import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
-import { getPaymentMethods } from '@/app/actions/accounting'
-import EditPaymentsComponents from './edit-payments-components'
-import { updateRemark } from './update-remarks'
-import SelectSearchCustomer from '@/components/select-search-customer'
 import { cn } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
 import {
-    Tooltip,
-    TooltipContent,
     TooltipProvider,
+    Tooltip,
     TooltipTrigger,
+    TooltipContent,
 } from '@/components/ui/tooltip'
 import { isBefore, startOfDay } from 'date-fns'
-import SalesInvoiceLinkComponent from './sales-invoice-link-component'
-import { Metadata, ResolvingMetadata } from 'next'
+import Link from 'next/link'
+import { getServerSession } from 'next-auth'
+import { Input } from '@/components/ui/input'
+import React from 'react'
+import { Button } from '@/components/ui/button'
+import getQuotationDetail from './get-quotation-detail'
+import QuotationLinkComponent from './quotation-link-component'
+import { updateRemark } from '../../return/[documentNo]/update-remarks'
+// import { updateRemark } from '../../return/[documentNo]/update-remarks'
 
 type Props = {
-    params: { documentNo: string }
-}
-
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
-    return {
-        title: `รายละเอียดบิลขาย - ${params.documentNo}`,
+    params: {
+        documentNo: string
     }
 }
 
-export default async function SalesInvoiceDetailPage({
+export default async function QuotationDetailPage({
     params: { documentNo },
 }: Props) {
-    const document = await getSalesInvoiceDetail(documentNo)
+    const document = await getQuotationDetail(documentNo)
     const session = await getServerSession(authOptions)
     const paymentMethods = await getPaymentMethods()
 
@@ -59,12 +53,11 @@ export default async function SalesInvoiceDetailPage({
                 </Table>
             </>
         )
-
     return (
         <>
             <div className="mb-2 p-3">
                 <Link
-                    href={'/sales'}
+                    href={'/sales/quotation'}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
                 <h1 className="my-2 text-3xl transition-colors">
@@ -95,7 +88,7 @@ export default async function SalesInvoiceDetailPage({
                         ) ? (
                             <div>
                                 <Link
-                                    href={`/sales/${document?.documentNo}/edit`}
+                                    href={`/sales/sales-order/${document?.documentNo}/edit`}
                                 >
                                     <Button
                                         type="button"
@@ -124,7 +117,7 @@ export default async function SalesInvoiceDetailPage({
                             </TooltipProvider>
                         )}
                     </div>
-                    <SalesInvoiceLinkComponent document={document} />
+                    <QuotationLinkComponent document={document} />
                 </div>
                 <div className="flex gap-3">
                     <div className="my-1 flex items-baseline space-x-2">
@@ -149,11 +142,6 @@ export default async function SalesInvoiceDetailPage({
                 <Table className="mt-3">
                     <TableCaption>
                         <div className="w-[600px] space-y-1">
-                            <EditPaymentsComponents
-                                document={document}
-                                paymentMethods={paymentMethods}
-                            />
-
                             <p className="text-left font-bold text-primary">
                                 หมายเหตุ:
                             </p>
@@ -198,17 +186,17 @@ export default async function SalesInvoiceDetailPage({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {document?.SkuOut.map((item) => (
+                        {document?.Quotation?.QuotationItem.map((item) => (
                             <TableRow key={item.barcode}>
                                 <TableCell>{item.barcode}</TableCell>
                                 <TableCell>
                                     <p>
                                         {
-                                            item.GoodsMaster.SkuMaster.mainSku
+                                            item?.GoodsMaster?.SkuMaster.mainSku
                                                 .name
                                         }
                                     </p>
-                                    <p>{item.GoodsMaster.SkuMaster.detail}</p>
+                                    <p>{item?.GoodsMaster?.SkuMaster.detail}</p>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {item.quantity}
@@ -231,12 +219,10 @@ export default async function SalesInvoiceDetailPage({
                             <TableCell className="text-right">
                                 {Math.abs(
                                     Number(
-                                        document?.GeneralLedger.filter(
-                                            (item) =>
-                                                item.chartOfAccountId >=
-                                                    11000 &&
-                                                item.chartOfAccountId <= 12000
-                                        )?.reduce((a, b) => a + b.amount, 0)
+                                        document?.Quotation?.QuotationItem.reduce(
+                                            (a, b) => a + (b.price + b.vat),
+                                            0
+                                        )
                                     )
                                 )}
                             </TableCell>

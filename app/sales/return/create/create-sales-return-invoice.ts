@@ -9,7 +9,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { InventoryDetailType } from '@/types/inventory-detail'
-import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
+import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
 import { redirect } from 'next/navigation'
 import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 
@@ -324,6 +324,6 @@ export const createSalesReturnInvoice = async (
         },
     })
 
-    revalidatePath('/sales')
-    redirect(`/sales/${invoice.documentNo}`)
+    revalidatePath('/sales/sales-order')
+    redirect(`/sales/sales-order/${invoice.documentNo}`)
 }

@@ -9,7 +9,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { InventoryDetailType } from '@/types/inventory-detail'
-import { generateDocumentNumber } from '@/lib/generateDocumentNumber'
+import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
 import { redirect } from 'next/navigation'
 import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 
@@ -30,8 +30,6 @@ export const createSalesInvoice = async (
         taxId: z.string().trim().optional().nullable(),
         date: z.string().trim().min(1, 'date must not be empty'),
         documentNo: z.string().trim().optional().nullable(),
-        // payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
-        // remark: z.string().trim().optional().nullable(),
     })
 
     const result = validator.safeParse({
@@ -42,8 +40,6 @@ export const createSalesInvoice = async (
         taxId: formData.get('taxId') || undefined,
         date: formData.get('date'),
         documentNo: formData.get('documentNo'),
-        // payment: formData.get('payment'),
-        // remark: formData.get('remark'),
     })
 
     if (!result.success) {
@@ -57,17 +53,8 @@ export const createSalesInvoice = async (
         )
     }
 
-    let {
-        customerId,
-        contactName,
-        address,
-        phone,
-        taxId,
-        date,
-        documentNo,
-        // payment,
-        // remark,
-    } = result.data
+    let { customerId, contactName, address, phone, taxId, date, documentNo } =
+        result.data
 
     const getContact = async () => {
         if (customerId) {
@@ -309,6 +296,6 @@ export const createSalesInvoice = async (
         },
     })
 
-    revalidatePath('/sales')
-    redirect(`/sales/${invoice.documentNo}`)
+    revalidatePath('/sales/sales-order')
+    redirect(`/sales/sales-order/${invoice.documentNo}`)
 }

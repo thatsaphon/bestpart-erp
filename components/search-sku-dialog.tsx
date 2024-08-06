@@ -8,7 +8,7 @@ import {
 import { Input } from '@/components/ui/input'
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { searchSku } from './search-sku'
+import { searchSku } from '@/actions/search-sku'
 import toast from 'react-hot-toast'
 import {
     Table,

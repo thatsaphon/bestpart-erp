@@ -11,9 +11,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
+import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import { getPaymentMethods } from '@/app/actions/accounting'
 import EditPaymentsComponents from './edit-payments-components'
 import { updateRemark } from './update-remarks'
@@ -26,10 +28,8 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { isBefore, startOfDay } from 'date-fns'
-import { Button } from '@/components/ui/button'
-import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/return-invoice-detail'
-import ReturnInvoicePdfLinkComponent from './pdf-link-component'
-import { ResolvingMetadata, Metadata } from 'next'
+import SalesInvoiceLinkComponent from './sales-invoice-link-component'
+import { Metadata, ResolvingMetadata } from 'next'
 
 type Props = {
     params: { documentNo: string }
@@ -40,14 +40,14 @@ export async function generateMetadata(
     parent: ResolvingMetadata
 ): Promise<Metadata> {
     return {
-        title: `รายละเอียดใบรับคืนสินค้า - ${params.documentNo}`,
+        title: `รายละเอียดบิลขาย - ${params.documentNo}`,
     }
 }
 
 export default async function SalesInvoiceDetailPage({
     params: { documentNo },
 }: Props) {
-    const document = await getSalesReturnInvoiceDetail(documentNo)
+    const document = await getSalesInvoiceDetail(documentNo)
     const session = await getServerSession(authOptions)
     const paymentMethods = await getPaymentMethods()
 
@@ -64,11 +64,11 @@ export default async function SalesInvoiceDetailPage({
         <>
             <div className="mb-2 p-3">
                 <Link
-                    href={'/sales/return'}
+                    href={'/sales/sales-order'}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
                 <h1 className="my-2 text-3xl transition-colors">
-                    รายละเอียดใบรับคืนสินค้า
+                    รายละเอียดบิลขาย
                 </h1>
                 <div className="flex justify-between pr-4">
                     <div className="flex gap-3">
@@ -124,7 +124,7 @@ export default async function SalesInvoiceDetailPage({
                             </TooltipProvider>
                         )}
                     </div>
-                    <ReturnInvoicePdfLinkComponent document={document} />
+                    <SalesInvoiceLinkComponent document={document} />
                 </div>
                 <div className="flex gap-3">
                     <div className="my-1 flex items-baseline space-x-2">
@@ -198,7 +198,7 @@ export default async function SalesInvoiceDetailPage({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {document?.SkuIn.map((item) => (
+                        {document?.SkuOut.map((item) => (
                             <TableRow key={item.barcode}>
                                 <TableCell>{item.barcode}</TableCell>
                                 <TableCell>
@@ -215,10 +215,10 @@ export default async function SalesInvoiceDetailPage({
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.cost + item.vat}
+                                    {item.price + item.vat}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {(item.cost + item.vat) * item.quantity}
+                                    {(item.price + item.vat) * item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}

@@ -66,6 +66,6 @@ export const updatePayments = async (
         },
     })
 
-    revalidatePath(`/sales/${document[0].documentNo}`)
-    revalidatePath(`/sales`)
+    revalidatePath(`/sales/sales-order${document[0].documentNo}`)
+    revalidatePath(`/sales/sales-order`)
 }

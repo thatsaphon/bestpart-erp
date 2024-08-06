@@ -59,7 +59,7 @@ export default function CreateBillingNote({
     return (
         <div className="p-3" key={key}>
             <div className="flex justify-between">
-                <Link href="/sales">
+                <Link href="/sales/sales-order">
                     <Button variant="ghost" className="mb-2">{`< Back`}</Button>
                 </Link>
                 <Link href="/sales/create">
@@ -253,25 +253,6 @@ export default function CreateBillingNote({
                                     // }}
                                 />
                             </TableCell>
-                            {/* <SearchSkuDialog
-                                isOpen={open}
-                                setIsOpen={setOpen}
-                                onSelected={(data) => {
-                                    const isExist = items.find(
-                                        (item) => item.barcode === data.barcode
-                                    )
-                                    if (isExist) {
-                                        return toast.error(
-                                            'มีรายการนี้อยู่แล้ว'
-                                        )
-                                    }
-                                    setItems([
-                                        ...items,
-                                        { ...data, quantity: 1 },
-                                    ])
-                                    setOpen(false)
-                                }}
-                            /> */}
                         </TableRow>
                     </TableBody>
                     <TableFooter>
