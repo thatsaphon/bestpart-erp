@@ -40,33 +40,44 @@ export function NavMenubar() {
                 </Link>
             </MenubarMenu>
             <MenubarMenu>
-                <MenubarTrigger
-                    className={cn(pathName.includes('/sales') && 'bg-accent')}
-                >
-                    งานขาย
-                </MenubarTrigger>
-                <MenubarContent>
+                {!pathName.includes('/sales') ? (
                     <Link href={'/sales/sales-order'}>
-                        <MenubarItem>รายการขาย</MenubarItem>
+                        <MenubarTrigger
+                            className={cn(
+                                pathName.includes('/sales') && 'bg-accent'
+                            )}
+                        >
+                            งานขาย
+                        </MenubarTrigger>
                     </Link>
-                    <Link href={'/sales/create'}>
-                        <MenubarItem>สร้างบิลขาย</MenubarItem>
-                    </Link>
-                    <MenubarSeparator />
-                    <Link href={'/sales/return'}>
-                        <MenubarItem>รายการคืนสินค้า</MenubarItem>
-                    </Link>
-                    <Link href={'/sales/return/create'}>
-                        <MenubarItem>สร้างใบรับคืนสินค้า</MenubarItem>
-                    </Link>
-                    <MenubarSeparator />
-                    <Link href={'/sales/bill'}>
-                        <MenubarItem>รายการใบวางบิล</MenubarItem>
-                    </Link>
-                    <Link href={'/sales/bill/create'}>
-                        <MenubarItem>สร้างใบวางบิล</MenubarItem>
-                    </Link>
-                </MenubarContent>
+                ) : (
+                    <>
+                        <MenubarTrigger
+                            className={cn(
+                                pathName.includes('/sales') && 'bg-accent'
+                            )}
+                        >
+                            งานขาย
+                        </MenubarTrigger>
+                        <MenubarContent>
+                            <Link href={'/sales/sales-order/create'}>
+                                <MenubarItem>สร้างบิลขาย</MenubarItem>
+                            </Link>
+                            <Link href={'/sales/return/create'}>
+                                <MenubarItem>สร้างใบรับคืนสินค้า</MenubarItem>
+                            </Link>
+                            <Link href={'/sales/bill/create'}>
+                                <MenubarItem>สร้างใบวางบิล</MenubarItem>
+                            </Link>
+                            <Link href={'/sales/quotation/create'}>
+                                <MenubarItem>สร้างใบเสนอราคา</MenubarItem>
+                            </Link>
+                            <Link href={'/sales/customer-order/create'}>
+                                <MenubarItem>สร้างใบจองสินค้า</MenubarItem>
+                            </Link>
+                        </MenubarContent>
+                    </>
+                )}
             </MenubarMenu>
             <MenubarMenu>
                 <Link href={'/purchase'}>

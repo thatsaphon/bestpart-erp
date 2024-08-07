@@ -18,3 +18,24 @@ export type InventoryDetailType = {
     remaining?: number
     images?: string[]
 }
+
+export const defaultInventoryDetail = (): InventoryDetailType => {
+    return {
+        mainSkuId: 0,
+        goodsMasterId: 0,
+        barcode: '',
+        skuMasterId: 0,
+        name: '',
+        detail: '',
+        MainSkuRemarks: [],
+        SkuMasterRemarks: [],
+        Vendors: [],
+        unit: '',
+        quantityPerUnit: 1,
+        quantity: 1,
+        price: 0,
+        partNumber: '',
+        remaining: 0,
+        images: [],
+    }
+}

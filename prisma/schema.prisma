@@ -488,9 +488,12 @@ model CustomerOrderItem {
   CustomerOrder   CustomerOrder @relation(fields: [customerOrderId], references: [id])
   customerOrderId Int
 
-  description String
-  quantity    String
-  price       Float
+  barcode         String?
+  description     String
+  quantity        String
+  unit            String
+  quantityPerUnit Float   @default(1)
+  price           Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
