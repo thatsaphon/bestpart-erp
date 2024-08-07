@@ -19,7 +19,7 @@ export const createOrUpdateGoodsMasters = async (
                 .number()
                 .positive()
                 .int()
-                .or(z.string().pipe(z.coerce.number().positive().int()))
+                .or(z.string().pipe(z.coerce.number().int()))
         ),
         barcode: z.array(z.string().trim().min(1, 'barcode must not be empty')),
         unit: z.array(z.string().trim().min(1, 'unit must not be empty')),
@@ -59,6 +59,8 @@ export const createOrUpdateGoodsMasters = async (
         quantity: quantity[index],
         price: price[index],
     }))
+    console.log(goodsMasterId)
+    console.log(goodsMasters)
 
     try {
         await prisma.skuMaster.update({

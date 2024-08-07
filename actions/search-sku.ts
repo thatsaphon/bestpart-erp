@@ -15,6 +15,10 @@ export const searchSku = async (query: string, page: number = 1) => {
     from "MainSku"
     inner join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
     inner join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
+    inner join "_MainSkuToMainSkuRemark" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
+    inner join "MainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
+    inner join "_SkuMasterToSkuMasterRemark" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
+    inner join "SkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id" 
     ${query ? `where ` : ` `}
     ${splitQuery
         .map((x, index) =>

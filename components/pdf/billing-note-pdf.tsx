@@ -1,6 +1,7 @@
 'use client'
 
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+import { fullDateFormat } from '@/lib/date-format'
 import { Prisma } from '@prisma/client'
 import {
     Page,
@@ -155,13 +156,7 @@ export default function BillingNotePdf({ document }: Props) {
                         <Text>เลขที่: {document?.documentNo}</Text>
                         <Text>
                             วันที่:{' '}
-                            {new Intl.DateTimeFormat('th-TH', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                localeMatcher: 'best fit',
-                            }).format(document?.date)}
+                            {fullDateFormat(document?.date)}
                         </Text>
                         <Text
                             render={({ pageNumber, totalPages }) =>

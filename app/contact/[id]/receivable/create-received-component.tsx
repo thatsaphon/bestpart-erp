@@ -21,6 +21,7 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { Prisma } from '@prisma/client'
 import { createBillingNote } from './create-billing-note'
+import { fullDateFormat } from '@/lib/date-format'
 
 const documentWithGeneralLedgerArSubledger =
     Prisma.validator<Prisma.DocumentDefaultArgs>()({
@@ -151,13 +152,7 @@ export default function CreateBillingNote({
                         {items.map((item, index) => (
                             <TableRow key={item.documentNo}>
                                 <TableCell>
-                                    {new Intl.DateTimeFormat('th-TH', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                        timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                        localeMatcher: 'best fit',
-                                    }).format(item.date)}
+                                    {fullDateFormat(item.date)}
                                 </TableCell>
                                 <TableCell>
                                     <p>{item.documentNo}</p>

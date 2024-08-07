@@ -33,18 +33,19 @@ import { disconnectSkuMasterRemark } from '@/app/inventory/remark-action/sku-mas
 import AddSkuMasterRemarkInput from './add-sku-master-remark-input'
 
 type Props = {
-    mainSkus: InventoryDetailType[]
+    skuDetail: InventoryDetailType[]
 }
 
-export default function SkuMasterCardForm({ mainSkus }: Props) {
+export default function SkuMasterCardForm({ skuDetail }: Props) {
     const [isEdit, setIsEdit] = useState(false)
     const [file, setFile] = useState<File | null | undefined>(null)
     const [goodsMasters, setGoodsMasters] = useState<Partial<GoodsMaster>[]>(
-        mainSkus.map((mainSku) => ({
-            barcode: mainSku.barcode,
-            price: mainSku.price,
-            quantity: mainSku.quantityPerUnit,
-            unit: mainSku.unit,
+        skuDetail.map((detail) => ({
+            id: detail.goodsMasterId,
+            barcode: detail.barcode,
+            price: detail.price,
+            quantity: detail.quantityPerUnit,
+            unit: detail.unit,
         }))
     )
 
@@ -55,20 +56,21 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
     })
     useEffect(() => {
         setGoodsMasters(
-            mainSkus.map((mainSku) => ({
-                barcode: mainSku.barcode,
-                price: mainSku.price,
-                quantity: mainSku.quantityPerUnit,
-                unit: mainSku.unit,
+            skuDetail.map((detail) => ({
+                id: detail.goodsMasterId,
+                barcode: detail.barcode,
+                price: detail.price,
+                quantity: detail.quantityPerUnit,
+                unit: detail.unit,
             }))
         )
         setIsEdit(false)
-    }, [mainSkus])
+    }, [skuDetail])
     return (
         <form action={formAction} ref={ref}>
             <input
                 type="text"
-                value={mainSkus[0].skuMasterId}
+                value={skuDetail[0].skuMasterId}
                 readOnly
                 hidden
                 name="skuMasterId"
@@ -79,15 +81,15 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                         <CardTitle className="text-lg">
                             {isEdit ? (
                                 <Input
-                                    defaultValue={mainSkus[0].detail}
+                                    defaultValue={skuDetail[0].detail}
                                     name="detail"
                                 />
                             ) : (
-                                mainSkus[0].detail
+                                skuDetail[0].detail
                             )}
                         </CardTitle>
                         <div>
-                            {mainSkus[0].SkuMasterRemarks?.map((remark) => (
+                            {skuDetail[0].SkuMasterRemarks?.map((remark) => (
                                 <Badge key={remark.name} variant={'outline'}>
                                     {remark.name}
                                     <Trash2Icon
@@ -96,7 +98,7 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                             try {
                                                 await disconnectSkuMasterRemark(
                                                     remark.id,
-                                                    mainSkus[0].skuMasterId
+                                                    skuDetail[0].skuMasterId
                                                 )
                                                 toast.success('Remark updated')
                                             } catch (err) {
@@ -113,7 +115,7 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                 </Badge>
                             ))}
                             <AddSkuMasterRemarkInput
-                                skuMasterId={mainSkus[0].skuMasterId}
+                                skuMasterId={skuDetail[0].skuMasterId}
                             />
                         </div>
                         {/* <CardDescription>
@@ -299,7 +301,7 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                             try {
                                                 formData.append(
                                                     'fileName',
-                                                    `${mainSkus[0].name}-${mainSkus[0].detail}`
+                                                    `${skuDetail[0].name}-${skuDetail[0].detail}`
                                                 )
                                                 const result =
                                                     await uploadSkuMasterImage(
@@ -321,11 +323,11 @@ export default function SkuMasterCardForm({ mainSkus }: Props) {
                                     </Button>
                                 )}
                                 <div className="grid grid-cols-3 gap-2">
-                                    {mainSkus[0]?.images &&
-                                        mainSkus[0]?.images?.map((image) => (
+                                    {skuDetail[0]?.images &&
+                                        skuDetail[0]?.images?.map((image) => (
                                             <Image
                                                 src={image}
-                                                alt={mainSkus[0]?.detail}
+                                                alt={skuDetail[0]?.detail}
                                                 key={image}
                                                 width={500}
                                                 height={500}

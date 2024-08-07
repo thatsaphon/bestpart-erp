@@ -23,6 +23,7 @@ import {
     TableHead,
 } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
+import { fullDateFormat } from '@/lib/date-format'
 
 type Props = {
     selectedDocuments: Awaited<ReturnType<typeof fetchUnpaidSalesInvoice>>
@@ -111,13 +112,7 @@ export default function SearchDocumentDialogComponent({
                                     </TableCell>
                                     <TableCell>{index + 1}</TableCell>
                                     <TableCell>
-                                        {new Intl.DateTimeFormat('th-TH', {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric',
-                                            timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                            localeMatcher: 'best fit',
-                                        }).format(item.date)}
+                                        {fullDateFormat(item.date)}
                                     </TableCell>
                                     <TableCell>{item.documentNo}</TableCell>
                                     <TableCell>

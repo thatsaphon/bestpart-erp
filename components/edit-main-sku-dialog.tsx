@@ -160,7 +160,7 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
                         ([skuMasterId, skuMasters]) =>
                             skuMasters[0].skuMasterId ? (
                                 <InventoryDialogContextMenu key={skuMasterId}>
-                                    <SkuMasterCardForm mainSkus={skuMasters} />
+                                    <SkuMasterCardForm skuDetail={skuMasters} />
                                 </InventoryDialogContextMenu>
                             ) : (
                                 <></>

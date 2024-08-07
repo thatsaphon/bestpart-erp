@@ -1,6 +1,7 @@
 'use client'
 
 import getQuotationDetail from '@/app/sales/quotation/[documentNo]/get-quotation-detail'
+import { fullDateFormat } from '@/lib/date-format'
 import {
     Page,
     Text,
@@ -130,19 +131,14 @@ export default function QuotationPdf_5x9({ document }: Props) {
                 </View>
                 <View style={styles.header} fixed>
                     <View style={{ gap: 2 }}>
-                        <Text>{document?.contactName}</Text>
+                        <Text>{`ชื่อลูกค้า: ${document?.contactName}`}</Text>
+                        <Text>{`โทร: ${document?.phone}`}</Text>
                     </View>
                     <View style={{ gap: 2 }}>
                         <Text>เลขที่: {document?.documentNo}</Text>
                         <Text>
                             วันที่:{' '}
-                            {new Intl.DateTimeFormat('th-TH', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                localeMatcher: 'best fit',
-                            }).format(document?.date)}
+                            {fullDateFormat(document?.date)}
                         </Text>
                         <Text
                             render={({ pageNumber, totalPages }) =>
@@ -167,11 +163,14 @@ export default function QuotationPdf_5x9({ document }: Props) {
                             {`${item.GoodsMaster?.SkuMaster.mainSku.name} - ${item.GoodsMaster?.SkuMaster.detail}`}
                         </Text>
                         <Text style={styles.col4}>
-                            {item.quantity / item.quantityPerUnit}
+                            {item.quantity.toLocaleString()}
                         </Text>
                         <Text style={styles.col5}>{`${item.unit}`}</Text>
                         <Text style={styles.col6}>
-                            {(item.price + item.vat) * item.quantity}
+                            {(
+                                (item.price + item.vat) *
+                                item.quantity
+                            ).toLocaleString()}
                         </Text>
                     </View>
                 ))}

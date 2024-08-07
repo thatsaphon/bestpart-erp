@@ -261,7 +261,7 @@ export const updateSalesInvoice = async (
                         barcode: String(item.barcode),
                         unit: item.unit,
                         quantityPerUnit: item.quantityPerUnit,
-                        quantity: item.quantity * item.quantityPerUnit,
+                        quantity: item.quantity,
                         cost: 0,
                         price: +((100 / 107) * item.price).toFixed(2),
                         vat: +((7 / 107) * item.price).toFixed(2),

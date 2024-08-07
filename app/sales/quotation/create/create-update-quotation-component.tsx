@@ -26,6 +26,7 @@ import { DocumentRemark } from '@prisma/client'
 import { cn } from '@/lib/utils'
 import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import { createQuotation } from './create-quotation'
+import { updateQuotation } from './update-quotation'
 
 type Props = {
     defaultItems?: InventoryDetailType[]
@@ -128,13 +129,12 @@ export default function CreateOrUpdateQuotationComponent({
                             toast.success('บันทึกสําเร็จ')
                         }
                         if (defaultDocumentDetails) {
-                            // await updateSalesInvoice(
-                            //     defaultDocumentDetails.id,
-                            //     formData,
-                            //     items,
-                            //     selectedPayments,
-                            //     remarks
-                            // )
+                            await updateQuotation(
+                                defaultDocumentDetails.id,
+                                formData,
+                                items,
+                                remarks
+                            )
                             toast.success('บันทึกสําเร็จ')
                         }
                     } catch (err) {

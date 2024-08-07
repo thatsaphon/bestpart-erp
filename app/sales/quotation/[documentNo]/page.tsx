@@ -82,40 +82,15 @@ export default async function QuotationDetailPage({
                             />
                         </div>
 
-                        {!isBefore(
-                            startOfDay(document?.date),
-                            startOfDay(new Date())
-                        ) ? (
-                            <div>
-                                <Link
-                                    href={`/sales/sales-order/${document?.documentNo}/edit`}
-                                >
-                                    <Button
-                                        type="button"
-                                        variant={'destructive'}
-                                    >
-                                        แก้ไข
-                                    </Button>
-                                </Link>
-                            </div>
-                        ) : (
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            variant="destructive"
-                                            disabled
-                                            className="disabled:pointer-events-auto"
-                                        >
-                                            แก้ไข
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>ไม่สามารถแก้ไขย้อนหลังได้</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        )}
+                        <div>
+                            <Link
+                                href={`/sales/quotation/${document?.documentNo}/edit`}
+                            >
+                                <Button type="button" variant={'destructive'}>
+                                    แก้ไข
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
                     <QuotationLinkComponent document={document} />
                 </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+import { fullDateFormat } from '@/lib/date-format'
 import {
     Page,
     Text,
@@ -133,14 +134,7 @@ export default function SalesInvoicePdf({ document }: Props) {
                         เลขที่: {document?.documentNo}
                     </Text>
                     <Text style={styles.header}>
-                        วันที่:{' '}
-                        {new Intl.DateTimeFormat('th-TH', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                            timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                            localeMatcher: 'best fit',
-                        }).format(document?.date)}
+                        วันที่: {fullDateFormat(document?.date)}
                     </Text>
                     <Text style={styles.header}>ราคารวมภาษีมูลค่าเพิ่ม</Text>
                 </View>

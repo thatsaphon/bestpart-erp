@@ -17,6 +17,7 @@ import { Prisma } from '@prisma/client'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { Avatar } from '@/components/ui/avatar'
+import { fullDateFormat } from '@/lib/date-format'
 
 type Props = {
     searchParams: {
@@ -131,15 +132,7 @@ export default async function SalesListPage({
                 <TableBody>
                     {sales.map((sale) => (
                         <TableRow key={sale.documentNo}>
-                            <TableCell>
-                                {new Intl.DateTimeFormat('th-TH', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                    localeMatcher: 'best fit',
-                                }).format(sale.date)}
-                            </TableCell>
+                            <TableCell>{fullDateFormat(sale.date)}</TableCell>
                             <TableCell>{sale.documentNo}</TableCell>
                             <TableCell>
                                 {sale.ArSubledger?.Contact.name || '-'}

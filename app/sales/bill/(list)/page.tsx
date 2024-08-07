@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/tooltip'
 import { Fragment } from 'react'
 import { Badge } from '@/components/ui/badge'
+import { fullDateFormat } from '@/lib/date-format'
 
 type Props = {
     searchParams: {
@@ -96,13 +97,7 @@ export default async function SalesListPage({
                         <TableRow key={bill.documentNo}>
                             <TableCell>
                                 {/* {format(sale.date, 'dd/MM/yyyy')} */}
-                                {new Intl.DateTimeFormat('th-TH', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                    localeMatcher: 'best fit',
-                                }).format(bill.date)}
+                                {fullDateFormat(bill.date)}
                             </TableCell>
                             <TableCell>{bill.documentNo}</TableCell>
                             <TableCell>

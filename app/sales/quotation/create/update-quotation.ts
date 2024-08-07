@@ -11,7 +11,8 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-export async function createQuotation(
+export async function updateQuotation(
+    id: number,
     formData: FormData,
     items: InventoryDetailType[],
     remarks: { id?: number; remark: string }[]
@@ -49,6 +50,14 @@ export async function createQuotation(
     let { customerId, contactName, address, phone, taxId, date, documentNo } =
         result.data
 
+    const quotation = await prisma.document.findUnique({
+        where: {
+            id,
+        },
+        include: {
+            Quotation: true,
+        },
+    })
     const getContact = async () => {
         if (customerId) {
             const contact = await prisma.contact.findUnique({
@@ -64,20 +73,23 @@ export async function createQuotation(
     }
     let contact: Contact | undefined = await getContact()
 
-    // const goodsMasters = await prisma.goodsMaster.findMany({
-    //     where: {
-    //         barcode: {
-    //             in: items.map((item) => item.barcode),
-    //         },
-    //     },
-    // })
+    const goodsMasters = await prisma.goodsMaster.findMany({
+        where: {
+            barcode: {
+                in: items.map((item) => item.barcode),
+            },
+        },
+    })
 
     if (!documentNo) {
         documentNo = await generateDocumentNumber('SQ', date)
     }
     const session = await getServerSession(authOptions)
 
-    const quotation = await prisma.document.create({
+    const updatedQuotation = await prisma.document.update({
+        where: {
+            id,
+        },
         data: {
             contactName: contactName || '',
             type: 'Quotation',
@@ -90,8 +102,11 @@ export async function createQuotation(
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             Quotation: {
-                create: {
+                update: {
                     QuotationItem: {
+                        deleteMany: {
+                            quotationId: quotation?.Quotation?.id,
+                        },
                         create: items.map((item) => ({
                             goodsMasterId: item.goodsMasterId,
                             skuMasterId: item.skuMasterId,
@@ -103,16 +118,11 @@ export async function createQuotation(
                             vat: +((7 / 107) * item.price).toFixed(2),
                         })),
                     },
-                    Contact: {
-                        connect: {
-                            id: contact?.id,
-                        },
-                    },
                 },
             },
         },
     })
 
     revalidatePath('/sales/quotation')
-    redirect(`/sales/quotation/${quotation.documentNo}`)
+    redirect(`/sales/quotation/${updatedQuotation.documentNo}`)
 }

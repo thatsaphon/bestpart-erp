@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import React from 'react'
 import Link from 'next/link'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
+import { fullDateFormat } from '@/lib/date-format'
 
 type Props = {
     searchParams: {
@@ -120,13 +121,7 @@ export default async function OtherPaymentPage({
                     {otherInvoice.map((invoice) => (
                         <TableRow key={invoice.documentNo}>
                             <TableCell>
-                                {new Intl.DateTimeFormat('th-TH', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                    localeMatcher: 'best fit',
-                                }).format(invoice.date)}
+                                {fullDateFormat(invoice.date)}
                             </TableCell>
                             <TableCell>{invoice.documentNo}</TableCell>
                             <TableCell>

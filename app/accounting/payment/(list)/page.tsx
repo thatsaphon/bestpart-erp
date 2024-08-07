@@ -101,45 +101,7 @@ export default async function APPaymentPage({
                         <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>
-                {/* <TableBody>
-                    {purchaseInvoices.map((invoice) => (
-                        <TableRow key={invoice.documentNo}>
-                            <TableCell>
-                                {new Intl.DateTimeFormat('th-TH', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                    localeMatcher: 'best fit',
-                                }).format(invoice.date)}
-                            </TableCell>
-                            <TableCell>{invoice.documentNo}</TableCell>
-                            <TableCell>{invoice.referenceNo}</TableCell>
-                            <TableCell>
-                                {invoice.ApSubledger?.Contact.name || 'เงินสด'}
-                            </TableCell>
-                            <TableCell>
-                                {invoice.ApSubledger?.paymentStatus || 'Paid'}
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {Math.abs(
-                                    invoice.GeneralLedger[0]?.amount
-                                ).toLocaleString()}
-                            </TableCell>
-                            <TableCell className="text-right">
-                                <Link href={`/purchase/${invoice.documentNo}`}>
-                                    <EyeOpenIcon />
-                                </Link>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody> */}
             </Table>
-            {/* <PaginationComponent
-                page={page}
-                limit={limit}
-                numberOfPage={numberOfPage}
-            /> */}
         </>
     )
 }

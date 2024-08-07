@@ -108,7 +108,16 @@ export default function SearchSkuDialog({
                         {searchItems.map((item) => (
                             <TableRow key={item.barcode}>
                                 <TableCell className="text-center">
-                                    {item.remaining}
+                                    {Number(
+                                        (
+                                            (item.remaining || 0) /
+                                            item.quantityPerUnit
+                                        ).toFixed(2)
+                                    ).toLocaleString()}
+                                    {/* {(
+                                        (item.remaining || 0) /
+                                        item.quantityPerUnit
+                                    ).toFixed(2)} */}
                                 </TableCell>
                                 <TableCell>{item.barcode}</TableCell>
                                 <TableCell className="w-[350px]">

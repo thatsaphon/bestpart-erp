@@ -14,6 +14,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { fullDateFormat } from '@/lib/date-format'
 import { AssetType } from '@prisma/client'
 import React from 'react'
 
@@ -80,18 +81,7 @@ export default async function AssetManagementPage({}: Props) {
                                                         )?.value.toLocaleString()}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {new Intl.DateTimeFormat(
-                                                            'th-TH',
-                                                            {
-                                                                year: 'numeric',
-                                                                month: 'short',
-                                                                day: 'numeric',
-                                                                timeZone:
-                                                                    'Asia/Bangkok', // Set time zone to Bangkok
-                                                                localeMatcher:
-                                                                    'best fit',
-                                                            }
-                                                        ).format(
+                                                        {fullDateFormat(
                                                             asset.acquisitionDate
                                                         )}
                                                     </TableCell>

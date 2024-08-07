@@ -1,6 +1,7 @@
 'use client'
 
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+import { fullDateFormat } from '@/lib/date-format'
 import {
     Page,
     Text,
@@ -134,16 +135,7 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
                     </View>
                     <View style={{ marginLeft: '10', gap: 2 }}>
                         <Text>เลขที่: {document?.documentNo}</Text>
-                        <Text>
-                            วันที่:{' '}
-                            {new Intl.DateTimeFormat('th-TH', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                localeMatcher: 'best fit',
-                            }).format(document?.date)}
-                        </Text>
+                        <Text>วันที่: {fullDateFormat(document?.date)}</Text>
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 `หน้าที่: ${pageNumber} / ${totalPages}`
