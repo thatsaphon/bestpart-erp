@@ -24,7 +24,6 @@ import {
 } from '@/types/inventory-detail'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import { useSession } from 'next-auth/react'
-import ImageToolTip from '@/components/image-tooltip'
 import { DocumentRemark, PaymentStatus } from '@prisma/client'
 import { cn } from '@/lib/utils'
 import { getSkuByBarcode } from '@/actions/barcode-scanned'
@@ -166,7 +165,12 @@ export default function CreateOrUpdateQuotationComponent({
                 action={async (formData) => {
                     try {
                         if (!defaultItems.length) {
-                            await createCustomerOrder(formData, items, remarks)
+                            await createCustomerOrder(
+                                formData,
+                                items,
+                                selectedPayments,
+                                remarks
+                            )
                             setKey(String(Date.now()))
                             setItems([])
                             toast.success('บันทึกสําเร็จ')

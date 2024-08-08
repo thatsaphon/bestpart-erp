@@ -7,7 +7,7 @@ import CreateOrUpdateCustomerOrderComponent from './create-update-customer-order
 type Props = {}
 
 export const metadata: Metadata = {
-    title: 'สร้างบิลขาย',
+    title: 'สร้างใบจองสินค้า',
 }
 
 export default async function CreateCustomerOrderPage({}: Props) {

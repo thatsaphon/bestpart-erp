@@ -13,7 +13,11 @@ import { redirect } from 'next/navigation'
 
 export async function createCustomerOrder(
     formData: FormData,
-    items: InventoryDetailType[],
+    items: (InventoryDetailType & { description: string })[],
+    payments: {
+        id: number
+        amount: number
+    }[],
     remarks: { id?: number; remark: string }[]
 ) {
     const validator = z.object({
@@ -73,14 +77,14 @@ export async function createCustomerOrder(
     // })
 
     if (!documentNo) {
-        documentNo = await generateDocumentNumber('SQ', date)
+        documentNo = await generateDocumentNumber('CO', date)
     }
     const session = await getServerSession(authOptions)
 
-    const quotation = await prisma.document.create({
+    const customerOrder = await prisma.document.create({
         data: {
             contactName: contactName || '',
-            type: 'Quotation',
+            type: 'CustomerOrder',
             address: address || '',
             phone: phone || '',
             taxId: taxId || '',
@@ -89,30 +93,73 @@ export async function createCustomerOrder(
             remark: { create: remarks },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
-            Quotation: {
+
+            GeneralLedger: {
+                create:
+                    payments.length > 0
+                        ? [
+                              ...payments.map((payment) => ({
+                                  chartOfAccountId: payment.id,
+                                  amount: payment.amount,
+                              })),
+                              {
+                                  //เงินมัดจำ
+                                  chartOfAccountId: 22300,
+                                  amount: payments.reduce(
+                                      (acc, payment) => acc - payment.amount,
+                                      0
+                                  ),
+                              },
+                          ]
+                        : undefined,
+            },
+            CustomerOrder: {
                 create: {
-                    QuotationItem: {
+                    Contact: {
+                        connect: { id: contact?.id },
+                    },
+                    deposit: payments.reduce(
+                        (acc, payment) => acc + payment.amount,
+                        0
+                    ),
+                    CustomerOrderItem: {
                         create: items.map((item) => ({
-                            goodsMasterId: item.goodsMasterId,
-                            skuMasterId: item.skuMasterId,
-                            barcode: String(item.barcode),
-                            unit: item.unit,
+                            description: item.description,
+                            price: item.price,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
-                            price: +((100 / 107) * item.price).toFixed(2),
-                            vat: +((7 / 107) * item.price).toFixed(2),
+                            barcode: item.barcode,
+                            unit: item.unit,
                         })),
                     },
-                    Contact: {
-                        connect: {
-                            id: contact?.id,
-                        },
-                    },
+                    status: 'Open',
                 },
             },
+
+            // Quotation: {
+            //     create: {
+            //         QuotationItem: {
+            //             create: items.map((item) => ({
+            //                 goodsMasterId: item.goodsMasterId,
+            //                 skuMasterId: item.skuMasterId,
+            //                 barcode: String(item.barcode),
+            //                 unit: item.unit,
+            //                 quantityPerUnit: item.quantityPerUnit,
+            //                 quantity: item.quantity,
+            //                 price: +((100 / 107) * item.price).toFixed(2),
+            //                 vat: +((7 / 107) * item.price).toFixed(2),
+            //             })),
+            //         },
+            //         Contact: {
+            //             connect: {
+            //                 id: contact?.id,
+            //             },
+            //         },
+            //     },
+            // },
         },
     })
 
-    revalidatePath('/sales/quotation')
-    redirect(`/sales/quotation/${quotation.documentNo}`)
+    revalidatePath('/sales/customer-order')
+    redirect(`/sales/customer-order/${customerOrder.documentNo}`)
 }

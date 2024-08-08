@@ -7,7 +7,7 @@ import CreateOrUpdateQuotationComponent from './create-update-quotation-componen
 type Props = {}
 
 export const metadata: Metadata = {
-    title: 'สร้างบิลขาย',
+    title: 'สร้างใบเสนอราคา',
 }
 
 export default async function CreateQuotationPage({}: Props) {
