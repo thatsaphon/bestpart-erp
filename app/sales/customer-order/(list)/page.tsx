@@ -39,9 +39,7 @@ export default async function CustomerOrderPage({
 }: Props) {
     const purchaseInvoices = await prisma.document.findMany({
         where: {
-            documentNo: {
-                startsWith: 'PINV',
-            },
+            type: 'CustomerOrder',
             AND: [
                 {
                     date: {
@@ -79,9 +77,21 @@ export default async function CustomerOrderPage({
 
     const documentCount = await prisma.document.count({
         where: {
-            documentNo: {
-                startsWith: 'PINV',
-            },
+            type: 'CustomerOrder',
+            AND: [
+                {
+                    date: {
+                        gte: new Date(from),
+                    },
+                },
+                {
+                    date: {
+                        lt: new Date(
+                            new Date(to).setDate(new Date(to).getDate() + 1)
+                        ),
+                    },
+                },
+            ],
         },
     })
     const numberOfPage = Math.ceil(documentCount / Number(limit))
@@ -137,7 +147,9 @@ export default async function CustomerOrderPage({
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
-                                <Link href={`/purchase/${invoice.documentNo}`}>
+                                <Link
+                                    href={`/sales/customer-order/${invoice.documentNo}`}
+                                >
                                     <EyeOpenIcon />
                                 </Link>
                             </TableCell>

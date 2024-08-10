@@ -14,7 +14,11 @@ import { redirect } from 'next/navigation'
 export async function updateCustomerOrder(
     id: number,
     formData: FormData,
-    items: InventoryDetailType[],
+    items: (InventoryDetailType & { description: string })[],
+    payments: {
+        id: number
+        amount: number
+    }[],
     remarks: { id?: number; remark: string }[]
 ) {
     const validator = z.object({
@@ -50,12 +54,19 @@ export async function updateCustomerOrder(
     let { customerId, contactName, address, phone, taxId, date, documentNo } =
         result.data
 
-    const quotation = await prisma.document.findUnique({
+    const customerOrder = await prisma.document.findUnique({
         where: {
             id,
         },
         include: {
-            Quotation: true,
+            GeneralLedger: true,
+            CustomerOrder: {
+                include: {
+                    Contact: true,
+                    PurchasOrderLink: true,
+                    CustomerOrderItem: true,
+                },
+            },
         },
     })
     const getContact = async () => {
@@ -82,11 +93,11 @@ export async function updateCustomerOrder(
     })
 
     if (!documentNo) {
-        documentNo = await generateDocumentNumber('SQ', date)
+        documentNo = await generateDocumentNumber('CO', date)
     }
     const session = await getServerSession(authOptions)
 
-    const updatedQuotation = await prisma.document.update({
+    const updatedCustomerOrder = await prisma.document.update({
         where: {
             id,
         },
@@ -101,28 +112,65 @@ export async function updateCustomerOrder(
             remark: { create: remarks },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
-            Quotation: {
+            GeneralLedger: {
+                deleteMany: {
+                    id: {
+                        in:
+                            customerOrder?.GeneralLedger.map((gl) => gl.id) ||
+                            [],
+                    },
+                },
+                create:
+                    payments.length > 0
+                        ? [
+                              ...payments.map((payment) => ({
+                                  chartOfAccountId: payment.id,
+                                  amount: payment.amount,
+                              })),
+                              {
+                                  //เงินมัดจำ
+                                  chartOfAccountId: 22300,
+                                  amount: payments.reduce(
+                                      (acc, payment) => acc - payment.amount,
+                                      0
+                                  ),
+                              },
+                          ]
+                        : undefined,
+            },
+            CustomerOrder: {
                 update: {
-                    QuotationItem: {
+                    Contact: {
+                        connect: { id: contact?.id },
+                    },
+                    deposit: payments.reduce(
+                        (acc, payment) => acc + payment.amount,
+                        0
+                    ),
+                    CustomerOrderItem: {
                         deleteMany: {
-                            quotationId: quotation?.Quotation?.id,
+                            id: {
+                                in:
+                                    customerOrder?.CustomerOrder?.CustomerOrderItem.map(
+                                        (item) => item.id
+                                    ) || [],
+                            },
                         },
                         create: items.map((item) => ({
-                            goodsMasterId: item.goodsMasterId,
-                            skuMasterId: item.skuMasterId,
-                            barcode: String(item.barcode),
-                            unit: item.unit,
+                            description: item.description,
+                            price: item.price,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
-                            price: +((100 / 107) * item.price).toFixed(2),
-                            vat: +((7 / 107) * item.price).toFixed(2),
+                            barcode: item.barcode,
+                            unit: item.unit,
                         })),
                     },
+                    // status: 'Open',
                 },
             },
         },
     })
 
-    revalidatePath('/sales/quotation')
-    redirect(`/sales/quotation/${updatedQuotation.documentNo}`)
+    revalidatePath('/sales/customer-order')
+    redirect(`/sales/customer-order/${updatedCustomerOrder.documentNo}`)
 }

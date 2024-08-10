@@ -43,7 +43,7 @@ import {
 } from '@/components/ui/select'
 
 type Props = {
-    defaultItems?: InventoryDetailType[]
+    defaultItems?: (InventoryDetailType & { description: string })[]
     defaultDocumentDetails?: {
         id: number
         date: Date
@@ -54,14 +54,14 @@ type Props = {
         phone: string
         taxId: string
         documentRemarks: DocumentRemark[]
-        paymentStatus: PaymentStatus
+        // paymentStatus: PaymentStatus
     }
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
     defaultPayments?: { id: number; amount: number }[]
     defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
 }
 
-export default function CreateOrUpdateQuotationComponent({
+export default function CreateOrUpdateCustomerOrderComponent({
     defaultItems = [],
     defaultDocumentDetails,
     paymentMethods,
@@ -72,7 +72,7 @@ export default function CreateOrUpdateQuotationComponent({
     const [open, setOpen] = useState(false)
     const [items, setItems] = useState<
         (InventoryDetailType & { description: string })[]
-    >(defaultItems.map((item) => ({ ...item, description: '' })))
+    >(defaultItems.map((item) => ({ ...item })))
     const [barcodeInput, setBarcodeInput] = useState<string>('')
     const [key, setKey] = useState('1')
     const session = useSession()
@@ -180,6 +180,7 @@ export default function CreateOrUpdateQuotationComponent({
                                 defaultDocumentDetails.id,
                                 formData,
                                 items,
+                                selectedPayments,
                                 remarks
                             )
                             toast.success('บันทึกสําเร็จ')
@@ -234,40 +235,12 @@ export default function CreateOrUpdateQuotationComponent({
                         <div className="w-[650px] space-y-1">
                             <div className="flex items-center gap-1 text-left">
                                 ช่องทางชำระเงิน:{' '}
-                                {!defaultDocumentDetails ? (
-                                    <></>
-                                ) : defaultDocumentDetails?.paymentStatus ===
-                                  'Paid' ? (
-                                    <Badge className="bg-green-400">
-                                        จ่ายแล้ว
-                                    </Badge>
-                                ) : defaultDocumentDetails?.paymentStatus ===
-                                  'Billed' ? (
-                                    <Badge variant={`secondary`}>
-                                        วางบิลแล้ว
-                                    </Badge>
-                                ) : defaultDocumentDetails?.paymentStatus ===
-                                  'PartialPaid' ? (
-                                    <Badge variant={'destructive'}>
-                                        จ่ายบางส่วน
-                                    </Badge>
-                                ) : !defaultDocumentDetails?.paymentStatus ? (
-                                    <Badge className="bg-green-400">
-                                        เงินสด
-                                    </Badge>
-                                ) : (
-                                    <Badge variant={'destructive'}>
-                                        ยังไม่จ่าย
-                                    </Badge>
-                                )}
                             </div>
                             {selectedPayments.map((item) => (
                                 <div
                                     key={item.id}
                                     className={cn(
-                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary',
-                                        defaultDocumentDetails?.paymentStatus ===
-                                            'Billed' && 'grid-cols-2'
+                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary'
                                     )}
                                 >
                                     <p>
@@ -282,9 +255,7 @@ export default function CreateOrUpdateQuotationComponent({
                                     <p>{item.amount}</p>
                                     <Cross1Icon
                                         className={cn(
-                                            'cursor-pointer text-destructive',
-                                            defaultDocumentDetails?.paymentStatus ===
-                                                'Billed' && 'hidden'
+                                            'cursor-pointer text-destructive'
                                         )}
                                         onClick={() =>
                                             setSelectedPayments(
@@ -298,9 +269,7 @@ export default function CreateOrUpdateQuotationComponent({
                             ))}
                             <div
                                 className={cn(
-                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1',
-                                    defaultDocumentDetails?.paymentStatus ===
-                                        'Billed' && 'hidden'
+                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1'
                                 )}
                             >
                                 <Select
@@ -362,10 +331,6 @@ export default function CreateOrUpdateQuotationComponent({
                                     เพิ่มการชำระเงิน
                                 </Button>
                             </div>
-                            {defaultDocumentDetails?.paymentStatus ===
-                                'Billed' && (
-                                <p className="text-destructive">วางบิลแล้ว</p>
-                            )}
 
                             <p className="text-left">หมายเหตุ:</p>
                             {remarks.map((remark, index) => (

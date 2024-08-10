@@ -25,9 +25,9 @@ import { isBefore, startOfDay } from 'date-fns'
 import Link from 'next/link'
 import { getServerSession } from 'next-auth'
 import { Input } from '@/components/ui/input'
-import React from 'react'
+import React, { Fragment } from 'react'
 import { Button } from '@/components/ui/button'
-import getQuotationDetail from './get-quotation-detail'
+import getCustomerOrderDetail from './get-customer-order-detail'
 import QuotationLinkComponent from './quotation-link-component'
 import { updateRemark } from '../../return/[documentNo]/update-remarks'
 // import { updateRemark } from '../../return/[documentNo]/update-remarks'
@@ -38,10 +38,10 @@ type Props = {
     }
 }
 
-export default async function QuotationDetailPage({
+export default async function CustomerOrderDetailPage({
     params: { documentNo },
 }: Props) {
-    const document = await getQuotationDetail(documentNo)
+    const document = await getCustomerOrderDetail(documentNo)
     const session = await getServerSession(authOptions)
     const paymentMethods = await getPaymentMethods()
 
@@ -57,7 +57,7 @@ export default async function QuotationDetailPage({
         <>
             <div className="mb-2 p-3">
                 <Link
-                    href={'/sales/quotation'}
+                    href={'/sales/customer-order'}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
                 <h1 className="my-2 text-3xl transition-colors">
@@ -84,7 +84,7 @@ export default async function QuotationDetailPage({
 
                         <div>
                             <Link
-                                href={`/sales/quotation/${document?.documentNo}/edit`}
+                                href={`/sales/customer-order/${document?.documentNo}/edit`}
                             >
                                 <Button type="button" variant={'destructive'}>
                                     แก้ไข
@@ -102,7 +102,7 @@ export default async function QuotationDetailPage({
                             hasTextArea={true}
                             // placeholder="Optional"
                             defaultValue={String(
-                                document?.ArSubledger?.Contact.id || ''
+                                document?.CustomerOrder?.Contact.id || ''
                             )}
                             defaultAddress={{
                                 name: document?.contactName || '',
@@ -117,6 +117,19 @@ export default async function QuotationDetailPage({
                 <Table className="mt-3">
                     <TableCaption>
                         <div className="w-[600px] space-y-1">
+                            <p className="text-left font-bold text-primary">
+                                มัดจำ:
+                            </p>
+                            <p className="grid grid-cols-[300px_1fr] text-left text-primary">
+                                {document.GeneralLedger.map((generalLedger) => (
+                                    <Fragment key={generalLedger.id}>
+                                        <span>
+                                            {generalLedger.ChartOfAccount.name}
+                                        </span>
+                                        <span>{generalLedger.amount}</span>
+                                    </Fragment>
+                                ))}
+                            </p>
                             <p className="text-left font-bold text-primary">
                                 หมายเหตุ:
                             </p>
@@ -161,30 +174,26 @@ export default async function QuotationDetailPage({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {document?.Quotation?.QuotationItem.map((item) => (
-                            <TableRow key={item.barcode}>
-                                <TableCell>{item.barcode}</TableCell>
-                                <TableCell>
-                                    <p>
-                                        {
-                                            item?.GoodsMaster?.SkuMaster.mainSku
-                                                .name
-                                        }
-                                    </p>
-                                    <p>{item?.GoodsMaster?.SkuMaster.detail}</p>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {item.quantity}
-                                </TableCell>
-                                <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
-                                <TableCell className="text-right">
-                                    {item.price + item.vat}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {(item.price + item.vat) * item.quantity}
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        {document?.CustomerOrder?.CustomerOrderItem.map(
+                            (item) => (
+                                <TableRow key={item.barcode}>
+                                    <TableCell>{item.barcode}</TableCell>
+                                    <TableCell>
+                                        <p>{item?.description}</p>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {item.quantity}
+                                    </TableCell>
+                                    <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
+                                    <TableCell className="text-right">
+                                        {item.price}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {item.price * item.quantity}
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        )}
                     </TableBody>
                     <TableFooter>
                         <TableRow>
@@ -194,10 +203,8 @@ export default async function QuotationDetailPage({
                             <TableCell className="text-right">
                                 {Math.abs(
                                     Number(
-                                        document?.Quotation?.QuotationItem.reduce(
-                                            (a, b) =>
-                                                a +
-                                                (b.price + b.vat) * b.quantity,
+                                        document?.CustomerOrder?.CustomerOrderItem.reduce(
+                                            (a, b) => a + b.price * b.quantity,
                                             0
                                         )
                                     )
