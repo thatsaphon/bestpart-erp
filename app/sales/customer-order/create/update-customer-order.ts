@@ -103,7 +103,6 @@ export async function updateCustomerOrder(
         },
         data: {
             contactName: contactName || '',
-            type: 'Quotation',
             address: address || '',
             phone: phone || '',
             taxId: taxId || '',

@@ -17,9 +17,7 @@ export const updatePurchaseInvoice = async (id: number, formData: FormData) => {
         barcodes: z
             .array(z.string().trim().min(1, 'barcode must not be empty'))
             .min(1),
-        quanties: z.array(
-            z.coerce.number().positive().min(0.01).or(z.string())
-        ),
+        quanties: z.array(z.coerce.number().positive().min(0).or(z.string())),
         prices: z.array(z.coerce.number().or(z.string())),
         date: z.string().trim().min(1, 'date must not be empty'),
         documentNo: z.string().trim().optional().nullable(),
@@ -100,28 +98,40 @@ export const updatePurchaseInvoice = async (id: number, formData: FormData) => {
             id,
         },
         include: {
-            SkuIn: { include: { SkuInToOut: true } },
+            SkuIn: true,
+            SkuOut: true,
         },
     })
 
     const error = { message: '' }
+
     for (let item of invoice?.SkuIn || []) {
-        if (item.SkuInToOut.length > 0) {
-            const mapQuantity = mapQuanties.find(
-                (mapQuantity) => mapQuantity.skuMasterId === item.skuMasterId
-            )
-            if (!mapQuantity) {
-                error.message += `${item.barcode} ได้ถูกขายแล้ว ไม่สามารถลบได้\n`
-                continue
-            }
-            if (
-                mapQuantity.q * mapQuantity.quantity <
-                item.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)
-            ) {
-                error.message += `${item.barcode} ได้ถูกขายไปแล้ว ${item.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)} หน่วย ห้ามแก้ไขจำนวนต่ำกว่านี้\n`
-                continue
-            }
-        }
+        const currentQuantity = mapQuanties.reduce(
+            (sum, mapQuantity) =>
+                item.skuMasterId !== mapQuantity.skuMasterId
+                    ? sum
+                    : sum + mapQuantity.q * mapQuantity.quantityPerUnit,
+            0
+        )
+
+        // if (currentQuantity)
+
+        // if (item.SkuInToOut.length > 0) {
+        //     const mapQuantity = mapQuanties.find(
+        //         (mapQuantity) => mapQuantity.skuMasterId === item.skuMasterId
+        //     )
+        //     if (!mapQuantity) {
+        //         error.message += `${item.barcode} ได้ถูกขายแล้ว ไม่สามารถลบได้\n`
+        //         continue
+        //     }
+        //     if (
+        //         mapQuantity.q * mapQuantity.quantity <
+        //         item.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)
+        //     ) {
+        //         error.message += `${item.barcode} ได้ถูกขายไปแล้ว ${item.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)} หน่วย ห้ามแก้ไขจำนวนต่ำกว่านี้\n`
+        //         continue
+        //     }
+        // }
     }
 
     if (error.message) throw new Error(error.message)
@@ -185,10 +195,10 @@ export const updatePurchaseInvoice = async (id: number, formData: FormData) => {
                     skuMasterId: item.skuMasterId,
                     barcode: item.barcode,
                     unit: item.unit,
-                    quantityPerUnit: item.quantity,
-                    quantity: item.q * item.quantity,
-                    cost: +(((100 / 107) * +item.p) / item.quantity).toFixed(2),
-                    vat: +(((7 / 107) * +item.p) / item.quantity).toFixed(2),
+                    quantityPerUnit: item.quantityPerUnit,
+                    quantity: item.q * item.quantityPerUnit,
+                    cost: +((100 / 107) * +item.p * item.q).toFixed(2),
+                    vat: +((7 / 107) * +item.p * item.q).toFixed(2),
                 })),
             },
         },

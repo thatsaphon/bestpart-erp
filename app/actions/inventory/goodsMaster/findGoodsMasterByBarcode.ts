@@ -6,23 +6,17 @@ export const findGoodsMasterByBarcode = async (barcode: string) => {
     try {
         if (!barcode.trim()) throw new Error('Barcode must not be empty')
 
-        // const inventory = await prisma.$queryRaw`
-        //     SELECT * FROM "MainSku" 
-        //     LEFT JOIN "SkuMaster" ON "MainSku"."id" = "SkuMaster"."mainSkuId"
-        //     LEFT JOIN "GoodsMaster" ON "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
-        //     WHERE "GoodsMaster"."barcode" = ${barcode}`
-
         const data = await prisma.mainSku.findFirst({
             where: {
                 SkuMaster: {
                     some: {
                         GoodsMaster: {
                             some: {
-                                barcode
-                            }
-                        }
-                    }
-                }
+                                barcode,
+                            },
+                        },
+                    },
+                },
             },
             include: {
                 SkuMaster: {
@@ -37,9 +31,8 @@ export const findGoodsMasterByBarcode = async (barcode: string) => {
                         },
                         Image: true,
 
-                        SkuIn: {
-                            include: { SkuInToOut: true },
-                        },
+                        SkuIn: true,
+                        SkuOut: true,
                     },
                 },
             },

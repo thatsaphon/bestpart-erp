@@ -200,13 +200,13 @@ export default function SkuMasterCardForm({ skuDetail }: Props) {
                                             name="quantity"
                                             type="number"
                                             className="my-1 focus-visible:ring-0 focus-visible:ring-offset-0"
-                                            defaultValue={goodsMaster.quantity?.toString()}
+                                            defaultValue={goodsMaster.quantityPerUnit?.toString()}
                                         />
                                     </div>
                                     <Input
                                         name="price"
                                         className="my-1 focus-visible:ring-0 focus-visible:ring-offset-0"
-                                        defaultValue={goodsMaster.price?.toString()}
+                                        defaultValue={goodsMaster.pricePerUnit?.toString()}
                                     />
                                 </Fragment>
                             ) : (
@@ -214,10 +214,10 @@ export default function SkuMasterCardForm({ skuDetail }: Props) {
                                     <span>{goodsMaster.barcode}</span>
                                     <span className="justify-self-end">
                                         {goodsMaster.unit}x
-                                        {goodsMaster.quantity?.toString()}
+                                        {goodsMaster.quantityPerUnit?.toString()}
                                     </span>
                                     <span className="justify-self-end">
-                                        {goodsMaster.price?.toLocaleString()}
+                                        {goodsMaster.pricePerUnit?.toLocaleString()}
                                     </span>
                                 </Fragment>
                             )

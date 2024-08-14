@@ -16,6 +16,7 @@ export type InventoryDetailType = {
     price: number
     partNumber: string
     remaining?: number
+    remainingAt?: Date
     images?: string[]
 }
 

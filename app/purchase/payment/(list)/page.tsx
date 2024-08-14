@@ -15,6 +15,7 @@ import PaginationComponent from '@/components/pagination-component'
 import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import prisma from '@/app/db/db'
+import { fullDateFormat } from '@/lib/date-format'
 
 type Props = {
     searchParams: {
@@ -106,13 +107,7 @@ export default async function PaymentPage({
                     {purchaseInvoices.map((invoice) => (
                         <TableRow key={invoice.documentNo}>
                             <TableCell>
-                                {new Intl.DateTimeFormat('th-TH', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                    localeMatcher: 'best fit',
-                                }).format(invoice.date)}
+                                {fullDateFormat(invoice.date)}
                             </TableCell>
                             <TableCell>{invoice.documentNo}</TableCell>
                             <TableCell>{invoice.referenceNo}</TableCell>

@@ -370,10 +370,10 @@ export default function SelectSearchMainSku({
                                                                             goodsMaster.barcode
                                                                         }
                                                                     </TableCell>
-                                                                    <TableCell>{`${goodsMaster.unit}(${goodsMaster.quantity})`}</TableCell>
+                                                                    <TableCell>{`${goodsMaster.unit}(${goodsMaster.quantityPerUnit})`}</TableCell>
                                                                     <TableCell>
                                                                         {
-                                                                            goodsMaster.price
+                                                                            goodsMaster.pricePerUnit
                                                                         }
                                                                     </TableCell>
                                                                     <TableCell>

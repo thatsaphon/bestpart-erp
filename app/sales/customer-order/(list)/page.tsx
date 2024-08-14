@@ -56,10 +56,10 @@ export default async function CustomerOrderPage({
             ],
         },
         include: {
-            ApSubledger: {
-                select: {
+            CustomerOrder: {
+                include: {
                     Contact: true,
-                    paymentStatus: true,
+                    CustomerOrderItem: true,
                 },
             },
             GeneralLedger: {
@@ -109,7 +109,8 @@ export default async function CustomerOrderPage({
                         <TableHead className="w-[100px]">Ref</TableHead>
                         <TableHead>คู่ค้า</TableHead>
                         <TableHead className="text-center">Status</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">มัดจำ</TableHead>
+                        <TableHead className="text-right">ยอดรวม</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>
@@ -122,28 +123,48 @@ export default async function CustomerOrderPage({
                             <TableCell>{invoice.documentNo}</TableCell>
                             <TableCell>{invoice.referenceNo}</TableCell>
                             <TableCell>
-                                {invoice.ApSubledger?.Contact.name || 'เงินสด'}
+                                {invoice.CustomerOrder?.Contact.name ||
+                                    'เงินสด'}
                             </TableCell>
                             <TableCell className="text-center">
-                                {invoice.ApSubledger?.paymentStatus ===
-                                'NotPaid' ? (
+                                {invoice.CustomerOrder?.status === 'Open' ? (
+                                    <Badge variant={'destructive'}>Open</Badge>
+                                ) : invoice.CustomerOrder?.status ===
+                                  'Ordered' ? (
                                     <Badge variant={'destructive'}>
-                                        ยังไม่จ่าย
+                                        สั่งของแล้ว
                                     </Badge>
-                                ) : invoice.ApSubledger?.paymentStatus ===
-                                  'Billed' ? (
-                                    <Badge variant={'outline'}>
-                                        วางบิลแล้ว
+                                ) : invoice.CustomerOrder?.status ===
+                                  'Received' ? (
+                                    <Badge variant={'destructive'}>
+                                        ได้รับสินค้าแล้ว
+                                    </Badge>
+                                ) : invoice.CustomerOrder?.status ===
+                                  'Closed' ? (
+                                    <Badge
+                                        className="bg-green-400"
+                                        variant={'outline'}
+                                    >
+                                        สำเร็จแล้ว
                                     </Badge>
                                 ) : (
-                                    <Badge className="bg-green-400">
-                                        จ่ายแล้ว
+                                    <Badge variant={'outline'}>
+                                        ยกเลิกแล้ว
                                     </Badge>
                                 )}
                             </TableCell>
                             <TableCell className="text-right">
                                 {Math.abs(
-                                    invoice.GeneralLedger[0]?.amount
+                                    invoice.CustomerOrder?.deposit || 0
+                                ).toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                                {Math.abs(
+                                    invoice.CustomerOrder?.CustomerOrderItem.reduce(
+                                        (sum, item) =>
+                                            sum + item.price * item.quantity,
+                                        0
+                                    ) || 0
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">

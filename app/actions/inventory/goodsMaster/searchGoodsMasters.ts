@@ -18,11 +18,8 @@ export default async function searchGoodsMasters(
                 include: {
                     GoodsMaster: true,
                     Image: true,
-                    SkuIn: {
-                        include: {
-                            SkuInToOut: true,
-                        }
-                    },
+                    SkuIn: true,
+                    SkuOut: true,
                 },
             },
         },

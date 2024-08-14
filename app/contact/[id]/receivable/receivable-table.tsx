@@ -16,6 +16,7 @@ import CreateBillingNote from './create-billing-note-component'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { fullDateFormat } from '@/lib/date-format'
 
 const documentWithGeneralLedgerArSubledger =
     Prisma.validator<Prisma.DocumentDefaultArgs>()({
@@ -100,13 +101,7 @@ export default function ReceivableTable({ documents }: Props) {
                                     </Link>
                                 </TableCell>
                                 <TableCell>
-                                    {new Intl.DateTimeFormat('th-TH', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                        timeZone: 'Asia/Bangkok', // Set time zone to Bangkok
-                                        localeMatcher: 'best fit',
-                                    }).format(document.date)}
+                                    {fullDateFormat(document.date)}
                                 </TableCell>
                                 <TableCell>
                                     {document.GeneralLedger?.reduce(

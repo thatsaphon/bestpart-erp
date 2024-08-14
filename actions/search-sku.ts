@@ -37,11 +37,13 @@ export const searchSku = async (query: string, page: number = 1) => {
     console.log(items.map((item) => item.detail))
 
     const remaining: { skuMasterId: number; remaining: number }[] =
-        await prisma.$queryRaw`select "SkuIn"."skuMasterId", SUM("SkuIn".quantity) - COALESCE(sum("SkuInToOut".quantity), 0)  as remaining 
-    from "SkuIn" left join "SkuInToOut" on "SkuIn"."id" = "SkuInToOut"."skuInId" 
-    where "SkuIn"."skuMasterId" in (${Prisma.join(items.map((item) => item.skuMasterId))})
-    group by "SkuIn"."id"
-    having sum("SkuInToOut".quantity) < "SkuIn".quantity or sum("SkuInToOut".quantity) is null`
+        await prisma.$queryRaw`
+    select "SkuMaster"."id" as "skuMasterId", ("SkuMaster"."remaining" + COALESCE(sum("SkuIn".quantity), 0) - COALESCE(sum("SkuOut".quantity), 0)) as "remaining"
+    from "SkuMaster" left join "SkuIn" on "SkuMaster"."id" = "SkuIn"."skuMasterId"
+    left join "SkuOut" on "SkuMaster"."id" = "SkuOut"."skuMasterId"
+    where "SkuMaster"."id" in (${Prisma.join(items.map((item) => item.skuMasterId))})
+    group by "SkuMaster"."id"
+    `
 
     const [{ count }] = await prisma.$queryRawUnsafe<{ count: number }[]>(
         `select count("GoodsMaster".barcode) from "MainSku"
