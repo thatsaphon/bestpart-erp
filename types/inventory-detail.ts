@@ -13,7 +13,7 @@ export type InventoryDetailType = {
     unit: string
     quantityPerUnit: number
     quantity: number
-    price: number
+    pricePerUnit: number
     partNumber: string
     remaining?: number
     remainingAt?: Date
@@ -34,7 +34,7 @@ export const defaultInventoryDetail = (): InventoryDetailType => {
         unit: '',
         quantityPerUnit: 1,
         quantity: 1,
-        price: 0,
+        pricePerUnit: 0,
         partNumber: '',
         remaining: 0,
         images: [],

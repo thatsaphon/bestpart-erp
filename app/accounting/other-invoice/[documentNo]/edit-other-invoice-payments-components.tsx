@@ -18,11 +18,18 @@ import { Button } from '@/components/ui/button'
 import toast from 'react-hot-toast'
 import { updateOtherInvoicePayments } from './update-payments'
 import { cn } from '@/lib/utils'
-import { ApSubledger, Prisma } from '@prisma/client'
+import { Contact, Prisma } from '@prisma/client'
 
 const documentWithGeneralLedger =
     Prisma.validator<Prisma.DocumentDefaultArgs>()({
-        include: { GeneralLedger: true },
+        include: {
+            OtherInvoice: {
+                include: {
+                    GeneralLedger: true,
+                    Contact: true,
+                },
+            },
+        },
     })
 type DocumentWithGeneralLedger = Prisma.DocumentGetPayload<
     typeof documentWithGeneralLedger
@@ -30,9 +37,7 @@ type DocumentWithGeneralLedger = Prisma.DocumentGetPayload<
 
 type Props = {
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
-    document: DocumentWithGeneralLedger & {
-        ApSubledger?: ApSubledger | null
-    }
+    document: DocumentWithGeneralLedger
 }
 
 export default function EditOtherInvoicePaymentsComponents({
@@ -42,7 +47,7 @@ export default function EditOtherInvoicePaymentsComponents({
     const [selectedPayments, setSelectedPayments] = React.useState<
         { id: number; amount: number }[]
     >(
-        document?.GeneralLedger.filter(({ chartOfAccountId }) =>
+        document?.OtherInvoice?.GeneralLedger.filter(({ chartOfAccountId }) =>
             paymentMethods.some(({ id }) => id === chartOfAccountId)
         ).map(({ chartOfAccountId, amount }) => ({
             id: chartOfAccountId,
@@ -72,7 +77,7 @@ export default function EditOtherInvoicePaymentsComponents({
     const submitPayment = async () => {
         const totalBill = Math.abs(
             Number(
-                document?.GeneralLedger.filter(
+                document?.OtherInvoice?.GeneralLedger.filter(
                     (item) =>
                         item.chartOfAccountId >= 11000 &&
                         item.chartOfAccountId <= 12000
@@ -103,9 +108,7 @@ export default function EditOtherInvoicePaymentsComponents({
                 <div
                     key={item.id}
                     className={cn(
-                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary',
-                        document?.ApSubledger?.paymentStatus === 'Billed' &&
-                            'grid-cols-[1fr_140px] text-muted-foreground'
+                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary'
                     )}
                 >
                     <p>
@@ -117,11 +120,7 @@ export default function EditOtherInvoicePaymentsComponents({
                     </p>
                     <p>{item.amount}</p>
                     <Cross1Icon
-                        className={cn(
-                            'cursor-pointer text-destructive',
-                            document?.ApSubledger?.paymentStatus === 'Billed' &&
-                                'hidden'
-                        )}
+                        className={cn('cursor-pointer text-destructive')}
                         onClick={() =>
                             setSelectedPayments(
                                 selectedPayments.filter((p) => p.id !== item.id)
@@ -132,9 +131,7 @@ export default function EditOtherInvoicePaymentsComponents({
             ))}
             <div
                 className={cn(
-                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1',
-                    document?.ApSubledger?.paymentStatus === 'Billed' &&
-                        'hidden'
+                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1'
                 )}
             >
                 <Select
@@ -185,24 +182,8 @@ export default function EditOtherInvoicePaymentsComponents({
                     เพิ่มการชำระเงิน
                 </Button>
             </div>
-            <Button
-                className={cn(
-                    document?.ApSubledger?.paymentStatus === 'Billed' &&
-                        'hidden'
-                )}
-                onClick={() => submitPayment()}
-            >
-                ยืนยัน
-            </Button>
-            <p
-                className={cn(
-                    'text-destructive',
-                    document?.ApSubledger?.paymentStatus !== 'Billed' &&
-                        'hidden'
-                )}
-            >
-                วางบิลแล้ว
-            </p>
+            <Button onClick={() => submitPayment()}>ยืนยัน</Button>
+            <p className={cn('text-destructive')}>วางบิลแล้ว</p>
         </>
     )
 }

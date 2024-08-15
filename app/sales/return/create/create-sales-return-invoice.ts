@@ -179,7 +179,8 @@ export const createSalesReturnInvoice = async (
                             .reduce(
                                 (sum, item) =>
                                     sum +
-                                    (item.quantity * item.price * 100) / 107,
+                                    (item.quantity * item.pricePerUnit * 100) /
+                                        107,
                                 0
                             )
                             .toFixed(2),
@@ -191,7 +192,8 @@ export const createSalesReturnInvoice = async (
                             .reduce(
                                 (sum, item) =>
                                     sum +
-                                    (item.quantity * item.price * 7) / 107,
+                                    (item.quantity * item.pricePerUnit * 7) /
+                                        107,
                                 0
                             )
                             .toFixed(2),
@@ -208,8 +210,8 @@ export const createSalesReturnInvoice = async (
                         unit: item.unit,
                         quantityPerUnit: item.quantityPerUnit,
                         quantity: item.quantity * item.quantityPerUnit,
-                        cost: +((100 / 107) * item.price).toFixed(2),
-                        vat: +((7 / 107) * item.price).toFixed(2),
+                        cost: +((100 / 107) * item.pricePerUnit).toFixed(2),
+                        vat: +((7 / 107) * item.pricePerUnit).toFixed(2),
                     }
                 }),
             },

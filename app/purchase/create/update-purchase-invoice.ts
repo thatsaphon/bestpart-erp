@@ -146,7 +146,8 @@ export const updatePurchaseInvoice = async (
                         data: {
                             chartOfAccountId: 21000,
                             amount: -items.reduce(
-                                (sum, item) => sum + item.quantity * item.price,
+                                (sum, item) =>
+                                    sum + item.quantity * item.pricePerUnit,
                                 0
                             ),
                         },
@@ -165,7 +166,9 @@ export const updatePurchaseInvoice = async (
                                 .reduce(
                                     (sum, item) =>
                                         sum +
-                                        (item.quantity * item.price * 100) /
+                                        (item.quantity *
+                                            item.pricePerUnit *
+                                            100) /
                                             107,
                                     0
                                 )
@@ -186,7 +189,10 @@ export const updatePurchaseInvoice = async (
                                 .reduce(
                                     (sum, item) =>
                                         sum +
-                                        (item.quantity * item.price * 7) / 107,
+                                        (item.quantity *
+                                            item.pricePerUnit *
+                                            7) /
+                                            107,
                                     0
                                 )
                                 .toFixed(2),
@@ -220,11 +226,11 @@ export const updatePurchaseInvoice = async (
                                 quantityPerUnit: item.quantityPerUnit,
                                 quantity: item.quantity * item.quantityPerUnit,
                                 cost: +(
-                                    ((100 / 107) * +item.price) /
+                                    ((100 / 107) * +item.pricePerUnit) /
                                     item.quantityPerUnit
                                 ).toFixed(2),
                                 vat: +(
-                                    ((7 / 107) * +item.price) /
+                                    ((7 / 107) * +item.pricePerUnit) /
                                     item.quantityPerUnit
                                 ).toFixed(2),
                             },
@@ -255,11 +261,11 @@ export const updatePurchaseInvoice = async (
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity * item.quantityPerUnit,
                             cost: +(
-                                ((100 / 107) * +item.price) /
+                                ((100 / 107) * +item.pricePerUnit) /
                                 item.quantityPerUnit
                             ).toFixed(2),
                             vat: +(
-                                ((7 / 107) * +item.price) /
+                                ((7 / 107) * +item.pricePerUnit) /
                                 item.quantityPerUnit
                             ).toFixed(2),
                         }

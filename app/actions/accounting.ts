@@ -75,8 +75,17 @@ export async function deleteChartOfAccount(id: number) {
 
 export async function getPaymentMethods() {
     return await prisma.chartOfAccount.findMany({
-        where: { AND: [{ id: { gte: 11000 } }, { id: { lte: 12000 } }] },
-        select: { id: true, name: true, type: true },
+        where: {
+            OR: [
+                {
+                    isAr: true,
+                },
+                {
+                    isCash: true,
+                },
+            ],
+        },
+        select: { id: true, name: true, type: true, isAr: true, isCash: true },
     })
 }
 
@@ -84,10 +93,14 @@ export async function getApPaymentMethods() {
     return await prisma.chartOfAccount.findMany({
         where: {
             OR: [
-                { AND: [{ id: { gte: 11000 } }, { id: { lt: 12000 } }] },
-                { id: { in: [21000, 22100] } },
+                {
+                    isAp: true,
+                },
+                {
+                    isCash: true,
+                },
             ],
         },
-        select: { id: true, name: true, type: true },
+        select: { id: true, name: true, type: true, isAp: true, isCash: true },
     })
 }

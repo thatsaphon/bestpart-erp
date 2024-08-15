@@ -43,7 +43,7 @@ export default function SkuMasterCardForm({ skuDetail }: Props) {
         skuDetail.map((detail) => ({
             id: detail.goodsMasterId,
             barcode: detail.barcode,
-            price: detail.price,
+            price: detail.pricePerUnit,
             quantity: detail.quantityPerUnit,
             unit: detail.unit,
         }))
@@ -59,7 +59,7 @@ export default function SkuMasterCardForm({ skuDetail }: Props) {
             skuDetail.map((detail) => ({
                 id: detail.goodsMasterId,
                 barcode: detail.barcode,
-                price: detail.price,
+                price: detail.pricePerUnit,
                 quantity: detail.quantityPerUnit,
                 unit: detail.unit,
             }))

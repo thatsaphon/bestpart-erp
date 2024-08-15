@@ -1,6 +1,6 @@
-CREATE VIEW "StockMovement" AS
+CREATE OR REPLACE VIEW "StockMovement" AS
 SELECT
-    "documentId", "documentNo", "date", 'Sales' as "documentType", ("quantity" * "quantityPerUnit"), 0 as cost, "price" 
+    "documentId", "documentNo", "date", 'Sales' as "documentType", "skuMasterId", ("quantity" * "quantityPerUnit") as quantity, 0 as cost, "price" 
 FROM
     "Document"
 INNER JOIN
@@ -9,7 +9,7 @@ INNER JOIN
     "SalesItem" ON "Sales".id = "SalesItem"."salesId"
 UNION
 SELECT
-    "documentId", "documentNo", "date", 'SalesReturn' as "documentType", -("quantity" * "quantityPerUnit"), 0 as cost, "price" 
+    "documentId", "documentNo", "date", 'SalesReturn' as "documentType", "skuMasterId", -("quantity" * "quantityPerUnit") as quantity, 0 as cost, "price" 
 FROM
     "Document"
 INNER JOIN
@@ -18,7 +18,7 @@ INNER JOIN
     "SalesReturnItem" ON "SalesReturn".id = "SalesReturnItem"."salesReturnId"
 UNION
 SELECT
-    "documentId", "documentNo", "date", 'Purchase' as "documentType", -("quantity" * "quantityPerUnit"), "cost", 0 as price 
+    "documentId", "documentNo", "date", 'Purchase' as "documentType", "skuMasterId", -("quantity" * "quantityPerUnit") as quantity, "cost", 0 as price 
 FROM
     "Document"
 INNER JOIN
@@ -27,7 +27,7 @@ INNER JOIN
     "PurchaseItem" ON "Purchase".id = "PurchaseItem"."purchaseId"
 UNION
 SELECT
-    "documentId", "documentNo", "date", 'PurchaseReturn' as "documentType", ("quantity" * "quantityPerUnit"), cost, 0 as price 
+    "documentId", "documentNo", "date", 'PurchaseReturn' as "documentType", "skuMasterId", ("quantity" * "quantityPerUnit") as quantity, cost, 0 as price 
 FROM
     "Document"
 INNER JOIN
@@ -36,7 +36,7 @@ INNER JOIN
     "PurchaseReturnItem" ON "PurchaseReturn".id = "PurchaseReturnItem"."purchaseReturnId"
 UNION
 SELECT
-    "documentId", "documentNo", "date", 'StockAdjustment' as "documentType", "quantity", "estimatedCost" as cost, 0 as price 
+    "documentId", "documentNo", "date", 'StockAdjustment' as "documentType", "skuMasterId", "quantity", "estimatedCost" as cost, 0 as price 
 FROM
     "Document"
 INNER JOIN

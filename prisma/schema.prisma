@@ -293,6 +293,11 @@ model Sales {
   Contact       Contact?        @relation(fields: [contactId], references: [id])
   contactId     Int?
   GeneralLedger GeneralLedger[]
+
+  SalesBill       SalesBill?     @relation(fields: [salesBillId], references: [id])
+  salesBillId     Int?
+  SalesReceived   SalesReceived? @relation(fields: [salesReceivedId], references: [id])
+  salesReceivedId Int?
 }
 
 enum SalesStatus {
@@ -321,12 +326,8 @@ model SalesItem {
   price    Float
   vat      Float
 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @default(now()) @updatedAt
-  SalesBill       SalesBill?     @relation(fields: [salesBillId], references: [id])
-  salesBillId     Int?
-  SalesReceived   SalesReceived? @relation(fields: [salesReceivedId], references: [id])
-  salesReceivedId Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([skuMasterId])
   @@index([goodsMasterId])
@@ -378,7 +379,7 @@ model SalesBill {
   documentId      Int            @unique
   Contact         Contact        @relation(fields: [contactId], references: [id])
   contactId       Int
-  SalesItem       SalesItem[]
+  Sales           Sales[]
   SalesReturn     SalesReturn[]
   SalesReceived   SalesReceived? @relation(fields: [salesReceivedId], references: [id])
   salesReceivedId Int?
@@ -390,7 +391,7 @@ model SalesReceived {
   documentId    Int             @unique
   Contact       Contact         @relation(fields: [contactId], references: [id])
   contactId     Int
-  SalesItem     SalesItem[]
+  Sales         Sales[]
   SalesReturn   SalesReturn[]
   SalesBill     SalesBill[]
   GeneralLedger GeneralLedger[]
@@ -404,10 +405,11 @@ model Purchase {
   documentId Int      @unique
   Contact    Contact? @relation(fields: [contactId], references: [id])
   contactId  Int?
-  vatable    Boolean  @default(true)
 
-  PurchaseItem  PurchaseItem[]
-  GeneralLedger GeneralLedger[]
+  PurchaseItem      PurchaseItem[]
+  GeneralLedger     GeneralLedger[]
+  PurchasePayment   PurchasePayment? @relation(fields: [purchasePaymentId], references: [id])
+  purchasePaymentId Int?
 }
 
 model PurchaseItem {
@@ -427,10 +429,10 @@ model PurchaseItem {
   cost     Float
   vat      Float
 
-  Purchase          Purchase         @relation(fields: [purchaseId], references: [id])
-  purchaseId        Int
-  PurchasePayment   PurchasePayment? @relation(fields: [purchasePaymentId], references: [id])
-  purchasePaymentId Int?
+  Purchase   Purchase @relation(fields: [purchaseId], references: [id])
+  purchaseId Int
+
+  vatable Boolean @default(true)
 
   @@index([skuMasterId])
   @@index([goodsMasterId])
@@ -469,6 +471,8 @@ model PurchaseReturnItem {
   PurchaseReturn   PurchaseReturn @relation(fields: [purchaseReturnId], references: [id])
   purchaseReturnId Int
 
+  vatable Boolean @default(true)
+
   @@index([skuMasterId])
   @@index([goodsMasterId])
 }
@@ -479,7 +483,7 @@ model PurchasePayment {
   documentId     Int              @unique
   Contact        Contact          @relation(fields: [contactId], references: [id])
   contactId      Int
-  PurchaseItem   PurchaseItem[]
+  Purchase       Purchase[]
   PurchaseReturn PurchaseReturn[]
   GeneralLedger  GeneralLedger[]
 
@@ -779,6 +783,7 @@ model QuotationItem {
 view StockMovement {
   documentId   String       @id
   documentNo   String
+  skuMasterId  Int
   date         DateTime
   documentType DocumentType
   quantity     Float

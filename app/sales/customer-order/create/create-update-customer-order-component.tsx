@@ -521,12 +521,11 @@ export default function CreateOrUpdateCustomerOrderComponent({
                                         id={`price-${index}`}
                                         className="w-16 text-right"
                                         type="number"
-                                        value={item.price || undefined}
+                                        value={item.pricePerUnit || undefined}
                                         onChange={(e) => {
                                             const newItems = [...items]
-                                            newItems[index].price = Number(
-                                                e.target.value
-                                            )
+                                            newItems[index].pricePerUnit =
+                                                Number(e.target.value)
                                             setItems(newItems)
                                         }}
                                         onKeyDown={(e) => {
@@ -564,7 +563,7 @@ export default function CreateOrUpdateCustomerOrderComponent({
                                     />
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {item.price * item.quantity}
+                                    {item.pricePerUnit * item.quantity}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Cross1Icon
@@ -727,7 +726,7 @@ export default function CreateOrUpdateCustomerOrderComponent({
                             <TableCell className="text-right">
                                 {items.reduce(
                                     (acc, item) =>
-                                        acc + item.price * item.quantity,
+                                        acc + item.pricePerUnit * item.quantity,
                                     0
                                 )}
                             </TableCell>

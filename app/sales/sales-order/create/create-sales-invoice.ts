@@ -166,7 +166,8 @@ export const createSalesInvoice = async (
                             .reduce(
                                 (sum, item) =>
                                     sum +
-                                    (item.quantity * item.price * 100) / 107,
+                                    (item.quantity * item.pricePerUnit * 100) /
+                                        107,
                                 0
                             )
                             .toFixed(2),
@@ -178,7 +179,8 @@ export const createSalesInvoice = async (
                             .reduce(
                                 (sum, item) =>
                                     sum +
-                                    (item.quantity * item.price * 7) / 107,
+                                    (item.quantity * item.pricePerUnit * 7) /
+                                        107,
                                 0
                             )
                             .toFixed(2),
@@ -196,8 +198,8 @@ export const createSalesInvoice = async (
                         quantityPerUnit: item.quantityPerUnit,
                         quantity: item.quantity,
                         cost: 0,
-                        price: +((100 / 107) * item.price).toFixed(2),
-                        vat: +((7 / 107) * item.price).toFixed(2),
+                        price: +((100 / 107) * item.pricePerUnit).toFixed(2),
+                        vat: +((7 / 107) * item.pricePerUnit).toFixed(2),
                         SkuInToOut: {
                             create: checkRemaining
                                 .filter(

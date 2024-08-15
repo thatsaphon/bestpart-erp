@@ -142,7 +142,7 @@ export default function SearchSkuDialog({
                                 </TableCell>
                                 <TableCell>{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.price}
+                                    {item.pricePerUnit}
                                 </TableCell>
                                 <TableCell>
                                     <Button

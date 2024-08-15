@@ -70,26 +70,37 @@ export const updateOtherInvoice = async (
             id,
         },
         include: {
-            ApSubledger: true,
-            remark: true,
-            AssetMovement: { include: { AssetRegistration: true } },
-            GeneralLedger: true,
+            OtherInvoice: {
+                include: {
+                    Contact: true,
+                    GeneralLedger: true,
+                    OtherInvoiceItem: {
+                        include: {
+                            AssetMovement: {
+                                include: {
+                                    Asset: { include: { AssetMovement: true } },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
         },
     })
 
     if (!document) {
         throw new Error('Document not found')
     }
-    if (document.ApSubledger?.paymentStatus === 'Billed') {
-        throw new Error('Document has already been billed')
-    }
+    // if (document.ApSubledger?.paymentStatus === 'Billed') {
+    //     throw new Error('Document has already been billed')
+    // }
 
-    const assets = await prisma.assetRegistration.findMany({
+    const assets = await prisma.asset.findMany({
         where: {
             id: {
-                in: document.AssetMovement.map(
-                    (item) => item.AssetRegistration.id
-                ),
+                in: document.OtherInvoice?.OtherInvoiceItem.filter(
+                    (item) => item.AssetMovement
+                ).map((item) => item.AssetMovement?.Asset.id as number),
             },
         },
         include: {
@@ -109,31 +120,37 @@ export const updateOtherInvoice = async (
     const deleteGL = prisma.generalLedger.deleteMany({
         where: {
             id: {
-                in: document.GeneralLedger.map((item) => item.id),
+                in: document.OtherInvoice?.GeneralLedger.map((item) => item.id),
             },
         },
     })
 
-    const deleteAsset = prisma.assetRegistration.deleteMany({
+    const deleteAsset = prisma.asset.deleteMany({
         where: {
             id: {
-                in: document.AssetMovement.map(
-                    (item) => item.AssetRegistration.id
-                ),
+                in: document.OtherInvoice?.OtherInvoiceItem.filter(
+                    (item) => item.AssetMovement
+                ).map((item) => item.AssetMovement?.Asset.id as number),
             },
-        },
-    })
-
-    const deleteApSubledger = prisma.apSubledger.delete({
-        where: {
-            id: document.ApSubledger?.id,
         },
     })
 
     const deleteAssetMovement = prisma.assetMovement.deleteMany({
         where: {
+            assetId: {
+                in: document.OtherInvoice?.OtherInvoiceItem.filter(
+                    (item) => item.AssetMovement
+                ).map((item) => item.AssetMovement?.Asset.id as number),
+            },
+        },
+    })
+
+    const deleteOtherInvoiceItem = prisma.otherInvoiceItem.deleteMany({
+        where: {
             id: {
-                in: document.AssetMovement.map((item) => item.id),
+                in: document.OtherInvoice?.OtherInvoiceItem.map(
+                    (item) => item.id
+                ),
             },
         },
     })
@@ -166,55 +183,57 @@ export const updateOtherInvoice = async (
                     })),
             },
             referenceNo: referenceNo,
-            GeneralLedger: {
-                create: [
-                    ...items
-                        .filter((item) => !item.assetType)
-                        .map((item) => ({
-                            chartOfAccountId: item.chartOfAccountId,
-                            amount: item.amount,
-                        })),
-                    // ...items
-                    //     .filter((item) => item.assetType)
-                    //     .map((item) => ({
-                    //         chartOfAccountId: item.chartOfAccountId,
-                    //         amount: item.amount,
-                    //         AssetMovement: {
-                    //             create: items
-                    //                 .filter((item) => item.assetType)
-                    //                 .map((item) => ({
-                    //                     AssetRegistration: {
-                    //                         create: {
-                    //                             acquisitionDate: new Date(date),
-                    //                             name: item.assetName as string,
-                    //                             description: '',
-                    //                             remark: '',
-                    //                             type: item.assetType as AssetType,
-                    //                             usefulLife:
-                    //                                 item.assetUsefulLife,
-                    //                         },
-                    //                     },
-                    //                     date: new Date(date),
-                    //                     value: item.amount,
-                    //                 })),
-                    //         },
-                    //     })),
-                    ...payments.map((payment) => {
-                        return {
-                            chartOfAccountId: payment.id,
-                            amount: -payment.amount,
-                        }
-                    }),
-                ],
+            OtherInvoice: {
+                update: {
+                    contactId: Number(contactId),
+                    //PENDING
+                    // GeneralLedger: {
+                    //     create: [
+                    //         ...items
+                    //             .filter((item) => !item.assetType)
+                    //             .map((item) => ({
+                    //                 chartOfAccountId: item.chartOfAccountId,
+                    //                 amount: item.amount,
+                    //             })),
+                    //         ...payments.map((payment) => {
+                    //             return {
+                    //                 chartOfAccountId: payment.id,
+                    //                 amount: -payment.amount,
+                    //             }
+                    //         }),
+                    //     ],
+                    // },
+                    // OtherInvoiceItem: {
+                    //     create:{
+
+                    //     }
+                    // }
+                },
             },
-            ApSubledger: !!contactId
-                ? {
-                      create: {
-                          contactId: Number(contactId),
-                          paymentStatus: calculateApPaymentStatus(payments),
-                      },
-                  }
-                : undefined,
+            // GeneralLedger: {
+            //     create: [
+            //         ...items
+            //             .filter((item) => !item.assetType)
+            //             .map((item) => ({
+            //                 chartOfAccountId: item.chartOfAccountId,
+            //                 amount: item.amount,
+            //             })),
+            //         ...payments.map((payment) => {
+            //             return {
+            //                 chartOfAccountId: payment.id,
+            //                 amount: -payment.amount,
+            //             }
+            //         }),
+            //     ],
+            // },
+            // ApSubledger: !!contactId
+            //     ? {
+            //           create: {
+            //               contactId: Number(contactId),
+            //               paymentStatus: calculateApPaymentStatus(payments),
+            //           },
+            //       }
+            //     : undefined,
         },
     })
 
@@ -255,8 +274,8 @@ export const updateOtherInvoice = async (
     await prisma.$transaction([
         deleteGL,
         deleteAsset,
-        deleteApSubledger,
         deleteAssetMovement,
+        deleteOtherInvoiceItem,
         update,
         // createAssetMovement,
     ])

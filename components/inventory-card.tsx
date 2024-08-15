@@ -83,7 +83,7 @@ export function InventoryCard({ mainSkus }: Props) {
                                         )
                                     </div>
                                     <div className="col-start-4 justify-self-end text-sm">
-                                        {mainSku.price}
+                                        {mainSku.pricePerUnit}
                                     </div>
                                 </React.Fragment>
                             </div>

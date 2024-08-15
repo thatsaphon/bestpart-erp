@@ -114,8 +114,10 @@ export async function updateQuotation(
                             unit: item.unit,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
-                            price: +((100 / 107) * item.price).toFixed(2),
-                            vat: +((7 / 107) * item.price).toFixed(2),
+                            price: +((100 / 107) * item.pricePerUnit).toFixed(
+                                2
+                            ),
+                            vat: +((7 / 107) * item.pricePerUnit).toFixed(2),
                         })),
                     },
                 },

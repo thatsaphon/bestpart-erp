@@ -6,13 +6,7 @@ import {
     getPaymentMethods,
 } from '@/app/actions/accounting'
 import CreateUpdateOtherExpenseComponent from '../../create/create-update-other-expense'
-import {
-    AccountType,
-    AssetType,
-    DocumentRemark,
-    PaymentStatus,
-    Prisma,
-} from '@prisma/client'
+import { AccountType, AssetType, DocumentRemark, Prisma } from '@prisma/client'
 
 type Props = {
     params: {
@@ -23,6 +17,7 @@ type Props = {
 export default async function UpdateOtherExpensePage({
     params: { documentNo },
 }: Props) {
+    //PENDING
     const paymentMethods = await getApPaymentMethods()
 
     const otherExpenses = await prisma.chartOfAccount.findMany({
@@ -53,7 +48,6 @@ export default async function UpdateOtherExpensePage({
         phone: string
         taxId: string
         documentRemarks: DocumentRemark[]
-        paymentStatus: PaymentStatus
         chartOfAccountId: number
         chartOfAccountName: string
         amount: number
@@ -66,15 +60,19 @@ export default async function UpdateOtherExpensePage({
                     SELECT "Document"."id", "Document"."date", "Document"."documentNo", "Document"."referenceNo", "ApSubledger"."contactId", "Document"."contactName", "Document"."address",
                     "Document"."phone", "Document"."taxId", "ApSubledger"."paymentStatus", "ChartOfAccount"."id" as "chartOfAccountId", "ChartOfAccount"."name" as "chartOfAccountName", 
                     "GeneralLedger"."amount" , "ChartOfAccount"."type" as "chartOfAccountType" ,
-                    "AssetRegistration"."name" as "assetName", "AssetRegistration"."usefulLife" as "assetUsefulLife",
-                    "AssetRegistration"."residualValue" as "assetResidualValue", "AssetRegistration"."type" as "assetType"
+                    "Asset"."name" as "assetName", "Asset"."usefulLife" as "assetUsefulLife",
+                    "Asset"."residualValue" as "assetResidualValue", "Asset"."type" as "assetType"
                     from "Document"
-                    left join "_DocumentToGeneralLedger" on "Document"."id" = "_DocumentToGeneralLedger"."A"
-                    left join "GeneralLedger" on "_DocumentToGeneralLedger"."B" = "GeneralLedger"."id"
-                    left join "ApSubledger" on "ApSubledger"."documentId" = "Document"."id"
+                    left join "OtherInvoice" on "OtherInvoice"."documentId" = "Document"."id"
+                    left join "OtherInvoiceItem" on "OtherInvoice"."id" = "OtherInvoiceItem"."otherInvoiceId"
+                    left join "GeneralLedger" on "OtherInvoice"."id" = "GeneralLedger"."otherInvoiceId"
+
+                    -- left join "_DocumentToGeneralLedger" on "Document"."id" = "_DocumentToGeneralLedger"."A"
+                    -- left join "GeneralLedger" on "_DocumentToGeneralLedger"."B" = "GeneralLedger"."id"
+                    -- left join "ApSubledger" on "ApSubledger"."documentId" = "Document"."id"
                     left join "ChartOfAccount" on "ChartOfAccount"."id" = "GeneralLedger"."chartOfAccountId"
-                    left join "AssetMovement" on "GeneralLedger"."id" = "AssetMovement"."generalLedgerId"
-                    left join "AssetRegistration" on "AssetRegistration"."id" = "AssetMovement"."assetRegistrationId"
+                    left join "AssetMovement" on "OtherInvoiceItem"."id" = "AssetMovement"."otherInvoiceItemId"
+                    left join "Asset" on "Asset"."id" = "AssetMovement"."assetId"
                     where 1 = 1
                     and "Document"."documentNo" = ${documentNo}
                     and "ChartOfAccount"."id" not in (${Prisma.join(paymentMethods.map((m) => m.id))})

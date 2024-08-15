@@ -6,19 +6,38 @@ import { InventoryDetailType } from '@/types/inventory-detail'
 
 export const searchSku = async (query: string, page: number = 1) => {
     console.log('function searchSku called')
+    console.log('page', page)
     const splitQuery = query.trim().split(' ')
+
+    // prisma.stockMovement.findMany({
+    //     where:{skuMasterId: 1}
+    // })
+
+    const item = await prisma.mainSku.findMany({
+        where: {
+            AND: [
+                ...splitQuery.map((x, index) => ({
+                    OR: [
+                        {
+                            name: { contains: x, mode: 'insensitive' },
+                        },
+                    ],
+                })),
+            ],
+        },
+    })
 
     const items = await prisma.$queryRawUnsafe<InventoryDetailType[]>(
         `select "MainSku".id as "mainSkuId", "GoodsMaster".id as "goodsMasterId", "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", 
-        "MainSku"."name", "SkuMaster"."detail", "GoodsMaster".price, 
-    "GoodsMaster".quantity as "quantityPerUnit", "GoodsMaster".unit, "MainSku"."partNumber"
+        "MainSku"."name", "SkuMaster"."detail", "GoodsMaster"."pricePerUnit", 
+    "GoodsMaster"."quantityPerUnit", "GoodsMaster".unit, "MainSku"."partNumber"
     from "MainSku"
-    inner join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
-    inner join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
-    inner join "_MainSkuToMainSkuRemark" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
-    inner join "MainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
-    inner join "_SkuMasterToSkuMasterRemark" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
-    inner join "SkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id" 
+    left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
+    left join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
+    left join "_MainSkuToMainSkuRemark" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
+    left join "MainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
+    left join "_SkuMasterToSkuMasterRemark" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
+    left join "SkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id" 
     ${query ? `where ` : ` `}
     ${splitQuery
         .map((x, index) =>
@@ -29,21 +48,37 @@ export const searchSku = async (query: string, page: number = 1) => {
                 : ``
         )
         .join(' and ')}
+        order by "MainSku"."name"
     limit 10 offset ${(page - 1) * 10}
     `,
         ...splitQuery.map((x) => `%${x.toLowerCase()}%`)
     )
     if (!items.length) throw new Error('ไม่พบสินค้าที่ค้นหา')
-    console.log(items.map((item) => item.detail))
+    console.log(items.map((item) => item.name + ' - ' + item.detail))
+
+    // const remaining: { skuMasterId: number; remaining: number }[] =
+    //     await prisma.$queryRaw`
+    // select "SkuMaster"."id" as "skuMasterId", ("SkuMaster"."remaining" + COALESCE(sum("SkuIn".quantity), 0) - COALESCE(sum("SkuOut".quantity), 0)) as "remaining"
+    // from "SkuMaster" left join "SkuIn" on "SkuMaster"."id" = "SkuIn"."skuMasterId"
+    // left join "SkuOut" on "SkuMaster"."id" = "SkuOut"."skuMasterId"
+    // where "SkuMaster"."id" in (${Prisma.join(items.map((item) => item.skuMasterId))})
+    // group by "SkuMaster"."id"
+    // `
 
     const remaining: { skuMasterId: number; remaining: number }[] =
         await prisma.$queryRaw`
-    select "SkuMaster"."id" as "skuMasterId", ("SkuMaster"."remaining" + COALESCE(sum("SkuIn".quantity), 0) - COALESCE(sum("SkuOut".quantity), 0)) as "remaining"
-    from "SkuMaster" left join "SkuIn" on "SkuMaster"."id" = "SkuIn"."skuMasterId"
-    left join "SkuOut" on "SkuMaster"."id" = "SkuOut"."skuMasterId"
-    where "SkuMaster"."id" in (${Prisma.join(items.map((item) => item.skuMasterId))})
-    group by "SkuMaster"."id"
-    `
+        select "StockMovement"."skuMasterId", sum("StockMovement"."quantity") from "StockMovement" 
+        where "StockMovement"."skuMasterId" in (${Prisma.join(items.map((item) => item.skuMasterId))})
+        group by "StockMovement"."skuMasterId"
+        `
+
+    // const remaining = await prisma.stockMovement.findMany({
+    //     where: {
+    //         skuMasterId: {
+    //             in: items.map((item) => item.skuMasterId),
+    //         },
+    //     },
+    // })
 
     const [{ count }] = await prisma.$queryRawUnsafe<{ count: number }[]>(
         `select count("GoodsMaster".barcode) from "MainSku"

@@ -165,7 +165,7 @@ export default async function InventoryListPage({
                                     <TableCell className="text-primary/50 group-hover:text-primary">
                                         {item.map((goods) => (
                                             <p key={'price-' + goods.barcode}>
-                                                {goods.price}
+                                                {goods.pricePerUnit}
                                             </p>
                                         ))}
                                     </TableCell>
