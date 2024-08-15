@@ -9,49 +9,68 @@ export default async function deleteOtherInvoice(documentNo: string) {
             documentNo,
         },
         include: {
-            ApSubledger: { include: { Contact: true } },
-            GeneralLedger: { include: { ChartOfAccount: true } },
-            AssetMovement: {
+            OtherInvoice: {
                 include: {
-                    AssetRegistration: { include: { AssetMovement: true } },
+                    Contact: true,
+                    GeneralLedger: true,
+                    OtherInvoiceItem: {
+                        include: {
+                            AssetMovement: {
+                                include: {
+                                    Asset: { include: { AssetMovement: true } },
+                                },
+                            },
+                        },
+                    },
                 },
             },
         },
     })
 
-    if (!document) {
+    if (!document || !document.OtherInvoice) {
         throw new Error('Document not found')
     }
-    for (let { AssetRegistration: asset } of document.AssetMovement) {
-        if (asset.AssetMovement.length > 1) {
+    for (let item of document.OtherInvoice.OtherInvoiceItem || []) {
+        if (
+            item.AssetMovement &&
+            item.AssetMovement?.Asset.AssetMovement.length > 1
+        ) {
             throw new Error(
                 'มีการเปลี่ยนแปลงมูลค่าของสินทรัพย์ กรุณาลบการเปลี่ยนแปลงมูลค่าก่อน'
             )
         }
     }
 
-    const deleteApSubledger = prisma.apSubledger.deleteMany({
-        where: {
-            documentId: document.id,
-        },
-    })
     const deleteGeneralLedger = prisma.generalLedger.deleteMany({
         where: {
             id: {
-                in: document.GeneralLedger.map((gl) => gl.id),
+                in: document.OtherInvoice.GeneralLedger.map((gl) => gl.id),
             },
         },
     })
     const deleteAssetMovement = prisma.assetMovement.deleteMany({
         where: {
-            documentId: document.id,
+            // documentId: document.id,
+            assetId: {
+                in: document.OtherInvoice?.OtherInvoiceItem.filter(
+                    (item) => item.AssetMovement
+                ).map((item) => item.AssetMovement?.Asset.id as number),
+            },
         },
     })
-    const deleteAsset = prisma.assetRegistration.deleteMany({
+    const deleteAsset = prisma.asset.deleteMany({
         where: {
             id: {
-                in: document.AssetMovement.map((am) => am.AssetRegistration.id),
+                in: document.OtherInvoice?.OtherInvoiceItem.filter(
+                    (item) => item.AssetMovement
+                ).map((item) => item.AssetMovement?.Asset.id as number),
             },
+        },
+    })
+
+    const deleteOtherInvoice = prisma.otherInvoice.delete({
+        where: {
+            id: document.OtherInvoice.id,
         },
     })
 
@@ -62,10 +81,10 @@ export default async function deleteOtherInvoice(documentNo: string) {
     })
 
     await prisma.$transaction([
-        deleteApSubledger,
         deleteAssetMovement,
         deleteAsset,
         deleteGeneralLedger,
+        deleteOtherInvoice,
         deleteDocument,
     ])
 

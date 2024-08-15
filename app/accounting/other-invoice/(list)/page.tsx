@@ -38,9 +38,7 @@ export default async function OtherPaymentPage({
 }: Props) {
     const otherInvoice = await prisma.document.findMany({
         where: {
-            documentNo: {
-                startsWith: 'INV',
-            },
+            type: 'OtherInvoice',
             AND: [
                 {
                     date: {
@@ -57,17 +55,16 @@ export default async function OtherPaymentPage({
             ],
         },
         include: {
-            ApSubledger: {
-                select: {
+            OtherInvoice: {
+                include: {
                     Contact: true,
-                    paymentStatus: true,
-                },
-            },
-            GeneralLedger: {
-                where: {
-                    amount: {
-                        lte: 0,
+                    OtherInvoiceItem: {
+                        include: {
+                            AssetMovement: { include: { Asset: true } },
+                            ChartOfAccount: true,
+                        },
                     },
+                    GeneralLedger: true,
                 },
             },
         },
@@ -79,9 +76,7 @@ export default async function OtherPaymentPage({
 
     const documentCount = await prisma.document.count({
         where: {
-            documentNo: {
-                startsWith: 'SINV',
-            },
+            type: 'OtherInvoice',
             AND: [
                 {
                     date: {
@@ -125,10 +120,10 @@ export default async function OtherPaymentPage({
                             </TableCell>
                             <TableCell>{invoice.documentNo}</TableCell>
                             <TableCell>
-                                {invoice.ApSubledger?.Contact.name || '-'}
+                                {invoice.OtherInvoice?.Contact?.name || '-'}
                             </TableCell>
                             <TableCell>{invoice.createdBy}</TableCell>
-                            <TableCell className="text-center">
+                            {/* <TableCell className="text-center">
                                 {invoice.ApSubledger?.paymentStatus ===
                                 'Paid' ? (
                                     <Badge className="bg-green-400">
@@ -159,7 +154,7 @@ export default async function OtherPaymentPage({
                                     (acc, gl) => acc + gl.amount,
                                     0
                                 )).toLocaleString()}
-                            </TableCell>
+                            </TableCell> */}
                             <TableCell className="text-right">
                                 <Link
                                     href={`/accounting/other-invoice/${invoice.documentNo}`}

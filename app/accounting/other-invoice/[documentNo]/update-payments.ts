@@ -12,13 +12,23 @@ export const updateOtherInvoicePayments = async (
     id: number,
     payments: { id: number; amount: number }[]
 ) => {
+    //PEINDING
     const paymentMethods = await getApPaymentMethods()
     const document = await prisma.document.findMany({
         where: { id },
         include: {
-            SkuOut: true,
-            GeneralLedger: true,
-            ApSubledger: { include: { Contact: true } },
+            OtherInvoice: {
+                include: {
+                    Contact: true,
+                    OtherInvoiceItem: {
+                        include: {
+                            AssetMovement: { include: { Asset: true } },
+                            ChartOfAccount: true,
+                        },
+                    },
+                    GeneralLedger: true,
+                },
+            },
         },
     })
 
@@ -34,45 +44,45 @@ export const updateOtherInvoicePayments = async (
     //     )
     // }
 
-    if (
-        document[0].GeneralLedger.filter(
-            (gl) =>
-                !paymentMethods
-                    .map(({ id }) => id)
-                    .includes(gl.chartOfAccountId)
-        ).reduce((acc, { amount }) => acc + amount, 0) !==
-        payments.reduce((acc, payment) => acc + payment.amount, 0)
-    )
-        throw new Error('จำนวนเงินไม่ถูกต้อง')
-    const paymentStatus = await calculateApPaymentStatus(payments)
+    // if (
+    //     document[0].GeneralLedger.filter(
+    //         (gl) =>
+    //             !paymentMethods
+    //                 .map(({ id }) => id)
+    //                 .includes(gl.chartOfAccountId)
+    //     ).reduce((acc, { amount }) => acc + amount, 0) !==
+    //     payments.reduce((acc, payment) => acc + payment.amount, 0)
+    // )
+    //     throw new Error('จำนวนเงินไม่ถูกต้อง')
+    // const paymentStatus = await calculateApPaymentStatus(payments)
 
-    await prisma.document.update({
-        where: { id },
-        data: {
-            GeneralLedger: {
-                deleteMany: [
-                    {
-                        chartOfAccountId: {
-                            in: paymentMethods.map(({ id }) => id),
-                        },
-                    },
-                ],
-                create: payments.map((payment) => ({
-                    chartOfAccountId: payment.id,
-                    amount: -payment.amount,
-                })),
-            },
-            ApSubledger: document[0].ApSubledger
-                ? {
-                      update: {
-                          data: {
-                              paymentStatus,
-                          },
-                      },
-                  }
-                : undefined,
-        },
-    })
+    // await prisma.document.update({
+    //     where: { id },
+    //     data: {
+    //         GeneralLedger: {
+    //             deleteMany: [
+    //                 {
+    //                     chartOfAccountId: {
+    //                         in: paymentMethods.map(({ id }) => id),
+    //                     },
+    //                 },
+    //             ],
+    //             create: payments.map((payment) => ({
+    //                 chartOfAccountId: payment.id,
+    //                 amount: -payment.amount,
+    //             })),
+    //         },
+    //         ApSubledger: document[0].ApSubledger
+    //             ? {
+    //                   update: {
+    //                       data: {
+    //                           paymentStatus,
+    //                       },
+    //                   },
+    //               }
+    //             : undefined,
+    //     },
+    // })
 
     revalidatePath(`/accounting/other-invoice/${document[0].documentNo}`)
     revalidatePath(`/accounting/other-invoice`)

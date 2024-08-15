@@ -71,14 +71,17 @@ model Document {
 
 enum DocumentType {
   Sales
+  SalesReturn
+  SalesBill
+  SalesReceived
   Purchase
-  BillingNote
-  Received
-  Payment
-  OtherInvoice
+  PurchaseReturn
+  PurchasePayment
+  JournalVoucher
   Quotation
   CustomerOrder
   PurchaseOrder
+  OtherInvoice
 }
 
 model DocumentRemark {
@@ -107,6 +110,12 @@ model ChartOfAccount {
   PurchaseItem              PurchaseItem[]
   PurchaseReturnItem        PurchaseReturnItem[]
   OtherInvoiceItem          OtherInvoiceItem[]
+
+  isCash      Boolean @default(false)
+  isAr        Boolean @default(false)
+  isAp        Boolean @default(false)
+  isInputTax  Boolean @default(false)
+  isOutputTax Boolean @default(false)
 }
 
 enum AccountType {
@@ -390,11 +399,13 @@ model SalesReceived {
 }
 
 model Purchase {
-  id            Int             @id @default(autoincrement())
-  Document      Document        @relation(fields: [documentId], references: [id])
-  documentId    Int             @unique
-  Contact       Contact?        @relation(fields: [contactId], references: [id])
-  contactId     Int?
+  id         Int      @id @default(autoincrement())
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+  Contact    Contact? @relation(fields: [contactId], references: [id])
+  contactId  Int?
+  vatable    Boolean  @default(true)
+
   PurchaseItem  PurchaseItem[]
   GeneralLedger GeneralLedger[]
 }

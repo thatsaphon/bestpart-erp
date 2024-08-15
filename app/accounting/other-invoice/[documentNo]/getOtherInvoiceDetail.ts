@@ -4,24 +4,20 @@ import prisma from '@/app/db/db'
 
 export const getOtherInvoiceDetail = async (documentNo: string) => {
     return await prisma.document.findUnique({
-        where: { documentNo },
+        where: { documentNo, type: 'OtherInvoice' },
         include: {
-            ApSubledger: { include: { Contact: true } },
-            // SkuOut: {
-            //     include: {
-            //         GoodsMaster: {
-            //             include: { SkuMaster: { include: { mainSku: true } } },
-            //         },
-            //     },
-            // },
-            AssetMovement: { include: { AssetRegistration: true } },
-            GeneralLedger: {
+            OtherInvoice: {
                 include: {
-                    ChartOfAccount: true,
-                    AssetMovement: { include: { AssetRegistration: true } },
+                    Contact: true,
+                    OtherInvoiceItem: {
+                        include: {
+                            AssetMovement: { include: { Asset: true } },
+                            ChartOfAccount: true,
+                        },
+                    },
+                    GeneralLedger: true,
                 },
             },
-            remark: true,
         },
     })
 }
