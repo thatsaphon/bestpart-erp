@@ -139,9 +139,58 @@ export const createSalesInvoice = async (
             taxId: taxId || '',
             date: new Date(date),
             documentNo: documentNo,
-            remark: { create: remarks },
+            DocumentRemark: { create: remarks },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
+            Sales: {
+                create: {
+                    contactId: !!contact ? Number(customerId) : undefined,
+                    GeneralLedger: {
+                        create: [
+                            // 11000 = เงินสด, 12000 = ลูกหนี้
+                            ...payments.map((payment) => {
+                                return {
+                                    chartOfAccountId: payment.id,
+                                    amount: payment.amount,
+                                }
+                            }),
+                            // ขาย
+                            {
+                                chartOfAccountId: 41000,
+                                amount: -items
+                                    .reduce(
+                                        (sum, item) =>
+                                            sum +
+                                            (item.quantity *
+                                                item.pricePerUnit *
+                                                100) /
+                                                107,
+                                        0
+                                    )
+                                    .toFixed(2),
+                            },
+                            // ภาษีขาย
+                            {
+                                chartOfAccountId: 23100,
+                                amount: -items
+                                    .reduce(
+                                        (sum, item) =>
+                                            sum +
+                                            (item.quantity *
+                                                item.pricePerUnit *
+                                                7) /
+                                                107,
+                                        0
+                                    )
+                                    .toFixed(2),
+                            },
+                        ],
+                    },
+                    SalesItem: {
+                        create: [],
+                    },
+                },
+            },
             ArSubledger: !!contact
                 ? {
                       create: {

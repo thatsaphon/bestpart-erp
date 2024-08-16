@@ -42,13 +42,13 @@ model Document {
   date        DateTime
   Image       SkuMasterImage[]
 
-  contactName  String
-  address      String
-  phone        String
-  taxId        String
-  remark       DocumentRemark[]
-  DocumentFile DocumentFile[]
-  type         DocumentType
+  contactName    String
+  address        String
+  phone          String
+  taxId          String
+  DocumentRemark DocumentRemark[]
+  DocumentFile   DocumentFile[]
+  type           DocumentType
 
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @default(now()) @updatedAt
@@ -105,17 +105,14 @@ model ChartOfAccount {
 
   AccountOwner              AccountOwner[]
   AssetTypeToChartOfAccount AssetTypeToChartOfAccount?
-  SalesItem                 SalesItem[]
-  SalesReturnItem           SalesReturnItem[]
-  PurchaseItem              PurchaseItem[]
-  PurchaseReturnItem        PurchaseReturnItem[]
-  OtherInvoiceItem          OtherInvoiceItem[]
 
   isCash      Boolean @default(false)
   isAr        Boolean @default(false)
   isAp        Boolean @default(false)
   isInputTax  Boolean @default(false)
   isOutputTax Boolean @default(false)
+
+  ServiceAndNonStockItem ServiceAndNonStockItem[]
 }
 
 enum AccountType {
@@ -192,7 +189,7 @@ model MainSku {
   partNumber String?
   name       String  @unique
 
-  remark        MainSkuRemark[]
+  MainSkuRemark MainSkuRemark[]
   searchKeyword String?
 
   createdAt DateTime    @default(now())
@@ -204,10 +201,10 @@ model SkuMaster {
   id     Int    @id @default(autoincrement())
   detail String
 
-  remark SkuMasterRemark[]
+  SkuMasterRemark SkuMasterRemark[]
 
   mainSkuId Int
-  mainSku   MainSku @relation(fields: [mainSkuId], references: [id])
+  MainSku   MainSku @relation(fields: [mainSkuId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -308,19 +305,21 @@ enum SalesStatus {
 }
 
 model SalesItem {
-  id               Int             @id @default(autoincrement())
-  Sales            Sales           @relation(fields: [salesId], references: [id])
-  salesId          Int
-  GoodsMaster      GoodsMaster?    @relation(fields: [goodsMasterId], references: [id])
-  goodsMasterId    Int?
-  SkuMaster        SkuMaster?      @relation(fields: [skuMasterId], references: [id])
-  skuMasterId      Int?
-  ChartOfAccount   ChartOfAccount? @relation(fields: [chartOfAccountId], references: [id])
-  chartOfAccountId Int?
+  id                       Int                     @id @default(autoincrement())
+  Sales                    Sales                   @relation(fields: [salesId], references: [id])
+  salesId                  Int
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
 
-  barcode         String
+  name            String?
+  description     String?
+  barcode         String?
   unit            String
-  quantityPerUnit Float  @default(1)
+  quantityPerUnit Float   @default(1)
 
   quantity Float
   price    Float
@@ -331,6 +330,21 @@ model SalesItem {
 
   @@index([skuMasterId])
   @@index([goodsMasterId])
+}
+
+model ServiceAndNonStockItem {
+  id               Int            @id @default(autoincrement())
+  chartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
+  chartOfAccountId Int
+
+  canSales        Boolean
+  canPurchase     Boolean
+  canOtherInvoice Boolean
+
+  SalesItem          SalesItem[]
+  SalesReturnItem    SalesReturnItem[]
+  PurchaseItem       PurchaseItem[]
+  PurchaseReturnItem PurchaseReturnItem[]
 }
 
 model SalesReturn {
@@ -348,15 +362,15 @@ model SalesReturn {
 }
 
 model SalesReturnItem {
-  id               Int             @id @default(autoincrement())
-  SalesReturn      SalesReturn     @relation(fields: [salesReturnId], references: [id])
-  salesReturnId    Int
-  GoodsMaster      GoodsMaster?    @relation(fields: [goodsMasterId], references: [id])
-  goodsMasterId    Int?
-  SkuMaster        SkuMaster?      @relation(fields: [skuMasterId], references: [id])
-  skuMasterId      Int?
-  ChartOfAccount   ChartOfAccount? @relation(fields: [chartOfAccountId], references: [id])
-  chartOfAccountId Int?
+  id                       Int                     @id @default(autoincrement())
+  SalesReturn              SalesReturn             @relation(fields: [salesReturnId], references: [id])
+  salesReturnId            Int
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
 
   barcode         String
   unit            String
@@ -413,13 +427,13 @@ model Purchase {
 }
 
 model PurchaseItem {
-  id               Int             @id @default(autoincrement())
-  GoodsMaster      GoodsMaster?    @relation(fields: [goodsMasterId], references: [id])
-  goodsMasterId    Int?
-  SkuMaster        SkuMaster?      @relation(fields: [skuMasterId], references: [id])
-  skuMasterId      Int?
-  ChartOfAccount   ChartOfAccount? @relation(fields: [chartOfAccountId], references: [id])
-  chartOfAccountId Int?
+  id                       Int                     @id @default(autoincrement())
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
 
   barcode         String?
   unit            String
@@ -452,13 +466,13 @@ model PurchaseReturn {
 }
 
 model PurchaseReturnItem {
-  id               Int             @id @default(autoincrement())
-  GoodsMaster      GoodsMaster?    @relation(fields: [goodsMasterId], references: [id])
-  goodsMasterId    Int?
-  SkuMaster        SkuMaster?      @relation(fields: [skuMasterId], references: [id])
-  skuMasterId      Int?
-  ChartOfAccount   ChartOfAccount? @relation(fields: [chartOfAccountId], references: [id])
-  chartOfAccountId Int?
+  id                       Int                     @id @default(autoincrement())
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
 
   barcode         String?
   unit            String
@@ -566,9 +580,7 @@ model OtherInvoiceItem {
   OtherInvoice   OtherInvoice @relation(fields: [otherInvoiceId], references: [id])
   otherInvoiceId Int
 
-  ChartOfAccount   ChartOfAccount? @relation(fields: [chartOfAccountId], references: [id])
-  chartOfAccountId Int?
-  AssetMovement    AssetMovement?
+  AssetMovement AssetMovement?
 
   amount Float
 }

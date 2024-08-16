@@ -36,9 +36,9 @@ export default function SearchSkuDialog({
     children,
     onSelected,
 }: Props) {
-    const [searchItems, setSearchItems] = React.useState<InventoryDetailType[]>(
-        []
-    )
+    const [searchItems, setSearchItems] = React.useState<
+        Awaited<ReturnType<typeof searchSku>>
+    >({ items: [], count: 0 })
     const [searchKeyword, setSearchKeyword] = React.useState('')
     const [page, setPage] = React.useState(1)
     const [count, setCount] = React.useState(0)
@@ -62,7 +62,7 @@ export default function SearchSkuDialog({
                                     const result = await searchSku(
                                         e.currentTarget.value
                                     )
-                                    setSearchItems(result.items)
+                                    setSearchItems(result)
                                     setCount(result.count)
                                 } catch (error) {
                                     if (error instanceof Error)
@@ -78,7 +78,7 @@ export default function SearchSkuDialog({
                         onClick={async () => {
                             try {
                                 const result = await searchSku(searchKeyword)
-                                setSearchItems(result.items)
+                                setSearchItems(result)
                                 setCount(result.count)
                             } catch (error) {
                                 if (error instanceof Error)
@@ -105,7 +105,7 @@ export default function SearchSkuDialog({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {searchItems.map((item) => (
+                        {searchItems.items.map((item) => (
                             <TableRow key={item.barcode}>
                                 <TableCell className="text-center">
                                     {Number(
@@ -137,7 +137,11 @@ export default function SearchSkuDialog({
                                         <></>
                                     )}
                                     <div>
-                                        <ImageToolTip images={item.images} />
+                                        <ImageToolTip
+                                            images={item.images.map(
+                                                ({ path }) => path
+                                            )}
+                                        />
                                     </div>
                                 </TableCell>
                                 <TableCell>{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
@@ -166,7 +170,7 @@ export default function SearchSkuDialog({
                                         searchKeyword,
                                         page
                                     )
-                                    setSearchItems(result.items)
+                                    setSearchItems(result)
                                     setPage(page)
                                 } catch (error) {
                                     toast.error('Something went wrong')

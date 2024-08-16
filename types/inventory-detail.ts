@@ -1,4 +1,9 @@
-import { Contact, MainSkuRemark, SkuMasterRemark } from '@prisma/client'
+import {
+    Contact,
+    MainSkuRemark,
+    SkuMasterImage,
+    SkuMasterRemark,
+} from '@prisma/client'
 
 export type InventoryDetailType = {
     mainSkuId: number
@@ -17,7 +22,7 @@ export type InventoryDetailType = {
     partNumber: string
     remaining?: number
     remainingAt?: Date
-    images?: string[]
+    images?: SkuMasterImage[]
 }
 
 export const defaultInventoryDetail = (): InventoryDetailType => {
