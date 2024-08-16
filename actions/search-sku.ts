@@ -5,8 +5,6 @@ import { MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
 import { InventoryDetailType } from '@/types/inventory-detail'
 
 export const searchSku = async (query: string, page: number = 1) => {
-    console.log('function searchSku called')
-    console.log('page', page)
     const splitQuery = query.trim().split(' ')
 
     const items = await prisma.goodsMaster.findMany({

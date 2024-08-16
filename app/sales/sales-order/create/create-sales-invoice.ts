@@ -13,54 +13,77 @@ import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
 import { redirect } from 'next/navigation'
 import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 
+const create = async () => {
+    // return prisma.document.create({
+    // })
+}
+type DocumentSales = {
+    contactId?: string
+    contactName?: string
+    address?: string
+    phone?: string
+    taxId?: string
+    date: Date
+    documentNo?: string
+}
+
 export const createSalesInvoice = async (
-    formData: FormData,
-    items: InventoryDetailType[],
+    // formData: FormData,
+    {
+        contactId,
+        contactName,
+        address,
+        phone,
+        taxId,
+        date,
+        documentNo,
+    }: DocumentSales,
+    items: Prisma.SalesItemUncheckedCreateWithoutSalesInput[],
     payments: {
         id: number
         amount: number
     }[],
     remarks: { id?: number; remark: string }[]
 ) => {
-    const validator = z.object({
-        customerId: z.string().trim().nullable(),
-        contactName: z.string().trim().optional(),
-        address: z.string().trim().optional(),
-        phone: z.string().trim().optional().nullable(),
-        taxId: z.string().trim().optional().nullable(),
-        date: z.string().trim().min(1, 'date must not be empty'),
-        documentNo: z.string().trim().optional().nullable(),
-    })
+    // const validator = z.object({
+    //     customerId: z.string().trim().nullable(),
+    //     contactName: z.string().trim().optional(),
+    //     address: z.string().trim().optional(),
+    //     phone: z.string().trim().optional().nullable(),
+    //     taxId: z.string().trim().optional().nullable(),
+    //     date: z.string().trim().min(1, 'date must not be empty'),
+    //     documentNo: z.string().trim().optional().nullable(),
+    // })
 
-    const result = validator.safeParse({
-        customerId: formData.get('customerId'),
-        contactName: formData.get('contactName') || undefined,
-        address: formData.get('address') || undefined,
-        phone: formData.get('phone') || undefined,
-        taxId: formData.get('taxId') || undefined,
-        date: formData.get('date'),
-        documentNo: formData.get('documentNo'),
-    })
+    // const result = validator.safeParse({
+    //     customerId: formData.get('customerId'),
+    //     contactName: formData.get('contactName') || undefined,
+    //     address: formData.get('address') || undefined,
+    //     phone: formData.get('phone') || undefined,
+    //     taxId: formData.get('taxId') || undefined,
+    //     date: formData.get('date'),
+    //     documentNo: formData.get('documentNo'),
+    // })
 
-    if (!result.success) {
-        throw new Error(
-            fromZodError(result.error, {
-                prefix: '- ',
-                prefixSeparator: ' ',
-                includePath: false,
-                issueSeparator: '\n',
-            }).message
-        )
-    }
+    // if (!result.success) {
+    //     throw new Error(
+    //         fromZodError(result.error, {
+    //             prefix: '- ',
+    //             prefixSeparator: ' ',
+    //             includePath: false,
+    //             issueSeparator: '\n',
+    //         }).message
+    //     )
+    // }
 
-    let { customerId, contactName, address, phone, taxId, date, documentNo } =
-        result.data
+    // let { customerId, contactName, address, phone, taxId, date, documentNo } =
+    //     result.data
 
     const getContact = async () => {
-        if (customerId) {
+        if (contactId) {
             const contact = await prisma.contact.findUnique({
                 where: {
-                    id: Number(customerId),
+                    id: Number(contactId),
                 },
             })
             if (!contact) {
@@ -78,13 +101,32 @@ export const createSalesInvoice = async (
         throw new Error(`${contact?.name || ''} ไม่สามารถขายเงินเชื่อได้`)
     }
 
+    //check goodsMasterExist
     const goodsMasters = await prisma.goodsMaster.findMany({
         where: {
-            barcode: {
-                in: items.map((item) => item.barcode),
+            id: {
+                in: items
+                    .filter((item) => typeof item.goodsMasterId === 'number')
+                    .map((item) => item.goodsMasterId as number),
             },
         },
     })
+
+    //check ServiceAndNonStockItem
+    const serviceAndNonStockItems =
+        await prisma.serviceAndNonStockItem.findMany({
+            where: {
+                id: {
+                    in: items
+                        .filter(
+                            (item) =>
+                                typeof item.serviceAndNonStockItemId ===
+                                'number'
+                        )
+                        .map((item) => item.serviceAndNonStockItemId as number),
+                },
+            },
+        })
 
     const checkRemaining: {
         id: number
@@ -126,7 +168,7 @@ export const createSalesInvoice = async (
     }
 
     if (!documentNo) {
-        documentNo = await generateDocumentNumber('SINV', date)
+        documentNo = await generateDocumentNumber('SO', date)
     }
 
     const session = await getServerSession(authOptions)
@@ -187,7 +229,8 @@ export const createSalesInvoice = async (
                         ],
                     },
                     SalesItem: {
-                        create: [],
+                        // create: [],
+                        create: {} as Prisma.SalesItemUncheckedCreateWithoutSalesInput[],
                     },
                 },
             },

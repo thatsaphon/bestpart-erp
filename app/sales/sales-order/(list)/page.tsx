@@ -41,9 +41,7 @@ export default async function SalesListPage({
 }: Props) {
     const sales = await prisma.document.findMany({
         where: {
-            documentNo: {
-                startsWith: 'SINV',
-            },
+            type: 'Sales',
             AND: [
                 {
                     date: {
@@ -91,9 +89,7 @@ export default async function SalesListPage({
 
     const documentCount = await prisma.document.count({
         where: {
-            documentNo: {
-                startsWith: 'SINV',
-            },
+            type: 'Sales',
             AND: [
                 {
                     date: {

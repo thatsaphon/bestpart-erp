@@ -334,7 +334,7 @@ model SalesItem {
 
 model ServiceAndNonStockItem {
   id               Int            @id @default(autoincrement())
-  chartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
+  ChartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
   chartOfAccountId Int
 
   canSales        Boolean
@@ -345,6 +345,8 @@ model ServiceAndNonStockItem {
   SalesReturnItem    SalesReturnItem[]
   PurchaseItem       PurchaseItem[]
   PurchaseReturnItem PurchaseReturnItem[]
+  QuotationItem      QuotationItem[]
+  PurchaseOrderItem  PurchaseOrderItem[]
 }
 
 model SalesReturn {
@@ -372,9 +374,11 @@ model SalesReturnItem {
   ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
   serviceAndNonStockItemId Int?
 
-  barcode         String
+  name            String?
+  description     String?
+  barcode         String?
   unit            String
-  quantityPerUnit Float  @default(1)
+  quantityPerUnit Float   @default(1)
 
   quantity Float
   price    Float
@@ -435,6 +439,8 @@ model PurchaseItem {
   ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
   serviceAndNonStockItemId Int?
 
+  name            String?
+  description     String?
   barcode         String?
   unit            String
   quantityPerUnit Float   @default(1)
@@ -474,6 +480,8 @@ model PurchaseReturnItem {
   ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
   serviceAndNonStockItemId Int?
 
+  name            String?
+  description     String?
   barcode         String?
   unit            String
   quantityPerUnit Float   @default(1)
@@ -689,14 +697,16 @@ enum PurchaseOrderStatus {
 model PurchaseOrderItem {
   id Int @id @default(autoincrement())
 
-  GoodsMaster   GoodsMaster @relation(fields: [goodsMasterId], references: [id])
-  goodsMasterId Int
-  SkuMaster     SkuMaster   @relation(fields: [skuMasterId], references: [id])
-  skuMasterId   Int
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
 
-  barcode         String
+  barcode         String?
   unit            String
-  quantityPerUnit Float  @default(1)
+  quantityPerUnit Float   @default(1)
 
   quantity Float
   cost     Float
@@ -774,10 +784,12 @@ model QuotationItem {
   Quotation   Quotation @relation(fields: [quotationId], references: [id])
   quotationId Int
 
-  GoodsMaster   GoodsMaster? @relation(fields: [goodsMasterId], references: [id])
-  goodsMasterId Int?
-  SkuMaster     SkuMaster?   @relation(fields: [skuMasterId], references: [id])
-  skuMasterId   Int?
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
 
   barcode         String?
   unit            String?

@@ -26,7 +26,7 @@ import SelectSearchCustomer from '@/components/select-search-customer'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ImageToolTip from '@/components/image-tooltip'
-import { DocumentRemark, PaymentStatus } from '@prisma/client'
+import { DocumentRemark } from '@prisma/client'
 import {
     Select,
     SelectContent,
@@ -39,37 +39,39 @@ import {
 import { getPaymentMethods } from '@/app/actions/accounting'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { GetSales } from '@/types/sales'
+import { GetSalesItems } from '@/types/sales-item'
 
 type Props = {
-    defaultItems?: InventoryDetailType[]
-    defaultDocumentDetails?: {
-        id: number
-        date: Date
-        documentNo: string
-        contactId: number
-        contactName: string
-        address: string
-        phone: string
-        taxId: string
-        documentRemarks: DocumentRemark[]
-        paymentStatus: PaymentStatus
-    }
+    sales?: GetSales
+    // defaultItems?: InventoryDetailType[]
+    // defaultDocumentDetails?: {
+    //     id: number
+    //     date: Date
+    //     documentNo: string
+    //     contactId: number
+    //     contactName: string
+    //     address: string
+    //     phone: string
+    //     taxId: string
+    //     documentRemarks: DocumentRemark[]
+    // }
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
     defaultPayments?: { id: number; amount: number }[]
     defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
 }
 
 export default function CreateOrUpdateSalesInvoiceComponent({
-    defaultItems = [],
-    defaultDocumentDetails,
+    sales,
     paymentMethods,
     defaultPayments,
     defaultRemarks,
 }: Props) {
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
-    const [items, setItems] =
-        React.useState<InventoryDetailType[]>(defaultItems)
+    const [items, setItems] = React.useState<GetSalesItems[]>(
+        sales?.Sales?.SalesItem || []
+    )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
     const session = useSession()
@@ -161,22 +163,22 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                 ref={formRef}
                 action={async (formData) => {
                     try {
-                        if (
-                            selectedPayments.reduce(
-                                (a, b) => a + b.amount,
-                                0
-                            ) !==
-                            items.reduce(
-                                (acc, item) =>
-                                    acc + item.pricePerUnit * item.quantity,
-                                0
-                            )
-                        ) {
-                            return toast.error(
-                                'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
-                            )
-                        }
-                        if (!defaultItems.length) {
+                        // if (
+                        //     selectedPayments.reduce(
+                        //         (a, b) => a + b.amount,
+                        //         0
+                        //     ) !==
+                        //     items.reduce(
+                        //         (acc, item) =>
+                        //             acc + item.pricePerUnit * item.quantity,
+                        //         0
+                        //     )
+                        // ) {
+                        //     return toast.error(
+                        //         'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
+                        //     )
+                        // }
+                        if (!sales) {
                             await createSalesInvoice(
                                 formData,
                                 items,
@@ -248,7 +250,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                         <div className="w-[650px] space-y-1">
                             <div className="flex items-center gap-1 text-left">
                                 ช่องทางชำระเงิน:{' '}
-                                {!defaultDocumentDetails ? (
+                                {/* {!defaultDocumentDetails ? (
                                     <></>
                                 ) : defaultDocumentDetails?.paymentStatus ===
                                   'Paid' ? (
@@ -273,15 +275,15 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                     <Badge variant={'destructive'}>
                                         ยังไม่จ่าย
                                     </Badge>
-                                )}
+                                )} */}
                             </div>
                             {selectedPayments.map((item) => (
                                 <div
                                     key={item.id}
                                     className={cn(
-                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary',
-                                        defaultDocumentDetails?.paymentStatus ===
-                                            'Billed' && 'grid-cols-2'
+                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary'
+                                        // defaultDocumentDetails?.paymentStatus ===
+                                        //     'Billed' && 'grid-cols-2'
                                     )}
                                 >
                                     <p>
@@ -296,9 +298,9 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                     <p>{item.amount}</p>
                                     <Cross1Icon
                                         className={cn(
-                                            'cursor-pointer text-destructive',
-                                            defaultDocumentDetails?.paymentStatus ===
-                                                'Billed' && 'hidden'
+                                            'cursor-pointer text-destructive'
+                                            // defaultDocumentDetails?.paymentStatus ===
+                                            //     'Billed' && 'hidden'
                                         )}
                                         onClick={() =>
                                             setSelectedPayments(
@@ -312,9 +314,9 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             ))}
                             <div
                                 className={cn(
-                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1',
-                                    defaultDocumentDetails?.paymentStatus ===
-                                        'Billed' && 'hidden'
+                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1'
+                                    // defaultDocumentDetails?.paymentStatus ===
+                                    //     'Billed' && 'hidden'
                                 )}
                             >
                                 <Select

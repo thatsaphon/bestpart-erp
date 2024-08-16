@@ -11,7 +11,7 @@ import Image from 'next/image'
 import { SkuMasterImage } from '@prisma/client'
 
 type Props = {
-    images?: string[]
+    images?: { path: string }[]
     alt?: string
 }
 
@@ -30,9 +30,9 @@ export default function ImageToolTip({ images, alt = 'image' }: Props) {
                             <div className="grid w-[650px] grid-cols-3 gap-2 pb-2">
                                 {images?.map((image, index) => (
                                     <Image
-                                        src={image}
+                                        src={image.path}
                                         alt={`${alt}-${index}`}
-                                        key={image}
+                                        key={image.path}
                                         unoptimized
                                         width={500}
                                         height={500}
