@@ -267,17 +267,17 @@ export default function CreateOrUpdateQuotationComponent({
                                         {item.partNumber}
                                     </p>
                                     <div>
-                                        {item.MainSkuRemarks &&
-                                        item.SkuMasterRemarks &&
-                                        item.MainSkuRemarks.length > 0 &&
-                                        item.SkuMasterRemarks.length > 0 ? (
-                                            <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemarks?.map((remark) => remark.name), ...item.SkuMasterRemarks?.map((remark) => remark.name)].join(', ')}`}</p>
+                                        {item.MainSkuRemark &&
+                                        item.SkuMasterRemark &&
+                                        item.MainSkuRemark.length > 0 &&
+                                        item.SkuMasterRemark.length > 0 ? (
+                                            <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemark?.map((remark) => remark.name), ...item.SkuMasterRemark?.map((remark) => remark.name)].join(', ')}`}</p>
                                         ) : (
                                             <></>
                                         )}
                                     </div>
                                     <div>
-                                        <ImageToolTip images={item.images} />
+                                        <ImageToolTip images={item.Image} />
                                     </div>
                                 </TableCell>
                                 <TableCell className="text-right">

@@ -129,7 +129,7 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
                         )}
                     </form>
                     <div className="flex flex-wrap items-center">
-                        {mainSkus[0].MainSkuRemarks?.map((remark) => (
+                        {mainSkus[0].MainSkuRemark?.map((remark) => (
                             <Badge key={remark.id} variant={'secondary'}>
                                 {remark.name}{' '}
                                 <Trash2Icon

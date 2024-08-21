@@ -15,7 +15,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { Cross1Icon } from '@radix-ui/react-icons'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from '@/components/search-sku-dialog'
@@ -40,7 +40,12 @@ import { getPaymentMethods } from '@/app/actions/accounting'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { GetSales } from '@/types/sales'
-import { GetSalesItems } from '@/types/sales-item'
+import {
+    getDefaultSalesItem,
+    GetSalesItems,
+    salesItemsToInventoryDetailType,
+} from '@/types/sales-item'
+import { DocumentDatePicker } from '@/components/document-date-picker'
 
 type Props = {
     sales?: GetSales
@@ -67,10 +72,11 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     defaultPayments,
     defaultRemarks,
 }: Props) {
+    const [date, setDate] = useState<Date>(sales?.date || new Date())
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
-    const [items, setItems] = React.useState<GetSalesItems[]>(
-        sales?.Sales?.SalesItem || []
+    const [items, setItems] = React.useState<InventoryDetailType[]>(
+        salesItemsToInventoryDetailType(sales?.Sales?.SalesItem)
     )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
@@ -163,24 +169,31 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                 ref={formRef}
                 action={async (formData) => {
                     try {
-                        // if (
-                        //     selectedPayments.reduce(
-                        //         (a, b) => a + b.amount,
-                        //         0
-                        //     ) !==
-                        //     items.reduce(
-                        //         (acc, item) =>
-                        //             acc + item.pricePerUnit * item.quantity,
-                        //         0
-                        //     )
-                        // ) {
-                        //     return toast.error(
-                        //         'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
-                        //     )
-                        // }
+                        if (
+                            selectedPayments.reduce(
+                                (a, b) => a + b.amount,
+                                0
+                            ) !==
+                            items.reduce(
+                                (acc, item) =>
+                                    acc + item.pricePerUnit * item.quantity,
+                                0
+                            )
+                        ) {
+                            return toast.error(
+                                'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
+                            )
+                        }
                         if (!sales) {
                             await createSalesInvoice(
-                                formData,
+                                // formData,
+                                {
+                                    date: date,
+                                    address: '',
+                                    contactName: '',
+                                    phone: '',
+                                    taxId: '',
+                                },
                                 items,
                                 selectedPayments,
                                 remarks
@@ -189,17 +202,16 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             setItems([])
                             toast.success('บันทึกสําเร็จ')
                         }
-
-                        if (defaultDocumentDetails) {
-                            await updateSalesInvoice(
-                                defaultDocumentDetails.id,
-                                formData,
-                                items,
-                                selectedPayments,
-                                remarks
-                            )
-                            toast.success('บันทึกสําเร็จ')
-                        }
+                        // if (defaultDocumentDetails) {
+                        //     await updateSalesInvoice(
+                        //         defaultDocumentDetails.id,
+                        //         formData,
+                        //         items,
+                        //         selectedPayments,
+                        //         remarks
+                        //     )
+                        //     toast.success('บันทึกสําเร็จ')
+                        // }
                     } catch (err) {
                         if (err instanceof Error)
                             return toast.error(err.message)
@@ -211,9 +223,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                     <div className="flex gap-3">
                         <Label className="flex items-center gap-2">
                             <p className="">วันที่</p>
-                            <DatePickerWithPresets
-                                defaultDate={defaultDocumentDetails?.date}
-                            />
+                            <DocumentDatePicker date={date} setDate={setDate} />
                         </Label>
                         <Label className="flex items-center gap-2">
                             <p className="">No. </p>
@@ -221,9 +231,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 className="w-auto"
                                 name="documentNo"
                                 placeholder="Optional"
-                                defaultValue={
-                                    defaultDocumentDetails?.documentNo
-                                }
+                                defaultValue={sales?.documentNo || ''}
                             />
                         </Label>
                     </div>
@@ -233,14 +241,12 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             name="customerId"
                             hasTextArea={true}
                             placeholder="รหัสลูกค้า"
-                            defaultValue={String(
-                                defaultDocumentDetails?.contactId || ''
-                            )}
+                            defaultValue={String(sales?.Sales?.contactId || '')}
                             defaultAddress={{
-                                name: defaultDocumentDetails?.contactName || '',
-                                address: defaultDocumentDetails?.address || '',
-                                phone: defaultDocumentDetails?.phone || '',
-                                taxId: defaultDocumentDetails?.taxId || '',
+                                name: sales?.contactName || '',
+                                address: sales?.address || '',
+                                phone: sales?.phone || '',
+                                taxId: sales?.taxId || '',
                             }}
                         />
                     </div>
@@ -378,8 +384,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                     เพิ่มการชำระเงิน
                                 </Button>
                             </div>
-                            {defaultDocumentDetails?.paymentStatus ===
-                                'Billed' && (
+                            {sales?.Sales?.salesBillId && (
                                 <p className="text-destructive">วางบิลแล้ว</p>
                             )}
 
@@ -431,7 +436,11 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 type="button"
                                 onClick={(e) => {
                                     setKey(String(Date.now()))
-                                    setItems(defaultItems)
+                                    setItems(
+                                        salesItemsToInventoryDetailType(
+                                            sales?.Sales?.SalesItem
+                                        )
+                                    )
                                 }}
                             >
                                 Reset
@@ -465,17 +474,20 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                         {item.partNumber}
                                     </p>
                                     <div>
-                                        {item.MainSkuRemarks &&
-                                        item.SkuMasterRemarks &&
-                                        item.MainSkuRemarks.length > 0 &&
-                                        item.SkuMasterRemarks.length > 0 ? (
-                                            <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemarks?.map((remark) => remark.name), ...item.SkuMasterRemarks?.map((remark) => remark.name)].join(', ')}`}</p>
-                                        ) : (
-                                            <></>
-                                        )}
+                                        {[
+                                            ...item.MainSkuRemark,
+                                            ...item.SkuMasterRemark,
+                                        ].map((remark) => (
+                                            <p
+                                                className="text-primary/50"
+                                                key={`${remark.id}-${remark.name}`}
+                                            >
+                                                {remark?.name}
+                                            </p>
+                                        ))}
                                     </div>
                                     <div>
-                                        <ImageToolTip images={item.images} />
+                                        <ImageToolTip images={item.Image} />
                                     </div>
                                 </TableCell>
                                 <TableCell className="text-right">
@@ -645,6 +657,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                                     await getSkuByBarcode(
                                                         barcode
                                                     )
+
                                                 setItems([
                                                     ...items,
                                                     {

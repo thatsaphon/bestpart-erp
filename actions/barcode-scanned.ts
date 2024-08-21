@@ -44,8 +44,8 @@ export const getSkuByBarcode = async (barcode: string) => {
         pricePerUnit: result.quantityPerUnit,
         partNumber: result.SkuMaster.MainSku.partNumber || '',
         remaining: remaining._sum.quantity || 0,
-        images: result.SkuMaster.Image,
-        MainSkuRemarks: result.SkuMaster.MainSku.MainSkuRemark,
-        SkuMasterRemarks: result.SkuMaster.SkuMasterRemark,
+        Image: result.SkuMaster.Image,
+        MainSkuRemark: result.SkuMaster.MainSku.MainSkuRemark,
+        SkuMasterRemark: result.SkuMaster.SkuMasterRemark,
     }
 }

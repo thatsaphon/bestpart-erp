@@ -89,7 +89,7 @@ export default function SkuMasterCardForm({ skuDetail }: Props) {
                             )}
                         </CardTitle>
                         <div>
-                            {skuDetail[0].SkuMasterRemarks?.map((remark) => (
+                            {skuDetail[0].SkuMasterRemark?.map((remark) => (
                                 <Badge key={remark.name} variant={'outline'}>
                                     {remark.name}
                                     <Trash2Icon
@@ -323,8 +323,8 @@ export default function SkuMasterCardForm({ skuDetail }: Props) {
                                     </Button>
                                 )}
                                 <div className="grid grid-cols-3 gap-2">
-                                    {skuDetail[0]?.images &&
-                                        skuDetail[0]?.images?.map((image) => (
+                                    {skuDetail[0]?.Image &&
+                                        skuDetail[0]?.Image?.map((image) => (
                                             <Image
                                                 src={image}
                                                 alt={skuDetail[0]?.detail}

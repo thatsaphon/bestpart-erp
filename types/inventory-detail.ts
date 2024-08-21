@@ -6,14 +6,15 @@ import {
 } from '@prisma/client'
 
 export type InventoryDetailType = {
-    mainSkuId: number
-    goodsMasterId: number
-    barcode: string
-    skuMasterId: number
+    mainSkuId?: number
+    goodsMasterId?: number
+    skuMasterId?: number
+    barcode?: string
+    serviceAndNonStockItemId?: number
     name: string
     detail: string
-    MainSkuRemarks?: MainSkuRemark[]
-    SkuMasterRemarks?: SkuMasterRemark[]
+    MainSkuRemark: MainSkuRemark[]
+    SkuMasterRemark: SkuMasterRemark[]
     Vendors?: Contact[]
     unit: string
     quantityPerUnit: number
@@ -22,7 +23,7 @@ export type InventoryDetailType = {
     partNumber: string
     remaining?: number
     remainingAt?: Date
-    images?: SkuMasterImage[]
+    Image: SkuMasterImage[]
 }
 
 export const defaultInventoryDetail = (): InventoryDetailType => {
@@ -33,8 +34,8 @@ export const defaultInventoryDetail = (): InventoryDetailType => {
         skuMasterId: 0,
         name: '',
         detail: '',
-        MainSkuRemarks: [],
-        SkuMasterRemarks: [],
+        MainSkuRemark: [],
+        SkuMasterRemark: [],
         Vendors: [],
         unit: '',
         quantityPerUnit: 1,
@@ -42,6 +43,6 @@ export const defaultInventoryDetail = (): InventoryDetailType => {
         pricePerUnit: 0,
         partNumber: '',
         remaining: 0,
-        images: [],
+        Image: [],
     }
 }

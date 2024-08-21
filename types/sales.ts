@@ -15,7 +15,13 @@ export const getSalesDefaultFunction = async (
                         include: {
                             SkuMaster: {
                                 include: {
-                                    MainSku: true,
+                                    MainSku: {
+                                        include: {
+                                            MainSkuRemark: true,
+                                        },
+                                    },
+                                    SkuMasterRemark: true,
+                                    Image: true,
                                 },
                             },
                             GoodsMaster: true,

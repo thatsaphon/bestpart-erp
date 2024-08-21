@@ -28,7 +28,7 @@ export function InventoryCard({ mainSkus }: Props) {
                 </CardTitle>
                 <CardDescription>{mainSkus[0].partNumber}</CardDescription>
                 <div className="flex flex-wrap gap-1">
-                    {mainSkus[0].MainSkuRemarks?.map((remark) => (
+                    {mainSkus[0].MainSkuRemark?.map((remark) => (
                         <Badge key={remark.name} variant={'outline'}>
                             {remark.name}
                         </Badge>
@@ -37,7 +37,7 @@ export function InventoryCard({ mainSkus }: Props) {
                 <ImageToolTip
                     images={
                         mainSkus
-                            .flatMap((i) => i.images)
+                            .flatMap((i) => i.Image)
                             .filter((i) => i) as string[]
                     }
                 />
@@ -59,7 +59,7 @@ export function InventoryCard({ mainSkus }: Props) {
                                     )}
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                    {mainSku.SkuMasterRemarks?.map((remark) => (
+                                    {mainSku.SkuMasterRemark?.map((remark) => (
                                         <Badge
                                             key={remark.name}
                                             variant={'outline'}

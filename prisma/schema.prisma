@@ -321,9 +321,9 @@ model SalesItem {
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity Float
-  price    Float
-  vat      Float
+  quantity     Float
+  pricePerUnit Float
+  vat          Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -380,9 +380,9 @@ model SalesReturnItem {
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity Float
-  price    Float
-  vat      Float
+  quantity     Float
+  pricePerUnit Float
+  vat          Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -445,9 +445,9 @@ model PurchaseItem {
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity Float
-  cost     Float
-  vat      Float
+  quantity    Float
+  costPerUnit Float
+  vat         Float
 
   Purchase   Purchase @relation(fields: [purchaseId], references: [id])
   purchaseId Int
@@ -486,9 +486,9 @@ model PurchaseReturnItem {
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity Float
-  cost     Float
-  vat      Float
+  quantity    Float
+  costPerUnit Float
+  vat         Float
 
   PurchaseReturn   PurchaseReturn @relation(fields: [purchaseReturnId], references: [id])
   purchaseReturnId Int
@@ -708,9 +708,9 @@ model PurchaseOrderItem {
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity Float
-  cost     Float
-  vat      Float
+  quantity    Float
+  costPerUnit Float
+  vat         Float
 
   estimatedDeliveryDate DateTime
 
@@ -811,6 +811,6 @@ view StockMovement {
   date         DateTime
   documentType DocumentType
   quantity     Float
-  cost         Float
-  price        Float
+  costPerUnit  Float
+  pricePerUnit Float
 }
