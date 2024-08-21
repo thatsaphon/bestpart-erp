@@ -5,7 +5,7 @@ import {
     SkuMasterRemark,
 } from '@prisma/client'
 
-export type InventoryDetailType = {
+export type DocumentItem = {
     mainSkuId?: number
     goodsMasterId?: number
     skuMasterId?: number
@@ -26,7 +26,7 @@ export type InventoryDetailType = {
     Image: SkuMasterImage[]
 }
 
-export const defaultInventoryDetail = (): InventoryDetailType => {
+export const defaultInventoryDetail = (): DocumentItem => {
     return {
         mainSkuId: 0,
         goodsMasterId: 0,

@@ -20,7 +20,7 @@ import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from '@/components/search-sku-dialog'
 import { createSalesReturnInvoice } from './create-sales-return-invoice'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import { updateSalesInvoice } from './update-sales-return-invoice'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import Link from 'next/link'
@@ -41,7 +41,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 type Props = {
-    defaultItems?: InventoryDetailType[]
+    defaultItems?: DocumentItem[]
     defaultDocumentDetails?: {
         id: number
         date: Date
@@ -68,8 +68,7 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
 }: Props) {
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
-    const [items, setItems] =
-        React.useState<InventoryDetailType[]>(defaultItems)
+    const [items, setItems] = React.useState<DocumentItem[]>(defaultItems)
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
     const session = useSession()

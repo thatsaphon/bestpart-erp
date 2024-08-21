@@ -39,9 +39,7 @@ export default async function PurchasePage({
 }: Props) {
     const purchaseInvoices = await prisma.document.findMany({
         where: {
-            documentNo: {
-                startsWith: 'PINV',
-            },
+            type: 'Purchase',
             AND: [
                 {
                     date: {
@@ -58,17 +56,12 @@ export default async function PurchasePage({
             ],
         },
         include: {
-            ApSubledger: {
-                select: {
+            Purchase: {
+                include: {
                     Contact: true,
-                    paymentStatus: true,
-                },
-            },
-            GeneralLedger: {
-                where: {
-                    chartOfAccountId: {
-                        in: [21000, 11000],
-                    },
+                    GeneralLedger: { include: { ChartOfAccount: true } },
+                    PurchaseItem: true,
+                    PurchasePayment: true,
                 },
             },
         },
@@ -79,9 +72,21 @@ export default async function PurchasePage({
 
     const documentCount = await prisma.document.count({
         where: {
-            documentNo: {
-                startsWith: 'PINV',
-            },
+            type: 'Purchase',
+            AND: [
+                {
+                    date: {
+                        gte: new Date(from),
+                    },
+                },
+                {
+                    date: {
+                        lt: new Date(
+                            new Date(to).setDate(new Date(to).getDate() + 1)
+                        ),
+                    },
+                },
+            ],
         },
     })
     const numberOfPage = Math.ceil(documentCount / Number(limit))
@@ -112,18 +117,14 @@ export default async function PurchasePage({
                             <TableCell>{invoice.documentNo}</TableCell>
                             <TableCell>{invoice.referenceNo}</TableCell>
                             <TableCell>
-                                {invoice.ApSubledger?.Contact.name || 'เงินสด'}
+                                {invoice.Purchase?.Contact?.name || 'เงินสด'}
                             </TableCell>
                             <TableCell className="text-center">
-                                {invoice.ApSubledger?.paymentStatus ===
-                                'NotPaid' ? (
+                                {!invoice.Purchase?.GeneralLedger.find(
+                                    (x) => x.ChartOfAccount.isCash
+                                ) && !invoice.Purchase?.purchasePaymentId ? (
                                     <Badge variant={'destructive'}>
                                         ยังไม่จ่าย
-                                    </Badge>
-                                ) : invoice.ApSubledger?.paymentStatus ===
-                                  'Billed' ? (
-                                    <Badge variant={'outline'}>
-                                        วางบิลแล้ว
                                     </Badge>
                                 ) : (
                                     <Badge className="bg-green-400">
@@ -133,7 +134,13 @@ export default async function PurchasePage({
                             </TableCell>
                             <TableCell className="text-right">
                                 {Math.abs(
-                                    invoice.GeneralLedger[0]?.amount
+                                    invoice.Purchase?.PurchaseItem.reduce(
+                                        (sum, item) =>
+                                            sum +
+                                            item.quantityPerUnit *
+                                                item.costPerUnit,
+                                        0
+                                    ) || 0
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">

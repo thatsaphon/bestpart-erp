@@ -8,12 +8,12 @@ import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
-import { InventoryDetailType } from '@/types/inventory-detail'
 import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
 import { redirect } from 'next/navigation'
 import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 import { DocumentDetail } from '@/types/document-detail'
 import { checkRemaining } from '@/actions/check-remaining'
+import { DocumentItem } from '@/types/document-item'
 
 const create = async () => {
     // return prisma.document.create({
@@ -31,7 +31,7 @@ export const createSalesInvoice = async (
         referenceNo,
         documentNo,
     }: DocumentDetail,
-    items: InventoryDetailType[],
+    items: DocumentItem[],
     payments: {
         id: number
         amount: number
@@ -71,6 +71,10 @@ export const createSalesInvoice = async (
         },
     })
 
+    if (goodsMasters.length !== items.length) {
+        throw new Error('goods not found')
+    }
+
     //check ServiceAndNonStockItem
     const serviceAndNonStockItems =
         await prisma.serviceAndNonStockItem.findMany({
@@ -90,44 +94,38 @@ export const createSalesInvoice = async (
     const remainings = await checkRemaining(
         goodsMasters.map((item) => item.skuMasterId)
     )
-    console.log(remainings)
-    // return
-    // const checkRemaining: {
-    //     id: number
-    //     skuMasterId: number
-    //     barcode: string
-    //     quantity: number
-    //     remaining: number
-    // }[] = await prisma.$queryRaw`
-    //     select "SkuIn".id, "SkuIn"."skuMasterId", "SkuIn".barcode, "SkuIn".quantity, "SkuIn".quantity - COALESCE(sum("SkuInToOut".quantity), 0)  as remaining
-    //     from "SkuIn" left join "SkuInToOut" on "SkuIn"."id" = "SkuInToOut"."skuInId"
-    //     where "SkuIn"."skuMasterId" in (${Prisma.join(goodsMasters.map((item) => item.skuMasterId))})
-    //     group by "SkuIn".id
-    //     having sum("SkuInToOut".quantity) < "SkuIn".quantity or sum("SkuInToOut".quantity) is null
-    //     order by "SkuIn"."date", "SkuIn"."id" asc`
 
-    if (goodsMasters.length !== items.length) {
-        throw new Error('goods not found')
-    }
+    const groupBySkuMasterId = items.reduce(
+        (acc: Record<number, DocumentItem[]>, item) => {
+            if (!item.skuMasterId) return acc
+            if (!acc[item.skuMasterId]) {
+                acc[item.skuMasterId] = []
+            }
+            acc[item.skuMasterId].push(item)
+            return acc
+        },
+        {}
+    )
 
-    for (let i = 0; i < items.length; i++) {
-        const goodsMaster = goodsMasters.find(
-            (goods) => goods.barcode === items[i].barcode
-        )
-        if (!goodsMaster) {
-            throw new Error(`barcode ${items[i].barcode} not found`)
-        }
+    const itemsRemainings = Object.entries(groupBySkuMasterId).map(
+        ([key, value]) => ({
+            skuMasterId: Number(key),
+            quantity: value?.reduce(
+                (sum, item) => sum + item.quantity * item.quantityPerUnit,
+                0
+            ),
+            name: value?.[0].name,
+            remainings:
+                remainings.find((r) => r.skuMasterId === Number(key))
+                    ?.remaining || 0,
+        })
+    )
 
-        const remaining = checkRemaining.filter(
-            (item) => item.skuMasterId === goodsMaster.skuMasterId
-        )
-
-        if (
-            remaining.length <= 0 ||
-            remaining.reduce((sum, item) => sum + item.remaining, 0) <
-                items[i].quantity * items[i].quantityPerUnit
-        ) {
-            throw new Error('insufficient inventory')
+    for (const item of itemsRemainings) {
+        if (item.quantity > item.remainings) {
+            throw new Error(
+                `${item.name} \nต้องการขาย ${item.quantity} ชิ้น \nแต่ยอดคงเหลือ ${item.remainings} ชิ้น`
+            )
         }
     }
 
@@ -214,6 +212,19 @@ export const createSalesInvoice = async (
                     },
                 },
             },
+        },
+    })
+
+    await prisma.skuRemainingCache.updateMany({
+        where: {
+            skuMasterId: {
+                in: items
+                    .filter((item) => typeof item.skuMasterId === 'number')
+                    .map((item) => item.skuMasterId) as number[],
+            },
+        },
+        data: {
+            shouldRecheck: true,
         },
     })
 

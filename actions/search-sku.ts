@@ -2,7 +2,7 @@
 
 import prisma from '@/app/db/db'
 import { MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 
 export const searchSku = async (query: string, page: number = 1) => {
     const splitQuery = query.trim().split(' ')
@@ -173,9 +173,9 @@ export const searchSku = async (query: string, page: number = 1) => {
             remaining:
                 remaining.find((r) => r.skuMasterId === goods.skuMasterId)?._sum
                     .quantity || 0,
-            images: goods.SkuMaster.Image,
-            MainSkuRemarks: goods.SkuMaster.MainSku.MainSkuRemark,
-            SkuMasterRemarks: goods.SkuMaster.SkuMasterRemark,
+            Image: goods.SkuMaster.Image,
+            MainSkuRemark: goods.SkuMaster.MainSku.MainSkuRemark,
+            SkuMasterRemark: goods.SkuMaster.SkuMasterRemark,
         })),
         count,
     }

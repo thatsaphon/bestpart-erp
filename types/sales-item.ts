@@ -1,5 +1,3 @@
-'use server'
-
 import prisma from '@/app/db/db'
 import {
     GoodsMaster,
@@ -7,7 +5,7 @@ import {
     ServiceAndNonStockItem,
     SkuMaster,
 } from '@prisma/client'
-import { InventoryDetailType } from './inventory-detail'
+import { DocumentItem } from './document-item'
 
 export const getSalesItemsDefaultFunction = async (
     where: Prisma.SalesItemWhereInput
@@ -132,6 +130,6 @@ export const salesItemsToInventoryDetailType = (
                 MainSkuRemark: item.SkuMaster?.MainSku?.MainSkuRemark,
                 SkuMasterRemark: item.SkuMaster?.SkuMasterRemark,
                 serviceAndNonStockItemId: item.serviceAndNonStockItemId,
-            }) as InventoryDetailType
+            }) as DocumentItem
     )
 }

@@ -7,12 +7,12 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 
 export const updatePurchaseInvoice = async (
     id: number,
     formData: FormData,
-    items: InventoryDetailType[]
+    items: DocumentItem[]
 ) => {
     const validator = z.object({
         vendorId: z.string().trim().min(1, 'vendorId must not be empty'),

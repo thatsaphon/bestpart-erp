@@ -20,7 +20,7 @@ import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from '@/components/search-sku-dialog'
 import { createSalesInvoice } from './create-sales-invoice'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import { updateSalesInvoice } from './update-sales-invoice'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import Link from 'next/link'
@@ -75,7 +75,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     const [date, setDate] = useState<Date>(sales?.date || new Date())
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
-    const [items, setItems] = React.useState<InventoryDetailType[]>(
+    const [items, setItems] = React.useState<DocumentItem[]>(
         salesItemsToInventoryDetailType(sales?.Sales?.SalesItem)
     )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
@@ -198,8 +198,8 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 selectedPayments,
                                 remarks
                             )
-                            setKey(String(Date.now()))
-                            setItems([])
+                            // setKey(String(Date.now()))
+                            // setItems([])
                             toast.success('บันทึกสําเร็จ')
                         }
                         // if (defaultDocumentDetails) {

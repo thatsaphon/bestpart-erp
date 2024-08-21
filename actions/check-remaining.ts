@@ -4,12 +4,16 @@ import prisma from '@/app/db/db'
 import { isBefore, startOfDay } from 'date-fns'
 
 export const checkRemaining = async (skuMasterIds: number[]) => {
-    const cache = await checkCacheRemaining(skuMasterIds)
+    const nonDuplicatedSkuMasterIds = skuMasterIds.filter(
+        (x, i) => skuMasterIds.indexOf(x) === i
+    )
+    const cache = await checkCacheRemaining(nonDuplicatedSkuMasterIds)
 
     const filter = cache.filter(
         (x) =>
-            !x.remaining ||
+            x.remaining == null ||
             !x.remainingAt ||
+            x.shouldRecheck ||
             isBefore(x.remainingAt, startOfDay(new Date()))
     )
 
@@ -37,10 +41,38 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
             create: {
                 date: new Date(),
                 skuMasterId: x.skuMasterId,
+                remaining: x._sum.quantity || 0,
             },
         })
     })
-    await prisma.$transaction(stockMovementUpserts)
+
+    const stockMovementUpserts2 = filter
+        .filter(
+            (x) =>
+                !stockMovement.map((x) => x.skuMasterId).includes(x.skuMasterId)
+        )
+        .map((x) => {
+            return prisma.skuRemainingCache.create({
+                data: {
+                    date: new Date(),
+                    remaining: 0,
+                    skuMasterId: x.skuMasterId,
+                },
+            })
+        })
+
+    // console.log(nonDuplicatedSkuMasterIds)
+    // console.log(
+    //     filter.filter(
+    //         (x) =>
+    //             !stockMovement.map((x) => x.skuMasterId).includes(x.skuMasterId)
+    //     )
+    // )
+
+    await prisma.$transaction([
+        ...stockMovementUpserts,
+        ...stockMovementUpserts2,
+    ])
 
     return [
         ...cache.filter(
@@ -48,6 +80,7 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
                 !(
                     !x.remaining ||
                     !x.remainingAt ||
+                    x.shouldRecheck ||
                     isBefore(x.remainingAt, startOfDay(new Date()))
                 )
         ),
@@ -56,6 +89,18 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
             remaining: x._sum.quantity || 0,
             remainingAt: new Date(),
         })),
+        ...filter
+            .filter(
+                (x) =>
+                    !stockMovement
+                        .map((x) => x.skuMasterId)
+                        .includes(x.skuMasterId)
+            )
+            .map((x) => ({
+                skuMasterId: x.skuMasterId,
+                remaining: 0,
+                remainingAt: new Date(),
+            })),
     ]
 }
 
@@ -72,5 +117,6 @@ export const checkCacheRemaining = async (skuMasterIds: number[]) => {
         skuMasterId: id,
         remaining: caches.find((x) => x.skuMasterId === id)?.remaining,
         remainingAt: caches.find((x) => x.skuMasterId === id)?.date,
+        shouldRecheck: caches.find((x) => x.skuMasterId === id)?.shouldRecheck,
     }))
 }

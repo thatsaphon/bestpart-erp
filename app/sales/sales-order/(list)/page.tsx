@@ -67,20 +67,6 @@ export default async function SalesListPage({
                     SalesReceived: true,
                 },
             },
-            // ArSubledger: {
-            //     select: {
-            //         Contact: true,
-            //         paymentStatus: true,
-            //     },
-            // },
-            // GeneralLedger: {
-            //     where: {
-            //         chartOfAccountId: {
-            //             gte: 11000,
-            //             lte: 12000,
-            //         },
-            //     },
-            // },
         },
         orderBy: [{ date: 'desc' }, { documentNo: 'desc' }],
         take: +limit,
@@ -106,18 +92,10 @@ export default async function SalesListPage({
             ],
         },
     })
-    // const documentSum = await prisma.$queryRaw<
-    //     { sum: number }[]
-    // >`select COALESCE(sum("GeneralLedger"."amount"), 0) as "sum" from "GeneralLedger"
-    //          left join "_DocumentToGeneralLedger" on "_DocumentToGeneralLedger"."B" = "GeneralLedger"."id"
-    //          left join "Document" on "_DocumentToGeneralLedger"."A" = "Document"."id"
-    //          where "chartOfAccountId" in (11000, 12000) and "Document"."documentNo" like 'SINV%' and
-    //          "Document"."date" between ${new Date(from)} and ${new Date(new Date(to).setDate(new Date(to).getDate() + 1))}::date and
-    //          "Document"."documentNo" like 'SINV%'`
 
     const documentSum = await prisma.$queryRaw<
         { sum: number | null }[]
-    >`select sum("SalesItem"."quantity" * "SalesItem"."price") from "Document"
+    >`select sum("SalesItem"."quantity" * "SalesItem"."pricePerUnit") from "Document"
         left join "Sales" on "Document"."id" = "Sales"."documentId"
         left join "SalesItem" on "Sales"."id" = "SalesItem"."salesId"
         where 
@@ -230,7 +208,8 @@ export default async function SalesListPage({
                                             sale.Sales?.SalesItem.reduce(
                                                 (total, item) =>
                                                     total +
-                                                    item.quantity * item.price,
+                                                    item.quantity *
+                                                        item.pricePerUnit,
                                                 0
                                             ) || 0,
                                         0

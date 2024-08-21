@@ -20,7 +20,7 @@ import toast from 'react-hot-toast'
 import SkuMasterCardForm from './sku-master-card-form'
 import { editMainSku } from '@/app/actions/inventory/editMainSku'
 import InventoryDialogContextMenu from './inventory-dialog-context-menu'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import {
     disconnectMainSkuRemark,
     upsertMainSkuRemark,
@@ -30,7 +30,7 @@ import { Trash2Icon } from 'lucide-react'
 import AddMainSkuRemarkInput from './add-main-sku-remark-input'
 
 type Props = {
-    mainSkus: InventoryDetailType[]
+    mainSkus: DocumentItem[]
 }
 
 export default function EditMainSkuDialog({ mainSkus }: Props) {
@@ -38,8 +38,8 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
     const [isEdit, setIsEdit] = useState(false)
     const [addingNewSku, setAddingNewSku] = useState(false)
 
-    function groupBySkuMasters(mainSkus: InventoryDetailType[]) {
-        const groups: { [key: string]: InventoryDetailType[] } = {}
+    function groupBySkuMasters(mainSkus: DocumentItem[]) {
+        const groups: { [key: string]: DocumentItem[] } = {}
         mainSkus.forEach((mainSku) => {
             if (!groups[mainSku.skuMasterId]) {
                 groups[mainSku.skuMasterId] = []

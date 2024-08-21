@@ -18,7 +18,7 @@ import { Cross1Icon } from '@radix-ui/react-icons'
 import React, { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from '@/components/search-sku-dialog'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import { useSession } from 'next-auth/react'
 import ImageToolTip from '@/components/image-tooltip'
@@ -29,7 +29,7 @@ import { createQuotation } from './create-quotation'
 import { updateQuotation } from './update-quotation'
 
 type Props = {
-    defaultItems?: InventoryDetailType[]
+    defaultItems?: DocumentItem[]
     defaultDocumentDetails?: {
         id: number
         date: Date
@@ -51,8 +51,7 @@ export default function CreateOrUpdateQuotationComponent({
 }: Props) {
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
-    const [items, setItems] =
-        React.useState<InventoryDetailType[]>(defaultItems)
+    const [items, setItems] = React.useState<DocumentItem[]>(defaultItems)
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
     const session = useSession()

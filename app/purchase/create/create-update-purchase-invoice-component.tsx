@@ -22,13 +22,18 @@ import SearchSkuDialog from '@/components/search-sku-dialog'
 import SelectSearchVendor from '@/components/select-search-vendor'
 import { createPurchaseInvoice } from './create-purchase-invoice'
 import { updatePurchaseInvoice } from './update-purchase-invoice'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import { DocumentRemark } from '@prisma/client'
 import ImageToolTip from '@/components/image-tooltip'
 import { Badge } from '@/components/ui/badge'
+import { DocumentDatePicker } from '@/components/document-date-picker'
+import {
+    DocumentDetail,
+    getDefaultDocumentDetail,
+} from '@/types/document-detail'
 
 type Props = {
-    defaultItems?: InventoryDetailType[]
+    defaultItems?: DocumentItem[]
     defaultDocumentDetails?: {
         id: number
         date: Date
@@ -46,9 +51,12 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
     defaultItems = [],
     defaultDocumentDetails,
 }: Props) {
+    const [date, setDate] = React.useState<Date>(new Date())
+    const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
+        getDefaultDocumentDetail()
+    )
     const [open, setOpen] = React.useState(false)
-    const [items, setItems] =
-        React.useState<InventoryDetailType[]>(defaultItems)
+    const [items, setItems] = React.useState<DocumentItem[]>(defaultItems)
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
 
@@ -118,9 +126,7 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                     <div className="flex gap-3">
                         <Label className="flex items-center gap-2">
                             <p className="">วันที่</p>
-                            <DatePickerWithPresets
-                                defaultDate={defaultDocumentDetails?.date}
-                            />
+                            <DocumentDatePicker date={date} setDate={setDate} />
                         </Label>
                         <Label className="flex items-center gap-2">
                             <p className="">No. </p>

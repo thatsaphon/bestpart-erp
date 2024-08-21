@@ -18,10 +18,7 @@ import { Cross1Icon } from '@radix-ui/react-icons'
 import React, { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from '@/components/search-sku-dialog'
-import {
-    defaultInventoryDetail,
-    InventoryDetailType,
-} from '@/types/inventory-detail'
+import { defaultInventoryDetail, DocumentItem } from '@/types/document-item'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import { useSession } from 'next-auth/react'
 import { DocumentRemark, PaymentStatus } from '@prisma/client'
@@ -43,7 +40,7 @@ import {
 } from '@/components/ui/select'
 
 type Props = {
-    defaultItems?: (InventoryDetailType & { description: string })[]
+    defaultItems?: (DocumentItem & { description: string })[]
     defaultDocumentDetails?: {
         id: number
         date: Date
@@ -71,7 +68,7 @@ export default function CreateOrUpdateCustomerOrderComponent({
     const formRef = useRef<HTMLFormElement>(null)
     const [open, setOpen] = useState(false)
     const [items, setItems] = useState<
-        (InventoryDetailType & { description: string })[]
+        (DocumentItem & { description: string })[]
     >(defaultItems.map((item) => ({ ...item })))
     const [barcodeInput, setBarcodeInput] = useState<string>('')
     const [key, setKey] = useState('1')

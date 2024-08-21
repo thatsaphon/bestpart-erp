@@ -20,14 +20,14 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import PaginationClientComponent from '@/components/pagination-client-component'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import ImageToolTip from '@/components/image-tooltip'
 
 type Props = {
     isOpen: boolean
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
     children?: React.ReactNode
-    onSelected: (data: InventoryDetailType) => void
+    onSelected: (data: DocumentItem) => void
 }
 
 export default function SearchSkuDialog({
@@ -128,20 +128,16 @@ export default function SearchSkuDialog({
                                     <p className="text-primary/50">
                                         {item.partNumber}
                                     </p>
-                                    {item.MainSkuRemarks &&
-                                    item.SkuMasterRemarks &&
-                                    item.MainSkuRemarks.length > 0 &&
-                                    item.SkuMasterRemarks.length > 0 ? (
-                                        <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemarks?.map((remark) => remark.name), ...item.SkuMasterRemarks?.map((remark) => remark.name)].join(', ')}`}</p>
+                                    {item.MainSkuRemark &&
+                                    item.SkuMasterRemark &&
+                                    item.MainSkuRemark.length > 0 &&
+                                    item.SkuMasterRemark.length > 0 ? (
+                                        <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemark?.map((remark) => remark.name), ...item.SkuMasterRemark?.map((remark) => remark.name)].join(', ')}`}</p>
                                     ) : (
                                         <></>
                                     )}
                                     <div>
-                                        <ImageToolTip
-                                            images={item.images.map(
-                                                ({ path }) => path
-                                            )}
-                                        />
+                                        <ImageToolTip images={item.Image} />
                                     </div>
                                 </TableCell>
                                 <TableCell>{`${item.unit}(${item.quantityPerUnit})`}</TableCell>

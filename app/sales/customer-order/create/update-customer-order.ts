@@ -2,7 +2,7 @@
 
 import prisma from '@/app/db/db'
 import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import { Contact } from '@prisma/client'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
@@ -14,7 +14,7 @@ import { redirect } from 'next/navigation'
 export async function updateCustomerOrder(
     id: number,
     formData: FormData,
-    items: (InventoryDetailType & { description: string })[],
+    items: (DocumentItem & { description: string })[],
     payments: {
         id: number
         amount: number

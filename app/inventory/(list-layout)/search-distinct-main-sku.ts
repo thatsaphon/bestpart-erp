@@ -1,15 +1,16 @@
 'use server'
 
 import prisma from '@/app/db/db'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import { Contact, MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
 
-export const searchDistinctMainSku = async (query: string, page: number = 1) => {
+export const searchDistinctMainSku = async (
+    query: string,
+    page: number = 1
+) => {
     const splitQuery = query.trim().split(' ')
 
-    const items = await prisma.$queryRawUnsafe<
-        InventoryDetailType[]
-    >(
+    const items = await prisma.$queryRawUnsafe<DocumentItem[]>(
         `select distinct "MainSku"."name", "MainSku"."partNumber"
     from "MainSku"
     left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
@@ -20,28 +21,28 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
     left join "SkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id"
     ${query ? `where ` : ` `}
     ${splitQuery
-            .map((x, index) =>
-                x.trim()
-                    ? `(LOWER("MainSku"."name") like $${index + 1} or LOWER("SkuMaster"."detail") like $${index + 1} or
+        .map((x, index) =>
+            x.trim()
+                ? `(LOWER("MainSku"."name") like $${index + 1} or LOWER("SkuMaster"."detail") like $${index + 1} or
     LOWER("GoodsMaster"."barcode") like $${index + 1} or LOWER("MainSku"."searchKeyword") like $${index + 1} or
      LOWER("MainSkuRemark"."name") like $${index + 1} or LOWER("SkuMasterRemark"."name") like $${index + 1})`
-                    : ``
-            )
-            .join(' and ')}
+                : ``
+        )
+        .join(' and ')}
     limit 10 offset ${(page - 1) * 10}
     `,
         ...splitQuery.map((x) => `%${x.toLowerCase()}%`)
     )
     if (!items.length) throw new Error('ไม่พบสินค้าที่ค้นหา')
 
-    const extendedItems: InventoryDetailType[] = await prisma.$queryRaw`select "MainSku".id as "mainSkuId", "GoodsMaster".id as "goodsMasterId", 
+    const extendedItems: DocumentItem[] =
+        await prisma.$queryRaw`select "MainSku".id as "mainSkuId", "GoodsMaster".id as "goodsMasterId", 
     "GoodsMaster".barcode, "SkuMaster"."id" as "skuMasterId", "MainSku"."name", "SkuMaster"."detail", "GoodsMaster".price, 
     "GoodsMaster".quantity as "quantityPerUnit", "GoodsMaster".unit, "MainSku"."partNumber"
     from "MainSku"
     left join "SkuMaster" on "MainSku"."id" = "SkuMaster"."mainSkuId"
     left join "GoodsMaster" on "SkuMaster"."id" = "GoodsMaster"."skuMasterId"
     where "MainSku"."name" in (${Prisma.join(items.map((item) => item.name))})`
-
 
     const remaining: { skuMasterId: number; remaining: number }[] =
         await prisma.$queryRaw`select "SkuIn"."skuMasterId", SUM("SkuIn".quantity) - COALESCE(sum("SkuInToOut".quantity), 0)  as remaining 
@@ -50,7 +51,8 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
     group by "SkuIn"."id"
     having sum("SkuInToOut".quantity) < "SkuIn".quantity or sum("SkuInToOut".quantity) is null`
 
-    const images: { skuMasterId: number, images: string }[] = await prisma.$queryRaw`select "SkuMaster".id as "skuMasterId", "SkuMasterImage"."path" as "images" from "SkuMaster" left join "SkuMasterImage" on "SkuMaster"."id" = "SkuMasterImage"."skuMasterId" where "SkuMaster"."id" in (${Prisma.join(extendedItems.map((item) => item.skuMasterId))})`
+    const images: { skuMasterId: number; images: string }[] =
+        await prisma.$queryRaw`select "SkuMaster".id as "skuMasterId", "SkuMasterImage"."path" as "images" from "SkuMaster" left join "SkuMasterImage" on "SkuMaster"."id" = "SkuMasterImage"."skuMasterId" where "SkuMaster"."id" in (${Prisma.join(extendedItems.map((item) => item.skuMasterId))})`
 
     const [{ count }] = await prisma.$queryRawUnsafe<{ count: number }[]>(
         `select count(distinct "MainSku".name) from "MainSku"
@@ -59,13 +61,13 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
     
     ${query ? `where ` : ` `}
     ${splitQuery
-            .map((x, index) =>
-                x.trim()
-                    ? `(LOWER("MainSku"."name") like $${index + 1} or LOWER("SkuMaster"."detail") like $${index + 1} or
+        .map((x, index) =>
+            x.trim()
+                ? `(LOWER("MainSku"."name") like $${index + 1} or LOWER("SkuMaster"."detail") like $${index + 1} or
     LOWER("GoodsMaster"."barcode") like $${index + 1} or LOWER("MainSku"."searchKeyword") like $${index + 1})`
-                    : ``
-            )
-            .join(' and ')}
+                : ``
+        )
+        .join(' and ')}
     limit 10 offset ${(1 - 1) * 10}
     `,
         ...splitQuery.map((x) => `%${x.toLowerCase()}%`)
@@ -86,31 +88,39 @@ export const searchDistinctMainSku = async (query: string, page: number = 1) => 
                             where "SkuMaster"."id" in (${Prisma.join(extendedItems.map((x) => x.skuMasterId))})`
 
     const vendors = await prisma.$queryRaw<
-        (Contact & { skuMasterId: number })[]>`select "Contact".*, "SkuMaster"."id" as "skuMasterId" from "Contact"
+        (Contact & { skuMasterId: number })[]
+    >`select "Contact".*, "SkuMaster"."id" as "skuMasterId" from "Contact"
                             left join "_SkuMasterToVendor" on "_SkuMasterToVendor"."A" = "Contact"."id"
                             left join "SkuMaster" on "SkuMaster"."id" = "_SkuMasterToVendor"."B"
                             where "SkuMaster"."id" in (${Prisma.join(extendedItems.map((x) => x.skuMasterId))})`
 
-
-
-    const returnItems = items.map((item) => [...extendedItems.filter((x) => x.name === item.name).map((item) => ({
-        ...item,
-        remaining: remaining
-            .filter((x) => x.skuMasterId === item.skuMasterId)
-            .reduce(
-                (previousValue, currentValue) =>
-                    previousValue + currentValue.remaining,
-                0
-            ),
-        images: images.filter((x) => x.skuMasterId === item.skuMasterId).map((x) => x.images).filter((x) => x),
-        MainSkuRemarks: mainSkuRemarks.filter(
-            (y) => y.mainSkuId === item.mainSkuId
-        ),
-        SkuMasterRemarks: skuMasterRemarks.filter(
-            (y) => y.skuMasterId === item.skuMasterId
-        ),
-        Vendors: vendors.filter((y) => y.skuMasterId === item.skuMasterId),
-    }))])
+    const returnItems = items.map((item) => [
+        ...extendedItems
+            .filter((x) => x.name === item.name)
+            .map((item) => ({
+                ...item,
+                remaining: remaining
+                    .filter((x) => x.skuMasterId === item.skuMasterId)
+                    .reduce(
+                        (previousValue, currentValue) =>
+                            previousValue + currentValue.remaining,
+                        0
+                    ),
+                images: images
+                    .filter((x) => x.skuMasterId === item.skuMasterId)
+                    .map((x) => x.images)
+                    .filter((x) => x),
+                MainSkuRemarks: mainSkuRemarks.filter(
+                    (y) => y.mainSkuId === item.mainSkuId
+                ),
+                SkuMasterRemarks: skuMasterRemarks.filter(
+                    (y) => y.skuMasterId === item.skuMasterId
+                ),
+                Vendors: vendors.filter(
+                    (y) => y.skuMasterId === item.skuMasterId
+                ),
+            })),
+    ])
 
     return {
         items: returnItems,

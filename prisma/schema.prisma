@@ -233,7 +233,8 @@ model SkuRemainingCache {
   SkuMaster   SkuMaster @relation(fields: [skuMasterId], references: [id])
   skuMasterId Int       @unique
 
-  remaining Float @default(0)
+  remaining     Float   @default(0)
+  shouldRecheck Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

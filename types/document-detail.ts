@@ -8,3 +8,14 @@ export type DocumentDetail = {
     documentNo?: string
     referenceNo?: string
 }
+
+export const getDefaultDocumentDetail = () =>
+    ({
+        address: '',
+        contactId: '',
+        contactName: '',
+        date: new Date(),
+        phone: '',
+        taxId: '',
+        documentNo: '',
+    }) as DocumentDetail

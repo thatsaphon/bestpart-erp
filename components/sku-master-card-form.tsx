@@ -26,14 +26,14 @@ import {
 import Image from 'next/image'
 import { addImageToTag } from '@/app/actions/inventory/addImageToFlag'
 import { uploadFile } from '@/lib/s3-client'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import { uploadSkuMasterImage } from '@/app/inventory/upload-sku'
 import { Badge } from './ui/badge'
 import { disconnectSkuMasterRemark } from '@/app/inventory/remark-action/sku-master-remark'
 import AddSkuMasterRemarkInput from './add-sku-master-remark-input'
 
 type Props = {
-    skuDetail: InventoryDetailType[]
+    skuDetail: DocumentItem[]
 }
 
 export default function SkuMasterCardForm({ skuDetail }: Props) {

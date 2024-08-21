@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/app/db/db'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import { MainSkuRemark, SkuMasterRemark } from '@prisma/client'
 
 export const getSkuByBarcode = async (barcode: string) => {

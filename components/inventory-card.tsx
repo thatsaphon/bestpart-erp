@@ -9,13 +9,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import EditMainSkuDialog from './edit-main-sku-dialog'
 import { Badge } from './ui/badge'
 import ImageToolTip from './image-tooltip'
 
 type Props = {
-    mainSkus: InventoryDetailType[]
+    mainSkus: DocumentItem[]
 }
 
 export function InventoryCard({ mainSkus }: Props) {

@@ -6,14 +6,14 @@ import { format } from 'date-fns'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
-import { InventoryDetailType } from '@/types/inventory-detail'
+import { DocumentItem } from '@/types/document-item'
 import { redirect } from 'next/navigation'
 import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 
 export const updateSalesInvoice = async (
     id: number,
     formData: FormData,
-    items: InventoryDetailType[],
+    items: DocumentItem[],
     payments: { id: number; amount: number }[],
     remarks: { id?: number; remark: string; isDeleted?: boolean }[]
 ) => {
