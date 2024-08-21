@@ -168,7 +168,7 @@ export const searchSku = async (query: string, page: number = 1) => {
             unit: goods.unit,
             quantityPerUnit: goods.quantityPerUnit,
             quantity: 0,
-            pricePerUnit: goods.quantityPerUnit,
+            pricePerUnit: goods.pricePerUnit,
             partNumber: goods.SkuMaster.MainSku.partNumber || '',
             remaining:
                 remaining.find((r) => r.skuMasterId === goods.skuMasterId)?._sum

@@ -122,56 +122,11 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                     }
                 }}
             >
-                <div className="flex flex-col gap-2">
-                    <div className="flex gap-3">
-                        <Label className="flex items-center gap-2">
-                            <p className="">วันที่</p>
-                            <DocumentDatePicker date={date} setDate={setDate} />
-                        </Label>
-                        <Label className="flex items-center gap-2">
-                            <p className="">No. </p>
-                            <Input
-                                className="w-auto"
-                                name="documentNo"
-                                placeholder="Optional"
-                                defaultValue={
-                                    defaultDocumentDetails?.documentNo
-                                }
-                            />
-                            <span>Ref. </span>
-                            <Input
-                                className="w-auto"
-                                name="referenceNo"
-                                placeholder="Optional"
-                                defaultValue={
-                                    defaultDocumentDetails?.documentNo
-                                }
-                            />
-                        </Label>
-                    </div>
+                <DocumentDatePicker
+                    documentDetail={documentDetail}
+                    setDocumentDetail={setDocumentDetail}
+                />
 
-                    {/* <Label className="flex items-center space-x-1">
-                            <p className="">ลูกค้า</p>
-                            <Input className="w-auto" placeholder="Optional" />
-                        </Label> */}
-                    <div className="my-1 flex items-baseline space-x-2">
-                        <Label>คู่ค้า</Label>
-                        <SelectSearchVendor
-                            name="vendorId"
-                            hasTextArea={true}
-                            placeholder="รหัสคู่ค้า"
-                            defaultValue={String(
-                                defaultDocumentDetails?.contactId || ''
-                            )}
-                            defaultAddress={{
-                                name: defaultDocumentDetails?.contactName || '',
-                                address: defaultDocumentDetails?.address || '',
-                                phone: defaultDocumentDetails?.phone || '',
-                                taxId: defaultDocumentDetails?.taxId || '',
-                            }}
-                        />
-                    </div>
-                </div>
                 <Table>
                     <TableCaption className="space-x-1 text-right"></TableCaption>
                     <TableHeader>

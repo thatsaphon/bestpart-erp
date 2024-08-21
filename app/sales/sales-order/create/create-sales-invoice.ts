@@ -81,11 +81,7 @@ export const createSalesInvoice = async (
             where: {
                 id: {
                     in: items
-                        .filter(
-                            (item) =>
-                                typeof item.serviceAndNonStockItemId ===
-                                'number'
-                        )
+                        .filter((item) => item.serviceAndNonStockItemId != null)
                         .map((item) => item.serviceAndNonStockItemId as number),
                 },
             },

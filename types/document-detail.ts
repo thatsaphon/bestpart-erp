@@ -1,5 +1,5 @@
 export type DocumentDetail = {
-    contactId?: string
+    contactId?: number
     contactName: string
     address: string
     phone: string
@@ -12,7 +12,7 @@ export type DocumentDetail = {
 export const getDefaultDocumentDetail = () =>
     ({
         address: '',
-        contactId: '',
+        contactId: undefined,
         contactName: '',
         date: new Date(),
         phone: '',

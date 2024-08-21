@@ -19,75 +19,143 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { Label } from './ui/label'
+import { Input } from './ui/input'
+import { DocumentDetail } from '@/types/document-detail'
+import SelectSearchContact from './select-search-contact'
 
 type Props = {
     disabled?: boolean
     name?: string
-    date: Date
-    setDate: React.Dispatch<React.SetStateAction<Date>>
+    documentDetail: DocumentDetail
+    setDocumentDetail: React.Dispatch<React.SetStateAction<DocumentDetail>>
 }
 
 export function DocumentDatePicker({
     disabled,
     name = 'date',
-    date,
-    setDate,
+    documentDetail,
+    setDocumentDetail,
 }: Props) {
     return (
-        <Popover>
-            <PopoverTrigger asChild disabled={disabled}>
-                <Button
-                    variant={'outline'}
-                    className={cn(
-                        'w-[240px] justify-start text-left font-normal',
-                        !date && 'text-muted-foreground'
-                    )}
-                >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    <input
-                        name={name}
-                        type="hidden"
+        <div className="flex flex-col gap-2">
+            <div className="flex gap-3">
+                <Label className="flex items-center gap-2">
+                    <p className="">วันที่</p>
+
+                    <Popover>
+                        <PopoverTrigger asChild disabled={disabled}>
+                            <Button
+                                variant={'outline'}
+                                className={cn(
+                                    'w-[240px] justify-start text-left font-normal',
+                                    !documentDetail.date &&
+                                        'text-muted-foreground'
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                <input
+                                    name={name}
+                                    type="hidden"
+                                    onChange={(e) => {
+                                        setDocumentDetail((prev) => ({
+                                            ...prev,
+                                            date: new Date(e.target.value),
+                                        }))
+                                    }}
+                                    value={documentDetail.date.toLocaleString()}
+                                />
+                                {documentDetail.date ? (
+                                    format(documentDetail.date, 'PPP')
+                                ) : (
+                                    <span>Pick a date</span>
+                                )}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            align="start"
+                            className="flex w-auto flex-col space-y-2 p-2"
+                            onInteractOutside={(e) => e.preventDefault()}
+                        >
+                            <Select
+                                onValueChange={(value) => {
+                                    setDocumentDetail((prev) => ({
+                                        ...prev,
+                                        date: addDays(
+                                            new Date(),
+                                            parseInt(value)
+                                        ),
+                                    }))
+                                }}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select" />
+                                </SelectTrigger>
+                                <SelectContent position="popper">
+                                    <SelectItem value="-1">
+                                        Yesterday
+                                    </SelectItem>
+                                    <SelectItem value="0">Today</SelectItem>
+                                    <SelectItem value="1">Tomorrow</SelectItem>
+                                    <SelectItem value="3">In 3 days</SelectItem>
+                                    <SelectItem value="7">In a week</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <div className="rounded-md border">
+                                <Calendar
+                                    mode="single"
+                                    selected={documentDetail.date}
+                                    onSelect={(value) => {
+                                        console.log(value)
+                                        !!value &&
+                                            setDocumentDetail((prev) => ({
+                                                ...prev,
+                                                date: value,
+                                            }))
+                                    }}
+                                />
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                </Label>
+                <Label className="flex items-center gap-2">
+                    <p className="">No. </p>
+                    <Input
+                        className="w-auto"
+                        name="documentNo"
+                        placeholder="Optional"
+                        value={documentDetail?.documentNo}
                         onChange={(e) => {
-                            setDate(new Date(e.target.value))
-                        }}
-                        value={date.toLocaleString()}
-                    />
-                    {date ? format(date, 'PPP') : <span>Pick a date</span>}
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent
-                align="start"
-                className="flex w-auto flex-col space-y-2 p-2"
-                onInteractOutside={(e) => e.preventDefault()}
-            >
-                <Select
-                    onValueChange={(value) => {
-                        setDate(addDays(new Date(), parseInt(value)))
-                        console.log(date)
-                    }}
-                >
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                        <SelectItem value="-1">Yesterday</SelectItem>
-                        <SelectItem value="0">Today</SelectItem>
-                        <SelectItem value="1">Tomorrow</SelectItem>
-                        <SelectItem value="3">In 3 days</SelectItem>
-                        <SelectItem value="7">In a week</SelectItem>
-                    </SelectContent>
-                </Select>
-                <div className="rounded-md border">
-                    <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={(value) => {
-                            console.log(value)
-                            !!value && setDate(value)
+                            setDocumentDetail((prev) => ({
+                                ...prev,
+                                documentNo: e.target.value,
+                            }))
                         }}
                     />
-                </div>
-            </PopoverContent>
-        </Popover>
+                    <span>Ref. </span>
+                    <Input
+                        className="w-auto"
+                        name="referenceNo"
+                        placeholder="Optional"
+                        value={documentDetail?.referenceNo}
+                        onChange={(e) => {
+                            setDocumentDetail((prev) => ({
+                                ...prev,
+                                referenceNo: e.target.value,
+                            }))
+                        }}
+                    />
+                </Label>
+            </div>
+
+            <SelectSearchContact
+                label="คู่ค้า"
+                name="vendorId"
+                hasTextArea={true}
+                placeholder="รหัสคู่ค้า"
+                documentDetail={documentDetail}
+                setDocumentDetail={setDocumentDetail}
+            />
+        </div>
     )
 }
