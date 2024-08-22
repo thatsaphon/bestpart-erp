@@ -10,45 +10,12 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { DocumentItem } from '@/types/document-item'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { DocumentDetail } from '@/types/document-detail'
 
 export const createPurchaseInvoice = async (
-    formData: FormData,
-    items: DocumentItem[]
-) => {
-    const validator = z.object({
-        vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
-        contactName: z.string().trim().min(1, 'contactName must not be empty'),
-        address: z.string().trim().optional().nullable(),
-        phone: z.string().trim().optional().nullable(),
-        taxId: z.string().trim().optional().nullable(),
-        date: z.string().trim().min(1, 'date must not be empty'),
-        documentNo: z.string().trim().optional().nullable(),
-        referenceNo: z.string().trim().optional().nullable(),
-    })
-
-    const result = validator.safeParse({
-        vendorId: formData.get('vendorId'),
-        contactName: formData.get('contactName'),
-        address: formData.get('address'),
-        phone: formData.get('phone'),
-        taxId: formData.get('taxId'),
-        date: formData.get('date'),
-        documentNo: formData.get('documentNo'),
-        referenceNo: formData.get('referenceNo'),
-    })
-
-    if (!result.success) {
-        throw new Error(
-            fromZodError(result.error, {
-                prefix: '- ',
-                prefixSeparator: ' ',
-                issueSeparator: '\n',
-            }).message
-        )
-    }
-
-    let {
-        vendorId,
+    // formData: FormData,
+    {
+        contactId,
         contactName,
         address,
         phone,
@@ -56,11 +23,55 @@ export const createPurchaseInvoice = async (
         date,
         documentNo,
         referenceNo,
-    } = result.data
+    }: DocumentDetail,
+    items: DocumentItem[]
+) => {
+    // const validator = z.object({
+    //     vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
+    //     contactName: z.string().trim().min(1, 'contactName must not be empty'),
+    //     address: z.string().trim().optional().nullable(),
+    //     phone: z.string().trim().optional().nullable(),
+    //     taxId: z.string().trim().optional().nullable(),
+    //     date: z.string().trim().min(1, 'date must not be empty'),
+    //     documentNo: z.string().trim().optional().nullable(),
+    //     referenceNo: z.string().trim().optional().nullable(),
+    // })
+
+    // const result = validator.safeParse({
+    //     vendorId: formData.get('vendorId'),
+    //     contactName: formData.get('contactName'),
+    //     address: formData.get('address'),
+    //     phone: formData.get('phone'),
+    //     taxId: formData.get('taxId'),
+    //     date: formData.get('date'),
+    //     documentNo: formData.get('documentNo'),
+    //     referenceNo: formData.get('referenceNo'),
+    // })
+
+    // if (!result.success) {
+    //     throw new Error(
+    //         fromZodError(result.error, {
+    //             prefix: '- ',
+    //             prefixSeparator: ' ',
+    //             issueSeparator: '\n',
+    //         }).message
+    //     )
+    // }
+
+    // let {
+    //     vendorId,
+    //     contactName,
+    //     address,
+    //     phone,
+    //     taxId,
+    //     date,
+    //     documentNo,
+    //     referenceNo,
+    // } = result.data
 
     const contact = await prisma.contact.findUnique({
         where: {
-            id: Number(vendorId),
+            id: Number(contactId),
         },
     })
     if (!contact) {
@@ -98,7 +109,7 @@ export const createPurchaseInvoice = async (
             updatedBy: session?.user.username,
             ApSubledger: {
                 create: {
-                    contactId: Number(vendorId),
+                    contactId: Number(contactId),
                 },
             },
             GeneralLedger: {
@@ -166,7 +177,7 @@ export const createPurchaseInvoice = async (
 
     await prisma.contact.update({
         where: {
-            id: Number(vendorId),
+            id: Number(contactId),
         },
         data: {
             SkuMaster: {

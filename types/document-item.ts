@@ -19,6 +19,7 @@ export type DocumentItem = {
     unit: string
     quantityPerUnit: number
     quantity: number
+    lastPurchaseCostPerUnit?: number | null
     pricePerUnit: number
     partNumber: string
     remaining?: number

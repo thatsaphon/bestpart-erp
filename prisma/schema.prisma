@@ -261,14 +261,15 @@ model SkuMasterRemark {
 }
 
 model GoodsMaster {
-  id              Int       @id @default(autoincrement())
-  barcode         String    @unique
-  SkuMaster       SkuMaster @relation(fields: [skuMasterId], references: [id])
-  skuMasterId     Int
-  quantityPerUnit Float
-  unit            String
-  pricePerUnit    Float
-  flag            Json?
+  id                      Int       @id @default(autoincrement())
+  barcode                 String    @unique
+  SkuMaster               SkuMaster @relation(fields: [skuMasterId], references: [id])
+  skuMasterId             Int
+  quantityPerUnit         Float
+  unit                    String
+  lastPurchaseCostPerUnit Float?
+  pricePerUnit            Float
+  flag                    Json?
 
   SalesItem    SalesItem[]
   PurchaseItem PurchaseItem[]

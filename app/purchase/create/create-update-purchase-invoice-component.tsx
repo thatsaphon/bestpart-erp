@@ -338,7 +338,9 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                                                     {
                                                         ...result,
                                                         quantity,
-                                                        pricePerUnit: 0,
+                                                        pricePerUnit:
+                                                            result.lastPurchaseCostPerUnit ||
+                                                            0,
                                                     },
                                                 ])
                                                 setBarcodeInput('')
@@ -375,7 +377,13 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                                     }
                                     setItems([
                                         ...items,
-                                        { ...data, quantity: 1 },
+                                        {
+                                            ...data,
+                                            quantity: 1,
+                                            pricePerUnit:
+                                                data.lastPurchaseCostPerUnit ||
+                                                0,
+                                        },
                                     ])
                                     setOpen(false)
                                     setTimeout(() => {

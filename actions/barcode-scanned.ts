@@ -41,6 +41,7 @@ export const getSkuByBarcode = async (barcode: string) => {
         unit: result.unit,
         quantityPerUnit: result.quantityPerUnit,
         quantity: 0,
+        lastPurchaseCostPerUnit: result.lastPurchaseCostPerUnit,
         pricePerUnit: result.quantityPerUnit,
         partNumber: result.SkuMaster.MainSku.partNumber || '',
         remaining: remaining._sum.quantity || 0,
