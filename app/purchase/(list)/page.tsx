@@ -137,8 +137,7 @@ export default async function PurchasePage({
                                     invoice.Purchase?.PurchaseItem.reduce(
                                         (sum, item) =>
                                             sum +
-                                            item.quantityPerUnit *
-                                                item.costPerUnit,
+                                            item.quantity * item.costPerUnit,
                                         0
                                     ) || 0
                                 ).toLocaleString()}

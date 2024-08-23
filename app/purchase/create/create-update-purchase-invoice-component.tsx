@@ -26,37 +26,30 @@ import { DocumentItem } from '@/types/document-item'
 import { DocumentRemark } from '@prisma/client'
 import ImageToolTip from '@/components/image-tooltip'
 import { Badge } from '@/components/ui/badge'
-import { DocumentDatePicker } from '@/components/document-date-picker'
+import { DocumentDetailForm } from '@/components/document-date-picker'
 import {
     DocumentDetail,
     getDefaultDocumentDetail,
 } from '@/types/document-detail'
+import { GetPurchase } from '@/types/purchase'
+import { purchaseItemsToInventoryDetailType } from '@/types/purchase-item'
 
 type Props = {
-    defaultItems?: DocumentItem[]
-    defaultDocumentDetails?: {
-        id: number
-        date: Date
-        documentNo: string
-        contactId: number
-        contactName: string
-        address: string
-        phone: string
-        taxId: string
-        documentRemarks: DocumentRemark[]
-    }
+    purchase?: GetPurchase
 }
 
 export default function CreateOrUpdatePurchaseInvoiceComponent({
-    defaultItems = [],
-    defaultDocumentDetails,
+    purchase,
 }: Props) {
-    const [date, setDate] = React.useState<Date>(new Date())
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
-        getDefaultDocumentDetail()
+        purchase
+            ? { ...purchase, contactId: purchase?.Purchase?.contactId }
+            : getDefaultDocumentDetail()
     )
     const [open, setOpen] = React.useState(false)
-    const [items, setItems] = React.useState<DocumentItem[]>(defaultItems)
+    const [items, setItems] = React.useState<DocumentItem[]>(
+        purchaseItemsToInventoryDetailType(purchase?.Purchase?.PurchaseItem)
+    )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
 
@@ -101,16 +94,16 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
             <form
                 action={async (formData) => {
                     try {
-                        if (!defaultItems.length) {
+                        if (purchase) {
                             await createPurchaseInvoice(documentDetail, items)
-                            setKey(String(Date.now()))
-                            setItems([])
+                            // setKey(String(Date.now()))
+                            // setItems([])
                         }
 
-                        if (defaultDocumentDetails) {
+                        if (purchase) {
                             await updatePurchaseInvoice(
-                                defaultDocumentDetails.id,
-                                formData,
+                                purchase.id,
+                                documentDetail,
                                 items
                             )
                             toast.success('บันทึกสําเร็จ')
@@ -122,9 +115,11 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                     }
                 }}
             >
-                <DocumentDatePicker
+                <DocumentDetailForm
                     documentDetail={documentDetail}
                     setDocumentDetail={setDocumentDetail}
+                    label="คู่ค้า"
+                    placeholder="รหัสคู่ค้า"
                 />
 
                 <Table>

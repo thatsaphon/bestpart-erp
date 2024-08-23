@@ -86,7 +86,6 @@ export const createPurchaseInvoice = async (
             Purchase: {
                 create: {
                     contactId: contactId,
-
                     GeneralLedger: {
                         create: [
                             // เจ้าหนี้การค้า
@@ -153,71 +152,6 @@ export const createPurchaseInvoice = async (
                         : {},
                 },
             },
-            // ApSubledger: {
-            //     create: {
-            //         contactId: Number(contactId),
-            //     },
-            // },
-            // GeneralLedger: {
-            //     create: [
-            //         // เจ้าหนี้การค้า
-            //         {
-            //             chartOfAccountId: 21000,
-            //             amount: -items.reduce(
-            //                 (sum, item) =>
-            //                     sum + item.quantity * item.pricePerUnit,
-            //                 0
-            //             ),
-            //         },
-            //         // สินค้าคงเหลือ
-            //         {
-            //             chartOfAccountId: 13000,
-            //             amount: +items
-            //                 .reduce(
-            //                     (sum, item) =>
-            //                         sum +
-            //                         (item.quantity * item.pricePerUnit * 100) /
-            //                             107,
-            //                     0
-            //                 )
-            //                 .toFixed(2),
-            //         },
-            //         // ภาษีซื้อ
-            //         {
-            //             chartOfAccountId: 15100,
-            //             amount: +items
-            //                 .reduce(
-            //                     (sum, item) =>
-            //                         sum +
-            //                         (item.quantity * item.pricePerUnit * 7) /
-            //                             107,
-            //                     0
-            //                 )
-            //                 .toFixed(2),
-            //         },
-            //     ],
-            // },
-            // SkuIn: {
-            //     create: items.map((item) => ({
-            //         date: new Date(date),
-            //         goodsMasterId: goodsMasters.find(
-            //             (goodsMaster) => goodsMaster.barcode === item.barcode
-            //         )?.id as number,
-            //         skuMasterId: item.skuMasterId,
-            //         barcode: item.barcode,
-            //         unit: item.unit,
-            //         quantityPerUnit: item.quantityPerUnit,
-            //         quantity: item.quantity * item.quantityPerUnit,
-            //         cost: +(
-            //             ((100 / 107) * +item.pricePerUnit) /
-            //             item.quantityPerUnit
-            //         ).toFixed(2),
-            //         vat: +(
-            //             ((7 / 107) * +item.pricePerUnit) /
-            //             item.quantityPerUnit
-            //         ).toFixed(2),
-            //     })),
-            // },
         },
     })
 

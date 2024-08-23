@@ -45,22 +45,14 @@ import {
     GetSalesItems,
     salesItemsToInventoryDetailType,
 } from '@/types/sales-item'
-import { DocumentDatePicker } from '@/components/document-date-picker'
+import { DocumentDetailForm } from '@/components/document-date-picker'
+import {
+    DocumentDetail,
+    getDefaultDocumentDetail,
+} from '@/types/document-detail'
 
 type Props = {
     sales?: GetSales
-    // defaultItems?: InventoryDetailType[]
-    // defaultDocumentDetails?: {
-    //     id: number
-    //     date: Date
-    //     documentNo: string
-    //     contactId: number
-    //     contactName: string
-    //     address: string
-    //     phone: string
-    //     taxId: string
-    //     documentRemarks: DocumentRemark[]
-    // }
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
     defaultPayments?: { id: number; amount: number }[]
     defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
@@ -72,7 +64,11 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     defaultPayments,
     defaultRemarks,
 }: Props) {
-    const [date, setDate] = useState<Date>(sales?.date || new Date())
+    const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
+        sales
+            ? { ...sales, contactId: sales?.Sales?.contactId }
+            : getDefaultDocumentDetail()
+    )
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
     const [items, setItems] = React.useState<DocumentItem[]>(
@@ -187,13 +183,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                         if (!sales) {
                             await createSalesInvoice(
                                 // formData,
-                                {
-                                    date: date,
-                                    address: '',
-                                    contactName: '',
-                                    phone: '',
-                                    taxId: '',
-                                },
+                                documentDetail,
                                 items,
                                 selectedPayments,
                                 remarks
@@ -202,16 +192,16 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             // setItems([])
                             toast.success('บันทึกสําเร็จ')
                         }
-                        // if (defaultDocumentDetails) {
-                        //     await updateSalesInvoice(
-                        //         defaultDocumentDetails.id,
-                        //         formData,
-                        //         items,
-                        //         selectedPayments,
-                        //         remarks
-                        //     )
-                        //     toast.success('บันทึกสําเร็จ')
-                        // }
+                        if (sales) {
+                            // await updateSalesInvoice(
+                            //     defaultDocumentDetail.id,
+                            //     formData,
+                            //     items,
+                            //     selectedPayments,
+                            //     remarks
+                            // )
+                            toast.success('บันทึกสําเร็จ')
+                        }
                     } catch (err) {
                         if (err instanceof Error)
                             return toast.error(err.message)
@@ -219,61 +209,35 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                     }
                 }}
             >
-                <div className="flex flex-col gap-2">
-                    <div className="flex gap-3">
-                        <Label className="flex items-center gap-2">
-                            <p className="">วันที่</p>
-                            <DocumentDatePicker date={date} setDate={setDate} />
-                        </Label>
-                        <Label className="flex items-center gap-2">
-                            <p className="">No. </p>
-                            <Input
-                                className="w-auto"
-                                name="documentNo"
-                                placeholder="Optional"
-                                defaultValue={sales?.documentNo || ''}
-                            />
-                        </Label>
-                    </div>
-                    <div className="my-1 flex items-baseline space-x-2">
-                        <Label>ลูกค้า</Label>
-                        <SelectSearchCustomer
-                            name="customerId"
-                            hasTextArea={true}
-                            placeholder="รหัสลูกค้า"
-                            defaultValue={String(sales?.Sales?.contactId || '')}
-                            defaultAddress={{
-                                name: sales?.contactName || '',
-                                address: sales?.address || '',
-                                phone: sales?.phone || '',
-                                taxId: sales?.taxId || '',
-                            }}
-                        />
-                    </div>
-                </div>
+                <DocumentDetailForm
+                    setDocumentDetail={setDocumentDetail}
+                    documentDetail={documentDetail}
+                    label="ลูกค้า"
+                    placeholder="รหัสลูกค้า"
+                />
                 <Table>
                     <TableCaption>
                         <div className="w-[650px] space-y-1">
                             <div className="flex items-center gap-1 text-left">
                                 ช่องทางชำระเงิน:{' '}
-                                {/* {!defaultDocumentDetails ? (
+                                {/* {!defaultDocumentDetail ? (
                                     <></>
-                                ) : defaultDocumentDetails?.paymentStatus ===
+                                ) : defaultDocumentDetail?.paymentStatus ===
                                   'Paid' ? (
                                     <Badge className="bg-green-400">
                                         จ่ายแล้ว
                                     </Badge>
-                                ) : defaultDocumentDetails?.paymentStatus ===
+                                ) : defaultDocumentDetail?.paymentStatus ===
                                   'Billed' ? (
                                     <Badge variant={`secondary`}>
                                         วางบิลแล้ว
                                     </Badge>
-                                ) : defaultDocumentDetails?.paymentStatus ===
+                                ) : defaultDocumentDetail?.paymentStatus ===
                                   'PartialPaid' ? (
                                     <Badge variant={'destructive'}>
                                         จ่ายบางส่วน
                                     </Badge>
-                                ) : !defaultDocumentDetails?.paymentStatus ? (
+                                ) : !defaultDocumentDetail?.paymentStatus ? (
                                     <Badge className="bg-green-400">
                                         เงินสด
                                     </Badge>
@@ -288,7 +252,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                     key={item.id}
                                     className={cn(
                                         'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary'
-                                        // defaultDocumentDetails?.paymentStatus ===
+                                        // defaultDocumentDetail?.paymentStatus ===
                                         //     'Billed' && 'grid-cols-2'
                                     )}
                                 >
@@ -305,7 +269,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                     <Cross1Icon
                                         className={cn(
                                             'cursor-pointer text-destructive'
-                                            // defaultDocumentDetails?.paymentStatus ===
+                                            // defaultDocumentDetail?.paymentStatus ===
                                             //     'Billed' && 'hidden'
                                         )}
                                         onClick={() =>
@@ -321,7 +285,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             <div
                                 className={cn(
                                     'grid grid-cols-[1fr_1fr_140px] items-center gap-1'
-                                    // defaultDocumentDetails?.paymentStatus ===
+                                    // defaultDocumentDetail?.paymentStatus ===
                                     //     'Billed' && 'hidden'
                                 )}
                             >

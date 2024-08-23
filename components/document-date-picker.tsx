@@ -29,13 +29,17 @@ type Props = {
     name?: string
     documentDetail: DocumentDetail
     setDocumentDetail: React.Dispatch<React.SetStateAction<DocumentDetail>>
+    label?: string
+    placeholder?: string
 }
 
-export function DocumentDatePicker({
+export function DocumentDetailForm({
     disabled,
     name = 'date',
     documentDetail,
     setDocumentDetail,
+    label = 'ผู้ติดต่อ',
+    placeholder,
 }: Props) {
     return (
         <div className="flex flex-col gap-2">
@@ -49,7 +53,7 @@ export function DocumentDatePicker({
                                 variant={'outline'}
                                 className={cn(
                                     'w-[240px] justify-start text-left font-normal',
-                                    !documentDetail.date &&
+                                    !documentDetail?.date &&
                                         'text-muted-foreground'
                                 )}
                             >
@@ -63,9 +67,9 @@ export function DocumentDatePicker({
                                             date: new Date(e.target.value),
                                         }))
                                     }}
-                                    value={documentDetail.date.toLocaleString()}
+                                    value={documentDetail?.date.toLocaleString()}
                                 />
-                                {documentDetail.date ? (
+                                {documentDetail?.date ? (
                                     format(documentDetail.date, 'PPP')
                                 ) : (
                                     <span>Pick a date</span>
@@ -137,7 +141,7 @@ export function DocumentDatePicker({
                         className="w-auto"
                         name="referenceNo"
                         placeholder="Optional"
-                        value={documentDetail?.referenceNo}
+                        value={documentDetail?.referenceNo || ''}
                         onChange={(e) => {
                             setDocumentDetail((prev) => ({
                                 ...prev,
@@ -149,10 +153,9 @@ export function DocumentDatePicker({
             </div>
 
             <SelectSearchContact
-                label="คู่ค้า"
-                name="vendorId"
+                label={label}
                 hasTextArea={true}
-                placeholder="รหัสคู่ค้า"
+                placeholder={placeholder}
                 documentDetail={documentDetail}
                 setDocumentDetail={setDocumentDetail}
             />

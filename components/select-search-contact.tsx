@@ -195,7 +195,7 @@ export default function SelectSearchContact<T>({
                                 <div className="col-start-1">
                                     <Input
                                         name="contactName"
-                                        // placeholder="ชื่อคู่ค้า"
+                                        placeholder="ชื่อ"
                                         value={documentDetail.contactName}
                                         onChange={(e) =>
                                             setDocumentDetail((prev) => ({

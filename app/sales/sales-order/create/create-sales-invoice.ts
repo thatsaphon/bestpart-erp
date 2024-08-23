@@ -15,11 +15,6 @@ import { DocumentDetail } from '@/types/document-detail'
 import { checkRemaining } from '@/actions/check-remaining'
 import { DocumentItem } from '@/types/document-item'
 
-const create = async () => {
-    // return prisma.document.create({
-    // })
-}
-
 export const createSalesInvoice = async (
     {
         contactId,

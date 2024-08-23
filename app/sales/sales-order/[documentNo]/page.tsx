@@ -30,6 +30,7 @@ import {
 import { isBefore, startOfDay } from 'date-fns'
 import SalesInvoiceLinkComponent from './sales-invoice-link-component'
 import { Metadata, ResolvingMetadata } from 'next'
+import { getSalesDefaultFunction } from '@/types/sales'
 
 type Props = {
     params: { documentNo: string }
@@ -47,7 +48,10 @@ export async function generateMetadata(
 export default async function SalesInvoiceDetailPage({
     params: { documentNo },
 }: Props) {
-    const document = await getSalesInvoiceDetail(documentNo)
+    const [document] = await getSalesDefaultFunction({
+        documentNo,
+        type: 'Sales',
+    })
     const session = await getServerSession(authOptions)
     const paymentMethods = await getPaymentMethods()
 
@@ -134,7 +138,7 @@ export default async function SalesInvoiceDetailPage({
                             hasTextArea={true}
                             // placeholder="Optional"
                             defaultValue={String(
-                                document?.ArSubledger?.Contact.id || ''
+                                document?.Sales?.contactId || ''
                             )}
                             defaultAddress={{
                                 name: document?.contactName || '',
@@ -149,15 +153,15 @@ export default async function SalesInvoiceDetailPage({
                 <Table className="mt-3">
                     <TableCaption>
                         <div className="w-[600px] space-y-1">
-                            <EditPaymentsComponents
+                            {/* <EditPaymentsComponents
                                 document={document}
                                 paymentMethods={paymentMethods}
-                            />
+                            /> */}
 
                             <p className="text-left font-bold text-primary">
                                 หมายเหตุ:
                             </p>
-                            {document?.remark.map((remark) => (
+                            {/* {document?.remark.map((remark) => (
                                 <p
                                     className={cn(
                                         'text-left text-primary',
@@ -168,7 +172,7 @@ export default async function SalesInvoiceDetailPage({
                                 >
                                     {remark.remark}
                                 </p>
-                            ))}
+                            ))} */}
                             <form
                                 className="grid grid-cols-[500px_1fr] items-center gap-1"
                                 action={async (formData) => {
@@ -198,27 +202,23 @@ export default async function SalesInvoiceDetailPage({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {document?.SkuOut.map((item) => (
+                        {document?.Sales?.SalesItem.map((item) => (
                             <TableRow key={item.barcode}>
                                 <TableCell>{item.barcode}</TableCell>
                                 <TableCell>
-                                    <p>
-                                        {
-                                            item.GoodsMaster.SkuMaster.mainSku
-                                                .name
-                                        }
-                                    </p>
-                                    <p>{item.GoodsMaster.SkuMaster.detail}</p>
+                                    <p>{item.SkuMaster?.MainSku.name}</p>
+                                    <p>{item.SkuMaster?.detail}</p>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {item.quantity}
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.price + item.vat}
+                                    {item.pricePerUnit + item.vat}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {(item.price + item.vat) * item.quantity}
+                                    {(item.pricePerUnit + item.vat) *
+                                        item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -231,12 +231,13 @@ export default async function SalesInvoiceDetailPage({
                             <TableCell className="text-right">
                                 {Math.abs(
                                     Number(
-                                        document?.GeneralLedger.filter(
-                                            (item) =>
-                                                item.chartOfAccountId >=
-                                                    11000 &&
-                                                item.chartOfAccountId <= 12000
-                                        )?.reduce((a, b) => a + b.amount, 0)
+                                        document?.Sales?.SalesItem.reduce(
+                                            (a, b) =>
+                                                a +
+                                                (b.pricePerUnit + b.vat) *
+                                                    b.quantity,
+                                            0
+                                        )
                                     )
                                 )}
                             </TableCell>

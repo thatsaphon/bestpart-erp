@@ -28,7 +28,7 @@ export const updatePurchaseInvoice = async (
 ) => {
     const contact = await prisma.contact.findUnique({
         where: {
-            id: Number(contactId),
+            id: contactId || undefined,
         },
     })
     if (!contact) {
@@ -107,7 +107,7 @@ export const updatePurchaseInvoice = async (
     for (const item of itemsRemainings) {
         if (item.remainings - item.oldInvoice + item.quantity < 0) {
             throw new Error(
-                `${item.name} \nมียอดคงเหลือต่ำกว่า 0 ไม่สามารถลบได้`
+                `${item.name} \nมียอดคงเหลือต่ำกว่า 0 ไม่สามารถแก้ไขได้`
             )
         }
     }
@@ -133,176 +133,112 @@ export const updatePurchaseInvoice = async (
     // }
 
     // if (error.message) throw new Error(error.message)
+    const serviceAndNonStockItemsGLCreate = await Promise.all(
+        items
+            .filter((item) => item.serviceAndNonStockItemId)
+            .map(async (item) => {
+                const serviceAndNonStockItem =
+                    await prisma.serviceAndNonStockItem.findUniqueOrThrow({
+                        where: {
+                            id: item.serviceAndNonStockItemId,
+                        },
+                    })
+                return {
+                    chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
+                    amount: -(item.quantity * item.pricePerUnit),
+                }
+            })
+    )
 
     const updatedResult = await prisma.document.update({
         where: {
             id,
         },
         data: {
-            contactName: address?.split('\n')[0] || undefined,
-            address: address?.substring(address.indexOf('\n') + 1) || undefined,
+            contactName: contactName,
+            address: address,
             phone: phone || undefined,
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
             documentNo: documentNo || undefined,
             referenceNo: referenceNo || undefined,
             updatedBy: session?.user.username,
-            remark: remark ? { create: { remark } } : undefined,
-            ApSubledger: !!contact
-                ? {
-                      update: {
-                          contactId: Number(contactId),
-                      },
-                  }
-                : undefined,
-            GeneralLedger: {
-                update: [
-                    // เจ้าหนี้การค้า
-                    {
-                        where: {
-                            id: invoice?.GeneralLedger.find(
-                                ({ chartOfAccountId }) =>
-                                    chartOfAccountId === 21000
-                            )?.id,
-                        },
-                        data: {
-                            chartOfAccountId: 21000,
-                            amount: -items.reduce(
-                                (sum, item) =>
-                                    sum + item.quantity * item.pricePerUnit,
-                                0
-                            ),
-                        },
-                    },
-                    // สินค้าคงเหลือ
-                    {
-                        where: {
-                            id: invoice?.GeneralLedger.find(
-                                ({ chartOfAccountId }) =>
-                                    chartOfAccountId === 13000
-                            )?.id,
-                        },
-                        data: {
-                            chartOfAccountId: 13000,
-                            amount: +items
-                                .reduce(
-                                    (sum, item) =>
-                                        sum +
-                                        (item.quantity *
-                                            item.pricePerUnit *
-                                            100) /
-                                            107,
+            Purchase: {
+                update: {
+                    contactId: contactId,
+                    GeneralLedger: {
+                        delete:
+                            invoice?.Purchase?.GeneralLedger.map(({ id }) => ({
+                                id,
+                            })) || [],
+                        create: [
+                            // เจ้าหนี้การค้า
+                            {
+                                chartOfAccountId: 21000,
+                                amount: -items.reduce(
+                                    (a, b) =>
+                                        a +
+                                        b.pricePerUnit *
+                                            b.quantity *
+                                            (b.vatable ? 100 / 107 : 1),
                                     0
-                                )
-                                .toFixed(2),
-                        },
-                    },
-                    // ภาษีซื้อ
-                    {
-                        where: {
-                            id: invoice?.GeneralLedger.find(
-                                ({ chartOfAccountId }) =>
-                                    chartOfAccountId === 15100
-                            )?.id,
-                        },
-                        data: {
-                            chartOfAccountId: 15100,
-                            amount: +items
-                                .reduce(
-                                    (sum, item) =>
-                                        sum +
-                                        (item.quantity *
-                                            item.pricePerUnit *
-                                            7) /
-                                            107,
-                                    0
-                                )
-                                .toFixed(2),
-                        },
-                    },
-                ],
-            },
-            SkuIn: {
-                update: items
-                    .filter((item) =>
-                        invoice?.SkuIn.find(
-                            (skuIn) =>
-                                skuIn.goodsMasterId === item.goodsMasterId
-                        )
-                    )
-                    .map((item) => {
-                        return {
-                            where: {
-                                id: invoice?.SkuIn.find(
-                                    (skuIn) =>
-                                        skuIn.goodsMasterId ===
-                                        item.goodsMasterId
-                                )?.id,
+                                ),
                             },
-                            data: {
-                                date: new Date(date),
-                                goodsMasterId: item.goodsMasterId,
-                                skuMasterId: item.skuMasterId,
-                                barcode: item.barcode,
-                                unit: item.unit,
-                                quantityPerUnit: item.quantityPerUnit,
-                                quantity: item.quantity * item.quantityPerUnit,
-                                cost: +(
-                                    ((100 / 107) * +item.pricePerUnit) /
-                                    item.quantityPerUnit
-                                ).toFixed(2),
-                                vat: +(
-                                    ((7 / 107) * +item.pricePerUnit) /
-                                    item.quantityPerUnit
-                                ).toFixed(2),
+                            // ซื้อ
+                            {
+                                chartOfAccountId: 13000,
+                                amount: items
+                                    .filter((item) => item.goodsMasterId)
+                                    .reduce(
+                                        (a, b) =>
+                                            a + b.pricePerUnit * b.quantity,
+                                        0
+                                    ),
                             },
-                        }
-                    }),
-                delete: invoice?.SkuIn.filter(
-                    (skuIn) =>
-                        !items
-                            .map((item) => item.goodsMasterId)
-                            .includes(skuIn.goodsMasterId)
-                ).map((skuIn) => ({
-                    id: skuIn.id,
-                })),
-                create: items
-                    .filter(
-                        (item) =>
-                            !invoice?.SkuIn.map(
-                                (skuIn) => skuIn.goodsMasterId
-                            ).includes(item.goodsMasterId)
-                    )
-                    .map((item) => {
-                        return {
-                            date: new Date(date),
-                            goodsMasterId: item.goodsMasterId,
-                            skuMasterId: item.skuMasterId,
-                            barcode: item.barcode,
-                            unit: item.unit,
+                            ...serviceAndNonStockItemsGLCreate,
+                            // ภาษีซื้อ
+                            {
+                                chartOfAccountId: 15100,
+                                amount: -items
+                                    .filter((item) => item.vatable)
+                                    .reduce(
+                                        (a, b) =>
+                                            a +
+                                            b.pricePerUnit *
+                                                b.quantity *
+                                                (7 / 107),
+                                        0
+                                    ),
+                            },
+                        ],
+                    },
+                    PurchaseItem: {
+                        delete:
+                            invoice?.Purchase?.PurchaseItem.map(({ id }) => ({
+                                id,
+                            })) || [],
+                        create: items.map((item) => ({
+                            costPerUnit: item.pricePerUnit,
                             quantityPerUnit: item.quantityPerUnit,
-                            quantity: item.quantity * item.quantityPerUnit,
-                            cost: +(
-                                ((100 / 107) * +item.pricePerUnit) /
-                                item.quantityPerUnit
-                            ).toFixed(2),
-                            vat: +(
-                                ((7 / 107) * +item.pricePerUnit) /
-                                item.quantityPerUnit
-                            ).toFixed(2),
-                        }
-                    }),
-            },
-        },
-    })
-
-    await prisma.contact.update({
-        where: {
-            id: Number(contactId),
-        },
-        data: {
-            SkuMaster: {
-                connect: items.map((item) => ({ id: item.skuMasterId })),
+                            quantity: item.quantity,
+                            unit: item.unit,
+                            vatable: item.vatable === true,
+                            vat: item.vatable
+                                ? item.pricePerUnit * (7 / 107)
+                                : 0,
+                            barcode: item.barcode,
+                            description: item.detail,
+                            name: item.name,
+                            skuMasterId: item.skuMasterId,
+                            goodsMasterId: item.goodsMasterId,
+                            serviceAndNonStockItemId:
+                                item.serviceAndNonStockItemId,
+                        })),
+                    },
+                    PurchaseOrder: purchaseOrderId
+                        ? { set: { id: purchaseOrderId } }
+                        : {},
+                },
             },
         },
     })

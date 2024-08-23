@@ -3,15 +3,15 @@
 import prisma from '@/app/db/db'
 import { Prisma } from '@prisma/client'
 
-export const getSalesDefaultFunction = async (
+export const getPurchaseDefaultFunction = async (
     where: Prisma.DocumentWhereInput
 ) => {
     return await prisma.document.findMany({
         where: where,
         include: {
-            Sales: {
+            Purchase: {
                 include: {
-                    SalesItem: {
+                    PurchaseItem: {
                         include: {
                             SkuMaster: {
                                 include: {
@@ -32,14 +32,12 @@ export const getSalesDefaultFunction = async (
                             },
                         },
                     },
-                    GeneralLedger: { include: { ChartOfAccount: true } },
                 },
             },
-            DocumentRemark: true,
         },
     })
 }
 
-export type GetSales = Awaited<
-    ReturnType<typeof getSalesDefaultFunction>
+export type GetPurchase = Awaited<
+    ReturnType<typeof getPurchaseDefaultFunction>
 >[number]

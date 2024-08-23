@@ -1,7 +1,7 @@
 'use client'
 
-import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import { fullDateFormat } from '@/lib/date-format'
+import { GetSales } from '@/types/sales'
 import {
     Page,
     Text,
@@ -12,7 +12,7 @@ import {
 } from '@react-pdf/renderer'
 import { bahttext } from 'bahttext'
 
-type Props = { document: Awaited<ReturnType<typeof getSalesInvoiceDetail>> }
+type Props = { document: GetSales }
 
 Font.register({
     family: 'Inter Sarabun',
@@ -153,12 +153,12 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                     <Text style={styles.col5}>หน่วย</Text>
                     <Text style={styles.col6}>รวม</Text>
                 </View>
-                {document?.SkuOut.map((item, index) => (
+                {document?.Sales?.SalesItem.map((item, index) => (
                     <View style={styles.row} key={item.barcode} wrap={false}>
                         <Text style={styles.col1}>{index + 1}</Text>
                         <Text style={styles.col2}>{item.barcode}</Text>
                         <Text style={styles.col3}>
-                            {`${item.GoodsMaster.SkuMaster.mainSku.name} - ${item.GoodsMaster.SkuMaster.detail}`}
+                            {`${item.name} - ${item.description}`}
                         </Text>
                         <Text style={styles.col4}>
                             {(
@@ -168,7 +168,7 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                         <Text style={styles.col5}>{`${item.unit}`}</Text>
                         <Text style={styles.col6}>
                             {(
-                                (item.price + item.vat) *
+                                (item.pricePerUnit + item.vat) *
                                 item.quantity
                             ).toLocaleString()}
                         </Text>
@@ -176,10 +176,9 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                 ))}
                 <View style={{ ...styles.footer }}>
                     <View style={styles.sum}>
-                        {document?.GeneralLedger.filter(
-                            ({ chartOfAccountId }) =>
-                                chartOfAccountId >= 11000 &&
-                                chartOfAccountId <= 12000
+                        {document?.Sales?.GeneralLedger.filter(
+                            ({ ChartOfAccount: { isAr, isCash } }) =>
+                                isAr || isCash
                         ).map((item) => (
                             <View
                                 key={item.chartOfAccountId}
@@ -200,9 +199,11 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                         <Text>
                             {`(${bahttext(
                                 Number(
-                                    document?.SkuOut.reduce(
+                                    document?.Sales?.SalesItem.reduce(
                                         (a, b) =>
-                                            a + (b.price + b.vat) * b.quantity,
+                                            a +
+                                            (b.pricePerUnit + b.vat) *
+                                                b.quantity,
                                         0
                                     )
                                 )
@@ -216,9 +217,10 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
-                                document?.SkuOut.reduce(
+                                document?.Sales?.SalesItem.reduce(
                                     (a, b) =>
-                                        a + (b.price + b.vat) * b.quantity,
+                                        a +
+                                        (b.pricePerUnit + b.vat) * b.quantity,
                                     0
                                 ).toLocaleString()
                             }
