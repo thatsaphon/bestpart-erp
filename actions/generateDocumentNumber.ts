@@ -3,7 +3,10 @@
 import prisma from '@/app/db/db'
 import { format } from 'date-fns'
 
-export const generateDocumentNumber = async (prefix: string, date: string) => {
+export const generateDocumentNumber = async (
+    prefix: string,
+    date: string | Date
+) => {
     const todayFormat = `${prefix}${format(new Date(date), 'yyyyMM')}`
     const lastInvoice = await prisma.document.findFirst({
         where: { documentNo: { startsWith: todayFormat } },

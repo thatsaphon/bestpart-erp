@@ -102,7 +102,7 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                 action={async (formData) => {
                     try {
                         if (!defaultItems.length) {
-                            await createPurchaseInvoice(formData, items)
+                            await createPurchaseInvoice(documentDetail, items)
                             setKey(String(Date.now()))
                             setItems([])
                         }
@@ -341,6 +341,7 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                                                         pricePerUnit:
                                                             result.lastPurchaseCostPerUnit ||
                                                             0,
+                                                        vatable: true,
                                                     },
                                                 ])
                                                 setBarcodeInput('')
@@ -383,6 +384,7 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                                             pricePerUnit:
                                                 data.lastPurchaseCostPerUnit ||
                                                 0,
+                                            vatable: true,
                                         },
                                     ])
                                     setOpen(false)

@@ -8,58 +8,27 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { DocumentItem } from '@/types/document-item'
+import { DocumentDetail } from '@/types/document-detail'
+import { checkRemaining } from '@/actions/check-remaining'
 
 export const updatePurchaseInvoice = async (
     id: number,
-    formData: FormData,
-    items: DocumentItem[]
-) => {
-    const validator = z.object({
-        vendorId: z.string().trim().min(1, 'vendorId must not be empty'),
-        address: z.string().trim().optional().nullable(),
-        phone: z.string().trim().optional().nullable(),
-        taxId: z.string().trim().optional().nullable(),
-        date: z.string().trim().min(1, 'date must not be empty'),
-        documentNo: z.string().trim().optional().nullable(),
-        remark: z.string().trim().optional().nullable(),
-        referenceNo: z.string().trim().optional().nullable(),
-    })
-
-    const result = validator.safeParse({
-        vendorId: formData.get('vendorId') || undefined,
-        address: formData.get('address') || undefined,
-        phone: formData.get('phone') || undefined,
-        taxId: formData.get('taxId') || undefined,
-        date: formData.get('date') || undefined,
-        documentNo: formData.get('documentNo') || undefined,
-        remark: formData.get('remark') || undefined,
-        referenceNo: formData.get('referenceNo') || undefined,
-    })
-
-    if (!result.success) {
-        throw new Error(
-            fromZodError(result.error, {
-                prefix: '- ',
-                prefixSeparator: ' ',
-                issueSeparator: '\n',
-            }).message
-        )
-    }
-
-    let {
-        vendorId,
+    {
+        contactId,
+        contactName,
         address,
         phone,
         taxId,
         date,
         documentNo,
-        remark,
         referenceNo,
-    } = result.data
-
+    }: DocumentDetail,
+    items: DocumentItem[],
+    purchaseOrderId?: number
+) => {
     const contact = await prisma.contact.findUnique({
         where: {
-            id: Number(vendorId),
+            id: Number(contactId),
         },
     })
     if (!contact) {
@@ -69,7 +38,9 @@ export const updatePurchaseInvoice = async (
     const goodsMasters = await prisma.goodsMaster.findMany({
         where: {
             barcode: {
-                in: items.map((item) => item.barcode),
+                in: items
+                    .filter((item) => item.barcode)
+                    .map((item) => item.barcode as string),
             },
         },
     })
@@ -84,33 +55,84 @@ export const updatePurchaseInvoice = async (
             id,
         },
         include: {
-            GeneralLedger: true,
-            ApSubledger: true,
-            SkuIn: { include: { SkuInToOut: true } },
+            Purchase: {
+                include: {
+                    GeneralLedger: true,
+                    PurchaseItem: true,
+                },
+            },
         },
     })
 
-    const error = { message: '' }
-    for (let skuIn of invoice?.SkuIn || []) {
-        if (skuIn.SkuInToOut.length > 0) {
-            const mapQuantity = items.find(
-                (item) => item.skuMasterId === skuIn.skuMasterId
+    const remainings = await checkRemaining(
+        invoice?.Purchase?.PurchaseItem.filter((item) => item.skuMasterId).map(
+            (item) => item.skuMasterId as number
+        ) || []
+    )
+
+    const groupBySkuMasterId = items
+        .filter((item) =>
+            remainings.find((r) => r.skuMasterId === item.skuMasterId)
+        )
+        .reduce((acc: Record<number, DocumentItem[]>, item) => {
+            if (!item.skuMasterId) return acc
+            if (!acc[item.skuMasterId]) {
+                acc[item.skuMasterId] = []
+            }
+            acc[item.skuMasterId].push(item)
+            return acc
+        }, {})
+
+    const itemsRemainings = Object.entries(groupBySkuMasterId).map(
+        ([key, value]) => ({
+            skuMasterId: Number(key),
+            quantity: value?.reduce(
+                (sum, item) => sum + item.quantity * item.quantityPerUnit,
+                0
+            ),
+            name: value?.[0].name,
+            remainings:
+                remainings.find((r) => r.skuMasterId === Number(key))
+                    ?.remaining || 0,
+            oldInvoice:
+                invoice?.Purchase?.PurchaseItem.filter(
+                    (item) => item.skuMasterId === Number(key)
+                ).reduce(
+                    (sum, item) => sum + item.quantity * item.quantityPerUnit,
+                    0
+                ) || 0,
+        })
+    )
+
+    for (const item of itemsRemainings) {
+        if (item.remainings - item.oldInvoice + item.quantity < 0) {
+            throw new Error(
+                `${item.name} \nมียอดคงเหลือต่ำกว่า 0 ไม่สามารถลบได้`
             )
-            if (!mapQuantity) {
-                error.message += `${skuIn.barcode} ได้ถูกขายแล้ว ไม่สามารถลบได้\n`
-                continue
-            }
-            if (
-                mapQuantity.quantity * mapQuantity.quantityPerUnit <
-                skuIn.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)
-            ) {
-                error.message += `${skuIn.barcode} ได้ถูกขายไปแล้ว ${skuIn.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)} หน่วย ห้ามแก้ไขจำนวนต่ำกว่านี้\n`
-                continue
-            }
         }
     }
 
-    if (error.message) throw new Error(error.message)
+    // const error = { message: '' }
+    // for (let skuIn of invoice?.SkuIn || []) {
+    //     if (skuIn.SkuInToOut.length > 0) {
+    //         const mapQuantity = items.find(
+    //             (item) => item.skuMasterId === skuIn.skuMasterId
+    //         )
+    //         if (!mapQuantity) {
+    //             error.message += `${skuIn.barcode} ได้ถูกขายแล้ว ไม่สามารถลบได้\n`
+    //             continue
+    //         }
+    //         if (
+    //             mapQuantity.quantity * mapQuantity.quantityPerUnit <
+    //             skuIn.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)
+    //         ) {
+    //             error.message += `${skuIn.barcode} ได้ถูกขายไปแล้ว ${skuIn.SkuInToOut.reduce((sum, item) => sum + item.quantity, 0)} หน่วย ห้ามแก้ไขจำนวนต่ำกว่านี้\n`
+    //             continue
+    //         }
+    //     }
+    // }
+
+    // if (error.message) throw new Error(error.message)
 
     const updatedResult = await prisma.document.update({
         where: {
@@ -129,7 +151,7 @@ export const updatePurchaseInvoice = async (
             ApSubledger: !!contact
                 ? {
                       update: {
-                          contactId: Number(vendorId),
+                          contactId: Number(contactId),
                       },
                   }
                 : undefined,
@@ -276,7 +298,7 @@ export const updatePurchaseInvoice = async (
 
     await prisma.contact.update({
         where: {
-            id: Number(vendorId),
+            id: Number(contactId),
         },
         data: {
             SkuMaster: {

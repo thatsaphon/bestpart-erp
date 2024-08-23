@@ -88,7 +88,7 @@ export default async function PurchaseInvoiceDetailPage({
                             hasTextArea={true}
                             // placeholder="Optional"
                             defaultValue={
-                                document?.ApSubledger?.Contact.id + ''
+                                document?.Purchase?.Contact?.id + '' || ''
                             }
                             defaultAddress={{
                                 name: document?.contactName || '',
@@ -103,9 +103,9 @@ export default async function PurchaseInvoiceDetailPage({
                 <Table className="mt-3">
                     <TableCaption>
                         <Textarea
-                            defaultValue={document?.remark
-                                .map(({ remark }) => remark)
-                                .join('\n')}
+                            defaultValue={document?.DocumentRemark.map(
+                                ({ remark }) => remark
+                            ).join('\n')}
                         />
                     </TableCaption>
                     <TableHeader>
@@ -122,27 +122,23 @@ export default async function PurchaseInvoiceDetailPage({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {document?.SkuIn.map((item) => (
+                        {document?.Purchase?.PurchaseItem.map((item) => (
                             <TableRow key={item.barcode}>
                                 <TableCell>{item.barcode}</TableCell>
                                 <TableCell>
-                                    <p>
-                                        {
-                                            item.GoodsMaster.SkuMaster.mainSku
-                                                .name
-                                        }
-                                    </p>
-                                    <p>{item.GoodsMaster.SkuMaster.detail}</p>
+                                    <p>{item.SkuMaster?.MainSku.name}</p>
+                                    <p>{item.SkuMaster?.detail}</p>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {item.quantity}
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantity})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.cost + item.vat}
+                                    {item.costPerUnit + item.vat}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {(item.cost + item.vat) * item.quantity}
+                                    {(item.costPerUnit + item.vat) *
+                                        item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -155,12 +151,12 @@ export default async function PurchaseInvoiceDetailPage({
                             <TableCell className="text-right">
                                 {Math.abs(
                                     Number(
-                                        document?.GeneralLedger.find(
-                                            (item) =>
-                                                item.chartOfAccountId ===
-                                                    11000 ||
-                                                item.chartOfAccountId === 21000
-                                        )?.amount
+                                        document?.Purchase?.PurchaseItem.reduce(
+                                            (sum, item) =>
+                                                item.costPerUnit *
+                                                item.quantity,
+                                            0
+                                        )
                                     )
                                 )}
                             </TableCell>
