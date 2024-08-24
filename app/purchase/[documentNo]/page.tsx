@@ -152,8 +152,9 @@ export default async function PurchaseInvoiceDetailPage({
                                     Number(
                                         document?.Purchase?.PurchaseItem.reduce(
                                             (sum, item) =>
+                                                sum +
                                                 item.costPerUnit *
-                                                item.quantity,
+                                                    item.quantity,
                                             0
                                         )
                                     )
