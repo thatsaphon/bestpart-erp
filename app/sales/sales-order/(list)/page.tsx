@@ -154,8 +154,9 @@ export default async function SalesListPage({
                                 )}
                             </TableCell>
                             <TableCell className="text-right">
-                                {sale.Sales?.GeneralLedger.reduce(
-                                    (acc, gl) => acc + gl.amount,
+                                {sale.Sales?.SalesItem.reduce(
+                                    (acc, item) =>
+                                        acc + item.pricePerUnit * item.quantity,
                                     0
                                 ).toLocaleString()}
                             </TableCell>

@@ -33,20 +33,6 @@ export default async function EditSalesInvoicePage({
     })
     const paymentMethods = await getPaymentMethods()
 
-    // const defaultPayments = await prisma.generalLedger.findMany({
-    //     where: {
-    //         Sales:{}
-    //         // Document: { some: { id: salesInvoices[0].id } },
-    //         // AND: [
-    //         //     { chartOfAccountId: { gte: 11000 } },
-    //         //     { chartOfAccountId: { lte: 12000 } },
-    //         // ],
-    //     },
-    //     select: {
-    //         chartOfAccountId: true,
-    //         amount: true,
-    //     },
-    // })
     return (
         <>
             <div className="flex justify-between">

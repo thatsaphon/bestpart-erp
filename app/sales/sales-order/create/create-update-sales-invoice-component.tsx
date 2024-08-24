@@ -193,13 +193,13 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             toast.success('บันทึกสําเร็จ')
                         }
                         if (sales) {
-                            // await updateSalesInvoice(
-                            //     defaultDocumentDetail.id,
-                            //     formData,
-                            //     items,
-                            //     selectedPayments,
-                            //     remarks
-                            // )
+                            await updateSalesInvoice(
+                                sales.id,
+                                documentDetail,
+                                items,
+                                selectedPayments,
+                                remarks
+                            )
                             toast.success('บันทึกสําเร็จ')
                         }
                     } catch (err) {

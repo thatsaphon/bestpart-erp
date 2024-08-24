@@ -214,11 +214,10 @@ export default async function SalesInvoiceDetailPage({
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.pricePerUnit + item.vat}
+                                    {item.pricePerUnit}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {(item.pricePerUnit + item.vat) *
-                                        item.quantity}
+                                    {item.pricePerUnit * item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -233,9 +232,7 @@ export default async function SalesInvoiceDetailPage({
                                     Number(
                                         document?.Sales?.SalesItem.reduce(
                                             (a, b) =>
-                                                a +
-                                                (b.pricePerUnit + b.vat) *
-                                                    b.quantity,
+                                                a + b.pricePerUnit * b.quantity,
                                             0
                                         )
                                     )

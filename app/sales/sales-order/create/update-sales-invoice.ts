@@ -9,66 +9,30 @@ import { fromZodError } from 'zod-validation-error'
 import { DocumentItem } from '@/types/document-item'
 import { redirect } from 'next/navigation'
 import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
+import { DocumentDetail } from '@/types/document-detail'
+import { checkRemaining } from '@/actions/check-remaining'
 
 export const updateSalesInvoice = async (
     id: number,
-    formData: FormData,
-    items: DocumentItem[],
-    payments: { id: number; amount: number }[],
-    remarks: { id?: number; remark: string; isDeleted?: boolean }[]
-) => {
-    const validator = z.object({
-        customerId: z.string().trim().optional().nullable(),
-        contactName: z.string().trim().optional().nullable(),
-        address: z.string().trim().optional().nullable(),
-        phone: z.string().trim().optional().nullable(),
-        taxId: z.string().trim().optional().nullable(),
-        date: z.string().trim().optional(),
-        documentNo: z.string().trim().optional().nullable(),
-        // payment: z.enum(['cash', 'transfer', 'credit']).default('cash'),
-        // remark: z.string().trim().optional().nullable(),
-    })
-
-    const result = validator.safeParse({
-        customerId: formData.get('customerId') || undefined,
-        contactName: formData.get('contactName') || undefined,
-        address: formData.get('address') || undefined,
-        phone: formData.get('phone') || undefined,
-        taxId: formData.get('taxId') || undefined,
-        date: formData.get('date') || undefined,
-        documentNo: formData.get('documentNo') || undefined,
-        // payment: formData.get('payment') || undefined,
-        // remark: formData.get('remark') || undefined,
-    })
-
-    if (!result.success) {
-        throw new Error(
-            fromZodError(result.error, {
-                // prefix: '- ',
-                // prefixSeparator: ' ',
-                // includePath: false,
-                issueSeparator: '\n',
-            }).message
-        )
-    }
-
-    let {
-        customerId,
+    {
+        contactId,
         contactName,
         address,
         phone,
         taxId,
         date,
+        referenceNo,
         documentNo,
-        // payment,
-        // remark,
-    } = result.data
-
+    }: DocumentDetail,
+    items: DocumentItem[],
+    payments: { id: number; amount: number }[],
+    remarks: { id?: number; remark: string; isDeleted?: boolean }[]
+) => {
     const getContact = async () => {
-        if (customerId) {
+        if (contactId) {
             const contact = await prisma.contact.findUnique({
                 where: {
-                    id: Number(customerId),
+                    id: Number(contactId),
                 },
             })
             if (!contact) {
@@ -89,7 +53,9 @@ export const updateSalesInvoice = async (
     const goodsMasters = await prisma.goodsMaster.findMany({
         where: {
             barcode: {
-                in: items.map((item) => item.barcode),
+                in: items
+                    .filter((item) => item.barcode)
+                    .map((item) => item.barcode as string),
             },
         },
     })
@@ -100,68 +66,62 @@ export const updateSalesInvoice = async (
     const invoice = await prisma.document.findUniqueOrThrow({
         where: { id },
         include: {
-            GeneralLedger: true,
-            ArSubledger: true,
-            SkuOut: {
+            Sales: {
                 include: {
-                    GoodsMaster: true,
-                    SkuInToOut: true,
+                    SalesItem: true,
+                    GeneralLedger: true,
                 },
             },
         },
     })
 
-    if (invoice.ArSubledger?.paymentStatus === 'Billed') {
-        throw new Error('วางบิลแล้วไม่สามารถแก้ไขได้')
+    if (invoice.Sales?.salesBillId || invoice.Sales?.salesReceivedId) {
+        throw new Error('ลูกค้าจ่ายบิลหรือวางบิลแล้วไม่สามารถแก้ไขได้')
     }
 
-    const checkRemaining: {
-        id: number
-        skuMasterId: number
-        barcode: string
-        quantity: number
-        remaining: number
-    }[] = await prisma.$queryRaw`
-        select "SkuIn".id, "SkuIn"."skuMasterId", "SkuIn".barcode, "SkuIn".quantity, "SkuIn".quantity - COALESCE(sum("SkuInToOut".quantity), 0)  as remaining 
-        from "SkuIn" left join "SkuInToOut" on "SkuIn"."id" = "SkuInToOut"."skuInId" 
-        where "SkuIn"."skuMasterId" in (${Prisma.join(goodsMasters.map((item) => item.skuMasterId))})
-        and ("SkuInToOut".id not in (${Prisma.join(invoice.SkuOut.flatMap((item) => item.SkuInToOut.map((item) => item.id)))})
-        or "SkuInToOut".id is null)
-        group by "SkuIn".id 
-        having sum("SkuInToOut".quantity) < "SkuIn".quantity or sum("SkuInToOut".quantity) is null
-        order by "SkuIn"."date", "SkuIn"."id" asc`
+    const remainings = await checkRemaining(
+        goodsMasters.map((item) => item.skuMasterId)
+    )
 
-    for (let i = 0; i < items.length; i++) {
-        const goodsMaster = goodsMasters.find(
-            (goods) => goods.barcode === items[i].barcode
-        )
-        if (!goodsMaster) {
-            throw new Error('goods not found')
-        }
-
-        const remaining = checkRemaining.filter(
-            (item) => item.skuMasterId === goodsMaster.skuMasterId
-        )
-
-        if (
-            remaining.length <= 0 ||
-            remaining.reduce((sum, item) => sum + item.remaining, 0) <
-                items[i].quantity * items[i].quantityPerUnit
-        ) {
-            throw new Error('insufficient inventory')
-        }
-    }
-
-    const deleteSkuInToOut = prisma.skuInToOut.deleteMany({
-        where: {
-            id: {
-                in: invoice.SkuOut.flatMap((item) =>
-                    item.SkuInToOut.map((item) => item.id)
-                ),
-            },
+    const groupBySkuMasterId = items.reduce(
+        (acc: Record<number, DocumentItem[]>, item) => {
+            if (!item.skuMasterId) return acc
+            if (!acc[item.skuMasterId]) {
+                acc[item.skuMasterId] = []
+            }
+            acc[item.skuMasterId].push(item)
+            return acc
         },
-    })
-    const updateInvoice = prisma.document.update({
+        {}
+    )
+
+    const itemsRemainings = Object.entries(groupBySkuMasterId).map(
+        ([key, value]) => ({
+            skuMasterId: Number(key),
+            quantity: value?.reduce(
+                (sum, item) => sum + item.quantity * item.quantityPerUnit,
+                0
+            ),
+            name: value?.[0].name,
+            remainings:
+                remainings.find((r) => r.skuMasterId === Number(key))
+                    ?.remaining || 0,
+            oldQuantity:
+                invoice.Sales?.SalesItem.filter(
+                    (item) => item.skuMasterId === Number(key)
+                ).reduce((sum, item) => sum + item.quantity, 0) || 0,
+        })
+    )
+
+    for (const item of itemsRemainings) {
+        if (item.quantity > item.remainings + item.oldQuantity) {
+            throw new Error(
+                `${item.name} \nต้องการขาย ${item.quantity} ชิ้น \nแต่ยอดคงเหลือ ${item.remainings + item.oldQuantity} ชิ้น`
+            )
+        }
+    }
+
+    const updateInvoice = await prisma.document.update({
         where: { id },
         data: {
             contactName: contactName || undefined,
@@ -170,7 +130,7 @@ export const updateSalesInvoice = async (
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
             documentNo: documentNo || undefined,
-            remark: {
+            DocumentRemark: {
                 create: remarks.filter(({ id }) => !id),
                 update: remarks
                     .filter(({ id }) => id)
@@ -182,193 +142,90 @@ export const updateSalesInvoice = async (
                         },
                     })),
             },
-            ArSubledger: !!contact
-                ? {
-                      update: {
-                          contactId: Number(customerId),
-                          paymentStatus: calculateArPaymentStatus(payments),
-                      },
-                  }
-                : undefined,
-            GeneralLedger: {
-                deleteMany: [
-                    {
-                        AND: [
-                            { chartOfAccountId: { gte: 11000 } },
-                            { chartOfAccountId: { lte: 12000 } },
+            Sales: {
+                update: {
+                    contactId: contactId || undefined,
+                    GeneralLedger: {
+                        delete: invoice?.Sales?.GeneralLedger,
+                        create: [
+                            // 11000 = เงินสด, 12000 = ลูกหนี้
+                            ...payments.map((payment) => {
+                                return {
+                                    chartOfAccountId: payment.id,
+                                    amount: payment.amount,
+                                }
+                            }),
+                            // ขาย
+                            {
+                                chartOfAccountId: 41000,
+                                amount: -items
+                                    .reduce(
+                                        (sum, item) =>
+                                            sum +
+                                            (item.quantity *
+                                                item.pricePerUnit *
+                                                100) /
+                                                107,
+                                        0
+                                    )
+                                    .toFixed(2),
+                            },
+                            // ภาษีขาย
+                            {
+                                chartOfAccountId: 23100,
+                                amount: -items
+                                    .reduce(
+                                        (sum, item) =>
+                                            sum +
+                                            (item.quantity *
+                                                item.pricePerUnit *
+                                                7) /
+                                                107,
+                                        0
+                                    )
+                                    .toFixed(2),
+                            },
                         ],
                     },
-                ],
-                create: payments.map((payment) => ({
-                    chartOfAccountId: payment.id,
-                    amount: payment.amount,
-                })),
-                update: [
-                    // รายได้
-                    {
-                        where: {
-                            id: invoice?.GeneralLedger.find(
-                                ({ chartOfAccountId }) =>
-                                    chartOfAccountId === 41000
-                            )?.id,
-                        },
-                        data: {
-                            chartOfAccountId: 41000,
-                            amount: -items
-                                .reduce(
-                                    (sum, item) =>
-                                        sum +
-                                        (item.quantity *
-                                            item.pricePerUnit *
-                                            100) /
-                                            107,
-                                    0
-                                )
-                                .toFixed(2),
-                        },
-                    },
-                    // ภาษีขาย
-                    {
-                        where: {
-                            id: invoice?.GeneralLedger.find(
-                                ({ chartOfAccountId }) =>
-                                    chartOfAccountId === 23100
-                            )?.id,
-                        },
-                        data: {
-                            chartOfAccountId: 23100,
-                            amount: -items
-                                .reduce(
-                                    (sum, item) =>
-                                        sum +
-                                        (item.quantity *
-                                            item.pricePerUnit *
-                                            7) /
-                                            107,
-                                    0
-                                )
-                                .toFixed(2),
-                        },
-                    },
-                ],
-            },
-            SkuOut: {
-                deleteMany: {
-                    id: {
-                        in: invoice.SkuOut.flatMap((item) => item.id),
+                    SalesItem: {
+                        delete: invoice?.Sales?.SalesItem,
+                        create: items.map((item) => ({
+                            pricePerUnit: item.pricePerUnit,
+                            quantity: item.quantity,
+                            unit: item.unit,
+                            vat: item.pricePerUnit * (7 / 107),
+                            barcode: item.barcode,
+                            description: item.detail,
+                            name: item.name,
+                            goodsMasterId: item.goodsMasterId,
+                            quantityPerUnit: item.quantityPerUnit,
+                            serviceAndNonStockItemId:
+                                item.serviceAndNonStockItemId,
+                            skuMasterId: item.skuMasterId,
+                        })),
                     },
                 },
-                create: items.map((item) => {
-                    return {
-                        date: !!date ? new Date(date) : invoice.date,
-                        goodsMasterId: item.goodsMasterId,
-                        skuMasterId: item.skuMasterId,
-                        barcode: String(item.barcode),
-                        unit: item.unit,
-                        quantityPerUnit: item.quantityPerUnit,
-                        quantity: item.quantity,
-                        cost: 0,
-                        price: +((100 / 107) * item.pricePerUnit).toFixed(2),
-                        vat: +((7 / 107) * item.pricePerUnit).toFixed(2),
-                        SkuInToOut: {
-                            create: checkRemaining
-                                .filter(
-                                    ({ skuMasterId }) =>
-                                        item.skuMasterId === skuMasterId
-                                )
-                                ?.map(({ id, remaining }, index, array) => {
-                                    if (index === 0) {
-                                        if (
-                                            remaining >
-                                            item.quantity * item.quantityPerUnit
-                                        )
-                                            return {
-                                                skuInId: id,
-                                                quantity:
-                                                    item.quantity *
-                                                    item.quantityPerUnit,
-                                            }
-                                        if (
-                                            remaining <
-                                            item.quantity * item.quantityPerUnit
-                                        )
-                                            return {
-                                                skuInId: id,
-                                                quantity: remaining,
-                                            }
-                                    }
-                                    // ครั้งที่ 2+ ตัดยอดหมดแล้ว
-                                    if (
-                                        item.quantity * item.quantityPerUnit <
-                                        array
-                                            .slice(0, index)
-                                            .reduce(
-                                                (sum, item) =>
-                                                    sum + item.remaining,
-                                                0
-                                            )
-                                    )
-                                        return { skuInId: 0, quantity: 0 } // 0 will be filter out
-
-                                    // ครั้งที่ 2+ ตัดทั้ง lot
-
-                                    if (
-                                        item.quantity * item.quantityPerUnit -
-                                            array
-                                                .slice(0, index)
-                                                .reduce(
-                                                    (sum, item) =>
-                                                        sum + item.remaining,
-                                                    0
-                                                ) >=
-                                        remaining
-                                    )
-                                        return {
-                                            skuInId: id,
-                                            quantity: remaining,
-                                        }
-
-                                    // ครั้งที่ 2+ ตัดส่วนที่เหลือ
-                                    if (
-                                        item.quantity * item.quantityPerUnit -
-                                            array
-                                                .slice(0, index)
-                                                .reduce(
-                                                    (sum, item) =>
-                                                        sum + item.remaining,
-                                                    0
-                                                ) <
-                                        remaining
-                                    )
-                                        return {
-                                            skuInId: id,
-                                            quantity:
-                                                item.quantity *
-                                                    item.quantityPerUnit -
-                                                array
-                                                    .slice(0, index)
-                                                    .reduce(
-                                                        (sum, item) =>
-                                                            sum +
-                                                            item.remaining,
-                                                        0
-                                                    ),
-                                        }
-
-                                    return {
-                                        skuInId: 0, // 0 will be filter out
-                                        quantity: 0,
-                                    }
-                                })
-                                .filter((item) => !!item.skuInId),
-                        },
-                    }
-                }),
             },
         },
     })
 
-    await prisma.$transaction([deleteSkuInToOut, updateInvoice])
+    await prisma.skuRemainingCache.updateMany({
+        where: {
+            skuMasterId: {
+                in: [
+                    ...(items
+                        .filter((item) => item.skuMasterId != null)
+                        .map((item) => item.skuMasterId) as number[]),
+                    ...(invoice.Sales?.SalesItem.filter(
+                        (item) => item.skuMasterId != null
+                    ).map((item) => item.skuMasterId as number) || []),
+                ],
+            },
+        },
+        data: {
+            shouldRecheck: true,
+        },
+    })
 
     revalidatePath('/sales/sales-order')
     revalidatePath(`/sales/sales-order/${documentNo}`)

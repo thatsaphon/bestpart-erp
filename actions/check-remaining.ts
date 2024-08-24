@@ -37,11 +37,13 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
             update: {
                 remaining: x._sum.quantity || 0,
                 date: new Date(),
+                shouldRecheck: false,
             },
             create: {
                 date: new Date(),
                 skuMasterId: x.skuMasterId,
                 remaining: x._sum.quantity || 0,
+                shouldRecheck: false,
             },
         })
     })
@@ -57,17 +59,10 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
                     date: new Date(),
                     remaining: 0,
                     skuMasterId: x.skuMasterId,
+                    shouldRecheck: false,
                 },
             })
         })
-
-    // console.log(nonDuplicatedSkuMasterIds)
-    // console.log(
-    //     filter.filter(
-    //         (x) =>
-    //             !stockMovement.map((x) => x.skuMasterId).includes(x.skuMasterId)
-    //     )
-    // )
 
     await prisma.$transaction([
         ...stockMovementUpserts,
