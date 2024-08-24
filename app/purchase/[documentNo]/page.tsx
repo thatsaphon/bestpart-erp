@@ -134,11 +134,10 @@ export default async function PurchaseInvoiceDetailPage({
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantity})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.costPerUnit + item.vat}
+                                    {item.costPerUnit}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {(item.costPerUnit + item.vat) *
-                                        item.quantity}
+                                    {item.costPerUnit * item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}

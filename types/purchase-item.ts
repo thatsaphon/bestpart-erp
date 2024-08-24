@@ -60,6 +60,7 @@ export const purchaseItemsToInventoryDetailType = (
                 MainSkuRemark: item.SkuMaster?.MainSku?.MainSkuRemark,
                 SkuMasterRemark: item.SkuMaster?.SkuMasterRemark,
                 serviceAndNonStockItemId: item.serviceAndNonStockItemId,
+                vatable: item.vatable,
             }) as DocumentItem
     )
 }

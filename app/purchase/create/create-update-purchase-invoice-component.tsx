@@ -94,7 +94,7 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
             <form
                 action={async (formData) => {
                     try {
-                        if (purchase) {
+                        if (!purchase) {
                             await createPurchaseInvoice(documentDetail, items)
                             // setKey(String(Date.now()))
                             // setItems([])
