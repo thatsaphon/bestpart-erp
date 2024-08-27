@@ -11,7 +11,7 @@ import { getPaymentMethods } from '@/app/actions/accounting'
 import Link from 'next/link'
 import { getDate, isBefore, startOfDay } from 'date-fns'
 import { Metadata, ResolvingMetadata } from 'next'
-import { getSalesDefaultFunction } from '@/types/sales'
+import { getSalesDefaultFunction } from '@/types/sales/sales'
 
 type Props = { params: { documentNo: string } }
 

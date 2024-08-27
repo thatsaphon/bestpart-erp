@@ -11,9 +11,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
+import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import { getPaymentMethods } from '@/app/actions/accounting'
 import EditPaymentsComponents from './edit-payments-components'
 import { updateRemark } from './update-remarks'
@@ -26,10 +28,10 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { isBefore, startOfDay } from 'date-fns'
-import { Button } from '@/components/ui/button'
-import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/return-invoice-detail'
-import ReturnInvoicePdfLinkComponent from './pdf-link-component'
-import { ResolvingMetadata, Metadata } from 'next'
+// import SalesInvoiceLinkComponent from './sales-invoice-link-component'
+import { Metadata, ResolvingMetadata } from 'next'
+import { getSalesDefaultFunction } from '@/types/sales/sales'
+import { getSalesReturnDefaultFunction } from '@/types/sales-return/sales-return'
 
 type Props = {
     params: { documentNo: string }
@@ -40,14 +42,17 @@ export async function generateMetadata(
     parent: ResolvingMetadata
 ): Promise<Metadata> {
     return {
-        title: `รายละเอียดใบรับคืนสินค้า - ${params.documentNo}`,
+        title: `รายละเอียดบิลขาย - ${params.documentNo}`,
     }
 }
 
 export default async function SalesInvoiceDetailPage({
     params: { documentNo },
 }: Props) {
-    const document = await getSalesReturnInvoiceDetail(documentNo)
+    const [document] = await getSalesReturnDefaultFunction({
+        documentNo,
+        type: 'SalesReturn',
+    })
     const session = await getServerSession(authOptions)
     const paymentMethods = await getPaymentMethods()
 
@@ -68,7 +73,7 @@ export default async function SalesInvoiceDetailPage({
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
                 <h1 className="my-2 text-3xl transition-colors">
-                    รายละเอียดใบรับคืนสินค้า
+                    รายละเอียดบิลขาย
                 </h1>
                 <div className="flex justify-between pr-4">
                     <div className="flex gap-3">
@@ -95,7 +100,7 @@ export default async function SalesInvoiceDetailPage({
                         ) ? (
                             <div>
                                 <Link
-                                    href={`/sales/sales-order/${document?.documentNo}/edit`}
+                                    href={`/sales/return/${document?.documentNo}/edit`}
                                 >
                                     <Button
                                         type="button"
@@ -124,7 +129,7 @@ export default async function SalesInvoiceDetailPage({
                             </TooltipProvider>
                         )}
                     </div>
-                    <ReturnInvoicePdfLinkComponent document={document} />
+                    {/* <SalesInvoiceLinkComponent document={document} /> */}
                 </div>
                 <div className="flex gap-3">
                     <div className="my-1 flex items-baseline space-x-2">
@@ -134,7 +139,7 @@ export default async function SalesInvoiceDetailPage({
                             hasTextArea={true}
                             // placeholder="Optional"
                             defaultValue={String(
-                                document?.ArSubledger?.Contact.id || ''
+                                document?.SalesReturn?.contactId || ''
                             )}
                             defaultAddress={{
                                 name: document?.contactName || '',
@@ -149,15 +154,15 @@ export default async function SalesInvoiceDetailPage({
                 <Table className="mt-3">
                     <TableCaption>
                         <div className="w-[600px] space-y-1">
-                            <EditPaymentsComponents
+                            {/* <EditPaymentsComponents
                                 document={document}
                                 paymentMethods={paymentMethods}
-                            />
+                            /> */}
 
                             <p className="text-left font-bold text-primary">
                                 หมายเหตุ:
                             </p>
-                            {document?.remark.map((remark) => (
+                            {/* {document?.remark.map((remark) => (
                                 <p
                                     className={cn(
                                         'text-left text-primary',
@@ -168,7 +173,7 @@ export default async function SalesInvoiceDetailPage({
                                 >
                                     {remark.remark}
                                 </p>
-                            ))}
+                            ))} */}
                             <form
                                 className="grid grid-cols-[500px_1fr] items-center gap-1"
                                 action={async (formData) => {
@@ -198,27 +203,22 @@ export default async function SalesInvoiceDetailPage({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {document?.SkuIn.map((item) => (
+                        {document?.SalesReturn?.SalesReturnItem.map((item) => (
                             <TableRow key={item.barcode}>
                                 <TableCell>{item.barcode}</TableCell>
                                 <TableCell>
-                                    <p>
-                                        {
-                                            item.GoodsMaster.SkuMaster.mainSku
-                                                .name
-                                        }
-                                    </p>
-                                    <p>{item.GoodsMaster.SkuMaster.detail}</p>
+                                    <p>{item.SkuMaster?.MainSku.name}</p>
+                                    <p>{item.SkuMaster?.detail}</p>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {item.quantity}
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.cost + item.vat}
+                                    {item.pricePerUnit}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {(item.cost + item.vat) * item.quantity}
+                                    {item.pricePerUnit * item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -231,12 +231,11 @@ export default async function SalesInvoiceDetailPage({
                             <TableCell className="text-right">
                                 {Math.abs(
                                     Number(
-                                        document?.GeneralLedger.filter(
-                                            (item) =>
-                                                item.chartOfAccountId >=
-                                                    11000 &&
-                                                item.chartOfAccountId <= 12000
-                                        )?.reduce((a, b) => a + b.amount, 0)
+                                        document?.SalesReturn?.SalesReturnItem.reduce(
+                                            (a, b) =>
+                                                a + b.pricePerUnit * b.quantity,
+                                            0
+                                        )
                                     )
                                 )}
                             </TableCell>

@@ -8,9 +8,9 @@ import {
     SkuMasterRemark,
 } from '@prisma/client'
 import Link from 'next/link'
-import { salesItemsToInventoryDetailType } from '@/types/sales-item'
-import { purchaseItemsToInventoryDetailType } from '@/types/purchase-item'
-import { getPurchaseDefaultFunction } from '@/types/purchase'
+import { salesItemsToInventoryDetailType } from '@/types/sales/sales-item'
+import { purchaseItemsToInventoryDetailType } from '@/types/purchase/purchase-item'
+import { getPurchaseDefaultFunction } from '@/types/purchase/purchase'
 
 type Props = { params: { documentNo: string } }
 

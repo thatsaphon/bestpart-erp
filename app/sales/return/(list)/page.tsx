@@ -14,7 +14,7 @@ import { ViewIcon } from 'lucide-react'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import { Prisma } from '@prisma/client'
 import { Badge } from '@/components/ui/badge'
-import { format } from 'date-fns'
+import { endOfMonth, format, startOfMonth } from 'date-fns'
 import { Avatar } from '@/components/ui/avatar'
 import prisma from '@/app/db/db'
 import { fullDateFormat } from '@/lib/date-format'
@@ -32,18 +32,13 @@ export default async function SalesListPage({
     searchParams: {
         limit = '10',
         page = '1',
-        from = format(
-            new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-            'yyyy-MM-dd'
-        ),
-        to = format(new Date(), 'yyyy-MM-dd'),
+        from = format(startOfMonth(new Date()), 'yyyy-MM-dd'),
+        to = format(endOfMonth(new Date()), 'yyyy-MM-dd'),
     },
 }: Props) {
-    const sales = await prisma.document.findMany({
+    const documents = await prisma.document.findMany({
         where: {
-            documentNo: {
-                startsWith: 'CN',
-            },
+            type: 'SalesReturn',
             AND: [
                 {
                     date: {
@@ -60,18 +55,13 @@ export default async function SalesListPage({
             ],
         },
         include: {
-            ArSubledger: {
-                select: {
+            SalesReturn: {
+                include: {
                     Contact: true,
-                    paymentStatus: true,
-                },
-            },
-            GeneralLedger: {
-                where: {
-                    chartOfAccountId: {
-                        gte: 11000,
-                        lte: 12000,
-                    },
+                    SalesReturnItem: true,
+                    GeneralLedger: { include: { ChartOfAccount: true } },
+                    SalesBill: true,
+                    SalesReceived: true,
                 },
             },
         },
@@ -82,9 +72,7 @@ export default async function SalesListPage({
 
     const documentCount = await prisma.document.count({
         where: {
-            documentNo: {
-                startsWith: 'CN',
-            },
+            type: 'SalesReturn',
             AND: [
                 {
                     date: {
@@ -101,14 +89,16 @@ export default async function SalesListPage({
             ],
         },
     })
+
     const documentSum = await prisma.$queryRaw<
-        { sum: number }[]
-    >`select COALESCE(sum("GeneralLedger"."amount"), 0) as "sum" from "GeneralLedger"
-             left join "_DocumentToGeneralLedger" on "_DocumentToGeneralLedger"."B" = "GeneralLedger"."id"
-             left join "Document" on "_DocumentToGeneralLedger"."A" = "Document"."id"
-             where "chartOfAccountId" in (11000, 12000) and "Document"."documentNo" like 'CN%' and 
-             "Document"."date" between ${new Date(from)} and ${new Date(new Date(to).setDate(new Date(to).getDate() + 1))}::date and
-             "Document"."documentNo" like 'CN%'`
+        { sum: number | null }[]
+    >`select sum("SalesReturnItem"."quantity" * "SalesReturnItem"."pricePerUnit") from "Document"
+        left join "SalesReturn" on "Document"."id" = "SalesReturn"."documentId"
+        left join "SalesReturnItem" on "SalesReturn"."id" = "SalesReturnItem"."salesReturnId"
+        where 
+        "Document"."date" between ${new Date(from)} and ${new Date(new Date(to).setDate(new Date(to).getDate() + 1))}::date and
+        "Document"."type" = 'Sales'
+`
 
     const numberOfPage = Math.ceil(documentCount / Number(limit))
 
@@ -130,30 +120,27 @@ export default async function SalesListPage({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {sales.map((sale) => (
+                    {documents.map((sale) => (
                         <TableRow key={sale.documentNo}>
                             <TableCell>{fullDateFormat(sale.date)}</TableCell>
                             <TableCell>{sale.documentNo}</TableCell>
                             <TableCell>
-                                {sale.ArSubledger?.Contact.name || '-'}
+                                {sale.SalesReturn?.Contact?.name || '-'}
                             </TableCell>
                             <TableCell>{sale.createdBy}</TableCell>
                             <TableCell className="text-center">
-                                {sale.ArSubledger?.paymentStatus === 'Paid' ? (
+                                {sale.SalesReturn?.salesReceivedId != null ? (
                                     <Badge className="bg-green-400">
                                         จ่ายแล้ว
                                     </Badge>
-                                ) : sale.ArSubledger?.paymentStatus ===
-                                  'Billed' ? (
+                                ) : sale.SalesReturn?.salesBillId != null ? (
                                     <Badge variant={`secondary`}>
                                         วางบิลแล้ว
                                     </Badge>
-                                ) : sale.ArSubledger?.paymentStatus ===
-                                  'PartialPaid' ? (
-                                    <Badge variant={'destructive'}>
-                                        จ่ายบางส่วน
-                                    </Badge>
-                                ) : !sale.ArSubledger ? (
+                                ) : !sale.SalesReturn?.GeneralLedger.find(
+                                      ({ ChartOfAccount }) =>
+                                          ChartOfAccount.isAr
+                                  )?.amount ? (
                                     <Badge className="bg-green-400">
                                         เงินสด
                                     </Badge>
@@ -164,8 +151,9 @@ export default async function SalesListPage({
                                 )}
                             </TableCell>
                             <TableCell className="text-right">
-                                {sale.GeneralLedger.reduce(
-                                    (acc, gl) => acc + gl.amount,
+                                {sale.SalesReturn?.SalesReturnItem.reduce(
+                                    (acc, item) =>
+                                        acc + item.pricePerUnit * item.quantity,
                                     0
                                 ).toLocaleString()}
                             </TableCell>
@@ -203,21 +191,32 @@ export default async function SalesListPage({
                                         : documentCount}
                                 </TableCell>
                                 <TableCell>
-                                    {sales
+                                    {/* {sales
                                         .reduce(
                                             (total, sale) =>
                                                 total +
-                                                sale.GeneralLedger[0]?.amount,
+                                                sale.SalesReturn?.GeneralLedger,
                                             0
                                         )
-                                        .toLocaleString()}
+                                        .toLocaleString()} */}
+                                    {documents.reduce(
+                                        (total, sale) =>
+                                            sale.SalesReturn?.SalesReturnItem.reduce(
+                                                (total, item) =>
+                                                    total +
+                                                    item.quantity *
+                                                        item.pricePerUnit,
+                                                0
+                                            ) || 0,
+                                        0
+                                    )}
                                 </TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>รวมทุกหน้า</TableCell>
                                 <TableCell>{documentCount}</TableCell>
                                 <TableCell>
-                                    {documentSum[0].sum.toLocaleString()}
+                                    {(documentSum[0].sum || 0).toLocaleString()}
                                 </TableCell>
                             </TableRow>
                         </TableBody>

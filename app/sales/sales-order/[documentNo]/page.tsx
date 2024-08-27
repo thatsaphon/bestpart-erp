@@ -30,7 +30,7 @@ import {
 import { isBefore, startOfDay } from 'date-fns'
 import SalesInvoiceLinkComponent from './sales-invoice-link-component'
 import { Metadata, ResolvingMetadata } from 'next'
-import { getSalesDefaultFunction } from '@/types/sales'
+import { getSalesDefaultFunction } from '@/types/sales/sales'
 
 type Props = {
     params: { documentNo: string }

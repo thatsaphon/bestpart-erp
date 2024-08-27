@@ -5,12 +5,12 @@ import {
     ServiceAndNonStockItem,
     SkuMaster,
 } from '@prisma/client'
-import { DocumentItem } from './document-item'
+import { DocumentItem } from '../document-item'
 
-export const getSalesItemsDefaultFunction = async (
-    where: Prisma.SalesItemWhereInput
+export const getSalesReturnItemsDefaultFunction = async (
+    where: Prisma.SalesReturnItemWhereInput
 ) => {
-    return await prisma.salesItem.findMany({
+    return await prisma.salesReturnItem.findMany({
         where: where,
         include: {
             SkuMaster: {
@@ -34,11 +34,11 @@ export const getSalesItemsDefaultFunction = async (
     })
 }
 
-export type GetSalesItems = Awaited<
-    ReturnType<typeof getSalesItemsDefaultFunction>
+export type GetSalesReturnItems = Awaited<
+    ReturnType<typeof getSalesReturnItemsDefaultFunction>
 >[number]
 
-export const getDefaultSalesItem = () => {
+export const getDefaultSalesReturnItem = () => {
     return {
         id: 0,
         quantity: 0,
@@ -108,8 +108,8 @@ export const getDefaultSalesItem = () => {
     }
 }
 
-export const salesItemsToInventoryDetailType = (
-    items: GetSalesItems[] | undefined
+export const salesReturnItemsToInventoryDetailType = (
+    items: GetSalesReturnItems[] | undefined
 ) => {
     if (!items) return []
     return items.map(

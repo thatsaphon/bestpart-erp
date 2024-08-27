@@ -1,9 +1,7 @@
 'use client'
 
-import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
     Table,
     TableBody,
@@ -19,14 +17,9 @@ import React, { useEffect } from 'react'
 import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from '@/components/search-sku-dialog'
-import { createSalesReturnInvoice } from './create-sales-return-invoice'
 import { DocumentItem } from '@/types/document-item'
-import { updateSalesInvoice } from './update-sales-return-invoice'
-import SelectSearchCustomer from '@/components/select-search-customer'
-import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ImageToolTip from '@/components/image-tooltip'
-import { DocumentRemark, PaymentStatus } from '@prisma/client'
 import {
     Select,
     SelectContent,
@@ -37,38 +30,43 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { getPaymentMethods } from '@/app/actions/accounting'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { salesItemsToInventoryDetailType } from '@/types/sales/sales-item'
+import { DocumentDetailForm } from '@/components/document-date-picker'
+import {
+    DocumentDetail,
+    getDefaultDocumentDetail,
+} from '@/types/document-detail'
+import { createSalesReturnInvoice } from './create-sales-return-invoice'
+import { updateSalesReturnInvoice } from './update-sales-return-invoice'
+import { GetSalesReturn } from '@/types/sales-return/sales-return'
+import { salesReturnItemsToInventoryDetailType } from '@/types/sales-return/sales-return-item'
 
 type Props = {
-    defaultItems?: DocumentItem[]
-    defaultDocumentDetails?: {
-        id: number
-        date: Date
-        documentNo: string
-        contactId: number
-        contactName: string
-        address: string
-        phone: string
-        taxId: string
-        documentRemarks: DocumentRemark[]
-        paymentStatus: PaymentStatus
-    }
+    salesReturn?: GetSalesReturn
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
     defaultPayments?: { id: number; amount: number }[]
     defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
 }
 
 export default function CreateOrUpdateSalesReturnInvoiceComponent({
-    defaultItems = [],
-    defaultDocumentDetails,
+    salesReturn,
     paymentMethods,
     defaultPayments,
     defaultRemarks,
 }: Props) {
+    const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
+        salesReturn
+            ? { ...salesReturn, contactId: salesReturn?.SalesReturn?.contactId }
+            : getDefaultDocumentDetail()
+    )
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
-    const [items, setItems] = React.useState<DocumentItem[]>(defaultItems)
+    const [items, setItems] = React.useState<DocumentItem[]>(
+        salesReturnItemsToInventoryDetailType(
+            salesReturn?.SalesReturn?.SalesReturnItem
+        )
+    )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
     const session = useSession()
@@ -78,7 +76,12 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
     const [remarkInput, setRemarkInput] = React.useState<string>('')
     const [selectedPayments, setSelectedPayments] = React.useState<
         { id: number; amount: number }[]
-    >(defaultPayments || [])
+    >(
+        defaultPayments?.map((payment) => ({
+            id: payment.id,
+            amount: Math.abs(payment.amount),
+        })) || []
+    )
     const [selectedPayment, setSelectedPayment] = React.useState<
         number | undefined
     >()
@@ -175,22 +178,22 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                 'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
                             )
                         }
-                        if (!defaultItems.length) {
+                        if (!salesReturn) {
                             await createSalesReturnInvoice(
-                                formData,
+                                // formData,
+                                documentDetail,
                                 items,
                                 selectedPayments,
                                 remarks
                             )
-                            setKey(String(Date.now()))
-                            setItems([])
+                            // setKey(String(Date.now()))
+                            // setItems([])
                             toast.success('บันทึกสําเร็จ')
                         }
-
-                        if (defaultDocumentDetails) {
-                            await updateSalesInvoice(
-                                defaultDocumentDetails.id,
-                                formData,
+                        if (salesReturn) {
+                            await updateSalesReturnInvoice(
+                                salesReturn.id,
+                                documentDetail,
                                 items,
                                 selectedPayments,
                                 remarks
@@ -204,67 +207,35 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                     }
                 }}
             >
-                <div className="flex flex-col gap-2">
-                    <div className="flex gap-3">
-                        <Label className="flex items-center gap-2">
-                            <p className="">วันที่</p>
-                            <DatePickerWithPresets
-                                defaultDate={defaultDocumentDetails?.date}
-                            />
-                        </Label>
-                        <Label className="flex items-center gap-2">
-                            <p className="">No. </p>
-                            <Input
-                                className="w-auto"
-                                name="documentNo"
-                                placeholder="Optional"
-                                defaultValue={
-                                    defaultDocumentDetails?.documentNo
-                                }
-                            />
-                        </Label>
-                    </div>
-                    <div className="my-1 flex items-baseline space-x-2">
-                        <Label>ลูกค้า</Label>
-                        <SelectSearchCustomer
-                            name="customerId"
-                            hasTextArea={true}
-                            placeholder="รหัสลูกค้า"
-                            defaultValue={String(
-                                defaultDocumentDetails?.contactId || ''
-                            )}
-                            defaultAddress={{
-                                name: defaultDocumentDetails?.contactName || '',
-                                address: defaultDocumentDetails?.address || '',
-                                phone: defaultDocumentDetails?.phone || '',
-                                taxId: defaultDocumentDetails?.taxId || '',
-                            }}
-                        />
-                    </div>
-                </div>
+                <DocumentDetailForm
+                    setDocumentDetail={setDocumentDetail}
+                    documentDetail={documentDetail}
+                    label="ลูกค้า"
+                    placeholder="รหัสลูกค้า"
+                />
                 <Table>
                     <TableCaption>
                         <div className="w-[650px] space-y-1">
                             <div className="flex items-center gap-1 text-left">
                                 ช่องทางชำระเงิน:{' '}
-                                {!defaultDocumentDetails ? (
+                                {/* {!defaultDocumentDetail ? (
                                     <></>
-                                ) : defaultDocumentDetails?.paymentStatus ===
+                                ) : defaultDocumentDetail?.paymentStatus ===
                                   'Paid' ? (
                                     <Badge className="bg-green-400">
                                         จ่ายแล้ว
                                     </Badge>
-                                ) : defaultDocumentDetails?.paymentStatus ===
+                                ) : defaultDocumentDetail?.paymentStatus ===
                                   'Billed' ? (
                                     <Badge variant={`secondary`}>
                                         วางบิลแล้ว
                                     </Badge>
-                                ) : defaultDocumentDetails?.paymentStatus ===
+                                ) : defaultDocumentDetail?.paymentStatus ===
                                   'PartialPaid' ? (
                                     <Badge variant={'destructive'}>
                                         จ่ายบางส่วน
                                     </Badge>
-                                ) : !defaultDocumentDetails?.paymentStatus ? (
+                                ) : !defaultDocumentDetail?.paymentStatus ? (
                                     <Badge className="bg-green-400">
                                         เงินสด
                                     </Badge>
@@ -272,15 +243,15 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                     <Badge variant={'destructive'}>
                                         ยังไม่จ่าย
                                     </Badge>
-                                )}
+                                )} */}
                             </div>
                             {selectedPayments.map((item) => (
                                 <div
                                     key={item.id}
                                     className={cn(
-                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary',
-                                        defaultDocumentDetails?.paymentStatus ===
-                                            'Billed' && 'grid-cols-2'
+                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary'
+                                        // defaultDocumentDetail?.paymentStatus ===
+                                        //     'Billed' && 'grid-cols-2'
                                     )}
                                 >
                                     <p>
@@ -295,9 +266,9 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                     <p>{item.amount}</p>
                                     <Cross1Icon
                                         className={cn(
-                                            'cursor-pointer text-destructive',
-                                            defaultDocumentDetails?.paymentStatus ===
-                                                'Billed' && 'hidden'
+                                            'cursor-pointer text-destructive'
+                                            // defaultDocumentDetail?.paymentStatus ===
+                                            //     'Billed' && 'hidden'
                                         )}
                                         onClick={() =>
                                             setSelectedPayments(
@@ -311,9 +282,9 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                             ))}
                             <div
                                 className={cn(
-                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1',
-                                    defaultDocumentDetails?.paymentStatus ===
-                                        'Billed' && 'hidden'
+                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1'
+                                    // defaultDocumentDetail?.paymentStatus ===
+                                    //     'Billed' && 'hidden'
                                 )}
                             >
                                 <Select
@@ -375,8 +346,7 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                     เพิ่มการชำระเงิน
                                 </Button>
                             </div>
-                            {defaultDocumentDetails?.paymentStatus ===
-                                'Billed' && (
+                            {salesReturn?.SalesReturn?.salesBillId && (
                                 <p className="text-destructive">วางบิลแล้ว</p>
                             )}
 
@@ -428,7 +398,12 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                 type="button"
                                 onClick={(e) => {
                                     setKey(String(Date.now()))
-                                    setItems(defaultItems)
+                                    setItems(
+                                        salesReturnItemsToInventoryDetailType(
+                                            salesReturn?.SalesReturn
+                                                ?.SalesReturnItem
+                                        )
+                                    )
                                 }}
                             >
                                 Reset
@@ -462,14 +437,17 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                         {item.partNumber}
                                     </p>
                                     <div>
-                                        {item.MainSkuRemark &&
-                                        item.SkuMasterRemark &&
-                                        item.MainSkuRemark.length > 0 &&
-                                        item.SkuMasterRemark.length > 0 ? (
-                                            <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemark?.map((remark) => remark.name), ...item.SkuMasterRemark?.map((remark) => remark.name)].join(', ')}`}</p>
-                                        ) : (
-                                            <></>
-                                        )}
+                                        {[
+                                            ...item.MainSkuRemark,
+                                            ...item.SkuMasterRemark,
+                                        ].map((remark) => (
+                                            <p
+                                                className="text-primary/50"
+                                                key={`${remark.id}-${remark.name}`}
+                                            >
+                                                {remark?.name}
+                                            </p>
+                                        ))}
                                     </div>
                                     <div>
                                         <ImageToolTip images={item.Image} />
@@ -642,6 +620,7 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                                     await getSkuByBarcode(
                                                         barcode
                                                     )
+
                                                 setItems([
                                                     ...items,
                                                     {

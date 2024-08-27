@@ -1,7 +1,7 @@
 'use client'
 
 import { fullDateFormat } from '@/lib/date-format'
-import { GetSales } from '@/types/sales'
+import { GetSales } from '@/types/sales/sales'
 import {
     Page,
     Text,

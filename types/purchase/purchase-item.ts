@@ -5,7 +5,7 @@ import {
     ServiceAndNonStockItem,
     SkuMaster,
 } from '@prisma/client'
-import { DocumentItem } from './document-item'
+import { DocumentItem } from '../document-item'
 
 export const getPurchaseItemsDefaultFunction = async (
     where: Prisma.PurchaseItemWhereInput

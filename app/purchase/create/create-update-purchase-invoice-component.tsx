@@ -31,8 +31,8 @@ import {
     DocumentDetail,
     getDefaultDocumentDetail,
 } from '@/types/document-detail'
-import { GetPurchase } from '@/types/purchase'
-import { purchaseItemsToInventoryDetailType } from '@/types/purchase-item'
+import { GetPurchase } from '@/types/purchase/purchase'
+import { purchaseItemsToInventoryDetailType } from '@/types/purchase/purchase-item'
 
 type Props = {
     purchase?: GetPurchase

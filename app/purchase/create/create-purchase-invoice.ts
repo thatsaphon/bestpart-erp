@@ -66,7 +66,11 @@ export const createPurchaseInvoice = async (
                     })
                 return {
                     chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
-                    amount: -(item.quantity * item.pricePerUnit),
+                    amount: -(
+                        item.quantity *
+                        item.pricePerUnit *
+                        (item.vatable ? 100 / 107 : 1)
+                    ).toFixed(2),
                 }
             })
     )
@@ -91,25 +95,28 @@ export const createPurchaseInvoice = async (
                             // เจ้าหนี้การค้า
                             {
                                 chartOfAccountId: 21000,
-                                amount: -items.reduce(
-                                    (a, b) =>
-                                        a +
-                                        b.pricePerUnit *
-                                            b.quantity *
-                                            (b.vatable ? 100 / 107 : 1),
-                                    0
-                                ),
-                            },
-                            // ซื้อ
-                            {
-                                chartOfAccountId: 13000,
-                                amount: items
-                                    .filter((item) => item.goodsMasterId)
+                                amount: -items
                                     .reduce(
                                         (a, b) =>
                                             a + b.pricePerUnit * b.quantity,
                                         0
-                                    ),
+                                    )
+                                    .toFixed(2),
+                            },
+                            // ซื้อ
+                            {
+                                chartOfAccountId: 13000,
+                                amount: +items
+                                    .filter((item) => item.goodsMasterId)
+                                    .reduce(
+                                        (a, b) =>
+                                            a +
+                                            b.pricePerUnit *
+                                                b.quantity *
+                                                (b.vatable ? 100 / 107 : 1),
+                                        0
+                                    )
+                                    .toFixed(2),
                             },
                             ...serviceAndNonStockItemsGLCreate,
                             // ภาษีซื้อ
@@ -124,7 +131,8 @@ export const createPurchaseInvoice = async (
                                                 b.quantity *
                                                 (7 / 107),
                                         0
-                                    ),
+                                    )
+                                    .toFixed(2),
                             },
                         ],
                     },
@@ -136,7 +144,7 @@ export const createPurchaseInvoice = async (
                             unit: item.unit,
                             vatable: item.vatable === true,
                             vat: item.vatable
-                                ? item.pricePerUnit * (7 / 107)
+                                ? +(item.pricePerUnit * (7 / 107)).toFixed(2)
                                 : 0,
                             barcode: item.barcode,
                             description: item.detail,

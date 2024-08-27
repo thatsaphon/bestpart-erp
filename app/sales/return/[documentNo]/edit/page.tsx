@@ -1,17 +1,9 @@
-import prisma from '@/app/db/db'
-import React from 'react'
-import {
-    DocumentRemark,
-    MainSkuRemark,
-    PaymentStatus,
-    Prisma,
-    SkuMasterRemark,
-} from '@prisma/client'
 import { getPaymentMethods } from '@/app/actions/accounting'
 import Link from 'next/link'
-import { getDate, isBefore, startOfDay } from 'date-fns'
-import CreateOrUpdateSalesReturnInvoiceComponent from '../../create/create-update-sales-return-invoice-component'
 import { ResolvingMetadata, Metadata } from 'next'
+import { getSalesReturnDefaultFunction } from '@/types/sales-return/sales-return'
+import { Table, TableCaption } from '@/components/ui/table'
+import CreateOrUpdateSalesReturnInvoiceComponent from '../../create/create-update-sales-return-invoice-component'
 
 type Props = { params: { documentNo: string } }
 
@@ -27,97 +19,26 @@ export async function generateMetadata(
 export default async function EditSalesInvoicePage({
     params: { documentNo },
 }: Props) {
-    const salesInvoices: {
-        id: number
-        date: Date
-        documentNo: string
-        contactId: number
-        contactName: string
-        address: string
-        phone: string
-        taxId: string
-        documentRemarks: DocumentRemark[]
-        mainSkuId: number
-        partNumber: string
-        skuMasterId: number
-        goodsMasterId: number
-        barcode: string
-        name: string
-        detail: string
-        MainSkuRemarks?: MainSkuRemark[]
-        SkuMasterRemarks?: SkuMasterRemark[]
-        quantity: number
-        price: number
-        unit: string
-        quantityPerUnit: number
-        paymentStatus: PaymentStatus
-    }[] = await prisma.$queryRaw`
-        select "Document".id, "Document"."date", "Document"."documentNo", "ArSubledger"."contactId" as "contactId", "Document"."contactName", "Document"."address", "Document".phone, "Document"."taxId",
-        "SkuOut".barcode, "SkuOut"."skuMasterId", "SkuOut"."goodsMasterId", "SkuMaster"."mainSkuId", "MainSku"."partNumber", "SkuMaster"."id" as "skuMasterId", 
-        "MainSku"."name", "SkuMaster"."detail", "SkuOut".quantity, ("SkuOut".price + "SkuOut".vat) as "price", "SkuOut".unit, "SkuOut"."quantityPerUnit", "ArSubledger"."paymentStatus" 
-        from "Document"
-        left join "ArSubledger" on "ArSubledger"."documentId" = "Document"."id"
-        left join "Contact" on "Contact"."id" = "ArSubledger"."contactId"
-        -- left join "Address" on "Address"."contactId" = "Contact"."id"
-        left join "SkuOut" on "SkuOut"."documentId" = "Document"."id"
-        left join "SkuMaster" on "SkuMaster"."id" = "SkuOut"."skuMasterId"
-        left join "MainSku" on "MainSku"."id" = "SkuMaster"."mainSkuId"
-        where "Document"."documentNo" = ${documentNo}`
-
-    if (isBefore(startOfDay(salesInvoices[0].date), startOfDay(new Date()))) {
-        return (
-            <div>
-                <p>ไม่สามารถแก้ไขย้อนหลังได้</p>
-                <Link href={`/sales/sales-order/${documentNo}`}>Back</Link>
-            </div>
-        )
-    }
-
-    const mainSkuRemarks = await prisma.$queryRaw<
-        (MainSkuRemark & { mainSkuId: number })[]
-    >`select "MainSkuRemark".*, "MainSku"."id" as "mainSkuId" from "MainSkuRemark" 
-                    left join "_MainSkuToMainSkuRemark" on "_MainSkuToMainSkuRemark"."B" = "MainSkuRemark"."id"
-                    left join "MainSku" on "MainSku"."id" = "_MainSkuToMainSkuRemark"."A"
-                    where "MainSku"."id" in (${Prisma.join(salesInvoices.map((x) => x.mainSkuId))})`
-
-    const skuMasterRemarks = await prisma.$queryRaw<
-        (SkuMasterRemark & { skuMasterId: number })[]
-    >`select "SkuMasterRemark".*, "SkuMaster"."id" as "skuMasterId" from "SkuMasterRemark"
-                    left join "_SkuMasterToSkuMasterRemark" on "_SkuMasterToSkuMasterRemark"."B" = "SkuMasterRemark"."id"
-                    left join "SkuMaster" on "SkuMaster"."id" = "_SkuMasterToSkuMasterRemark"."A"
-                    where "SkuMaster"."id" in (${Prisma.join(salesInvoices.map((x) => x.skuMasterId))})`
-
-    const images: { skuMasterId: number; images: string }[] =
-        await prisma.$queryRaw`
-    select "SkuMaster".id as "skuMasterId", "SkuMasterImage"."path" as "images" from "SkuMaster" 
-    left join "SkuMasterImage" on "SkuMaster"."id" = "SkuMasterImage"."skuMasterId" 
-    where "SkuMaster"."id" in (${Prisma.join(salesInvoices.map(({ skuMasterId }) => skuMasterId))})`
-
+    const [document] = await getSalesReturnDefaultFunction({
+        documentNo,
+        type: 'SalesReturn',
+    })
     const paymentMethods = await getPaymentMethods()
 
-    const defaultPayments = await prisma.generalLedger.findMany({
-        where: {
-            Document: { some: { id: salesInvoices[0].id } },
-            AND: [
-                { chartOfAccountId: { gte: 11000 } },
-                { chartOfAccountId: { lte: 12000 } },
-            ],
-        },
-        select: {
-            chartOfAccountId: true,
-            amount: true,
-        },
-    })
-
-    const defaultRemarks = await prisma.documentRemark.findMany({
-        where: { documentId: salesInvoices[0].id },
-    })
+    if (!document)
+        return (
+            <>
+                <Table>
+                    <TableCaption>ไม่พบข้อมูล</TableCaption>
+                </Table>
+            </>
+        )
 
     return (
         <>
             <div className="flex justify-between">
                 <Link
-                    href={`/sales/sales-order/${documentNo}`}
+                    href={`/sales/return/${documentNo}`}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
 
@@ -132,25 +53,15 @@ export default async function EditSalesInvoicePage({
                 แก้ไขรายละเอียดบิลขาย
             </h1>
             <CreateOrUpdateSalesReturnInvoiceComponent
-                defaultItems={salesInvoices.map((x) => ({
-                    ...x,
-                    MainSkuRemarks: mainSkuRemarks.filter(
-                        (y) => y.mainSkuId === x.mainSkuId
-                    ),
-                    SkuMasterRemarks: skuMasterRemarks.filter(
-                        (y) => y.skuMasterId === x.skuMasterId
-                    ),
-                    images: images
-                        .filter((y) => y.skuMasterId === x.skuMasterId)
-                        .map((y) => y.images),
-                }))}
-                defaultDocumentDetails={salesInvoices[0]}
+                salesReturn={document}
                 paymentMethods={paymentMethods}
-                defaultPayments={defaultPayments.map((x) => ({
+                defaultPayments={document.SalesReturn?.GeneralLedger.filter(
+                    (gl) => gl.ChartOfAccount.isAr || gl.ChartOfAccount.isCash
+                ).map((x) => ({
                     id: x.chartOfAccountId,
                     amount: x.amount,
                 }))}
-                defaultRemarks={defaultRemarks}
+                defaultRemarks={document.DocumentRemark}
             />
         </>
     )

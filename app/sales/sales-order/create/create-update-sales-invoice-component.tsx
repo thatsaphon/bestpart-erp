@@ -39,12 +39,12 @@ import {
 import { getPaymentMethods } from '@/app/actions/accounting'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { GetSales } from '@/types/sales'
+import { GetSales } from '@/types/sales/sales'
 import {
     getDefaultSalesItem,
     GetSalesItems,
     salesItemsToInventoryDetailType,
-} from '@/types/sales-item'
+} from '@/types/sales/sales-item'
 import { DocumentDetailForm } from '@/components/document-date-picker'
 import {
     DocumentDetail,
