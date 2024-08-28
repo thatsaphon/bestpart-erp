@@ -53,6 +53,7 @@ export default function CreateBillPage({}: Props) {
                 }
             }}
         >
+            <h1 className="mb-2 text-2xl">สร้างใบวางบิล</h1>
             <div className="flex items-baseline gap-2">
                 <span>วันที่</span>
                 <DatePickerWithPresets />
