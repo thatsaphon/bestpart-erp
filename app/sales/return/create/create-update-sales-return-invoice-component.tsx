@@ -32,7 +32,7 @@ import {
 import { getPaymentMethods } from '@/app/actions/accounting'
 import { cn } from '@/lib/utils'
 import { salesItemsToInventoryDetailType } from '@/types/sales/sales-item'
-import { DocumentDetailForm } from '@/components/document-date-picker'
+import { DocumentDetailForm } from '@/components/document-detail-form'
 import {
     DocumentDetail,
     getDefaultDocumentDetail,

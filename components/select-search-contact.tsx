@@ -49,14 +49,6 @@ type Props<T> = {
     setDocumentDetail: React.Dispatch<React.SetStateAction<DocumentDetail>>
 }
 
-// type InvoiceAddress = {
-//     name: string
-//     address: string
-//     phone: string
-//     taxId: string
-// }
-type Payment = 'cash' | 'transfer' | 'credit'
-
 type PopoverType = 'search' | 'create'
 
 export default function SelectSearchContact<T>({

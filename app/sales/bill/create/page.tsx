@@ -1,115 +1,43 @@
-'use client'
-
-import SelectSearchCustomer from '@/components/select-search-customer'
-import { Input } from '@/components/ui/input'
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableFooter,
-    TableHeader,
-    TableRow,
-    TableHead,
-} from '@/components/ui/table'
-import React, { useState } from 'react'
-import SearchDocumentDialogComponent from './search-document-dialog'
-import { fetchUnpaidSalesInvoice } from './fetch-unpaid-sales-invoice'
-import { Button } from '@/components/ui/button'
-import { createBillingNote } from '@/app/contact/[id]/receivable/create-billing-note'
-import toast from 'react-hot-toast'
-import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import { Metadata } from 'next'
+import CreateUpdateSalesBillComponents from './create-update-sales-bill-components'
+import Link from 'next/link'
+import prisma from '@/app/db/db'
+import { getUnpaidInvoices } from '@/types/sales-bill/unpaid-invoice'
+import { unpaidInvoiceToSalesBillItems } from '@/types/sales-bill/unpaid-invoice-to-sales-bill-item'
 
-type Props = {}
+type Props = {
+    searchParams: {
+        contactId?: string
+    }
+}
 
-// export const metadata: Metadata = {
-//     title: 'สร้างใบวางบิล',
-// }
+export const metadata: Metadata = {
+    title: 'สร้างใบวางบิล',
+}
 
-export default function CreateBillPage({}: Props) {
-    const [selectedDocuments, setSelectedDocuments] = useState<
-        Awaited<ReturnType<typeof fetchUnpaidSalesInvoice>>
-    >([])
+export default async function CreateBillPage({
+    searchParams,
+    searchParams: { contactId },
+}: Props) {
+    const unpaidInvoices = await getUnpaidInvoices(Number(contactId))
 
-    const ref = React.createRef<HTMLFormElement>()
+    const unpaidItems = unpaidInvoiceToSalesBillItems(unpaidInvoices)
+
+    console.log(unpaidItems)
+
     return (
-        <form
-            ref={ref}
-            className="p-3"
-            action={async (formData) => {
-                try {
-                    await createBillingNote(
-                        formData,
-                        selectedDocuments.map((document) => document.documentNo)
-                    )
-                    toast.success('Create billing note success')
-                    ref.current?.reset()
-
-                    setSelectedDocuments([])
-                } catch (err) {
-                    if (err instanceof Error) toast.error(err.message)
-                    toast.error('Something went wrong')
-                }
-            }}
-        >
-            <h1 className="mb-2 text-2xl">สร้างใบวางบิล</h1>
-            <div className="flex items-baseline gap-2">
-                <span>วันที่</span>
-                <DatePickerWithPresets />
-                <span>เลขที่เอกสาร</span>
-                <Input name="documentNo" className="w-auto" />
-                {/* <SelectSearchCustomer hasTextArea /> */}
+        <>
+            <div className="flex justify-between">
+                <Link
+                    href={`/sales/sales-bill`}
+                    className="text-primary/50 underline hover:text-primary"
+                >{`< ย้อนกลับ`}</Link>
             </div>
-            <div className="flex items-baseline gap-2">
-                <span>ลูกค้า</span>
-                <SelectSearchCustomer hasTextArea />
-            </div>
-
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>ที่</TableHead>
-                        <TableHead>วันที่</TableHead>
-                        <TableHead>เลขที่</TableHead>
-                        <TableHead>จำนวนเงิน</TableHead>
-                    </TableRow>
-                </TableHeader>
-                {selectedDocuments
-                    .sort((a, b) => a.id - b.id)
-                    .map((document, index) => (
-                        <TableBody key={document.id}>
-                            <TableRow>
-                                <TableCell>{index + 1}</TableCell>
-                                <TableCell>
-                                    {Intl.DateTimeFormat('th-TH', {
-                                        timeZone: 'Asia/Bangkok',
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                    }).format(document.date)}
-                                </TableCell>
-                                <TableCell>{document.documentNo}</TableCell>
-                                <TableCell>
-                                    {document.GeneralLedger[0].amount}
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    ))}
-                <TableBody>
-                    <TableRow>
-                        <TableCell colSpan={4}>
-                            <SearchDocumentDialogComponent
-                                selectedDocuments={selectedDocuments}
-                                setSelectedDocuments={setSelectedDocuments}
-                            />
-                        </TableCell>
-                    </TableRow>
-                </TableBody>
-            </Table>
-            <div className="flex justify-end pr-[25%]">
-                <Button>บันทึก</Button>
-            </div>
-        </form>
+            <h1 className="my-2 text-3xl transition-colors">สร้างใบวางบิล</h1>
+            <CreateUpdateSalesBillComponents
+                unpaidItems={unpaidItems}
+                // paymentMethods={paymentMethods}
+            />
+        </>
     )
 }

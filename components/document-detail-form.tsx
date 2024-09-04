@@ -23,6 +23,7 @@ import { Label } from './ui/label'
 import { Input } from './ui/input'
 import { DocumentDetail } from '@/types/document-detail'
 import SelectSearchContact from './select-search-contact'
+import SelectSearchContactSearchParams from './select-search-contact-search-params'
 
 type Props = {
     disabled?: boolean
@@ -31,6 +32,7 @@ type Props = {
     setDocumentDetail: React.Dispatch<React.SetStateAction<DocumentDetail>>
     label?: string
     placeholder?: string
+    useSearchParams?: boolean
 }
 
 export function DocumentDetailForm({
@@ -40,6 +42,7 @@ export function DocumentDetailForm({
     setDocumentDetail,
     label = 'ผู้ติดต่อ',
     placeholder,
+    useSearchParams = false,
 }: Props) {
     return (
         <div className="flex flex-col gap-2">
@@ -152,13 +155,23 @@ export function DocumentDetailForm({
                 </Label>
             </div>
 
-            <SelectSearchContact
-                label={label}
-                hasTextArea={true}
-                placeholder={placeholder}
-                documentDetail={documentDetail}
-                setDocumentDetail={setDocumentDetail}
-            />
+            {useSearchParams ? (
+                <SelectSearchContactSearchParams
+                    label={label}
+                    hasTextArea={true}
+                    placeholder={placeholder}
+                    documentDetail={documentDetail}
+                    setDocumentDetail={setDocumentDetail}
+                />
+            ) : (
+                <SelectSearchContact
+                    label={label}
+                    hasTextArea={true}
+                    placeholder={placeholder}
+                    documentDetail={documentDetail}
+                    setDocumentDetail={setDocumentDetail}
+                />
+            )}
         </div>
     )
 }

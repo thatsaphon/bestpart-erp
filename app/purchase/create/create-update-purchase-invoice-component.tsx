@@ -26,7 +26,7 @@ import { DocumentItem } from '@/types/document-item'
 import { DocumentRemark } from '@prisma/client'
 import ImageToolTip from '@/components/image-tooltip'
 import { Badge } from '@/components/ui/badge'
-import { DocumentDetailForm } from '@/components/document-date-picker'
+import { DocumentDetailForm } from '@/components/document-detail-form'
 import {
     DocumentDetail,
     getDefaultDocumentDetail,

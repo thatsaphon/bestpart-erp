@@ -45,7 +45,7 @@ import {
     GetSalesItems,
     salesItemsToInventoryDetailType,
 } from '@/types/sales/sales-item'
-import { DocumentDetailForm } from '@/components/document-date-picker'
+import { DocumentDetailForm } from '@/components/document-detail-form'
 import {
     DocumentDetail,
     getDefaultDocumentDetail,
