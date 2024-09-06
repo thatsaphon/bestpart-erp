@@ -1,5 +1,6 @@
 'use client'
 
+import { searchAccountReceivableById } from '@/app/actions/contact/searchAccountReceivableById'
 import SelectSearchContact from '@/components/select-search-contact'
 import { createQueryString, deleteKeyFromQueryString } from '@/lib/searchParams'
 import {
@@ -32,6 +33,24 @@ export default function SelectSearchContactSearchParams({
     const searchParams = useSearchParams()
 
     useEffect(() => {
+        if (searchParams.get('contactId')) {
+            searchAccountReceivableById(
+                Number(searchParams.get('contactId'))
+            ).then((result) => {
+                setDocumentDetail({
+                    id: 0,
+                    documentNo: '',
+                    date: new Date(),
+                    contactId: result.id,
+                    contactName: result.name,
+                    address: result.address,
+                    phone: result.phone,
+                    taxId: result.taxId || '',
+                })
+            })
+        }
+    }, [searchParams, setDocumentDetail])
+    const onSetDocumentDetail = (documentDetail: DocumentDetail) => {
         if (!documentDetail.contactId) {
             router.push(
                 '?' +
@@ -40,33 +59,23 @@ export default function SelectSearchContactSearchParams({
                         'contactId'
                     )
             )
-            return
+        } else {
+            router.push(
+                '?' +
+                    createQueryString(
+                        new URLSearchParams(searchParams),
+                        'contactId',
+                        String(documentDetail.contactId)
+                    )
+            )
         }
-        router.push(
-            '?' +
-                createQueryString(
-                    new URLSearchParams(searchParams),
-                    'contactId',
-                    String(documentDetail.contactId)
-                )
-        )
-    }, [documentDetail.contactId, router, searchParams])
-    const onSetDocumentDetail = (documentDetail: DocumentDetail) => {
-        router.push(
-            '?' +
-                createQueryString(
-                    new URLSearchParams(searchParams),
-                    'contactId',
-                    String(documentDetail.contactId)
-                )
-        )
-        return setDocumentDetail(documentDetail)
+        setDocumentDetail(documentDetail)
     }
 
     return (
         <SelectSearchContact
             documentDetail={documentDetail}
-            setDocumentDetail={setDocumentDetail}
+            setDocumentDetail={onSetDocumentDetail}
             label={label}
             name={name}
             hasTextArea={hasTextArea}

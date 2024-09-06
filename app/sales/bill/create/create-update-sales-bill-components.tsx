@@ -21,6 +21,16 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableFooter,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import { fullDateFormat } from '@/lib/date-format'
 
 type Props = {
     unpaidItems: SalesBillItem[]
@@ -33,6 +43,7 @@ export default function CreateUpdateSalesBillComponents({
         getDefaultDocumentDetail()
     )
     const [open, setOpen] = useState(false)
+    const [selectedItems, setSelectedItems] = useState<SalesBillItem[]>([])
 
     useEffect(() => {
         if (documentDetail && documentDetail.contactId) {
@@ -47,51 +58,98 @@ export default function CreateUpdateSalesBillComponents({
                 setDocumentDetail={setDocumentDetail}
                 useSearchParams
             />
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog
+                open={open}
+                onOpenChange={setOpen}
+                // key={documentDetail.contactId}
+            >
                 <DialogTrigger asChild>
                     <Button variant="outline" className="w-full">
                         Create Sales Bill
                     </Button>
                 </DialogTrigger>
 
-                <DialogOverlay />
+                {/* <DialogOverlay /> */}
 
-                <DialogContent>
-                    <DialogTitle>Create Sales Bill</DialogTitle>
-
-                    <DialogContent>
-                        <table className="w-full">
-                            <thead>
-                                <tr>
-                                    <th className="w-12">No</th>
-                                    <th className="w-24">Document No</th>
-                                    <th className="w-24">Document Date</th>
-                                    <th className="w-24">Due Date</th>
-                                    <th className="w-24">Customer</th>
-                                    <th className="w-24">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {unpaidItems.map((item, i) => (
-                                    <tr key={i}>
-                                        <td className="text-center">{i + 1}</td>
-                                        <td>{item.documentNo}</td>
-                                        <td>{item.type}</td>
-                                        <td>{item.type}</td>
-                                        <td>{item.type}</td>
-                                        <td className="text-right">
-                                            {item.amount}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </DialogContent>
-
+                <DialogContent className="min-w-[800px]">
+                    <DialogTitle className="w-full">
+                        Create Sales Bill
+                    </DialogTitle>
+                    <Table className="w-full">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="text-center">
+                                    No
+                                </TableHead>
+                                <TableHead>Document No</TableHead>
+                                <TableHead>type</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead className="text-right">
+                                    Total
+                                </TableHead>
+                                <TableHead></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {unpaidItems.map((item, index) => (
+                                <TableRow key={index}>
+                                    <TableCell className="text-center">
+                                        {index + 1}
+                                    </TableCell>
+                                    <TableCell>{item.documentNo}</TableCell>
+                                    <TableCell>{item.type}</TableCell>
+                                    <TableCell>
+                                        {fullDateFormat(item.date)}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {item.amount.toLocaleString()}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button
+                                            className="w-24"
+                                            variant={
+                                                selectedItems.find(
+                                                    (selectedItem) =>
+                                                        selectedItem.documentId ===
+                                                        item.documentId
+                                                )
+                                                    ? 'destructive'
+                                                    : 'default'
+                                            }
+                                            onClick={() =>
+                                                selectedItems.find(
+                                                    (selectedItem) =>
+                                                        selectedItem.documentId ===
+                                                        item.documentId
+                                                )
+                                                    ? setSelectedItems(
+                                                          selectedItems.filter(
+                                                              (i) => i !== item
+                                                          )
+                                                      )
+                                                    : setSelectedItems([
+                                                          ...selectedItems,
+                                                          item,
+                                                      ])
+                                            }
+                                        >
+                                            {selectedItems.find(
+                                                (selectedItem) =>
+                                                    selectedItem.documentId ===
+                                                    item.documentId
+                                            )
+                                                ? 'Remove'
+                                                : 'Add'}
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                     <DialogFooter>
                         <Button
                             variant="outline"
-                            className="w-full"
+                            // className="w-full"
                             onClick={() => setOpen(false)}
                         >
                             Cancel
@@ -99,6 +157,34 @@ export default function CreateUpdateSalesBillComponents({
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>No</TableHead>
+                        <TableHead>Document No</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-right">Total</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {selectedItems.map((item, index) => (
+                        <TableRow key={index}>
+                            <TableCell className="text-center">
+                                {index + 1}
+                            </TableCell>
+                            <TableCell>{item.documentNo}</TableCell>
+                            <TableCell>{item.type}</TableCell>
+                            <TableCell>{fullDateFormat(item.date)}</TableCell>
+                            <TableCell className="text-right">
+                                {item.amount.toLocaleString()}
+                            </TableCell>
+                            <TableCell></TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
         </div>
     )
 }

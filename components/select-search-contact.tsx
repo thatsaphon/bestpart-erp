@@ -46,7 +46,7 @@ type Props<T> = {
     placeholder?: string
     disabled?: boolean
     documentDetail: DocumentDetail
-    setDocumentDetail: React.Dispatch<React.SetStateAction<DocumentDetail>>
+    setDocumentDetail: (documentDetail: DocumentDetail) => void
 }
 
 type PopoverType = 'search' | 'create'
@@ -66,6 +66,7 @@ export default function SelectSearchContact<T>({
     const [searchValue, setSearchValue] = useState('')
     const [searchResults, setSearchResults] = useState<Contact[]>([])
     const [error, setError] = useState<string | null>(null)
+    const [contactId, setContactId] = useState<number | undefined>()
 
     const onSearchChanged = async (
         event: React.ChangeEvent<HTMLInputElement>
@@ -100,12 +101,9 @@ export default function SelectSearchContact<T>({
                         <span className="relative">
                             <Input
                                 name={name}
-                                value={documentDetail.contactId || ''}
+                                value={contactId || ''}
                                 onChange={(e) =>
-                                    setDocumentDetail({
-                                        ...documentDetail,
-                                        contactId: +e.target.value || undefined,
-                                    })
+                                    setContactId(+e.target.value || undefined)
                                 }
                                 onKeyDown={async (e) => {
                                     if (e.shiftKey && e.code === 'Slash') {
@@ -116,16 +114,17 @@ export default function SelectSearchContact<T>({
                                     if (e.key === 'Enter') {
                                         e.preventDefault()
                                         try {
-                                            if (!documentDetail.contactId) {
+                                            if (!contactId) {
                                                 setError(null)
                                                 return
                                             }
                                             const result =
                                                 await searchAccountReceivableById(
-                                                    documentDetail.contactId
+                                                    contactId
                                                 )
                                             setDocumentDetail({
                                                 ...documentDetail,
+                                                contactId: result.id,
                                                 contactName: result.name,
                                                 address: result.address,
                                                 phone: result.phone,
@@ -190,10 +189,10 @@ export default function SelectSearchContact<T>({
                                         placeholder="ชื่อ"
                                         value={documentDetail.contactName}
                                         onChange={(e) =>
-                                            setDocumentDetail((prev) => ({
-                                                ...prev,
+                                            setDocumentDetail({
+                                                ...documentDetail,
                                                 contactName: e.target.value,
-                                            }))
+                                            })
                                         }
                                         disabled={disabled}
                                     />
@@ -203,10 +202,10 @@ export default function SelectSearchContact<T>({
                                         placeholder="ที่อยู่"
                                         className="col-start-1 row-span-2"
                                         onChange={(e) =>
-                                            setDocumentDetail((prev) => ({
-                                                ...prev,
+                                            setDocumentDetail({
+                                                ...documentDetail,
                                                 address: e.target.value,
-                                            }))
+                                            })
                                         }
                                         disabled={disabled}
                                     />
@@ -217,10 +216,10 @@ export default function SelectSearchContact<T>({
                                         placeholder="เบอร์โทร"
                                         value={documentDetail.phone}
                                         onChange={(e) =>
-                                            setDocumentDetail((prev) => ({
-                                                ...prev,
+                                            setDocumentDetail({
+                                                ...documentDetail,
                                                 phone: e.target.value,
-                                            }))
+                                            })
                                         }
                                         disabled={disabled}
                                     />
@@ -229,10 +228,10 @@ export default function SelectSearchContact<T>({
                                         placeholder="taxId"
                                         value={documentDetail.taxId}
                                         onChange={(e) =>
-                                            setDocumentDetail((prev) => ({
-                                                ...prev,
+                                            setDocumentDetail({
+                                                ...documentDetail,
                                                 taxId: e.target.value,
-                                            }))
+                                            })
                                         }
                                         disabled={disabled}
                                     />
@@ -329,6 +328,7 @@ export default function SelectSearchContact<T>({
                                                                 result.taxId ||
                                                                 '',
                                                         })
+                                                        setContactId(result.id)
                                                         setError(null)
                                                         setIsOpen(false)
                                                     }}
