@@ -37,7 +37,11 @@ import { Label } from './ui/label'
 import { Separator } from './ui/separator'
 import { createNewContact } from '@/app/actions/contact/createNewContact'
 import PaginationClientComponent from './pagination-client-component'
-import { DocumentDetail } from '@/types/document-detail'
+import {
+    DocumentDetail,
+    getDefaultDocumentDetail,
+} from '@/types/document-detail'
+import { useSearchParams } from 'next/navigation'
 
 type Props<T> = {
     label?: string
@@ -60,6 +64,7 @@ export default function SelectSearchContact<T>({
     documentDetail,
     setDocumentDetail,
 }: Props<T>) {
+    const searchParams = useSearchParams()
     const [page, setPage] = useState(1)
     const [isOpen, setIsOpen] = useState(false)
     const [popoverType, setPopoverType] = useState<PopoverType>('search')
@@ -67,6 +72,12 @@ export default function SelectSearchContact<T>({
     const [searchResults, setSearchResults] = useState<Contact[]>([])
     const [error, setError] = useState<string | null>(null)
     const [contactId, setContactId] = useState<number | undefined>()
+
+    useEffect(() => {
+        if (searchParams.get('contactId')) {
+            setContactId(parseInt(searchParams.get('contactId') as string))
+        }
+    }, [searchParams])
 
     const onSearchChanged = async (
         event: React.ChangeEvent<HTMLInputElement>
@@ -101,7 +112,7 @@ export default function SelectSearchContact<T>({
                         <span className="relative">
                             <Input
                                 name={name}
-                                value={contactId || ''}
+                                value={contactId || undefined}
                                 onChange={(e) =>
                                     setContactId(+e.target.value || undefined)
                                 }
@@ -114,8 +125,11 @@ export default function SelectSearchContact<T>({
                                     if (e.key === 'Enter') {
                                         e.preventDefault()
                                         try {
-                                            if (!contactId) {
+                                            if (contactId == undefined) {
                                                 setError(null)
+                                                setDocumentDetail(
+                                                    getDefaultDocumentDetail()
+                                                )
                                                 return
                                             }
                                             const result =

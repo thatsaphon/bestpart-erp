@@ -14,12 +14,22 @@ export const getSalesBillDefaultFunction = async (
                         include: {
                             SalesItem: true,
                             Document: true,
+                            GeneralLedger: {
+                                include: {
+                                    ChartOfAccount: true,
+                                },
+                            },
                         },
                     },
                     SalesReturn: {
                         include: {
                             SalesReturnItem: true,
                             Document: true,
+                            GeneralLedger: {
+                                include: {
+                                    ChartOfAccount: true,
+                                },
+                            },
                         },
                     },
                     SalesReceived: {

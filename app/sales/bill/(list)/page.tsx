@@ -24,6 +24,7 @@ import {
 import { Fragment } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { fullDateFormat } from '@/lib/date-format'
+import { getSalesBillDefaultFunction } from '@/types/sales-bill/sales-bill'
 
 type Props = {
     searchParams: {
@@ -35,7 +36,7 @@ type Props = {
 export default async function SalesListPage({
     searchParams: { limit = '10', page = '1' },
 }: Props) {
-    const billingNotes = await prisma.document.findMany({
+    const salesBills = await prisma.document.findMany({
         where: {
             type: 'SalesBill',
         },
@@ -43,8 +44,24 @@ export default async function SalesListPage({
             SalesBill: {
                 include: {
                     Contact: true,
-                    Sales: true,
-                    SalesReturn: true,
+                    Sales: {
+                        include: {
+                            GeneralLedger: {
+                                include: {
+                                    ChartOfAccount: true,
+                                },
+                            },
+                        },
+                    },
+                    SalesReturn: {
+                        include: {
+                            GeneralLedger: {
+                                include: {
+                                    ChartOfAccount: true,
+                                },
+                            },
+                        },
+                    },
                     SalesReceived: true,
                 },
             },
@@ -77,7 +94,51 @@ export default async function SalesListPage({
                         <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>
-                <TableBody></TableBody>
+                <TableBody>
+                    {salesBills.map((bill, index) => (
+                        <TableRow
+                            key={bill.documentNo}
+                            className={cn(
+                                index % 2 === 0 && 'bg-muted-100',
+                                'border-b'
+                            )}
+                        >
+                            <TableCell className="w-[150px]">
+                                {fullDateFormat(bill.date)}
+                            </TableCell>
+                            <TableCell className="w-[100px]">
+                                {bill.documentNo}
+                            </TableCell>
+                            <TableCell>
+                                {bill.SalesBill?.Contact.name}
+                            </TableCell>
+                            <TableCell></TableCell>
+                            <TableCell className="text-right">
+                                {[
+                                    ...(bill.SalesBill?.Sales || []),
+                                    ...(bill.SalesBill?.SalesReturn || []),
+                                ]
+                                    .reduce(
+                                        (a, b) =>
+                                            b.GeneralLedger.reduce(
+                                                (a, b) =>
+                                                    b.ChartOfAccount.isAr
+                                                        ? a + b.amount
+                                                        : a,
+                                                0
+                                            ),
+                                        0
+                                    )
+                                    .toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                                <Link href={`/sales/bill/${bill.documentNo}`}>
+                                    <EyeOpenIcon />
+                                </Link>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
             </Table>
             <PaginationComponent
                 page={page}

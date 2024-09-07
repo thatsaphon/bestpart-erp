@@ -8,26 +8,26 @@ export const unpaidInvoiceToSalesBillItems = (
         .map((x) => {
             if (x.Sales) {
                 return {
-                    id: 0,
+                    id: x.Sales.id,
                     type: 'Sales' as const,
                     date: x.date,
                     documentId: x.id,
                     documentNo: x.documentNo,
-                    amount: x.Sales.SalesItem.reduce(
-                        (a, b) => a + b.pricePerUnit * b.quantity,
+                    amount: x.Sales.GeneralLedger.reduce(
+                        (a, b) => (b.ChartOfAccount.isAr ? a + b.amount : a),
                         0
                     ),
                 }
             }
             if (x.SalesReturn) {
                 return {
-                    id: 0,
+                    id: x.SalesReturn.id,
                     type: 'SalesReturn' as const,
                     date: x.date,
                     documentId: x.id,
                     documentNo: x.documentNo,
-                    amount: -x.SalesReturn.SalesReturnItem.reduce(
-                        (a, b) => a + b.pricePerUnit * b.quantity,
+                    amount: x.SalesReturn.GeneralLedger.reduce(
+                        (a, b) => (b.ChartOfAccount.isAr ? a + b.amount : a),
                         0
                     ),
                 }

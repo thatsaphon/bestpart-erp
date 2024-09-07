@@ -31,6 +31,8 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { fullDateFormat } from '@/lib/date-format'
+import { createSalesBill } from './create-sales-bill'
+import toast from 'react-hot-toast'
 
 type Props = {
     unpaidItems: SalesBillItem[]
@@ -47,9 +49,19 @@ export default function CreateUpdateSalesBillComponents({
 
     useEffect(() => {
         if (documentDetail && documentDetail.contactId) {
-            setOpen(true)
+            setSelectedItems([])
         }
     }, [documentDetail, documentDetail.contactId])
+
+    const onCreateSalesBill = async () => {
+        try {
+            const result = await createSalesBill(documentDetail, selectedItems)
+            toast.success('บันทึกสําเร็จ')
+        } catch (err) {
+            if (err instanceof Error) return toast.error(err.message)
+            toast.error('Something went wrong')
+        }
+    }
 
     return (
         <div className="p-3">
@@ -58,23 +70,21 @@ export default function CreateUpdateSalesBillComponents({
                 setDocumentDetail={setDocumentDetail}
                 useSearchParams
             />
-            <Dialog
-                open={open}
-                onOpenChange={setOpen}
-                // key={documentDetail.contactId}
-            >
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full">
-                        Create Sales Bill
+                    <Button
+                        variant="outline"
+                        className="m-3"
+                        disabled={!documentDetail.contactId}
+                    >
+                        เลือกใบรายการขาย
                     </Button>
                 </DialogTrigger>
 
                 {/* <DialogOverlay /> */}
 
                 <DialogContent className="min-w-[800px]">
-                    <DialogTitle className="w-full">
-                        Create Sales Bill
-                    </DialogTitle>
+                    <DialogTitle className="w-full">เลือกรายการขาย</DialogTitle>
                     <Table className="w-full">
                         <TableHeader>
                             <TableRow>
@@ -91,6 +101,16 @@ export default function CreateUpdateSalesBillComponents({
                             </TableRow>
                         </TableHeader>
                         <TableBody>
+                            {unpaidItems.length === 0 && (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={6}
+                                        className="text-center"
+                                    >
+                                        ไม่พบรายการขายของลูกค้า
+                                    </TableCell>
+                                </TableRow>
+                            )}
                             {unpaidItems.map((item, index) => (
                                 <TableRow key={index}>
                                     <TableCell className="text-center">
@@ -149,7 +169,6 @@ export default function CreateUpdateSalesBillComponents({
                     <DialogFooter>
                         <Button
                             variant="outline"
-                            // className="w-full"
                             onClick={() => setOpen(false)}
                         >
                             Cancel
@@ -169,6 +188,13 @@ export default function CreateUpdateSalesBillComponents({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
+                    {selectedItems.length === 0 && (
+                        <TableRow>
+                            <TableCell colSpan={6} className="text-center">
+                                กรุณาเลือกรายการขาย
+                            </TableCell>
+                        </TableRow>
+                    )}
                     {selectedItems.map((item, index) => (
                         <TableRow key={index}>
                             <TableCell className="text-center">
@@ -184,7 +210,39 @@ export default function CreateUpdateSalesBillComponents({
                         </TableRow>
                     ))}
                 </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <TableHead className="text-right" colSpan={4}>
+                            Total
+                        </TableHead>
+                        <TableHead className="text-right">
+                            {selectedItems
+                                .reduce((total, item) => total + item.amount, 0)
+                                .toLocaleString()}
+                        </TableHead>
+                        <TableHead></TableHead>
+                    </TableRow>
+                    <TableRow>
+                        <TableHead colSpan={5}>
+                            <div className="flex justify-end gap-2">
+                                <Button
+                                    disabled={selectedItems.length === 0}
+                                    onClick={onCreateSalesBill}
+                                >
+                                    สร้างใบวางบิล
+                                </Button>
+                                <Button variant={'destructive'}>รีเซ็ต</Button>
+                            </div>
+                        </TableHead>
+                        <TableHead></TableHead>
+                    </TableRow>
+                </TableFooter>
             </Table>
+            {/* <div className="items mt-4 flex justify-center">
+                <Button disabled={selectedItems.length === 0}>
+                    สร้างใบวางบิล
+                </Button>
+            </div> */}
         </div>
     )
 }

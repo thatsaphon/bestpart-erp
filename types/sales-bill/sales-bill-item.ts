@@ -21,8 +21,8 @@ export const salesBillToSalesBillItems = (
             date: x.Document.date,
             documentId: salesBill.id,
             documentNo: salesBill.documentNo,
-            amount: x.SalesItem.reduce(
-                (a, b) => a + b.pricePerUnit * b.quantity,
+            amount: x.GeneralLedger.reduce(
+                (a, b) => (b.ChartOfAccount.isAr ? a + b.amount : a),
                 0
             ),
         })) || []
@@ -34,8 +34,8 @@ export const salesBillToSalesBillItems = (
             date: x.Document.date,
             documentId: salesBill.id,
             documentNo: salesBill.documentNo,
-            amount: -x.SalesReturnItem.reduce(
-                (a, b) => a + b.pricePerUnit * b.quantity,
+            amount: x.GeneralLedger.reduce(
+                (a, b) => (b.ChartOfAccount.isAr ? a + b.amount : a),
                 0
             ),
         })) || []

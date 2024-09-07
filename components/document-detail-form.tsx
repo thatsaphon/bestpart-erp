@@ -64,6 +64,7 @@ export function DocumentDetailForm({
                                 <input
                                     name={name}
                                     type="hidden"
+                                    disabled={disabled}
                                     onChange={(e) => {
                                         setDocumentDetail((prev) => ({
                                             ...prev,
@@ -130,6 +131,7 @@ export function DocumentDetailForm({
                     <Input
                         className="w-auto"
                         name="documentNo"
+                        disabled={disabled}
                         placeholder="Optional"
                         value={documentDetail?.documentNo}
                         onChange={(e) => {
@@ -143,6 +145,7 @@ export function DocumentDetailForm({
                     <Input
                         className="w-auto"
                         name="referenceNo"
+                        disabled={disabled}
                         placeholder="Optional"
                         value={documentDetail?.referenceNo || ''}
                         onChange={(e) => {
@@ -162,6 +165,7 @@ export function DocumentDetailForm({
                     placeholder={placeholder}
                     documentDetail={documentDetail}
                     setDocumentDetail={setDocumentDetail}
+                    disabled={disabled}
                 />
             ) : (
                 <SelectSearchContact
@@ -170,6 +174,7 @@ export function DocumentDetailForm({
                     placeholder={placeholder}
                     documentDetail={documentDetail}
                     setDocumentDetail={setDocumentDetail}
+                    disabled={disabled}
                 />
             )}
         </div>
