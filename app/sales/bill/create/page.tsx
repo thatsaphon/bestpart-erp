@@ -23,8 +23,6 @@ export default async function CreateBillPage({
 
     const unpaidItems = unpaidInvoiceToSalesBillItems(unpaidInvoices)
 
-    console.log(unpaidItems)
-
     return (
         <>
             <div className="flex justify-between">

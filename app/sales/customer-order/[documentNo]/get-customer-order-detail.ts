@@ -11,18 +11,18 @@ export default async function getCustomerOrderDetail(documentNo: string) {
                     Contact: true,
                     CustomerOrderItem: true,
                     PurchasOrderLink: true,
-                },
-            },
-            remark: true,
-            GeneralLedger: {
-                where: {
-                    chartOfAccountId: {
-                        //เงินมัดจำ = 22300
-                        not: 22300,
+                    GeneralLedger: {
+                        where: {
+                            chartOfAccountId: {
+                                //เงินมัดจำ = 22300
+                                not: 22300,
+                            },
+                        },
+                        include: { ChartOfAccount: true },
                     },
                 },
-                include: { ChartOfAccount: true },
             },
+            DocumentRemark: true,
         },
     })
     return quotation

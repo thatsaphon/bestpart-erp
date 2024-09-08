@@ -6,21 +6,21 @@ export default async function getQuotationDetail(documentNo: string) {
     const quotation = await prisma.document.findUnique({
         where: { documentNo },
         include: {
-            ArSubledger: { include: { Contact: true } },
             Quotation: {
                 include: {
+                    Contact: true,
                     QuotationItem: {
                         include: {
                             GoodsMaster: {
                                 include: {
-                                    SkuMaster: { include: { mainSku: true } },
+                                    SkuMaster: { include: { MainSku: true } },
                                 },
                             },
                         },
                     },
                 },
             },
-            remark: true,
+            DocumentRemark: true,
         },
     })
     return quotation

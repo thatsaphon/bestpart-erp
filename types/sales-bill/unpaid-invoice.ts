@@ -9,6 +9,13 @@ export const getUnpaidInvoices = async (contactId: number) => {
                 {
                     Sales: {
                         contactId: contactId,
+                        GeneralLedger: {
+                            some: {
+                                ChartOfAccount: {
+                                    isAr: true,
+                                },
+                            },
+                        },
                         salesBillId: null,
                         salesReceivedId: null,
                     },
@@ -16,6 +23,13 @@ export const getUnpaidInvoices = async (contactId: number) => {
                 {
                     SalesReturn: {
                         contactId: contactId,
+                        GeneralLedger: {
+                            some: {
+                                ChartOfAccount: {
+                                    isAr: true,
+                                },
+                            },
+                        },
                         salesBillId: null,
                         salesReceivedId: null,
                     },

@@ -102,7 +102,7 @@ export default async function QuotationDetailPage({
                             hasTextArea={true}
                             // placeholder="Optional"
                             defaultValue={String(
-                                document?.ArSubledger?.Contact.id || ''
+                                document?.Quotation?.Contact?.id || ''
                             )}
                             defaultAddress={{
                                 name: document?.contactName || '',
@@ -120,7 +120,7 @@ export default async function QuotationDetailPage({
                             <p className="text-left font-bold text-primary">
                                 หมายเหตุ:
                             </p>
-                            {document?.remark.map((remark) => (
+                            {document?.DocumentRemark.map((remark) => (
                                 <p
                                     className={cn(
                                         'text-left text-primary',
@@ -167,7 +167,7 @@ export default async function QuotationDetailPage({
                                 <TableCell>
                                     <p>
                                         {
-                                            item?.GoodsMaster?.SkuMaster.mainSku
+                                            item?.GoodsMaster?.SkuMaster.MainSku
                                                 .name
                                         }
                                     </p>

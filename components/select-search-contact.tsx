@@ -71,7 +71,9 @@ export default function SelectSearchContact<T>({
     const [searchValue, setSearchValue] = useState('')
     const [searchResults, setSearchResults] = useState<Contact[]>([])
     const [error, setError] = useState<string | null>(null)
-    const [contactId, setContactId] = useState<number | undefined>()
+    const [contactId, setContactId] = useState<number | null | undefined>(
+        documentDetail?.contactId
+    )
 
     useEffect(() => {
         if (searchParams.get('contactId')) {

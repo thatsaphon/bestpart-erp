@@ -28,7 +28,7 @@ import { Input } from '@/components/ui/input'
 import React, { Fragment } from 'react'
 import { Button } from '@/components/ui/button'
 import getCustomerOrderDetail from './get-customer-order-detail'
-import QuotationLinkComponent from './quotation-link-component'
+import CustomerOrderLinkComponent from './customer-order-link-component'
 import { updateRemark } from '../../return/[documentNo]/update-remarks'
 // import { updateRemark } from '../../return/[documentNo]/update-remarks'
 
@@ -92,7 +92,7 @@ export default async function CustomerOrderDetailPage({
                             </Link>
                         </div>
                     </div>
-                    <QuotationLinkComponent document={document} />
+                    <CustomerOrderLinkComponent document={document} />
                 </div>
                 <div className="flex gap-3">
                     <div className="my-1 flex items-baseline space-x-2">
@@ -121,19 +121,24 @@ export default async function CustomerOrderDetailPage({
                                 มัดจำ:
                             </p>
                             <p className="grid grid-cols-[300px_1fr] text-left text-primary">
-                                {document.GeneralLedger.map((generalLedger) => (
-                                    <Fragment key={generalLedger.id}>
-                                        <span>
-                                            {generalLedger.ChartOfAccount.name}
-                                        </span>
-                                        <span>{generalLedger.amount}</span>
-                                    </Fragment>
-                                ))}
+                                {document.CustomerOrder?.GeneralLedger.map(
+                                    (generalLedger) => (
+                                        <Fragment key={generalLedger.id}>
+                                            <span>
+                                                {
+                                                    generalLedger.ChartOfAccount
+                                                        .name
+                                                }
+                                            </span>
+                                            <span>{generalLedger.amount}</span>
+                                        </Fragment>
+                                    )
+                                )}
                             </p>
                             <p className="text-left font-bold text-primary">
                                 หมายเหตุ:
                             </p>
-                            {document?.remark.map((remark) => (
+                            {document?.DocumentRemark.map((remark) => (
                                 <p
                                     className={cn(
                                         'text-left text-primary',

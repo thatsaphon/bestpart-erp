@@ -39,6 +39,13 @@ export default async function page({ params: { documentNo } }: Props) {
 
     return (
         <div className="p-3">
+            <Link
+                href={'/sales/bill'}
+                className="text-primary/50 underline hover:text-primary"
+            >{`< ย้อนกลับ`}</Link>
+            <h1 className="my-2 text-3xl transition-colors">
+                รายละเอียดใบวางบิล
+            </h1>
             <div className="flex items-baseline gap-5">
                 <DocumentDetailReadonly
                     documentDetail={{
@@ -48,7 +55,7 @@ export default async function page({ params: { documentNo } }: Props) {
                     label="ลูกค้า"
                 />
 
-                <Link href={`/sales/bill/${documentNo}/edit}`}>
+                <Link href={`/sales/bill/${documentNo}/edit`}>
                     <Button variant={'destructive'}>แก้ไข</Button>
                 </Link>
             </div>

@@ -21,7 +21,7 @@ import SearchSkuDialog from '@/components/search-sku-dialog'
 import { defaultInventoryDetail, DocumentItem } from '@/types/document-item'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import { useSession } from 'next-auth/react'
-import { DocumentRemark, PaymentStatus } from '@prisma/client'
+import { DocumentRemark } from '@prisma/client'
 import { cn } from '@/lib/utils'
 import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import { createCustomerOrder } from './create-customer-order'
@@ -568,9 +568,8 @@ export default function CreateOrUpdateCustomerOrderComponent({
                                         onClick={() =>
                                             setItems(
                                                 items.filter(
-                                                    (i) =>
-                                                        i.barcode !==
-                                                        item.barcode
+                                                    (i, iIndex) =>
+                                                        index !== iIndex
                                                 )
                                             )
                                         }

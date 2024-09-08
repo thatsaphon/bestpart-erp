@@ -219,6 +219,6 @@ export const createSalesReturnInvoice = async (
         },
     })
 
-    revalidatePath('/sales/sales-order')
-    redirect(`/sales/sales-order/${invoice.documentNo}`)
+    revalidatePath('/sales/return')
+    redirect(`/sales/return/${invoice.documentNo}`)
 }

@@ -69,11 +69,11 @@ export default function SelectSearchContactSearchParams({
                     )
             )
         }
-        setDocumentDetail(documentDetail)
     }
 
     return (
         <SelectSearchContact
+            key={documentDetail.contactId}
             documentDetail={documentDetail}
             setDocumentDetail={onSetDocumentDetail}
             label={label}

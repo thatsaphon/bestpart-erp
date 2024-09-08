@@ -120,6 +120,7 @@ export default async function SalesListPage({
                                 ]
                                     .reduce(
                                         (a, b) =>
+                                            a +
                                             b.GeneralLedger.reduce(
                                                 (a, b) =>
                                                     b.ChartOfAccount.isAr

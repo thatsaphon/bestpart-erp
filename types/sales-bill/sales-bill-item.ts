@@ -19,8 +19,8 @@ export const salesBillToSalesBillItems = (
             id: x.id,
             type: 'Sales' as const,
             date: x.Document.date,
-            documentId: salesBill.id,
-            documentNo: salesBill.documentNo,
+            documentId: x.Document.id,
+            documentNo: x.Document.documentNo,
             amount: x.GeneralLedger.reduce(
                 (a, b) => (b.ChartOfAccount.isAr ? a + b.amount : a),
                 0
@@ -32,8 +32,8 @@ export const salesBillToSalesBillItems = (
             id: x.id,
             type: 'SalesReturn' as const,
             date: x.Document.date,
-            documentId: salesBill.id,
-            documentNo: salesBill.documentNo,
+            documentId: x.Document.id,
+            documentNo: x.Document.documentNo,
             amount: x.GeneralLedger.reduce(
                 (a, b) => (b.ChartOfAccount.isAr ? a + b.amount : a),
                 0

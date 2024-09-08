@@ -62,13 +62,6 @@ export default async function CustomerOrderPage({
                     CustomerOrderItem: true,
                 },
             },
-            GeneralLedger: {
-                where: {
-                    chartOfAccountId: {
-                        in: [21000, 11000],
-                    },
-                },
-            },
         },
         orderBy: [{ date: 'desc' }, { documentNo: 'desc' }],
         take: +limit,

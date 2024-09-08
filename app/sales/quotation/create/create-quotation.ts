@@ -86,7 +86,7 @@ export async function createQuotation(
             taxId: taxId || '',
             date: new Date(date),
             documentNo: documentNo,
-            remark: { create: remarks },
+            DocumentRemark: { create: remarks },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             Quotation: {

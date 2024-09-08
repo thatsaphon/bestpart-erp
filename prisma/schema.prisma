@@ -111,6 +111,7 @@ model ChartOfAccount {
   isAp        Boolean @default(false)
   isInputTax  Boolean @default(false)
   isOutputTax Boolean @default(false)
+  isDeposit   Boolean @default(false)
 
   ServiceAndNonStockItem ServiceAndNonStockItem[]
 }
@@ -140,6 +141,7 @@ model GeneralLedger {
   PurchasePayment  PurchasePayment? @relation(fields: [purchasePaymentId], references: [id])
   JournalVoucher   JournalVoucher?  @relation(fields: [journalVoucherId], references: [id])
   OtherInvoice     OtherInvoice?    @relation(fields: [otherInvoiceId], references: [id])
+  CustomerOrder    CustomerOrder?   @relation(fields: [customerOrderId], references: [id])
 
   salesId           Int?
   salesReturnId     Int?
@@ -149,6 +151,7 @@ model GeneralLedger {
   purchasePaymentId Int?
   journalVoucherId  Int?
   otherInvoiceId    Int?
+  customerOrderId   Int?
 
   @@index([chartOfAccountId])
 }
@@ -736,6 +739,8 @@ model CustomerOrder {
   status CustomerOrderStatus
 
   PurchasOrderLink PurchaseOrder[]
+
+  GeneralLedger GeneralLedger[]
 
   deposit Float
 

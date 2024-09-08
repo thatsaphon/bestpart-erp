@@ -58,17 +58,11 @@ export default async function PurchaseOrderPage({
             ],
         },
         include: {
-            ApSubledger: {
-                select: {
+            PurchaseOrder: {
+                include: {
                     Contact: true,
-                    paymentStatus: true,
-                },
-            },
-            GeneralLedger: {
-                where: {
-                    chartOfAccountId: {
-                        in: [21000, 11000],
-                    },
+                    PurchaseOrderItem: true,
+                    CustomerOrderLink: true,
                 },
             },
         },
@@ -112,28 +106,17 @@ export default async function PurchaseOrderPage({
                             <TableCell>{invoice.documentNo}</TableCell>
                             <TableCell>{invoice.referenceNo}</TableCell>
                             <TableCell>
-                                {invoice.ApSubledger?.Contact.name || 'เงินสด'}
+                                {invoice.contactName || 'เงินสด'}
                             </TableCell>
-                            <TableCell className="text-center">
-                                {invoice.ApSubledger?.paymentStatus ===
-                                'NotPaid' ? (
-                                    <Badge variant={'destructive'}>
-                                        ยังไม่จ่าย
-                                    </Badge>
-                                ) : invoice.ApSubledger?.paymentStatus ===
-                                  'Billed' ? (
-                                    <Badge variant={'outline'}>
-                                        วางบิลแล้ว
-                                    </Badge>
-                                ) : (
-                                    <Badge className="bg-green-400">
-                                        จ่ายแล้ว
-                                    </Badge>
-                                )}
-                            </TableCell>
+                            <TableCell className="text-center"></TableCell>
                             <TableCell className="text-right">
                                 {Math.abs(
-                                    invoice.GeneralLedger[0]?.amount
+                                    invoice.PurchaseOrder?.PurchaseOrderItem.reduce(
+                                        (acc, item) =>
+                                            acc +
+                                            item.costPerUnit * item.quantity,
+                                        0
+                                    ) || 0
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">

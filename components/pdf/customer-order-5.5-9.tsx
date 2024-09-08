@@ -1,5 +1,6 @@
 'use client'
 
+import getCustomerOrderDetail from '@/app/sales/customer-order/[documentNo]/get-customer-order-detail'
 import getQuotationDetail from '@/app/sales/quotation/[documentNo]/get-quotation-detail'
 import { fullDateFormat } from '@/lib/date-format'
 import {
@@ -11,7 +12,7 @@ import {
     Font,
 } from '@react-pdf/renderer'
 
-type Props = { document: Awaited<ReturnType<typeof getQuotationDetail>> }
+type Props = { document: Awaited<ReturnType<typeof getCustomerOrderDetail>> }
 
 Font.register({
     family: 'Inter Sarabun',
@@ -29,7 +30,7 @@ Font.register({
     fonts: [{ src: '/fonts/Inter-VariableFont_slnt,wght.ttf' }],
 })
 
-export default function QuotationPdf_5x9({ document }: Props) {
+export default function CustomerOrderPdf_5x9({ document }: Props) {
     const styles = StyleSheet.create({
         page: {
             flexDirection: 'column',
@@ -120,7 +121,7 @@ export default function QuotationPdf_5x9({ document }: Props) {
             >
                 <View style={styles.title} fixed>
                     <Text style={{ textAlign: 'center', width: '100%' }}>
-                        ใบเสนอราคา
+                        ใบจองสินค้า
                     </Text>
                     <Text style={{ textAlign: 'center', width: '100%' }}>
                         หจก.จ.สุพรรณบุรีอะไหล่
@@ -150,38 +151,44 @@ export default function QuotationPdf_5x9({ document }: Props) {
                     <Text style={styles.col3}>ชื่อสินค้า</Text>
                     <Text style={styles.col4}>จำนวน </Text>
                     <Text style={styles.col5}>หน่วย</Text>
+                    <Text style={styles.col6}>ราคา</Text>
                     <Text style={styles.col6}>รวม</Text>
                 </View>
-                {document?.Quotation?.QuotationItem.map((item, index) => (
-                    <View style={styles.row} key={item.barcode} wrap={false}>
-                        <Text style={styles.col1}>{index + 1}</Text>
-                        <Text style={styles.col2}>{item.barcode}</Text>
-                        <Text style={styles.col3}>
-                            {`${item.GoodsMaster?.SkuMaster.MainSku.name} - ${item.GoodsMaster?.SkuMaster.detail}`}
-                        </Text>
-                        <Text style={styles.col4}>
-                            {item.quantity.toLocaleString()}
-                        </Text>
-                        <Text style={styles.col5}>{`${item.unit}`}</Text>
-                        <Text style={styles.col6}>
-                            {(
-                                (item.price + item.vat) *
-                                item.quantity
-                            ).toLocaleString()}
-                        </Text>
-                    </View>
-                ))}
+                {document?.CustomerOrder?.CustomerOrderItem.map(
+                    (item, index) => (
+                        <View
+                            style={styles.row}
+                            key={item.barcode}
+                            wrap={false}
+                        >
+                            <Text style={styles.col1}>{index + 1}</Text>
+                            <Text style={styles.col2}>{item.barcode}</Text>
+                            <Text style={styles.col3}>
+                                {`${item.description}`}
+                            </Text>
+                            <Text style={styles.col4}>
+                                {item.quantity.toLocaleString()}
+                            </Text>
+                            <Text style={styles.col5}>{`${item.unit}`}</Text>
+                            <Text style={styles.col6}>
+                                {item.price.toLocaleString()}
+                            </Text>
+                            <Text style={styles.col6}>
+                                {(item.price * item.quantity).toLocaleString()}
+                            </Text>
+                        </View>
+                    )
+                )}
                 <View style={{ ...styles.footer }}>
                     <View style={styles.sum}>
-                        <Text>รวมเป็นเงินทั้งสิ้น: </Text>
+                        <Text>รวมเป็นเงินประมาณ: </Text>
                     </View>
                     <View style={styles.sum}>
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
-                                document?.Quotation?.QuotationItem.reduce(
-                                    (a, b) =>
-                                        a + (b.price + b.vat) * b.quantity,
+                                document?.CustomerOrder?.CustomerOrderItem.reduce(
+                                    (a, b) => a + b.price * b.quantity,
                                     0
                                 ).toLocaleString()
                             }
@@ -199,7 +206,7 @@ export default function QuotationPdf_5x9({ document }: Props) {
 
                 <View style={{ ...styles.footer2 }}>
                     <Text>
-                        {`ราคาสินค้าอาจมีการเปลี่ยนแปลงโดยไม่ต้องแจ้งให้ทราบล่วงหน้า
+                        {`ราคาสินค้าในใบจองสินค้าเป็นราคาประมาณ หากราคามีการเปลี่ยนแปลงจะแจ้งให้ลูกค้าทราบและยืนยันอีกครั้ง
                         สนใจสั่งซื้อกรุณาติดต่อเพิ่มเติมได้ที่ โทร:02-1234567 Line หรือหน้าร้าน`}
                     </Text>
                     <Text style={{ width: 120 }}>

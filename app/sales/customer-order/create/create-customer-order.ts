@@ -90,29 +90,29 @@ export async function createCustomerOrder(
             taxId: taxId || '',
             date: new Date(date),
             documentNo: documentNo,
-            remark: { create: remarks },
+            DocumentRemark: { create: remarks },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
 
-            GeneralLedger: {
-                create:
-                    payments.length > 0
-                        ? [
-                              ...payments.map((payment) => ({
-                                  chartOfAccountId: payment.id,
-                                  amount: payment.amount,
-                              })),
-                              {
-                                  //เงินมัดจำ
-                                  chartOfAccountId: 22300,
-                                  amount: payments.reduce(
-                                      (acc, payment) => acc - payment.amount,
-                                      0
-                                  ),
-                              },
-                          ]
-                        : undefined,
-            },
+            // GeneralLedger: {
+            //     create:
+            //         payments.length > 0
+            //             ? [
+            //                   ...payments.map((payment) => ({
+            //                       chartOfAccountId: payment.id,
+            //                       amount: payment.amount,
+            //                   })),
+            //                   {
+            //                       //เงินมัดจำ
+            //                       chartOfAccountId: 22300,
+            //                       amount: payments.reduce(
+            //                           (acc, payment) => acc - payment.amount,
+            //                           0
+            //                       ),
+            //                   },
+            //               ]
+            //             : undefined,
+            // },
             CustomerOrder: {
                 create: {
                     Contact: {
@@ -133,6 +133,26 @@ export async function createCustomerOrder(
                         })),
                     },
                     status: 'Open',
+                    GeneralLedger: {
+                        create:
+                            payments.length > 0
+                                ? [
+                                      ...payments.map((payment) => ({
+                                          chartOfAccountId: payment.id,
+                                          amount: payment.amount,
+                                      })),
+                                      {
+                                          //เงินมัดจำ
+                                          chartOfAccountId: 22300,
+                                          amount: payments.reduce(
+                                              (acc, payment) =>
+                                                  acc - payment.amount,
+                                              0
+                                          ),
+                                      },
+                                  ]
+                                : undefined,
+                    },
                 },
             },
 
