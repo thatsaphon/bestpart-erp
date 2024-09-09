@@ -40,6 +40,7 @@ import { getSalesReceived } from '@/types/sales-received/sales-receive'
 import { SalesReceivedItem } from '@/types/sales-received/sales-receive-item'
 import { Payment } from '@/types/payment/payment'
 import { getPaymentMethods } from '@/app/actions/accounting'
+import AddPaymentComponent from '@/components/add-payment-component'
 
 type Props = {
     existingSalesReceived?: getSalesReceived
@@ -92,7 +93,8 @@ export default function CreateUpdateSalesReceivedComponents({
             const result = await updateSalesReceived(
                 existingSalesBill?.id,
                 documentDetail,
-                selectedItems
+                selectedItems,
+                payments
             )
             toast.success('บันทึกสําเร็จ')
         } catch (err) {
@@ -112,7 +114,6 @@ export default function CreateUpdateSalesReceivedComponents({
                 existingSalesBill.documentNo
             )
             toast.success('ลบสําเร็จ')
-            router.push('/sales/bill')
         } catch (err) {
             if (err instanceof Error) return toast.error(err.message)
             toast.error('Something went wrong')
@@ -314,6 +315,15 @@ export default function CreateUpdateSalesReceivedComponents({
                                 .toLocaleString()}
                         </TableHead>
                         <TableHead></TableHead>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell colSpan={6} className="text-center">
+                            <AddPaymentComponent
+                                paymentMethods={paymentMethods}
+                                payments={payments}
+                                setPayments={setPayments}
+                            />
+                        </TableCell>
                     </TableRow>
                     <TableRow>
                         <TableHead colSpan={5}>

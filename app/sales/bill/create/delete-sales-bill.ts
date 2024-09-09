@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/app/db/db'
+import { redirect } from 'next/navigation'
 
 export const deleteSalesBill = async (documentNo: string) => {
     const salesBill = await prisma.document.findFirstOrThrow({
@@ -24,4 +25,5 @@ export const deleteSalesBill = async (documentNo: string) => {
     })
 
     await prisma.$transaction([deleteSalesBill, deleteDocument])
+    redirect('/sales/bill')
 }

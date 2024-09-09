@@ -3,6 +3,7 @@
 import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
 import prisma from '@/app/db/db'
 import { DocumentDetail } from '@/types/document-detail'
+import { Payment } from '@/types/payment/payment'
 import { SalesBillItem } from '@/types/sales-bill/sales-bill-item'
 import { SalesReceivedItem } from '@/types/sales-received/sales-receive-item'
 import { revalidatePath } from 'next/cache'
@@ -11,7 +12,8 @@ import { redirect } from 'next/navigation'
 export const updateSalesReceived = async (
     documentId: number,
     documentDetail: DocumentDetail,
-    salesBillItems: SalesReceivedItem[]
+    salesBillItems: SalesReceivedItem[],
+    payments: Payment[]
 ) => {
     if (!documentDetail.contactId) throw new Error('contact not found')
     if (!salesBillItems.length) throw new Error('items not found')

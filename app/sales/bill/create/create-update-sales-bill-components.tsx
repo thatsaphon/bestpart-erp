@@ -100,7 +100,6 @@ export default function CreateUpdateSalesBillComponents({
 
             const result = await deleteSalesBill(existingSalesBill.documentNo)
             toast.success('ลบสําเร็จ')
-            router.push('/sales/bill')
         } catch (err) {
             if (err instanceof Error) return toast.error(err.message)
             toast.error('Something went wrong')

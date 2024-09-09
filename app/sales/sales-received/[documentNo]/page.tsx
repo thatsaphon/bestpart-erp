@@ -14,6 +14,8 @@ import { fullDateFormat } from '@/lib/date-format'
 import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { getSalesReceivedDefaultFunction } from '@/types/sales-received/sales-receive'
+import { salesReceiveToSalesReceiveItems } from '@/types/sales-received/sales-receive-item'
 
 type Props = {
     params: {
@@ -31,16 +33,18 @@ export async function generateMetadata(
 }
 
 export default async function page({ params: { documentNo } }: Props) {
-    const billingNote = await getSalesBillDefaultFunction({
+    const salesReceived = await getSalesReceivedDefaultFunction({
         documentNo,
     })
 
-    const salesBillItems = await salesBillToSalesBillItems(billingNote[0])
+    const salesReceivedItems = await salesReceiveToSalesReceiveItems(
+        salesReceived[0]
+    )
 
     return (
         <div className="p-3">
             <Link
-                href={'/sales/bill'}
+                href={'/sales/sales-received'}
                 className="text-primary/50 underline hover:text-primary"
             >{`< ย้อนกลับ`}</Link>
             <h1 className="my-2 text-3xl transition-colors">
@@ -49,13 +53,13 @@ export default async function page({ params: { documentNo } }: Props) {
             <div className="flex items-baseline gap-5">
                 <DocumentDetailReadonly
                     documentDetail={{
-                        ...billingNote[0],
-                        contactId: billingNote[0].SalesBill?.contactId,
+                        ...salesReceived[0],
+                        contactId: salesReceived[0].SalesReceived?.contactId,
                     }}
                     label="ลูกค้า"
                 />
 
-                <Link href={`/sales/bill/${documentNo}/edit`}>
+                <Link href={`/sales/sales-received/${documentNo}/edit`}>
                     <Button variant={'destructive'}>แก้ไข</Button>
                 </Link>
             </div>
@@ -71,7 +75,7 @@ export default async function page({ params: { documentNo } }: Props) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {salesBillItems.map((item, index) => (
+                    {salesReceivedItems.map((item, index) => (
                         <TableRow key={index}>
                             <TableCell className="text-center">
                                 {index + 1}
@@ -92,7 +96,7 @@ export default async function page({ params: { documentNo } }: Props) {
                             Total
                         </TableHead>
                         <TableHead className="text-right">
-                            {salesBillItems
+                            {salesReceivedItems
                                 .reduce((total, item) => total + item.amount, 0)
                                 .toLocaleString()}
                         </TableHead>
