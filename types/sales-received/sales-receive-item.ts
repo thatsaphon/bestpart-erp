@@ -1,6 +1,6 @@
-import { getSalesReceive } from './sales-receive'
+import { getSalesReceived } from './sales-receive'
 
-export type SalesReceiveItem = {
+export type SalesReceivedItem = {
     id: number
     type: 'Sales' | 'SalesReturn' | 'SalesBill'
     date: Date
@@ -10,9 +10,9 @@ export type SalesReceiveItem = {
 }
 
 export const salesReceiveToSalesReceiveItems = (
-    salesReceive: getSalesReceive
-): SalesReceiveItem[] => {
-    const salesBillItems: SalesReceiveItem[] = []
+    salesReceive: getSalesReceived
+): SalesReceivedItem[] => {
+    const salesBillItems: SalesReceivedItem[] = []
 
     const sales =
         salesReceive.SalesReceived?.Sales.map((x) => ({
@@ -21,8 +21,8 @@ export const salesReceiveToSalesReceiveItems = (
             date: x.Document.date,
             documentId: salesReceive.id,
             documentNo: salesReceive.documentNo,
-            amount: x.SalesItem.reduce(
-                (a, b) => a + b.pricePerUnit * b.quantity,
+            amount: x.GeneralLedger.reduce(
+                (a, b) => (b.ChartOfAccount.isAr ? a + b.amount : a),
                 0
             ),
         })) || []
@@ -34,8 +34,8 @@ export const salesReceiveToSalesReceiveItems = (
             date: x.Document.date,
             documentId: salesReceive.id,
             documentNo: salesReceive.documentNo,
-            amount: -x.SalesReturnItem.reduce(
-                (a, b) => a + b.pricePerUnit * b.quantity,
+            amount: x.GeneralLedger.reduce(
+                (a, b) => (b.ChartOfAccount.isAr ? a + b.amount : a),
                 0
             ),
         })) || []
@@ -51,17 +51,19 @@ export const salesReceiveToSalesReceiveItems = (
                 x.Sales.reduce(
                     (a, b) =>
                         a +
-                        b.SalesItem.reduce(
-                            (a, b) => a + b.pricePerUnit * b.quantity,
+                        b.GeneralLedger.reduce(
+                            (a, b) =>
+                                b.ChartOfAccount.isAr ? a + b.amount : a,
                             0
                         ),
                     0
                 ) +
-                -x.SalesReturn.reduce(
+                x.SalesReturn.reduce(
                     (a, b) =>
                         a +
-                        b.SalesReturnItem.reduce(
-                            (a, b) => a + b.pricePerUnit * b.quantity,
+                        b.GeneralLedger.reduce(
+                            (a, b) =>
+                                b.ChartOfAccount.isAr ? a + b.amount : a,
                             0
                         ),
                     0

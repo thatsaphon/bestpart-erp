@@ -2,6 +2,8 @@
 
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import { fullDateFormat } from '@/lib/date-format'
+import { getSalesBill } from '@/types/sales-bill/sales-bill'
+import { salesBillToSalesBillItems } from '@/types/sales-bill/sales-bill-item'
 import { Prisma } from '@prisma/client'
 import {
     Page,
@@ -12,22 +14,7 @@ import {
     Font,
 } from '@react-pdf/renderer'
 
-const BillingNoteWithSubDocument =
-    Prisma.validator<Prisma.DocumentDefaultArgs>()({
-        include: {
-            ArSubledger: true,
-            GeneralLedger: {
-                include: {
-                    Document: true,
-                },
-            },
-        },
-    })
-export type BillingNoteDetail = Prisma.DocumentGetPayload<
-    typeof BillingNoteWithSubDocument
->
-
-type Props = { document: BillingNoteDetail }
+type Props = { document: getSalesBill }
 
 import { bahttext } from 'bahttext'
 
@@ -47,7 +34,7 @@ Font.register({
     fonts: [{ src: '/fonts/Inter-VariableFont_slnt,wght.ttf' }],
 })
 
-export default function BillingNotePdf({ document }: Props) {
+export default function SalesBillPdf({ document }: Props) {
     const styles = StyleSheet.create({
         page: {
             flexDirection: 'column',
@@ -130,9 +117,7 @@ export default function BillingNotePdf({ document }: Props) {
     })
 
     const getSalesInvoice = () => {
-        return document.GeneralLedger.sort(
-            (a, b) => a.Document[0].id - b.Document[0].id
-        )
+        return salesBillToSalesBillItems(document)
     }
 
     return (
@@ -154,10 +139,7 @@ export default function BillingNotePdf({ document }: Props) {
                     </View>
                     <View style={{ marginLeft: '10', gap: 2 }}>
                         <Text>เลขที่: {document?.documentNo}</Text>
-                        <Text>
-                            วันที่:{' '}
-                            {fullDateFormat(document?.date)}
-                        </Text>
+                        <Text>วันที่: {fullDateFormat(document?.date)}</Text>
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 `หน้าที่: ${pageNumber} / ${totalPages}`
@@ -174,15 +156,9 @@ export default function BillingNotePdf({ document }: Props) {
                     <Text style={styles.col6}>รวม</Text>
                 </View>
                 {getSalesInvoice().map((item, index) => (
-                    <View
-                        style={styles.row}
-                        key={item.Document[0].id}
-                        wrap={false}
-                    >
+                    <View style={styles.row} key={item.id} wrap={false}>
                         <Text style={styles.col1}>{index + 1}</Text>
-                        <Text style={styles.col2}>
-                            {item.Document[0].documentNo}
-                        </Text>
+                        <Text style={styles.col2}>{item.documentNo}</Text>
                         {/* <Text style={styles.col3}>
                             {`${item.GoodsMaster.SkuMaster.mainSku.name} - ${item.GoodsMaster.SkuMaster.detail}`}
                         </Text>

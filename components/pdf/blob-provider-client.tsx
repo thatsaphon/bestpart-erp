@@ -2,9 +2,9 @@
 
 import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/return-invoice-detail'
-import BillingNotePdf, {
+import SalesBillPdf, {
     BillingNoteDetail,
-} from '@/components/pdf/billing-note-pdf'
+} from '@/components/pdf/sales-bill-pdf'
 import SalesInvoicePdf_5x9 from '@/components/pdf/invoice-5.5-9'
 import SalesReturnInvoicePdf_5x9 from '@/components/pdf/return-invoice-5.5-9'
 import { Button } from '@/components/ui/button'

@@ -83,9 +83,19 @@ export async function getPaymentMethods() {
                 {
                     isCash: true,
                 },
+                {
+                    isDeposit: true,
+                },
             ],
         },
-        select: { id: true, name: true, type: true, isAr: true, isCash: true },
+        select: {
+            id: true,
+            name: true,
+            type: true,
+            isAr: true,
+            isCash: true,
+            isDeposit: true,
+        },
     })
 }
 

@@ -27,7 +27,7 @@ export default async function SalesBillEditPage({
                     >{`< ย้อนกลับ`}</Link>
                 </div>
                 <h1 className="my-2 text-3xl transition-colors">
-                    สร้างใบวางบิล
+                    แก้ไขใบวางบิล
                 </h1>
                 <h1 className="my-2 text-3xl transition-colors">ไม่พบข้อมูล</h1>
             </>

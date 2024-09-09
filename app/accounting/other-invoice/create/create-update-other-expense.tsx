@@ -30,7 +30,6 @@ import {
     AssetTypeToChartOfAccount,
     ChartOfAccount,
     DocumentRemark,
-    PaymentStatus,
 } from '@prisma/client'
 import { XIcon } from 'lucide-react'
 import React, { useEffect } from 'react'
@@ -38,7 +37,6 @@ import { createOtherInvoice } from './create-other-invoice'
 import toast from 'react-hot-toast'
 import { getPaymentMethods } from '@/app/actions/accounting'
 import { DocumentItem } from '@/types/document-item'
-import PaymentRemark from '@/components/table-caption/payment-remark'
 import { updateOtherInvoice } from '../[documentNo]/edit/update-other-invoice'
 
 type Props = {
@@ -206,7 +204,7 @@ export default function CreateUpdateOtherExpenseComponent({
                 </div> */}
             </div>
             <Table>
-                <PaymentRemark
+                {/* <PaymentRemark
                     paymentMethods={paymentMethods}
                     defaultDocumentDetails={defaultDocumentDetails}
                     defaultPayments={defaultPayments}
@@ -215,7 +213,7 @@ export default function CreateUpdateOtherExpenseComponent({
                     setSelectedPayments={setSelectedPayments}
                     remarks={remarks}
                     setRemarks={setRemarks}
-                />
+                /> */}
                 {/* <TableCaption></TableCaption> */}
                 <TableHeader>
                     <TableRow>

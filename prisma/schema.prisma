@@ -418,8 +418,6 @@ model SalesReceived {
   SalesReturn   SalesReturn[]
   SalesBill     SalesBill[]
   GeneralLedger GeneralLedger[]
-
-  amount Float
 }
 
 model Purchase {

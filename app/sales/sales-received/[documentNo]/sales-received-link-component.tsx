@@ -9,7 +9,7 @@ type Props = {
     document: getSalesBill
 }
 
-export default function BillInvoiceLinkComponent({ document }: Props) {
+export default function SalesReceivedLinkComponent({ document }: Props) {
     return (
         <BlobProviderClient>
             <SalesBillPdf document={document} />

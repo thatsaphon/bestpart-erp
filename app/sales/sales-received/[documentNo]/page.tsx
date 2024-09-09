@@ -14,7 +14,6 @@ import { fullDateFormat } from '@/lib/date-format'
 import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import BillInvoiceLinkComponent from './bill-invoice-link-component'
 
 type Props = {
     params: {
@@ -59,7 +58,6 @@ export default async function page({ params: { documentNo } }: Props) {
                 <Link href={`/sales/bill/${documentNo}/edit`}>
                     <Button variant={'destructive'}>แก้ไข</Button>
                 </Link>
-                <BillInvoiceLinkComponent document={billingNote[0]} />
             </div>
 
             <Table>

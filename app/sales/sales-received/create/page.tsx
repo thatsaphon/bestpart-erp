@@ -1,9 +1,12 @@
 import { Metadata } from 'next'
-import CreateUpdateSalesBillComponents from './create-update-sales-bill-components'
+import CreateUpdateSalesReceivedComponents from './create-update-sales-received-components'
 import Link from 'next/link'
 import prisma from '@/app/db/db'
 import { getUnpaidInvoices } from '@/types/sales-bill/unpaid-invoice'
 import { unpaidInvoiceToSalesBillItems } from '@/types/sales-bill/unpaid-invoice-to-sales-bill-item'
+import { getUnpaidBills } from '@/types/sales-received/unpaid-bill'
+import { unpaidBillsToSalesReceivedItems } from '@/types/sales-received/unpaid-bills-to-sales-Received-item copy'
+import { getPaymentMethods } from '@/app/actions/accounting'
 
 type Props = {
     searchParams: {
@@ -19,11 +22,13 @@ export default async function CreateBillPage({
     searchParams,
     searchParams: { contactId },
 }: Props) {
-    const unpaidInvoices = !!Number(contactId)
-        ? await getUnpaidInvoices(Number(contactId))
+    const unpaidInvoices = Number(contactId)
+        ? await getUnpaidBills(Number(contactId))
         : []
 
-    const unpaidItems = unpaidInvoiceToSalesBillItems(unpaidInvoices)
+    const unpaidItems = unpaidBillsToSalesReceivedItems(unpaidInvoices)
+
+    const paymentMethods = await getPaymentMethods()
 
     return (
         <>
@@ -33,10 +38,12 @@ export default async function CreateBillPage({
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
             </div>
-            <h1 className="my-2 text-3xl transition-colors">สร้างใบวางบิล</h1>
-            <CreateUpdateSalesBillComponents
+            <h1 className="my-2 text-3xl transition-colors">
+                สร้างใบเสร็จรับเงิน
+            </h1>
+            <CreateUpdateSalesReceivedComponents
                 unpaidItems={unpaidItems}
-                // paymentMethods={paymentMethods}
+                paymentMethods={paymentMethods}
             />
         </>
     )

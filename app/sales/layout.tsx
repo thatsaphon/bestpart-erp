@@ -33,6 +33,11 @@ export default async function RootLayout({
                     label="ใบจองสินค้า"
                 />
                 <Separator />
+                <SubMenuNavLink
+                    href="/sales/sales-received"
+                    label="ใบเสร็จรับเงิน"
+                />
+                <Separator />
             </div>
             <Separator orientation="vertical" className="h-full" />
             <div className="mb-2 p-3">{children}</div>

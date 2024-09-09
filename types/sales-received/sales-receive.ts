@@ -1,7 +1,7 @@
 import prisma from '@/app/db/db'
 import { Prisma } from '@prisma/client'
 
-export const getSalesReceiveDefaultFunction = async (
+export const getSalesReceivedDefaultFunction = async (
     where: Prisma.DocumentWhereInput
 ) => {
     return await prisma.document.findMany({
@@ -14,12 +14,18 @@ export const getSalesReceiveDefaultFunction = async (
                         include: {
                             SalesItem: true,
                             Document: true,
+                            GeneralLedger: {
+                                include: { ChartOfAccount: true },
+                            },
                         },
                     },
                     SalesReturn: {
                         include: {
                             SalesReturnItem: true,
                             Document: true,
+                            GeneralLedger: {
+                                include: { ChartOfAccount: true },
+                            },
                         },
                     },
                     SalesBill: {
@@ -28,11 +34,17 @@ export const getSalesReceiveDefaultFunction = async (
                             Sales: {
                                 include: {
                                     SalesItem: true,
+                                    GeneralLedger: {
+                                        include: { ChartOfAccount: true },
+                                    },
                                 },
                             },
                             SalesReturn: {
                                 include: {
                                     SalesReturnItem: true,
+                                    GeneralLedger: {
+                                        include: { ChartOfAccount: true },
+                                    },
                                 },
                             },
                         },
@@ -43,6 +55,6 @@ export const getSalesReceiveDefaultFunction = async (
     })
 }
 
-export type getSalesReceive = Awaited<
-    ReturnType<typeof getSalesReceiveDefaultFunction>
+export type getSalesReceived = Awaited<
+    ReturnType<typeof getSalesReceivedDefaultFunction>
 >[number]

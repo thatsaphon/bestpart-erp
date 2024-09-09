@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button'
 import {
     Table,
     TableBody,
@@ -11,20 +10,9 @@ import {
 import Link from 'next/link'
 import prisma from '../../../db/db'
 import PaginationComponent from '@/components/pagination-component'
-import { ViewIcon } from 'lucide-react'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
-import { Prisma } from '@prisma/client'
 import { cn } from '@/lib/utils'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { Fragment } from 'react'
-import { Badge } from '@/components/ui/badge'
 import { fullDateFormat } from '@/lib/date-format'
-import { getSalesBillDefaultFunction } from '@/types/sales-bill/sales-bill'
 
 type Props = {
     searchParams: {
@@ -33,15 +21,15 @@ type Props = {
     }
 }
 
-export default async function SalesListPage({
+export default async function SalesReceivedListPage({
     searchParams: { limit = '10', page = '1' },
 }: Props) {
-    const salesBills = await prisma.document.findMany({
+    const salesReceiveds = await prisma.document.findMany({
         where: {
-            type: 'SalesBill',
+            type: 'SalesReceived',
         },
         include: {
-            SalesBill: {
+            SalesReceived: {
                 include: {
                     Contact: true,
                     Sales: {
@@ -62,7 +50,28 @@ export default async function SalesListPage({
                             },
                         },
                     },
-                    SalesReceived: true,
+                    SalesBill: {
+                        include: {
+                            Sales: {
+                                include: {
+                                    GeneralLedger: {
+                                        include: {
+                                            ChartOfAccount: true,
+                                        },
+                                    },
+                                },
+                            },
+                            SalesReturn: {
+                                include: {
+                                    GeneralLedger: {
+                                        include: {
+                                            ChartOfAccount: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -73,7 +82,7 @@ export default async function SalesListPage({
 
     const documentCount = await prisma.document.count({
         where: {
-            type: 'SalesBill',
+            type: 'SalesReceived',
         },
     })
     const numberOfPage = Math.ceil(documentCount / Number(limit))
@@ -89,49 +98,44 @@ export default async function SalesListPage({
                             เลขที่เอกสาร
                         </TableHead>
                         <TableHead>ลูกค้า</TableHead>
-                        <TableHead>Status</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {salesBills.map((bill, index) => (
+                    {salesReceiveds.map((received, index) => (
                         <TableRow
-                            key={bill.documentNo}
+                            key={received.documentNo}
                             className={cn(
                                 index % 2 === 0 && 'bg-muted-100',
                                 'border-b'
                             )}
                         >
                             <TableCell className="w-[150px]">
-                                {fullDateFormat(bill.date)}
+                                {fullDateFormat(received.date)}
                             </TableCell>
                             <TableCell className="w-[100px]">
-                                {bill.documentNo}
+                                {received.documentNo}
                             </TableCell>
                             <TableCell>
-                                {bill.SalesBill?.Contact.name}
-                            </TableCell>
-                            <TableCell>
-                                {bill.SalesBill?.salesReceivedId ? (
-                                    <Badge className="bg-green-500">
-                                        จ่ายแล้ว
-                                    </Badge>
-                                ) : (
-                                    <Badge variant={'destructive'}>
-                                        ยังไม่จ่าย
-                                    </Badge>
-                                )}
+                                {received.SalesReceived?.Contact.name}
                             </TableCell>
                             <TableCell className="text-right">
                                 {[
-                                    ...(bill.SalesBill?.Sales || []),
-                                    ...(bill.SalesBill?.SalesReturn || []),
+                                    ...(received.SalesReceived?.Sales || []),
+                                    ...(received.SalesReceived?.SalesReturn ||
+                                        []),
+                                    ...(received.SalesReceived?.SalesBill.flatMap(
+                                        (bill) =>
+                                            bill.Sales
+                                                ? bill.Sales
+                                                : bill.SalesReturn
+                                    ) || []),
                                 ]
                                     .reduce(
                                         (a, b) =>
                                             a +
-                                            b.GeneralLedger.reduce(
+                                            b?.GeneralLedger?.reduce(
                                                 (a, b) =>
                                                     b.ChartOfAccount.isAr
                                                         ? a + b.amount
@@ -143,7 +147,9 @@ export default async function SalesListPage({
                                     .toLocaleString()}
                             </TableCell>
                             <TableCell>
-                                <Link href={`/sales/bill/${bill.documentNo}`}>
+                                <Link
+                                    href={`/sales/sales-received/${received.documentNo}`}
+                                >
                                     <EyeOpenIcon />
                                 </Link>
                             </TableCell>
