@@ -1,13 +1,12 @@
-import LoginComponent from '@/components/login-component'
-import { getServerSession } from 'next-auth'
-import { authOptions } from './api/auth/[...nextauth]/authOptions'
+import { Dashboard } from '@/components/dashboard'
 
 export default async function Home() {
-  return (
-    <div className='p-5'>
-      <h1 className='text-3xl font-bold underline mb-5'>
-        Welcome to BestPart Alai
-      </h1>
-    </div>
-  )
+    return (
+        <div className="p-5">
+            <h1 className="mb-5 text-3xl font-bold underline">
+                Welcome to BestPart Alai
+            </h1>
+            <Dashboard />
+        </div>
+    )
 }

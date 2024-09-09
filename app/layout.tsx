@@ -9,9 +9,7 @@ import { getServerSession } from 'next-auth'
 
 import SessionProvider from '@/components/session-provider'
 import { authOptions } from './api/auth/[...nextauth]/authOptions'
-import LoginComponent from '@/components/login-component'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import CreateUser from './auth/create/page'
 import { NextRequest } from 'next/server'
 
 export const fontSans = FontSans({

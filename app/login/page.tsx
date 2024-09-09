@@ -11,7 +11,7 @@ export default async function page({}: Props) {
     if (session) return redirect('/')
 
     return (
-        <main className="h-screen w-screen md:p-36">
+        <main className="flex h-screen w-screen items-center justify-center md:mt-[-5%]">
             <LoginComponent />
         </main>
     )

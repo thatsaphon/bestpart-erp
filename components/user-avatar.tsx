@@ -28,7 +28,7 @@ type Props = {
 
 export default function UserAvatar({ user }: Props) {
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button className='rounded-full'>
           <Avatar>
