@@ -27,7 +27,7 @@ import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import { createCustomerOrder } from './create-customer-order'
 import { updateCustomerOrder } from './update-customer-order'
 import { Textarea } from '@/components/ui/textarea'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { Badge } from '@/components/ui/badge'
 import {
     Select,

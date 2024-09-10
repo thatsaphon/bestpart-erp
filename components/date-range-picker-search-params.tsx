@@ -25,11 +25,10 @@ export default function DateRangePickerSearchParams({}: Props) {
             initialDateTo={
                 typeof searchParams.get('to') === 'string'
                     ? new Date(searchParams.get('to') as string)
-                    : searchParams.get('to') ?? new Date()
+                    : (searchParams.get('to') ?? new Date())
             }
             showCompare={false}
             onUpdate={({ range, rangeCompare }) => {
-                searchParams.toString()
                 const newSearchParams = new URLSearchParams(searchParams)
                 newSearchParams.set('from', format(range.from, 'yyyy-MM-dd'))
                 newSearchParams.set(

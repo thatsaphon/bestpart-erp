@@ -1,6 +1,6 @@
 import React from 'react'
 import { TableCaption } from '../ui/table'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { DocumentRemark } from '@prisma/client'
 import { Badge } from '../ui/badge'
 import {

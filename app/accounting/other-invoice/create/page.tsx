@@ -2,7 +2,7 @@ import Link from 'next/link'
 import React from 'react'
 import CreateUpdateOtherExpenseComponent from './create-update-other-expense'
 import prisma from '@/app/db/db'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 
 type Props = {}
 

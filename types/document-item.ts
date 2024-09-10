@@ -21,7 +21,7 @@ export type DocumentItem = {
     quantity: number
     lastPurchaseCostPerUnit?: number | null
     pricePerUnit: number
-    partNumber: string
+    partNumber?: string
     remaining?: number
     remainingAt?: Date
     Image: SkuMasterImage[]

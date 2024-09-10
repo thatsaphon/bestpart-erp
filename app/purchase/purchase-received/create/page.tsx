@@ -9,7 +9,7 @@ export default function CreatePurchaseInvoicePage({}: Props) {
         <>
             <div className="flex justify-between">
                 <Link
-                    href={`/purchase`}
+                    href={`/purchase/purchase-received`}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
             </div>

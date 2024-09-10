@@ -6,7 +6,8 @@ import { getUnpaidInvoices } from '@/types/sales-bill/unpaid-invoice'
 import { unpaidInvoiceToSalesBillItems } from '@/types/sales-bill/unpaid-invoice-to-sales-bill-item'
 import { getUnpaidBills } from '@/types/sales-received/unpaid-bill'
 import { unpaidBillsToSalesReceivedItems } from '@/types/sales-received/unpaid-bills-to-sales-Received-item copy'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
+import { getDepositAmount } from '@/actions/get-deposit-amount'
 
 type Props = {
     searchParams: {
@@ -30,6 +31,8 @@ export default async function CreateBillPage({
 
     const paymentMethods = await getPaymentMethods()
 
+    const depositAmount = await getDepositAmount(Number(contactId))
+
     return (
         <>
             <div className="flex justify-between">
@@ -44,6 +47,7 @@ export default async function CreateBillPage({
             <CreateUpdateSalesReceivedComponents
                 unpaidItems={unpaidItems}
                 paymentMethods={paymentMethods}
+                depositAmount={depositAmount}
             />
         </>
     )

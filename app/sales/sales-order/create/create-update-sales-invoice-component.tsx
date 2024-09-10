@@ -36,33 +36,33 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { GetSales } from '@/types/sales/sales'
 import {
     getDefaultSalesItem,
     GetSalesItems,
-    salesItemsToInventoryDetailType,
+    salesItemsToDocumentItems,
 } from '@/types/sales/sales-item'
 import { DocumentDetailForm } from '@/components/document-detail-form'
 import {
     DocumentDetail,
     getDefaultDocumentDetail,
 } from '@/types/document-detail'
+import AddPaymentComponent from '@/components/add-payment-component'
+import { Payment } from '@/types/payment/payment'
 
 type Props = {
     sales?: GetSales
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
-    defaultPayments?: { id: number; amount: number }[]
-    defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
+    deposit?: number
 }
 
 export default function CreateOrUpdateSalesInvoiceComponent({
     sales,
     paymentMethods,
-    defaultPayments,
-    defaultRemarks,
+    deposit = 0,
 }: Props) {
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
         sales
@@ -72,24 +72,18 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
     const [items, setItems] = React.useState<DocumentItem[]>(
-        salesItemsToInventoryDetailType(sales?.Sales?.SalesItem)
+        salesItemsToDocumentItems(sales?.Sales?.SalesItem)
     )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
     const session = useSession()
     const [remarks, setRemarks] = React.useState<
         { id?: number; remark: string; isDeleted?: boolean }[]
-    >(defaultRemarks || [])
+    >([])
     const [remarkInput, setRemarkInput] = React.useState<string>('')
-    const [selectedPayments, setSelectedPayments] = React.useState<
+    const [payments, setPayments] = React.useState<
         { id: number; amount: number }[]
-    >(defaultPayments || [])
-    const [selectedPayment, setSelectedPayment] = React.useState<
-        number | undefined
-    >()
-    const [paymentAmount, setPaymentAmount] = React.useState<
-        number | undefined
-    >()
+    >([])
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -124,40 +118,40 @@ export default function CreateOrUpdateSalesInvoiceComponent({
         }
     }, [key, open])
 
-    const addRemark = () => {
-        if (!remarkInput) return
-        setRemarks((prev) => [...prev, { remark: remarkInput }])
-        setRemarkInput('')
-    }
+    // const addRemark = () => {
+    //     if (!remarkInput) return
+    //     setRemarks((prev) => [...prev, { remark: remarkInput }])
+    //     setRemarkInput('')
+    // }
 
-    const removeRemark = (index: number) => {
-        // setRemarks((prev) => prev.filter((_, i) => i !== index))
-        const remarkToRemove = remarks[index]
-        if (remarkToRemove.id) {
-            setRemarks((prev) =>
-                prev.map((remark) =>
-                    remark.id === remarkToRemove.id
-                        ? { ...remark, isDeleted: true }
-                        : remark
-                )
-            )
-        } else {
-            setRemarks((prev) => prev.filter((_, i) => i !== index))
-        }
-    }
+    // const removeRemark = (index: number) => {
+    //     // setRemarks((prev) => prev.filter((_, i) => i !== index))
+    //     const remarkToRemove = remarks[index]
+    //     if (remarkToRemove.id) {
+    //         setRemarks((prev) =>
+    //             prev.map((remark) =>
+    //                 remark.id === remarkToRemove.id
+    //                     ? { ...remark, isDeleted: true }
+    //                     : remark
+    //             )
+    //         )
+    //     } else {
+    //         setRemarks((prev) => prev.filter((_, i) => i !== index))
+    //     }
+    // }
 
-    const addPayment = () => {
-        if (!selectedPayment || !paymentAmount) {
-            toast.error('กรุณาเลือกช่องทางการชําระเงินหรือจำนวนเงิน')
-            return
-        }
-        setSelectedPayments((prev) => [
-            ...prev,
-            { id: selectedPayment, amount: paymentAmount },
-        ])
-        setSelectedPayment(undefined)
-        setPaymentAmount(undefined)
-    }
+    // const addPayment = () => {
+    //     if (!selectedPayment || !paymentAmount) {
+    //         toast.error('กรุณาเลือกช่องทางการชําระเงินหรือจำนวนเงิน')
+    //         return
+    //     }
+    //     setSelectedPayments((prev) => [
+    //         ...prev,
+    //         { id: selectedPayment, amount: paymentAmount },
+    //     ])
+    //     setSelectedPayment(undefined)
+    //     setPaymentAmount(undefined)
+    // }
 
     return (
         <div className="p-3" id={key} key={key}>
@@ -166,10 +160,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                 action={async (formData) => {
                     try {
                         if (
-                            selectedPayments.reduce(
-                                (a, b) => a + b.amount,
-                                0
-                            ) !==
+                            payments.reduce((a, b) => a + b.amount, 0) !==
                             items.reduce(
                                 (acc, item) =>
                                     acc + item.pricePerUnit * item.quantity,
@@ -185,7 +176,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 // formData,
                                 documentDetail,
                                 items,
-                                selectedPayments,
+                                payments,
                                 remarks
                             )
                             // setKey(String(Date.now()))
@@ -197,7 +188,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 sales.id,
                                 documentDetail,
                                 items,
-                                selectedPayments,
+                                payments,
                                 remarks
                             )
                             toast.success('บันทึกสําเร็จ')
@@ -214,38 +205,13 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                     documentDetail={documentDetail}
                     label="ลูกค้า"
                     placeholder="รหัสลูกค้า"
+                    useSearchParams
                 />
                 <Table>
-                    <TableCaption>
+                    {/* <TableCaption>
                         <div className="w-[650px] space-y-1">
                             <div className="flex items-center gap-1 text-left">
                                 ช่องทางชำระเงิน:{' '}
-                                {/* {!defaultDocumentDetail ? (
-                                    <></>
-                                ) : defaultDocumentDetail?.paymentStatus ===
-                                  'Paid' ? (
-                                    <Badge className="bg-green-400">
-                                        จ่ายแล้ว
-                                    </Badge>
-                                ) : defaultDocumentDetail?.paymentStatus ===
-                                  'Billed' ? (
-                                    <Badge variant={`secondary`}>
-                                        วางบิลแล้ว
-                                    </Badge>
-                                ) : defaultDocumentDetail?.paymentStatus ===
-                                  'PartialPaid' ? (
-                                    <Badge variant={'destructive'}>
-                                        จ่ายบางส่วน
-                                    </Badge>
-                                ) : !defaultDocumentDetail?.paymentStatus ? (
-                                    <Badge className="bg-green-400">
-                                        เงินสด
-                                    </Badge>
-                                ) : (
-                                    <Badge variant={'destructive'}>
-                                        ยังไม่จ่าย
-                                    </Badge>
-                                )} */}
                             </div>
                             {selectedPayments.map((item) => (
                                 <div
@@ -411,7 +377,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             </Button>
                             <Button type="submit">Save</Button>
                         </div>
-                    </TableCaption>
+                    </TableCaption> */}
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>
@@ -693,6 +659,22 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 )}
                             </TableCell>
                             <TableCell className="text-right"></TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableHead colSpan={3}></TableHead>
+                            <TableHead colSpan={2}>
+                                <AddPaymentComponent
+                                    paymentMethods={paymentMethods}
+                                    payments={[]}
+                                    setPayments={function (
+                                        value: React.SetStateAction<Payment[]>
+                                    ): void {
+                                        throw new Error(
+                                            'Function not implemented.'
+                                        )
+                                    }}
+                                />
+                            </TableHead>
                         </TableRow>
                     </TableFooter>
                 </Table>

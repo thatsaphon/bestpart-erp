@@ -1,4 +1,4 @@
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import prisma from '@/app/db/db'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'

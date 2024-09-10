@@ -8,7 +8,7 @@ import {
     SkuMasterRemark,
 } from '@prisma/client'
 import Link from 'next/link'
-import { salesItemsToInventoryDetailType } from '@/types/sales/sales-item'
+import { salesItemsToDocumentItems } from '@/types/sales/sales-item'
 import { purchaseItemsToInventoryDetailType } from '@/types/purchase/purchase-item'
 import { getPurchaseDefaultFunction } from '@/types/purchase/purchase'
 
@@ -28,7 +28,7 @@ export default async function EditPurchaseInvoicePage({
             {' '}
             <div className="flex justify-between">
                 <Link
-                    href={`/purchase/${documentNo}`}
+                    href={`/purchase/purchase-received/${documentNo}`}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
             </div>

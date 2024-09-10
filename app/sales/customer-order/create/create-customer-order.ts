@@ -125,7 +125,7 @@ export async function createCustomerOrder(
                     CustomerOrderItem: {
                         create: items.map((item) => ({
                             description: item.description,
-                            price: item.pricePerUnit,
+                            pricePerUnit: item.pricePerUnit,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             barcode: item.barcode,

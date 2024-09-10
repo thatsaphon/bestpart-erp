@@ -71,8 +71,8 @@ export default function SelectSearchContact<T>({
     const [searchValue, setSearchValue] = useState('')
     const [searchResults, setSearchResults] = useState<Contact[]>([])
     const [error, setError] = useState<string | null>(null)
-    const [contactId, setContactId] = useState<number | null | undefined>(
-        documentDetail?.contactId
+    const [contactId, setContactId] = useState<number | string>(
+        documentDetail?.contactId || ''
     )
 
     useEffect(() => {
@@ -114,10 +114,8 @@ export default function SelectSearchContact<T>({
                         <span className="relative">
                             <Input
                                 name={name}
-                                value={contactId || undefined}
-                                onChange={(e) =>
-                                    setContactId(+e.target.value || undefined)
-                                }
+                                value={contactId || ''}
+                                onChange={(e) => setContactId(e.target.value)}
                                 onKeyDown={async (e) => {
                                     if (e.shiftKey && e.code === 'Slash') {
                                         e.preventDefault()
@@ -127,7 +125,7 @@ export default function SelectSearchContact<T>({
                                     if (e.key === 'Enter') {
                                         e.preventDefault()
                                         try {
-                                            if (contactId == undefined) {
+                                            if (contactId !== '') {
                                                 setError(null)
                                                 setDocumentDetail(
                                                     getDefaultDocumentDetail()
@@ -136,7 +134,7 @@ export default function SelectSearchContact<T>({
                                             }
                                             const result =
                                                 await searchAccountReceivableById(
-                                                    contactId
+                                                    +contactId
                                                 )
                                             setDocumentDetail({
                                                 ...documentDetail,

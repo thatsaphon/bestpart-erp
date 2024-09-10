@@ -1,4 +1,4 @@
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import Link from 'next/link'
 import { ResolvingMetadata, Metadata } from 'next'
 import { getSalesReturnDefaultFunction } from '@/types/sales-return/sales-return'

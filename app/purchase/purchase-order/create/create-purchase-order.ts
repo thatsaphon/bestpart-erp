@@ -24,7 +24,7 @@ export const createPurchaseOrder = async (
         referenceNo,
     }: DocumentDetail,
     items: DocumentItem[],
-    purchaseOrderId?: number
+    customerOrderIds?: number[]
 ) => {
     const contact = await prisma.contact.findUnique({
         where: {
@@ -49,7 +49,7 @@ export const createPurchaseOrder = async (
     }
 
     if (!documentNo) {
-        documentNo = await generateDocumentNumber('PINV', date)
+        documentNo = await generateDocumentNumber('PO', date)
     }
 
     const session = await getServerSession(authOptions)
@@ -110,21 +110,13 @@ export const createPurchaseOrder = async (
                             estimatedDeliveryDate: addDays(new Date(), 7),
                         })),
                     },
+                    CustomerOrderLink: {
+                        connect: customerOrderIds?.map((id) => ({ id })),
+                    },
                 },
             },
         },
     })
-
-    // await prisma.contact.update({
-    //     where: {
-    //         id: Number(contactId),
-    //     },
-    //     data: {
-    //         SkuMaster: {
-    //             connect: items.map((item) => ({ id: item.skuMasterId })),
-    //         },
-    //     },
-    // })
 
     revalidatePath('/purchase/purchase-order')
     redirect(`/purchase/purchase-order/${invoice.documentNo}`)

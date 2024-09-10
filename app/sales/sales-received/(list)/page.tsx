@@ -32,44 +32,9 @@ export default async function SalesReceivedListPage({
             SalesReceived: {
                 include: {
                     Contact: true,
-                    Sales: {
+                    GeneralLedger: {
                         include: {
-                            GeneralLedger: {
-                                include: {
-                                    ChartOfAccount: true,
-                                },
-                            },
-                        },
-                    },
-                    SalesReturn: {
-                        include: {
-                            GeneralLedger: {
-                                include: {
-                                    ChartOfAccount: true,
-                                },
-                            },
-                        },
-                    },
-                    SalesBill: {
-                        include: {
-                            Sales: {
-                                include: {
-                                    GeneralLedger: {
-                                        include: {
-                                            ChartOfAccount: true,
-                                        },
-                                    },
-                                },
-                            },
-                            SalesReturn: {
-                                include: {
-                                    GeneralLedger: {
-                                        include: {
-                                            ChartOfAccount: true,
-                                        },
-                                    },
-                                },
-                            },
+                            ChartOfAccount: true,
                         },
                     },
                 },
@@ -121,30 +86,19 @@ export default async function SalesReceivedListPage({
                                 {received.SalesReceived?.Contact.name}
                             </TableCell>
                             <TableCell className="text-right">
-                                {[
-                                    ...(received.SalesReceived?.Sales || []),
-                                    ...(received.SalesReceived?.SalesReturn ||
-                                        []),
-                                    ...(received.SalesReceived?.SalesBill.flatMap(
-                                        (bill) =>
-                                            bill.Sales
-                                                ? bill.Sales
-                                                : bill.SalesReturn
-                                    ) || []),
-                                ]
-                                    .reduce(
-                                        (a, b) =>
-                                            a +
-                                            b?.GeneralLedger?.reduce(
-                                                (a, b) =>
-                                                    b.ChartOfAccount.isAr
-                                                        ? a + b.amount
-                                                        : a,
-                                                0
-                                            ),
-                                        0
-                                    )
-                                    .toLocaleString()}
+                                {received.SalesReceived?.GeneralLedger.reduce(
+                                    (
+                                        a,
+                                        {
+                                            amount,
+                                            ChartOfAccount: {
+                                                isCash,
+                                                isDeposit,
+                                            },
+                                        }
+                                    ) => (isCash || isDeposit ? a + amount : a),
+                                    0
+                                ).toLocaleString()}
                             </TableCell>
                             <TableCell>
                                 <Link

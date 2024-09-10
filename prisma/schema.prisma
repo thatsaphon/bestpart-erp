@@ -766,7 +766,7 @@ model CustomerOrderItem {
   unit            String
   quantityPerUnit Float   @default(1)
   quantity        Float
-  price           Float
+  pricePerUnit    Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -804,9 +804,9 @@ model QuotationItem {
   quantityPerUnit Float   @default(1)
   description     String?
 
-  quantity Float
-  price    Float
-  vat      Float
+  quantity     Float
+  pricePerUnit Float
+  vat          Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

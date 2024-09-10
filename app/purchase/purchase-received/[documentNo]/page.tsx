@@ -11,13 +11,13 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Textarea } from '../../../components/ui/textarea'
-import { Button } from '../../../components/ui/button'
+import { Textarea } from '../../../../components/ui/textarea'
+import { Button } from '../../../../components/ui/button'
 import { getPurchaseInvoiceDetail } from '@/app/actions/purchase/purchase-invoice-detail'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
-import SelectSearchVendor from '../../../components/select-search-vendor'
+import SelectSearchVendor from '../../../../components/select-search-vendor'
 
 type Props = {
     params: { documentNo: string }
@@ -43,7 +43,7 @@ export default async function PurchaseInvoiceDetailPage({
             <div className="mb-2 p-3">
                 <div className="flex justify-between">
                     <Link
-                        href={`/purchase`}
+                        href={`/purchase/purchase-received`}
                         className="text-primary/50 underline hover:text-primary"
                     >{`< ย้อนกลับ`}</Link>
                 </div>
@@ -71,7 +71,7 @@ export default async function PurchaseInvoiceDetailPage({
                     {session?.user.role === 'ADMIN' && (
                         <div>
                             <Link
-                                href={`/purchase/${document?.documentNo}/edit`}
+                                href={`/purchase/purchase-received/${document?.documentNo}/edit`}
                             >
                                 <Button type="button" variant={'destructive'}>
                                     Edit

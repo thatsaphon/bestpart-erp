@@ -1,5 +1,5 @@
 import React from 'react'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import CreateOrUpdateQuotationComponent from '../../create/create-update-quotation-component'

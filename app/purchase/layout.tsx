@@ -23,7 +23,10 @@ export default async function RootLayout({
                     label="ใบสั่งซื้อ"
                 />
                 <Separator />
-                <SubMenuNavLink href="/purchase" label="รับสินค้า" />
+                <SubMenuNavLink
+                    href="/purchase/purchase-received"
+                    label="รับสินค้า"
+                />
                 <Separator />
                 <SubMenuNavLink href="/purchase/payment" label="ใบสำคัญจ่าย" />
                 <Separator />

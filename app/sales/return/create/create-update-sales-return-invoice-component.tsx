@@ -29,9 +29,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { cn } from '@/lib/utils'
-import { salesItemsToInventoryDetailType } from '@/types/sales/sales-item'
+import { salesItemsToDocumentItems } from '@/types/sales/sales-item'
 import { DocumentDetailForm } from '@/components/document-detail-form'
 import {
     DocumentDetail,

@@ -1,4 +1,4 @@
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import prisma from '@/app/db/db'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
@@ -61,7 +61,7 @@ export default async function CustomerOrderDetailPage({
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
                 <h1 className="my-2 text-3xl transition-colors">
-                    รายละเอียดบิลขาย
+                    รายละเอียดใบจองสินค้า
                 </h1>
                 <div className="flex justify-between pr-4">
                     <div className="flex gap-3">

@@ -80,7 +80,7 @@ export function NavMenubar() {
                 )}
             </MenubarMenu>
             <MenubarMenu>
-                <Link href={'/purchase'}>
+                <Link href={'/purchase/purchase-received'}>
                     <MenubarTrigger
                         className={cn(
                             pathName.includes('/purchase') && 'bg-accent'

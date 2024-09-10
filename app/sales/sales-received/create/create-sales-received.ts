@@ -1,6 +1,7 @@
 'use server'
 
 import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import prisma from '@/app/db/db'
 import { DocumentDetail } from '@/types/document-detail'
 import { Payment } from '@/types/payment/payment'
@@ -57,7 +58,10 @@ export const createSalesReceived = async (
                     },
                     GeneralLedger: {
                         create: [
-                            ...payments,
+                            ...payments.map((payment) => ({
+                                chartOfAccountId: payment.chartOfAccountId,
+                                amount: payment.amount,
+                            })),
                             {
                                 chartOfAccountId: 12000,
                                 amount: -salesReceivedItems.reduce(

@@ -35,7 +35,7 @@ import { XIcon } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { createOtherInvoice } from './create-other-invoice'
 import toast from 'react-hot-toast'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { DocumentItem } from '@/types/document-item'
 import { updateOtherInvoice } from '../[documentNo]/edit/update-other-invoice'
 

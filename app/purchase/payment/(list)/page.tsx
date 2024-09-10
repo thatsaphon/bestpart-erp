@@ -137,7 +137,9 @@ export default async function PaymentPage({
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
-                                <Link href={`/purchase/${invoice.documentNo}`}>
+                                <Link
+                                    href={`/purchase/purchase-received/${invoice.documentNo}`}
+                                >
                                     <EyeOpenIcon />
                                 </Link>
                             </TableCell>

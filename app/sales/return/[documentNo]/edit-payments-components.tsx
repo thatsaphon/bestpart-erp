@@ -1,6 +1,6 @@
 'use client'
 
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import {
     Select,
     SelectContent,

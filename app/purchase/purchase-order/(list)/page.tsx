@@ -39,9 +39,7 @@ export default async function PurchaseOrderPage({
 }: Props) {
     const purchaseInvoices = await prisma.document.findMany({
         where: {
-            documentNo: {
-                startsWith: 'PINV',
-            },
+            type: 'PurchaseOrder',
             AND: [
                 {
                     date: {
@@ -73,9 +71,7 @@ export default async function PurchaseOrderPage({
 
     const documentCount = await prisma.document.count({
         where: {
-            documentNo: {
-                startsWith: 'PINV',
-            },
+            type: 'PurchaseOrder',
         },
     })
     const numberOfPage = Math.ceil(documentCount / Number(limit))

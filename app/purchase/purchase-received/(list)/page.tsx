@@ -10,7 +10,7 @@ import {
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import prisma from '../../db/db'
+import prisma from '../../../db/db'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import PaginationComponent from '@/components/pagination-component'
 import { format } from 'date-fns'
@@ -143,7 +143,9 @@ export default async function PurchasePage({
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
-                                <Link href={`/purchase/${invoice.documentNo}`}>
+                                <Link
+                                    href={`/purchase/purchase-received/${invoice.documentNo}`}
+                                >
                                     <EyeOpenIcon />
                                 </Link>
                             </TableCell>

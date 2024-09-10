@@ -251,7 +251,7 @@ export const updatePurchaseOrder = async (
         },
     })
 
-    revalidatePath('/purchase')
-    revalidatePath(`/purchase/${documentNo}`)
-    redirect(`/purchase/${documentNo}`)
+    revalidatePath('/purchase/purchase-order')
+    revalidatePath(`/purchase/purchase-order/${documentNo}`)
+    redirect(`/purchase/purchase-order/${documentNo}`)
 }

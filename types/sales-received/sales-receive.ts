@@ -49,6 +49,11 @@ export const getSalesReceivedDefaultFunction = async (
                             },
                         },
                     },
+                    GeneralLedger: {
+                        include: {
+                            ChartOfAccount: true,
+                        },
+                    },
                 },
             },
         },

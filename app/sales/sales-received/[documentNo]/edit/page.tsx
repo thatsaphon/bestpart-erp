@@ -9,7 +9,8 @@ import { getSalesReceivedDefaultFunction } from '@/types/sales-received/sales-re
 import { salesReceiveToSalesReceiveItems } from '@/types/sales-received/sales-receive-item'
 import { unpaidBillsToSalesReceivedItems } from '@/types/sales-received/unpaid-bills-to-sales-Received-item copy'
 import { getUnpaidBills } from '@/types/sales-received/unpaid-bill'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
+import { getDepositAmount } from '@/actions/get-deposit-amount'
 
 type Props = {
     params: {
@@ -48,6 +49,10 @@ export default async function SalesReceivedEditPage({
     const paymentMethods = await getPaymentMethods()
 
     const unpaidItems = unpaidBillsToSalesReceivedItems(unpaidInvoices)
+    const depositAmount = await getDepositAmount(
+        salesReceived[0].SalesReceived.contactId,
+        { salesReceivedIds: [salesReceived[0].SalesReceived.id] }
+    )
     return (
         <>
             <div className="flex justify-between">
@@ -65,6 +70,7 @@ export default async function SalesReceivedEditPage({
                 existingSalesReceivedItems={salesReceivedItems}
                 unpaidItems={unpaidItems}
                 paymentMethods={paymentMethods}
+                depositAmount={depositAmount}
             />
         </>
     )

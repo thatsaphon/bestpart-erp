@@ -1,6 +1,6 @@
 import React from 'react'
 // import CreateOrUpdateSalesInvoiceComponent from './create-update-sales-invoice-component'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import Link from 'next/link'
 // import CreateOrUpdateSalesReturnInvoiceComponent from './create-update-sales-return-invoice-component'
 import { Metadata } from 'next'

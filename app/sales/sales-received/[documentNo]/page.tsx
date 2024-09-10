@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { getSalesReceivedDefaultFunction } from '@/types/sales-received/sales-receive'
 import { salesReceiveToSalesReceiveItems } from '@/types/sales-received/sales-receive-item'
+import PaymentComponentReadonly from '@/components/payment-component-readonly'
 
 type Props = {
     params: {
@@ -40,6 +41,15 @@ export default async function page({ params: { documentNo } }: Props) {
     const salesReceivedItems = await salesReceiveToSalesReceiveItems(
         salesReceived[0]
     )
+
+    const payments =
+        salesReceived[0].SalesReceived?.GeneralLedger.filter(
+            ({ ChartOfAccount: { isCash, isDeposit } }) => isCash || isDeposit
+        ).map(({ chartOfAccountId, amount, ChartOfAccount: { name } }) => ({
+            chartOfAccountId,
+            amount,
+            name,
+        })) || []
 
     return (
         <div className="p-3">
@@ -102,16 +112,14 @@ export default async function page({ params: { documentNo } }: Props) {
                         </TableHead>
                         <TableHead></TableHead>
                     </TableRow>
+                    <TableRow>
+                        <TableHead colSpan={5}>
+                            <PaymentComponentReadonly payments={payments} />
+                        </TableHead>
+                        <TableHead></TableHead>
+                    </TableRow>
                 </TableFooter>
             </Table>
-
-            {/* <div className="mt-4">
-                <ReceivedDialog
-                    bankAccounts={bankAccounts}
-                    billAmount={salesInvoices.reduce((a, b) => a + b.amount, 0)}
-                    documentNo={documentNo}
-                />
-            </div> */}
         </div>
     )
 }

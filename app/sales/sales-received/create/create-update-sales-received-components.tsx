@@ -39,7 +39,7 @@ import { updateSalesReceived } from './update-sales-received'
 import { getSalesReceived } from '@/types/sales-received/sales-receive'
 import { SalesReceivedItem } from '@/types/sales-received/sales-receive-item'
 import { Payment } from '@/types/payment/payment'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import AddPaymentComponent from '@/components/add-payment-component'
 
 type Props = {
@@ -47,30 +47,79 @@ type Props = {
     existingSalesReceivedItems?: SalesReceivedItem[]
     unpaidItems: SalesReceivedItem[]
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
+    depositAmount: number
 }
 
 export default function CreateUpdateSalesReceivedComponents({
-    existingSalesReceived: existingSalesBill,
-    existingSalesReceivedItems: existingSalesBillItems = [],
+    existingSalesReceived,
+    existingSalesReceivedItems = [],
     unpaidItems,
     paymentMethods,
+    depositAmount,
 }: Props) {
-    const router = useRouter()
     const [documentDetail, setDocumentDetail] = useState<DocumentDetail>(
-        existingSalesBill
+        existingSalesReceived
             ? {
-                  ...existingSalesBill,
-                  contactId: existingSalesBill?.SalesReceived?.contactId,
+                  ...existingSalesReceived,
+                  contactId: existingSalesReceived?.SalesReceived?.contactId,
               }
             : getDefaultDocumentDetail()
     )
     const [open, setOpen] = useState(false)
     const [selectedItems, setSelectedItems] = useState<SalesReceivedItem[]>(
-        existingSalesBillItems
+        existingSalesReceivedItems
     )
-    const [payments, setPayments] = useState<Payment[]>([])
+    const [payments, setPayments] = useState<Payment[]>(
+        existingSalesReceived?.SalesReceived?.GeneralLedger.filter(
+            ({ ChartOfAccount: { isCash, isDeposit } }) => isCash || isDeposit
+        ).map(
+            ({
+                chartOfAccountId,
+                amount,
+                ChartOfAccount: {
+                    name,
+                    isAp,
+                    isAr,
+                    isCash,
+                    isDeposit,
+                    isInputTax,
+                    isOutputTax,
+                },
+            }) => ({
+                chartOfAccountId,
+                amount,
+                name,
+                isAp,
+                isAr,
+                isCash,
+                isDeposit,
+                isInputTax,
+                isOutputTax,
+            })
+        ) || []
+    )
 
     const onCreateSalesBill = async () => {
+        for (let payment of payments) {
+            if (payment.amount === 0)
+                return toast.error('จํานวนเงินต้องมากกว่า 0')
+
+            if (payment.chartOfAccountId === 0)
+                return toast.error('เลือกประเภทการชําระเงิน')
+        }
+
+        if (
+            payments.reduce((a, b) => a + b.amount, 0) !==
+            selectedItems.reduce((a, b) => a + b.amount, 0)
+        )
+            return toast.error('จำนวนเงินที่ชำระเงินไม่ตรงกัน')
+
+        if (
+            payments.reduce((a, b) => (b.isDeposit ? a + b.amount : a), 0) >
+            depositAmount
+        )
+            return toast.error('เงินมัดจำไม่เพียงพอ')
+
         try {
             const result = await createSalesReceived(
                 documentDetail,
@@ -85,13 +134,33 @@ export default function CreateUpdateSalesReceivedComponents({
     }
 
     const onUpdateSalesBill = async () => {
+        if (!existingSalesReceived) {
+            toast.error('ไม่พบใบเสร็จรับเงินที่ต้องการแก้ไข')
+            return
+        }
+        for (let payment of payments) {
+            if (payment.amount === 0)
+                return toast.error('จํานวนเงินต้องมากกว่า 0')
+
+            if (payment.chartOfAccountId === 0)
+                return toast.error('เลือกประเภทการชําระเงิน')
+        }
+
+        if (
+            payments.reduce((a, b) => a + b.amount, 0) !==
+            selectedItems.reduce((a, b) => a + b.amount, 0)
+        )
+            return toast.error('จำนวนเงินที่ชำระเงินไม่ตรงกัน')
+
+        if (
+            payments.reduce((a, b) => (b.isDeposit ? a + b.amount : a), 0) >
+            depositAmount
+        )
+            return toast.error('เงินมัดจำไม่เพียงพอ')
+
         try {
-            if (!existingSalesBill) {
-                toast.error('ไม่พบใบเสร็จรับเงินที่ต้องการแก้ไข')
-                return
-            }
             const result = await updateSalesReceived(
-                existingSalesBill?.id,
+                existingSalesReceived?.id,
                 documentDetail,
                 selectedItems,
                 payments
@@ -105,13 +174,13 @@ export default function CreateUpdateSalesReceivedComponents({
 
     const onDeleteSalesBill = async () => {
         try {
-            if (!existingSalesBill) {
+            if (!existingSalesReceived) {
                 toast.error('ไม่พบใบเสร็จรับเงินที่ต้องการลบ')
                 return
             }
 
             const result = await deleteSalesReceived(
-                existingSalesBill.documentNo
+                existingSalesReceived.documentNo
             )
             toast.success('ลบสําเร็จ')
         } catch (err) {
@@ -127,9 +196,9 @@ export default function CreateUpdateSalesReceivedComponents({
                     documentDetail={documentDetail}
                     setDocumentDetail={setDocumentDetail}
                     useSearchParams
-                    disabled={existingSalesBill ? true : false}
+                    disabled={existingSalesReceived ? true : false}
                 />
-                {existingSalesBill && (
+                {existingSalesReceived && (
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button type="button" variant={'destructive'}>
@@ -192,7 +261,7 @@ export default function CreateUpdateSalesReceivedComponents({
                         </TableHeader>
                         <TableBody>
                             {(unpaidItems.length === 0 ||
-                                !existingSalesBill) && (
+                                !existingSalesReceived) && (
                                 <TableRow>
                                     <TableCell
                                         colSpan={6}
@@ -202,62 +271,62 @@ export default function CreateUpdateSalesReceivedComponents({
                                     </TableCell>
                                 </TableRow>
                             )}
-                            {[...existingSalesBillItems, ...unpaidItems].map(
-                                (item, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell className="text-center">
-                                            {index + 1}
-                                        </TableCell>
-                                        <TableCell>{item.documentNo}</TableCell>
-                                        <TableCell>{item.type}</TableCell>
-                                        <TableCell>
-                                            {fullDateFormat(item.date)}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {item.amount.toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button
-                                                className="w-24"
-                                                variant={
-                                                    selectedItems.find(
-                                                        (selectedItem) =>
-                                                            selectedItem.documentId ===
-                                                            item.documentId
-                                                    )
-                                                        ? 'destructive'
-                                                        : 'default'
-                                                }
-                                                onClick={() =>
-                                                    selectedItems.find(
-                                                        (selectedItem) =>
-                                                            selectedItem.documentId ===
-                                                            item.documentId
-                                                    )
-                                                        ? setSelectedItems(
-                                                              selectedItems.filter(
-                                                                  (i) =>
-                                                                      i !== item
-                                                              )
-                                                          )
-                                                        : setSelectedItems([
-                                                              ...selectedItems,
-                                                              item,
-                                                          ])
-                                                }
-                                            >
-                                                {selectedItems.find(
+                            {[
+                                ...existingSalesReceivedItems,
+                                ...unpaidItems,
+                            ].map((item, index) => (
+                                <TableRow key={index}>
+                                    <TableCell className="text-center">
+                                        {index + 1}
+                                    </TableCell>
+                                    <TableCell>{item.documentNo}</TableCell>
+                                    <TableCell>{item.type}</TableCell>
+                                    <TableCell>
+                                        {fullDateFormat(item.date)}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {item.amount.toLocaleString()}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button
+                                            className="w-24"
+                                            variant={
+                                                selectedItems.find(
                                                     (selectedItem) =>
                                                         selectedItem.documentId ===
                                                         item.documentId
                                                 )
-                                                    ? 'Remove'
-                                                    : 'Add'}
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            )}
+                                                    ? 'destructive'
+                                                    : 'default'
+                                            }
+                                            onClick={() =>
+                                                selectedItems.find(
+                                                    (selectedItem) =>
+                                                        selectedItem.documentId ===
+                                                        item.documentId
+                                                )
+                                                    ? setSelectedItems(
+                                                          selectedItems.filter(
+                                                              (i) => i !== item
+                                                          )
+                                                      )
+                                                    : setSelectedItems([
+                                                          ...selectedItems,
+                                                          item,
+                                                      ])
+                                            }
+                                        >
+                                            {selectedItems.find(
+                                                (selectedItem) =>
+                                                    selectedItem.documentId ===
+                                                    item.documentId
+                                            )
+                                                ? 'Remove'
+                                                : 'Add'}
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
                         </TableBody>
                     </Table>
                     <DialogFooter>
@@ -322,13 +391,14 @@ export default function CreateUpdateSalesReceivedComponents({
                                 paymentMethods={paymentMethods}
                                 payments={payments}
                                 setPayments={setPayments}
+                                depositAmount={depositAmount}
                             />
                         </TableCell>
                     </TableRow>
                     <TableRow>
                         <TableHead colSpan={5}>
                             <div className="flex justify-end gap-2">
-                                {existingSalesBill ? (
+                                {existingSalesReceived ? (
                                     <Button
                                         disabled={selectedItems.length === 0}
                                         onClick={onUpdateSalesBill}

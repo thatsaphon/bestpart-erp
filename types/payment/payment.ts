@@ -1,7 +1,7 @@
 export type Payment = {
     chartOfAccountId: number
     amount: number
-    name: string
+    name?: string
     isCash?: boolean
     isAr?: boolean
     isAp?: boolean

@@ -7,7 +7,7 @@ import {
     Prisma,
     SkuMasterRemark,
 } from '@prisma/client'
-import { getPaymentMethods } from '@/app/actions/accounting'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
 import Link from 'next/link'
 import { getDate, isBefore, startOfDay } from 'date-fns'
 import { Metadata, ResolvingMetadata } from 'next'
