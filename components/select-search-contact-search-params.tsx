@@ -33,6 +33,9 @@ export default function SelectSearchContactSearchParams({
     const searchParams = useSearchParams()
 
     useEffect(() => {
+        if (!searchParams.get('contactId')) {
+            setDocumentDetail(getDefaultDocumentDetail())
+        }
         if (searchParams.get('contactId')) {
             searchAccountReceivableById(
                 Number(searchParams.get('contactId'))

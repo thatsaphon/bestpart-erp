@@ -27,20 +27,11 @@ import { cn } from '@/lib/utils'
 import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import { createQuotation } from './create-quotation'
 import { updateQuotation } from './update-quotation'
+import { DocumentDetail } from '@/types/document-detail'
 
 type Props = {
     defaultItems?: DocumentItem[]
-    defaultDocumentDetails?: {
-        id: number
-        date: Date
-        documentNo: string
-        contactId: number
-        contactName: string
-        address: string
-        phone: string
-        taxId: string
-        documentRemarks: DocumentRemark[]
-    }
+    defaultDocumentDetails?: DocumentDetail
     defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
 }
 

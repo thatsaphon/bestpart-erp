@@ -10,10 +10,19 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { DocumentDetail } from '@/types/document-detail'
 
 export async function updateCustomerOrder(
     id: number,
-    formData: FormData,
+    {
+        contactId,
+        contactName,
+        address,
+        phone,
+        taxId,
+        date,
+        documentNo,
+    }: DocumentDetail,
     items: (DocumentItem & { description: string })[],
     payments: {
         id: number
@@ -21,47 +30,14 @@ export async function updateCustomerOrder(
     }[],
     remarks: { id?: number; remark: string }[]
 ) {
-    const validator = z.object({
-        customerId: z.string().trim().nullable(),
-        contactName: z.string().trim().optional(),
-        address: z.string().trim().optional(),
-        phone: z.string().trim().optional().nullable(),
-        taxId: z.string().trim().optional().nullable(),
-        date: z.string().trim().min(1, 'date must not be empty'),
-        documentNo: z.string().trim().optional().nullable(),
-    })
-
-    const result = validator.safeParse({
-        customerId: formData.get('customerId'),
-        contactName: formData.get('contactName') || undefined,
-        address: formData.get('address') || undefined,
-        phone: formData.get('phone') || undefined,
-        taxId: formData.get('taxId') || undefined,
-        date: formData.get('date'),
-        documentNo: formData.get('documentNo'),
-    })
-
-    if (!result.success) {
-        throw new Error(
-            fromZodError(result.error, {
-                prefix: '- ',
-                prefixSeparator: ' ',
-                includePath: false,
-                issueSeparator: '\n',
-            }).message
-        )
-    }
-    let { customerId, contactName, address, phone, taxId, date, documentNo } =
-        result.data
-
     const customerOrder = await prisma.document.findUnique({
         where: {
             id,
         },
         include: {
-            GeneralLedger: true,
             CustomerOrder: {
                 include: {
+                    GeneralLedger: true,
                     Contact: true,
                     PurchasOrderLink: true,
                     CustomerOrderItem: true,
@@ -70,10 +46,10 @@ export async function updateCustomerOrder(
         },
     })
     const getContact = async () => {
-        if (customerId) {
+        if (contactId) {
             const contact = await prisma.contact.findUnique({
                 where: {
-                    id: Number(customerId),
+                    id: Number(contactId),
                 },
             })
             if (!contact) {
@@ -84,20 +60,27 @@ export async function updateCustomerOrder(
     }
     let contact: Contact | undefined = await getContact()
 
-    const goodsMasters = await prisma.goodsMaster.findMany({
-        where: {
-            barcode: {
-                in: items.map((item) => item.barcode),
-            },
-        },
-    })
+    // const goodsMasters = await prisma.goodsMaster.findMany({
+    //     where: {
+    //         barcode: {
+    //             in: items
+    //                 .map((item) => item.barcode)
+    //                 .filter((barcode) => typeof barcode === 'string'),
+    //         },
+    //     },
+    // })
 
     if (!documentNo) {
         documentNo = await generateDocumentNumber('CO', date)
     }
     const session = await getServerSession(authOptions)
 
-    const updatedCustomerOrder = await prisma.document.update({
+    const deleteGeneralLedger = prisma.generalLedger.deleteMany({
+        where: {
+            customerOrderId: customerOrder?.CustomerOrder?.id,
+        },
+    })
+    const updatedCustomerOrder = prisma.document.update({
         where: {
             id,
         },
@@ -108,35 +91,10 @@ export async function updateCustomerOrder(
             taxId: taxId || '',
             date: new Date(date),
             documentNo: documentNo,
-            remark: { create: remarks },
+            DocumentRemark: { create: remarks },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
-            GeneralLedger: {
-                deleteMany: {
-                    id: {
-                        in:
-                            customerOrder?.GeneralLedger.map((gl) => gl.id) ||
-                            [],
-                    },
-                },
-                create:
-                    payments.length > 0
-                        ? [
-                              ...payments.map((payment) => ({
-                                  chartOfAccountId: payment.id,
-                                  amount: payment.amount,
-                              })),
-                              {
-                                  //เงินมัดจำ
-                                  chartOfAccountId: 22300,
-                                  amount: payments.reduce(
-                                      (acc, payment) => acc - payment.amount,
-                                      0
-                                  ),
-                              },
-                          ]
-                        : undefined,
-            },
+
             CustomerOrder: {
                 update: {
                     Contact: {
@@ -164,12 +122,36 @@ export async function updateCustomerOrder(
                             unit: item.unit,
                         })),
                     },
-                    // status: 'Open',
+                    GeneralLedger: {
+                        create:
+                            payments.length > 0
+                                ? [
+                                      ...payments.map((payment) => ({
+                                          chartOfAccountId: payment.id,
+                                          amount: payment.amount,
+                                      })),
+                                      {
+                                          //เงินมัดจำ
+                                          chartOfAccountId: 22300,
+                                          amount: payments.reduce(
+                                              (acc, payment) =>
+                                                  acc - payment.amount,
+                                              0
+                                          ),
+                                      },
+                                  ]
+                                : undefined,
+                    },
                 },
             },
         },
     })
 
+    const result = await prisma.$transaction([
+        deleteGeneralLedger,
+        updatedCustomerOrder,
+    ])
+
     revalidatePath('/sales/customer-order')
-    redirect(`/sales/customer-order/${updatedCustomerOrder.documentNo}`)
+    redirect(`/sales/customer-order/${result[1].documentNo}`)
 }

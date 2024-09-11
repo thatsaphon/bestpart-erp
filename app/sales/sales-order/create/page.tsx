@@ -4,6 +4,7 @@ import { getPaymentMethods } from '@/actions/get-payment-methods'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
+import { getQuotationDefaultFunction } from '@/types/quotation/quotation'
 
 type Props = {
     searchParams: { contactId: number }
@@ -18,15 +19,23 @@ export default async function CreateSalesInvoicePage({
 }: Props) {
     const paymentMethods = await getPaymentMethods()
 
-    const customerOrders = await getCustomerOrderDefaultFunction({
-        CustomerOrder: {
-            contactId: Number(contactId),
-            status: {
-                notIn: ['Cancelled', 'Closed'],
-            },
-        },
-    })
-    console.log(customerOrders)
+    const customerOrders = contactId
+        ? await getCustomerOrderDefaultFunction({
+              CustomerOrder: {
+                  contactId: Number(contactId),
+                  status: {
+                      notIn: ['Cancelled', 'Closed'],
+                  },
+              },
+          })
+        : []
+    const quotations = contactId
+        ? await getQuotationDefaultFunction({
+              Quotation: {
+                  contactId: Number(contactId),
+              },
+          })
+        : []
     return (
         <>
             <div className="flex justify-between">
@@ -38,6 +47,8 @@ export default async function CreateSalesInvoicePage({
             <h1 className="my-2 text-3xl transition-colors">สร้างบิลขาย</h1>
             <CreateOrUpdateSalesInvoiceComponent
                 paymentMethods={paymentMethods}
+                quotations={quotations}
+                customerOrders={customerOrders}
             />
         </>
     )

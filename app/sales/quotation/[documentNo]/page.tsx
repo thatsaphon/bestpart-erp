@@ -178,10 +178,10 @@ export default async function QuotationDetailPage({
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.price + item.vat}
+                                    {item.pricePerUnit + item.vat}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {(item.price + item.vat) * item.quantity}
+                                    {(item.pricePerUnit + item.vat) * item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -197,7 +197,7 @@ export default async function QuotationDetailPage({
                                         document?.Quotation?.QuotationItem.reduce(
                                             (a, b) =>
                                                 a +
-                                                (b.price + b.vat) * b.quantity,
+                                                (b.pricePerUnit + b.vat) * b.quantity,
                                             0
                                         )
                                     )

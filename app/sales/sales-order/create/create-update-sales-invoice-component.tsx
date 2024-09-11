@@ -52,17 +52,24 @@ import {
 } from '@/types/document-detail'
 import AddPaymentComponent from '@/components/add-payment-component'
 import { Payment } from '@/types/payment/payment'
+import { GetQuotation } from '@/types/quotation/quotation'
+import { GetCustomerOrder } from '@/types/customer-order/customer-order'
+import ViewQuotationDialog from '@/components/view-quotation-dialog'
 
 type Props = {
     sales?: GetSales
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
     deposit?: number
+    quotations?: GetQuotation[]
+    customerOrders?: GetCustomerOrder[]
 }
 
 export default function CreateOrUpdateSalesInvoiceComponent({
     sales,
     paymentMethods,
     deposit = 0,
+    quotations = [],
+    customerOrders = [],
 }: Props) {
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
         sales
@@ -118,41 +125,6 @@ export default function CreateOrUpdateSalesInvoiceComponent({
         }
     }, [key, open])
 
-    // const addRemark = () => {
-    //     if (!remarkInput) return
-    //     setRemarks((prev) => [...prev, { remark: remarkInput }])
-    //     setRemarkInput('')
-    // }
-
-    // const removeRemark = (index: number) => {
-    //     // setRemarks((prev) => prev.filter((_, i) => i !== index))
-    //     const remarkToRemove = remarks[index]
-    //     if (remarkToRemove.id) {
-    //         setRemarks((prev) =>
-    //             prev.map((remark) =>
-    //                 remark.id === remarkToRemove.id
-    //                     ? { ...remark, isDeleted: true }
-    //                     : remark
-    //             )
-    //         )
-    //     } else {
-    //         setRemarks((prev) => prev.filter((_, i) => i !== index))
-    //     }
-    // }
-
-    // const addPayment = () => {
-    //     if (!selectedPayment || !paymentAmount) {
-    //         toast.error('กรุณาเลือกช่องทางการชําระเงินหรือจำนวนเงิน')
-    //         return
-    //     }
-    //     setSelectedPayments((prev) => [
-    //         ...prev,
-    //         { id: selectedPayment, amount: paymentAmount },
-    //     ])
-    //     setSelectedPayment(undefined)
-    //     setPaymentAmount(undefined)
-    // }
-
     return (
         <div className="p-3" id={key} key={key}>
             <form
@@ -207,6 +179,25 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                     placeholder="รหัสลูกค้า"
                     useSearchParams
                 />
+                <div className="space-x-3 p-2">
+                    <Button
+                        type="button"
+                        variant={'outline'}
+                        className=""
+                        disabled={quotations.length === 0}
+                    >
+                        ดูใบเสนอราคา
+                    </Button>
+                    <Button
+                        type="button"
+                        variant={'outline'}
+                        className=""
+                        disabled={customerOrders.length === 0}
+                    >
+                        ดูใบจองสินค้า
+                    </Button>
+                    <ViewQuotationDialog quotations={quotations} />
+                </div>
                 <Table>
                     {/* <TableCaption>
                         <div className="w-[650px] space-y-1">

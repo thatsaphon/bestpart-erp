@@ -125,7 +125,7 @@ export default function SelectSearchContact<T>({
                                     if (e.key === 'Enter') {
                                         e.preventDefault()
                                         try {
-                                            if (contactId !== '') {
+                                            if (contactId === '') {
                                                 setError(null)
                                                 setDocumentDetail(
                                                     getDefaultDocumentDetail()
@@ -147,7 +147,7 @@ export default function SelectSearchContact<T>({
                                             setError(null)
                                         } catch (err) {
                                             setError(
-                                                `ไม่สามารถใช้รหัส ${documentDetail.contactId} ได้`
+                                                `ไม่สามารถใช้รหัส ${contactId} ได้`
                                             )
                                             if (err instanceof Error) {
                                                 return toast.error(err.message)

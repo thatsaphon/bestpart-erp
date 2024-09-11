@@ -24,4 +24,4 @@ export const getCustomerOrderDefaultFunction = async (
 
 export type GetCustomerOrder = Awaited<
     ReturnType<typeof getCustomerOrderDefaultFunction>
->
+>[number]

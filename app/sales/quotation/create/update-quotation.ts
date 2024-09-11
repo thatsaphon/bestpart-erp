@@ -72,14 +72,16 @@ export async function updateQuotation(
         }
     }
     let contact: Contact | undefined = await getContact()
-
-    const goodsMasters = await prisma.goodsMaster.findMany({
-        where: {
-            barcode: {
-                in: items.map((item) => item.barcode),
-            },
-        },
-    })
+    if (!contact) {
+        throw new Error('contact not found')
+    }
+    // const goodsMasters = await prisma.goodsMaster.findMany({
+    //     where: {
+    //         barcode: {
+    //             in: items.map((item) => item.barcode).filter((barcode)=> typeof barcode === 'string'),
+    //         },
+    //     },
+    // })
 
     if (!documentNo) {
         documentNo = await generateDocumentNumber('SQ', date)
@@ -98,7 +100,7 @@ export async function updateQuotation(
             taxId: taxId || '',
             date: new Date(date),
             documentNo: documentNo,
-            remark: { create: remarks },
+            DocumentRemark: { create: remarks },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             Quotation: {
@@ -114,10 +116,7 @@ export async function updateQuotation(
                             unit: item.unit,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
-                            pricePerUnit: +(
-                                (100 / 107) *
-                                item.pricePerUnit
-                            ).toFixed(2),
+                            pricePerUnit: +item.pricePerUnit.toFixed(2),
                             vat: +((7 / 107) * item.pricePerUnit).toFixed(2),
                         })),
                     },

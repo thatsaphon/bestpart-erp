@@ -14,7 +14,7 @@ export type GetCustomerOrderItems = Awaited<
     ReturnType<typeof getSalesItemsDefaultFunction>
 >[number]
 
-export const salesItemsToDocumentItems = (
+export const customerOrderItemsToDocumentItems = (
     items: GetCustomerOrderItems[] | undefined
 ) => {
     if (!items) return []
