@@ -142,7 +142,7 @@ export default async function SalesListPage({
                                     </Badge>
                                 ) : !sale.Sales?.GeneralLedger.find(
                                       ({ ChartOfAccount }) =>
-                                          ChartOfAccount.isAp
+                                          ChartOfAccount.isAr
                                   )?.amount ? (
                                     <Badge className="bg-green-400">
                                         เงินสด

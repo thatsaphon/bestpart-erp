@@ -35,6 +35,11 @@ export const getQuotationDefaultFunction = async (
                     Contact: true,
                 },
             },
+            DocumentRemark: {
+                include: {
+                    User: true,
+                },
+            },
         },
     })
 }

@@ -21,7 +21,11 @@ export const getPurchaseInvoiceDetail = async (documentNo: string) => {
                     },
                 },
             },
-            DocumentRemark: true,
+            DocumentRemark: {
+                include: {
+                    User: true,
+                },
+            },
             // ApSubledger: { include: { Contact: true } },
             // SkuIn: {
             //     include: {

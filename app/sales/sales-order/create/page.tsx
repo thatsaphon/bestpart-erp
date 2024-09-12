@@ -5,9 +5,10 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
 import { getQuotationDefaultFunction } from '@/types/quotation/quotation'
+import { getDepositAmount } from '@/actions/get-deposit-amount'
 
 type Props = {
-    searchParams: { contactId: number }
+    searchParams: { contactId: string }
 }
 
 export const metadata: Metadata = {
@@ -36,6 +37,8 @@ export default async function CreateSalesInvoicePage({
               },
           })
         : []
+
+    const depositAmount = await getDepositAmount(Number(contactId))
     return (
         <>
             <div className="flex justify-between">
@@ -49,6 +52,7 @@ export default async function CreateSalesInvoicePage({
                 paymentMethods={paymentMethods}
                 quotations={quotations}
                 customerOrders={customerOrders}
+                depositAmount={depositAmount}
             />
         </>
     )

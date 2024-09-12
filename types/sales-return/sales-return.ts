@@ -35,7 +35,11 @@ export const getSalesReturnDefaultFunction = async (
                     GeneralLedger: { include: { ChartOfAccount: true } },
                 },
             },
-            DocumentRemark: true,
+            DocumentRemark: {
+                include: {
+                    User: true,
+                },
+            },
         },
     })
 }

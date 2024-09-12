@@ -96,6 +96,7 @@ export async function createQuotation(
                             goodsMasterId: item.goodsMasterId,
                             skuMasterId: item.skuMasterId,
                             barcode: String(item.barcode),
+                            description: item.name + ' - ' + item.detail,
                             unit: item.unit,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,

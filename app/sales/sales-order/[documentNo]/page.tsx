@@ -12,15 +12,9 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
-import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
-import { getPaymentMethods } from '@/actions/get-payment-methods'
-import EditPaymentsComponents from './edit-payments-components'
 import { updateRemark } from './update-remarks'
 import SelectSearchCustomer from '@/components/select-search-customer'
-import { cn } from '@/lib/utils'
 import {
     Tooltip,
     TooltipContent,
@@ -31,6 +25,10 @@ import { isBefore, startOfDay } from 'date-fns'
 import SalesInvoiceLinkComponent from './sales-invoice-link-component'
 import { Metadata, ResolvingMetadata } from 'next'
 import { getSalesDefaultFunction } from '@/types/sales/sales'
+import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
+import PaymentComponentReadonly from '@/components/payment-component-readonly'
+import { generalLedgerToPayments } from '@/types/payment/payment'
+import UpdateDocumentRemark from '@/components/update-document-remark'
 
 type Props = {
     params: { documentNo: string }
@@ -52,8 +50,6 @@ export default async function SalesInvoiceDetailPage({
         documentNo,
         type: 'Sales',
     })
-    const session = await getServerSession(authOptions)
-    const paymentMethods = await getPaymentMethods()
 
     if (!document)
         return (
@@ -75,48 +71,24 @@ export default async function SalesInvoiceDetailPage({
                     รายละเอียดบิลขาย
                 </h1>
                 <div className="flex justify-between pr-4">
-                    <div className="flex gap-3">
-                        <div className="space-x-2">
-                            <Label>วันที่</Label>
-                            <DatePickerWithPresets
-                                defaultDate={document?.date}
-                                disabled
-                            />
-                        </div>
-                        <div className="space-x-2">
-                            <Label>No.</Label>
-                            <Input
-                                className="w-auto"
-                                placeholder="Optional"
-                                defaultValue={document?.documentNo}
-                                disabled
-                            />
-                        </div>
-
-                        {!isBefore(
+                    <div className="flex items-baseline gap-2">
+                        <DocumentDetailReadonly
+                            documentDetail={{
+                                ...document,
+                                contactId: document?.Sales?.contactId,
+                            }}
+                        />
+                        {isBefore(
                             startOfDay(document?.date),
                             startOfDay(new Date())
                         ) ? (
-                            <div>
-                                <Link
-                                    href={`/sales/sales-order/${document?.documentNo}/edit`}
-                                >
-                                    <Button
-                                        type="button"
-                                        variant={'destructive'}
-                                    >
-                                        แก้ไข
-                                    </Button>
-                                </Link>
-                            </div>
-                        ) : (
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <Button
                                             variant="destructive"
-                                            disabled
                                             className="disabled:pointer-events-auto"
+                                            disabled
                                         >
                                             แก้ไข
                                         </Button>
@@ -126,29 +98,20 @@ export default async function SalesInvoiceDetailPage({
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
+                        ) : (
+                            <Link
+                                href={`/sales/sales-order/${documentNo}/edit`}
+                            >
+                                <Button
+                                    variant="destructive"
+                                    className="disabled:pointer-events-auto"
+                                >
+                                    แก้ไข
+                                </Button>
+                            </Link>
                         )}
                     </div>
                     <SalesInvoiceLinkComponent document={document} />
-                </div>
-                <div className="flex gap-3">
-                    <div className="my-1 flex items-baseline space-x-2">
-                        <Label>ลูกค้า</Label>
-                        <SelectSearchCustomer
-                            name={'customerId'}
-                            hasTextArea={true}
-                            // placeholder="Optional"
-                            defaultValue={String(
-                                document?.Sales?.contactId || ''
-                            )}
-                            defaultAddress={{
-                                name: document?.contactName || '',
-                                address: document?.address || '',
-                                phone: document?.phone || '',
-                                taxId: document?.taxId || '',
-                            }}
-                            disabled
-                        />
-                    </div>
                 </div>
                 <Table className="mt-3">
                     <TableCaption>
@@ -241,9 +204,33 @@ export default async function SalesInvoiceDetailPage({
                         </TableRow>
                         <TableRow className="bg-background">
                             <TableCell
-                                colSpan={6}
+                                colSpan={4}
                                 className="space-x-1 text-right"
-                            ></TableCell>
+                            >
+                                <UpdateDocumentRemark
+                                    existingDocumentRemark={
+                                        document?.DocumentRemark
+                                    }
+                                    documentId={document?.id}
+                                />
+                                {/* <PaymentComponentReadonly
+                                    payments={generalLedgerToPayments(
+                                        document?.Sales?.GeneralLedger || [],
+                                        true
+                                    )}
+                                /> */}
+                            </TableCell>
+                            <TableCell
+                                colSpan={2}
+                                className="space-x-1 text-right"
+                            >
+                                <PaymentComponentReadonly
+                                    payments={generalLedgerToPayments(
+                                        document?.Sales?.GeneralLedger || [],
+                                        true
+                                    )}
+                                />
+                            </TableCell>
                         </TableRow>
                     </TableFooter>
                 </Table>

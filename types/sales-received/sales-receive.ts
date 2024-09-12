@@ -56,6 +56,11 @@ export const getSalesReceivedDefaultFunction = async (
                     },
                 },
             },
+            DocumentRemark: {
+                include: {
+                    User: true,
+                },
+            },
         },
     })
 }

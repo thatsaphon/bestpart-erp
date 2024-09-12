@@ -12,6 +12,9 @@ import Link from 'next/link'
 import { getDate, isBefore, startOfDay } from 'date-fns'
 import { Metadata, ResolvingMetadata } from 'next'
 import { getSalesDefaultFunction } from '@/types/sales/sales'
+import { getDepositAmount } from '@/actions/get-deposit-amount'
+import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
+import { getQuotationDefaultFunction } from '@/types/quotation/quotation'
 
 type Props = { params: { documentNo: string } }
 
@@ -32,6 +35,27 @@ export default async function EditSalesInvoicePage({
         type: 'Sales',
     })
     const paymentMethods = await getPaymentMethods()
+    const customerOrders = document.Sales?.contactId
+        ? await getCustomerOrderDefaultFunction({
+              CustomerOrder: {
+                  contactId: document.Sales.contactId,
+                  status: {
+                      notIn: ['Cancelled', 'Closed'],
+                  },
+              },
+          })
+        : []
+    const quotations = document.Sales?.contactId
+        ? await getQuotationDefaultFunction({
+              Quotation: {
+                  contactId: document.Sales?.contactId,
+              },
+          })
+        : []
+
+    const depositAmount = document.Sales?.contactId
+        ? await getDepositAmount(document.Sales?.contactId)
+        : 0
 
     return (
         <>
@@ -52,15 +76,11 @@ export default async function EditSalesInvoicePage({
                 แก้ไขรายละเอียดบิลขาย
             </h1>
             <CreateOrUpdateSalesInvoiceComponent
-                sales={document}
+                existingSales={document}
                 paymentMethods={paymentMethods}
-                defaultPayments={document.Sales?.GeneralLedger.filter(
-                    (gl) => gl.ChartOfAccount.isAr || gl.ChartOfAccount.isCash
-                ).map((x) => ({
-                    id: x.chartOfAccountId,
-                    amount: x.amount,
-                }))}
-                defaultRemarks={document.DocumentRemark}
+                quotations={quotations}
+                customerOrders={customerOrders}
+                depositAmount={depositAmount}
             />
         </>
     )

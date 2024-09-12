@@ -1,13 +1,10 @@
 'use client'
 
-import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableFooter,
     TableHead,
@@ -15,82 +12,66 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { Cross1Icon } from '@radix-ui/react-icons'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from '@/components/search-sku-dialog'
 import { createSalesInvoice } from './create-sales-invoice'
 import { DocumentItem } from '@/types/document-item'
 import { updateSalesInvoice } from './update-sales-invoice'
-import SelectSearchCustomer from '@/components/select-search-customer'
-import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import ImageToolTip from '@/components/image-tooltip'
-import { DocumentRemark } from '@prisma/client'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
 import { GetSales } from '@/types/sales/sales'
-import {
-    getDefaultSalesItem,
-    GetSalesItems,
-    salesItemsToDocumentItems,
-} from '@/types/sales/sales-item'
+import { salesItemsToDocumentItems } from '@/types/sales/sales-item'
 import { DocumentDetailForm } from '@/components/document-detail-form'
 import {
     DocumentDetail,
     getDefaultDocumentDetail,
 } from '@/types/document-detail'
 import AddPaymentComponent from '@/components/add-payment-component'
-import { Payment } from '@/types/payment/payment'
+import { generalLedgerToPayments, Payment } from '@/types/payment/payment'
 import { GetQuotation } from '@/types/quotation/quotation'
 import { GetCustomerOrder } from '@/types/customer-order/customer-order'
 import ViewQuotationDialog from '@/components/view-quotation-dialog'
+import ViewCustomerOrderDialog from '@/components/view-customer-order-dialog'
+import CreateDocumentRemark from '@/components/create-document-remark'
+import { GetDocumentRemark } from '@/types/remark/document-remark'
 
 type Props = {
-    sales?: GetSales
+    existingSales?: GetSales
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
-    deposit?: number
+    depositAmount?: number
     quotations?: GetQuotation[]
     customerOrders?: GetCustomerOrder[]
 }
 
 export default function CreateOrUpdateSalesInvoiceComponent({
-    sales,
+    existingSales: existingSales,
     paymentMethods,
-    deposit = 0,
+    depositAmount = 0,
     quotations = [],
     customerOrders = [],
 }: Props) {
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
-        sales
-            ? { ...sales, contactId: sales?.Sales?.contactId }
+        existingSales
+            ? { ...existingSales, contactId: existingSales?.Sales?.contactId }
             : getDefaultDocumentDetail()
     )
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
     const [items, setItems] = React.useState<DocumentItem[]>(
-        salesItemsToDocumentItems(sales?.Sales?.SalesItem)
+        salesItemsToDocumentItems(existingSales?.Sales?.SalesItem)
     )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
     const session = useSession()
-    const [remarks, setRemarks] = React.useState<
-        { id?: number; remark: string; isDeleted?: boolean }[]
-    >([])
-    const [remarkInput, setRemarkInput] = React.useState<string>('')
-    const [payments, setPayments] = React.useState<
-        { id: number; amount: number }[]
-    >([])
+    const [documentRemarks, setDocumentRemarks] = React.useState<
+        GetDocumentRemark[]
+    >(existingSales?.DocumentRemark || [])
+    const [payments, setPayments] = React.useState<Payment[]>(
+        generalLedgerToPayments(existingSales?.Sales?.GeneralLedger || [], true)
+    )
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -143,25 +124,25 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
                             )
                         }
-                        if (!sales) {
+                        if (!existingSales) {
                             await createSalesInvoice(
                                 // formData,
                                 documentDetail,
                                 items,
                                 payments,
-                                remarks
+                                documentRemarks
                             )
                             // setKey(String(Date.now()))
                             // setItems([])
                             toast.success('บันทึกสําเร็จ')
                         }
-                        if (sales) {
+                        if (existingSales) {
                             await updateSalesInvoice(
-                                sales.id,
+                                existingSales.id,
                                 documentDetail,
                                 items,
                                 payments,
-                                remarks
+                                documentRemarks
                             )
                             toast.success('บันทึกสําเร็จ')
                         }
@@ -177,198 +158,22 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                     documentDetail={documentDetail}
                     label="ลูกค้า"
                     placeholder="รหัสลูกค้า"
-                    useSearchParams
+                    useSearchParams={existingSales ? false : true}
+                    disabled={existingSales ? true : false}
                 />
                 <div className="space-x-3 p-2">
-                    <Button
-                        type="button"
-                        variant={'outline'}
-                        className=""
-                        disabled={quotations.length === 0}
-                    >
-                        ดูใบเสนอราคา
-                    </Button>
-                    <Button
-                        type="button"
-                        variant={'outline'}
-                        className=""
-                        disabled={customerOrders.length === 0}
-                    >
-                        ดูใบจองสินค้า
-                    </Button>
-                    <ViewQuotationDialog quotations={quotations} />
+                    <ViewQuotationDialog quotations={quotations}>
+                        <Button type="button" variant={'outline'}>
+                            ดูใบเสนอราคา
+                        </Button>
+                    </ViewQuotationDialog>
+                    <ViewCustomerOrderDialog customerOrders={customerOrders}>
+                        <Button type="button" variant={'outline'}>
+                            ดูใบจองสินค้า
+                        </Button>
+                    </ViewCustomerOrderDialog>
                 </div>
                 <Table>
-                    {/* <TableCaption>
-                        <div className="w-[650px] space-y-1">
-                            <div className="flex items-center gap-1 text-left">
-                                ช่องทางชำระเงิน:{' '}
-                            </div>
-                            {selectedPayments.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className={cn(
-                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary'
-                                        // defaultDocumentDetail?.paymentStatus ===
-                                        //     'Billed' && 'grid-cols-2'
-                                    )}
-                                >
-                                    <p>
-                                        {paymentMethods.find(
-                                            (p) => p.id === item.id
-                                        )?.id === 12000
-                                            ? 'เงินเชื่อ'
-                                            : paymentMethods.find(
-                                                  (p) => p.id === item.id
-                                              )?.name}
-                                    </p>
-                                    <p>{item.amount}</p>
-                                    <Cross1Icon
-                                        className={cn(
-                                            'cursor-pointer text-destructive'
-                                            // defaultDocumentDetail?.paymentStatus ===
-                                            //     'Billed' && 'hidden'
-                                        )}
-                                        onClick={() =>
-                                            setSelectedPayments(
-                                                selectedPayments.filter(
-                                                    (p) => p.id !== item.id
-                                                )
-                                            )
-                                        }
-                                    />
-                                </div>
-                            ))}
-                            <div
-                                className={cn(
-                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1'
-                                    // defaultDocumentDetail?.paymentStatus ===
-                                    //     'Billed' && 'hidden'
-                                )}
-                            >
-                                <Select
-                                    name="paymentMethodId"
-                                    onValueChange={(e) =>
-                                        setSelectedPayment(Number(e))
-                                    }
-                                    value={String(selectedPayment)}
-                                >
-                                    <SelectTrigger className="">
-                                        <SelectValue
-                                            placeholder={'เลือกช่องทางชำระเงิน'}
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>
-                                                ช่องทางชำระเงิน
-                                            </SelectLabel>
-                                            {paymentMethods
-                                                .filter(
-                                                    ({ id }) =>
-                                                        !selectedPayments.find(
-                                                            (p) => p.id === id
-                                                        )
-                                                )
-                                                .map((item) => (
-                                                    <SelectItem
-                                                        key={item.id}
-                                                        value={String(item.id)}
-                                                    >
-                                                        {item.id === 12000
-                                                            ? 'เงินเชื่อ'
-                                                            : item.name}
-                                                    </SelectItem>
-                                                ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                                <Input
-                                    name="amount"
-                                    type="number"
-                                    placeholder="จำนวนเงิน"
-                                    onChange={(e) =>
-                                        setPaymentAmount(Number(e.target.value))
-                                    }
-                                    value={paymentAmount || ''}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault()
-                                            addPayment()
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="button"
-                                    onClick={() => addPayment()}
-                                >
-                                    เพิ่มการชำระเงิน
-                                </Button>
-                            </div>
-                            {sales?.Sales?.salesBillId && (
-                                <p className="text-destructive">วางบิลแล้ว</p>
-                            )}
-
-                            <p className="text-left">หมายเหตุ:</p>
-                            {remarks.map((remark, index) => (
-                                <p
-                                    className={cn(
-                                        'grid grid-cols-[1fr_20px] items-center gap-1 text-left text-primary',
-                                        remark.isDeleted &&
-                                            'text-primary/50 line-through'
-                                    )}
-                                    key={'remark-' + index}
-                                >
-                                    <span>{remark.remark}</span>
-                                    <Cross1Icon
-                                        className={cn(
-                                            'font-bold text-destructive hover:cursor-pointer',
-                                            remark.isDeleted && 'hidden'
-                                        )}
-                                        onClick={() => removeRemark(index)}
-                                    />
-                                </p>
-                            ))}
-                            <div className="grid grid-cols-[1fr_140px] items-center gap-1">
-                                <Input
-                                    name="remark"
-                                    onChange={(e) =>
-                                        setRemarkInput(e.target.value)
-                                    }
-                                    value={remarkInput}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault()
-                                            addRemark()
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="button"
-                                    onClick={() => addRemark()}
-                                >
-                                    เพิ่มหมายเหตุ
-                                </Button>
-                            </div>
-                        </div>
-                        <div className="mt-4 flex w-[600px] justify-end gap-1">
-                            <Button
-                                variant="destructive"
-                                type="button"
-                                onClick={(e) => {
-                                    setKey(String(Date.now()))
-                                    setItems(
-                                        salesItemsToInventoryDetailType(
-                                            sales?.Sales?.SalesItem
-                                        )
-                                    )
-                                }}
-                            >
-                                Reset
-                            </Button>
-                            <Button type="submit">Save</Button>
-                        </div>
-                    </TableCaption> */}
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>
@@ -379,7 +184,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             <TableHead className="text-right">Unit</TableHead>
                             <TableHead className="text-right">Price</TableHead>
                             <TableHead className="text-right">Total</TableHead>
-                            <TableHead></TableHead>
+                            <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -528,7 +333,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             </TableRow>
                         ))}
                         <TableRow>
-                            <TableCell colSpan={6} className="text-right">
+                            <TableCell colSpan={7} className="text-right">
                                 <Input
                                     id="barcode"
                                     value={barcodeInput}
@@ -652,20 +457,56 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             <TableCell className="text-right"></TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableHead colSpan={3}></TableHead>
-                            <TableHead colSpan={2}>
+                            <TableCell colSpan={7} className="text-center">
                                 <AddPaymentComponent
                                     paymentMethods={paymentMethods}
-                                    payments={[]}
-                                    setPayments={function (
-                                        value: React.SetStateAction<Payment[]>
-                                    ): void {
-                                        throw new Error(
-                                            'Function not implemented.'
-                                        )
-                                    }}
+                                    payments={payments}
+                                    setPayments={setPayments}
+                                    depositAmount={depositAmount}
                                 />
-                            </TableHead>
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={7}>
+                                <CreateDocumentRemark
+                                    existingDocumentRemark={
+                                        existingSales?.DocumentRemark || []
+                                    }
+                                    documentRemarks={documentRemarks}
+                                    setDocumentRemarks={setDocumentRemarks}
+                                />
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={6}>
+                                <div className="flex justify-end gap-2">
+                                    {existingSales ? (
+                                        <Button disabled={items.length === 0}>
+                                            แก้ไขรายการขาย
+                                        </Button>
+                                    ) : (
+                                        <Button disabled={items.length === 0}>
+                                            สร้างรายการขาย
+                                        </Button>
+                                    )}
+                                    <Button
+                                        variant={'destructive'}
+                                        type="button"
+                                        onClick={(e) => {
+                                            setKey(String(Date.now()))
+                                            setItems(
+                                                salesItemsToDocumentItems(
+                                                    existingSales?.Sales
+                                                        ?.SalesItem || []
+                                                )
+                                            )
+                                        }}
+                                    >
+                                        รีเซ็ต
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableHead></TableHead>
                         </TableRow>
                     </TableFooter>
                 </Table>

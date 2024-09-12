@@ -1,21 +1,9 @@
 'use client'
 
-import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
-import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/return-invoice-detail'
-import SalesBillPdf, {
-    BillingNoteDetail,
-} from '@/components/pdf/sales-bill-pdf'
-import SalesInvoicePdf_5x9 from '@/components/pdf/invoice-5.5-9'
-import SalesReturnInvoicePdf_5x9 from '@/components/pdf/return-invoice-5.5-9'
 import { Button } from '@/components/ui/button'
 import { BlobProvider, DocumentProps } from '@react-pdf/renderer'
 import Link from 'next/link'
-import React, {
-    JSXElementConstructor,
-    ReactElement,
-    useEffect,
-    useState,
-} from 'react'
+import { JSXElementConstructor, ReactElement, useEffect, useState } from 'react'
 
 type Props = {
     children: ReactElement<DocumentProps, string | JSXElementConstructor<any>>
@@ -32,6 +20,8 @@ type Props = {
  *
  * @param {Props} props - The props object containing a single child element, which is the Document component which is used to render the PDF document.
  * @return {JSX.Element} - The JSX element containing a loading state while the PDF document is being rendered, and the PDF document itself once it has been rendered.
+ * no error in next 14.2.5
+ * error in next 14.2.10
  */
 //
 export default function BlobProviderClient({ children }: Props) {

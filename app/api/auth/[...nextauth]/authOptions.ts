@@ -65,6 +65,7 @@ export const authOptions: AuthOptions = {
     callbacks: {
         jwt: async ({ token, user }) => {
             if (user) {
+                token.id = user.id
                 token.username = user.username
                 token.first_name = user.first_name
                 token.last_name = user.last_name
@@ -77,6 +78,7 @@ export const authOptions: AuthOptions = {
         session: async ({ session, token }) => {
             // revalidatePath('/')
             if (session.user) {
+                session.user.id = token.id
                 session.user.username = token.username
                 session.user.first_name = token.first_name
                 session.user.last_name = token.last_name

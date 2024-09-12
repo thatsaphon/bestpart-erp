@@ -8,7 +8,7 @@ type Props = {
 
 export default function PaymentComponentReadonly({ payments }: Props) {
     return (
-        <div className="grid grid-cols-[1fr_100px_100px] items-baseline gap-x-5 ">
+        <div className="grid grid-cols-[1fr_100px_100px] items-baseline gap-x-5">
             <p className="justify-self-end">วิธีการชำระเงิน: </p>
             {payments.map((payment, index) => (
                 <Fragment key={index}>

@@ -25,7 +25,10 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
 
-  AccountOwner AccountOwner[]
+  AccountOwner    AccountOwner[]
+  DocumentRemark  DocumentRemark[]
+  MainSkuRemark   MainSkuRemark[]
+  SkuMasterRemark SkuMasterRemark[]
 }
 
 enum Role {
@@ -93,6 +96,8 @@ model DocumentRemark {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @default(now()) @updatedAt
   isDeleted  Boolean   @default(false)
+  User       User?     @relation(fields: [userId], references: [id])
+  userId     String?
 }
 
 model ChartOfAccount {
@@ -251,6 +256,9 @@ model MainSkuRemark {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
 }
 
 model SkuMasterRemark {
@@ -261,6 +269,9 @@ model SkuMasterRemark {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
 }
 
 model GoodsMaster {

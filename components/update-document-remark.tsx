@@ -1,0 +1,120 @@
+'use client'
+
+import React, { Fragment } from 'react'
+import { GetDocumentRemark } from '@/types/remark/document-remark'
+import { Input } from './ui/input'
+import { cn } from '@/lib/utils'
+import { Cross1Icon } from '@radix-ui/react-icons'
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from './ui/dialog'
+import { Button } from './ui/button'
+import { addDocumentRemark } from '@/actions/add-document-remark'
+import toast from 'react-hot-toast'
+
+type Props = {
+    existingDocumentRemark: GetDocumentRemark[]
+    documentId: number
+}
+
+export default function UpdateDocumentRemark({
+    existingDocumentRemark,
+    documentId,
+}: Props) {
+    const [remark, setRemark] = React.useState<string>('')
+
+    return (
+        <div>
+            <div className="flex items-baseline justify-center gap-x-1">
+                <p className="text-right text-primary/60">หมายเหตุ: </p>
+                <div className="w-[600px] text-left">
+                    {existingDocumentRemark.map((remark, index) => (
+                        <Fragment key={index}>
+                            <span
+                                className={cn(
+                                    'col-start-2 overflow-auto',
+                                    remark.isDeleted && 'line-through'
+                                )}
+                            >
+                                {remark.remark}
+                                <span className="text-primary/50">{` - ${remark.User?.first_name} ${remark.User?.last_name} - ${remark.createdAt}`}</span>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Cross1Icon className="ml-1 inline text-destructive hover:cursor-pointer" />
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogTitle>ลบหมายเหตุ</DialogTitle>
+                                        <DialogFooter>
+                                            <DialogClose asChild>
+                                                <Button
+                                                    variant="destructive"
+                                                    onClick={() => {}}
+                                                >
+                                                    ยืนยัน
+                                                </Button>
+                                            </DialogClose>
+
+                                            <DialogClose asChild>
+                                                <Button variant="outline">
+                                                    ยกเลิก
+                                                </Button>
+                                            </DialogClose>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                            </span>
+                        </Fragment>
+                    ))}
+                </div>
+            </div>
+            <div className="mx-auto mt-1 flex w-[700px] items-center justify-center gap-1">
+                <Input
+                    type="text"
+                    className="text-sm"
+                    value={remark}
+                    onChange={(e) => setRemark(e.target.value)}
+                />
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button size="sm">เพิ่มหมายเหตุ</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogTitle>ลบหมายเหตุ</DialogTitle>
+
+                        <DialogFooter>
+                            <DialogClose
+                                asChild
+                                onClick={async () => {
+                                    try {
+                                        await addDocumentRemark(
+                                            documentId,
+                                            remark
+                                        )
+                                        toast.success('เพิ่มหมายเหตุสําเร็จ')
+                                    } catch (err) {
+                                        if (err instanceof Error) {
+                                            toast.error(err.message)
+                                            return
+                                        }
+                                        toast.error('เกิดข้อผิดพลาด')
+                                    }
+                                }}
+                            >
+                                <Button variant="default">ยืนยัน</Button>
+                            </DialogClose>
+
+                            <DialogClose asChild>
+                                <Button variant="outline">ยกเลิก</Button>
+                            </DialogClose>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </div>
+    )
+}

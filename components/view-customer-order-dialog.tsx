@@ -22,24 +22,28 @@ import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { GetCustomerOrder } from '@/types/customer-order/customer-order'
 
 type Props = {
-    quotations: GetQuotation[]
+    customerOrders: GetCustomerOrder[]
     children?: React.ReactNode
 }
 
-export default function ViewQuotationDialog({ quotations, children }: Props) {
+export default function ViewCustomerOrderDialog({
+    customerOrders,
+    children,
+}: Props) {
     const [expandList, setExpandList] = React.useState<boolean[]>(
-        quotations.map(() => false)
+        customerOrders.map(() => false)
     )
     return (
         <Dialog>
             <DialogTrigger asChild>
-                {children || <Button variant="outline">ใบเสนอราคา</Button>}
+                {children || <Button variant="outline">ใบจองสินค้า</Button>}
             </DialogTrigger>
-            <DialogContent className="flex h-[500px] w-[800px] flex-col">
+            <DialogContent className="flex h-[500px] min-w-[900px] flex-col">
                 <DialogHeader>
-                    <DialogTitle>ใบเสนอราคา</DialogTitle>
+                    <DialogTitle>ใบจองสินค้า</DialogTitle>
                 </DialogHeader>
                 <div className="flex-1 overflow-y-scroll">
                     <Table>
@@ -48,13 +52,17 @@ export default function ViewQuotationDialog({ quotations, children }: Props) {
                                 <TableHead>Quotation no.</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Customer</TableHead>
+                                <TableHead>Status</TableHead>
                                 <TableHead className="text-right">
                                     Amount
+                                </TableHead>
+                                <TableHead className="text-right">
+                                    มัดจำ
                                 </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {quotations.length === 0 && (
+                            {customerOrders.length === 0 && (
                                 <TableRow>
                                     <TableCell
                                         colSpan={5}
@@ -64,8 +72,8 @@ export default function ViewQuotationDialog({ quotations, children }: Props) {
                                     </TableCell>
                                 </TableRow>
                             )}
-                            {quotations.map((quotation, index) => (
-                                <React.Fragment key={quotation.id}>
+                            {customerOrders.map((customerOrder, index) => (
+                                <React.Fragment key={customerOrder.id}>
                                     <TableRow
                                         onClick={() =>
                                             setExpandList((prev) => [
@@ -74,7 +82,7 @@ export default function ViewQuotationDialog({ quotations, children }: Props) {
                                                 ...prev.slice(index + 1),
                                             ])
                                         }
-                                        key={quotation.id}
+                                        key={customerOrder.id}
                                         className={cn(
                                             'hover:cursor-pointer',
                                             expandList[index]
@@ -83,19 +91,28 @@ export default function ViewQuotationDialog({ quotations, children }: Props) {
                                         )}
                                     >
                                         <TableCell>
-                                            {quotation.documentNo}
+                                            {customerOrder.documentNo}
                                         </TableCell>
                                         <TableCell>
                                             {format(
-                                                quotation.date,
+                                                customerOrder.date,
                                                 'dd/MM/yyyy'
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            {quotation.Quotation?.Contact?.name}
+                                            {
+                                                customerOrder.CustomerOrder
+                                                    ?.Contact?.name
+                                            }
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {
+                                                customerOrder.CustomerOrder
+                                                    ?.status
+                                            }
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {quotation.Quotation?.QuotationItem.reduce(
+                                            {customerOrder.CustomerOrder?.CustomerOrderItem.reduce(
                                                 (total, item) =>
                                                     total +
                                                     item.pricePerUnit *
@@ -103,11 +120,40 @@ export default function ViewQuotationDialog({ quotations, children }: Props) {
                                                 0
                                             )}
                                         </TableCell>
+                                        <TableCell className="text-right">
+                                            {
+                                                -(
+                                                    customerOrder.CustomerOrder?.GeneralLedger.reduce(
+                                                        (total, item) =>
+                                                            item.ChartOfAccount
+                                                                .isDeposit
+                                                                ? total +
+                                                                  item.amount
+                                                                : total,
+                                                        0
+                                                    )?.toFixed(2) || 0
+                                                )
+                                            }
+                                        </TableCell>
+                                        {/* <TableCell>
+                                            <ChevronDown
+                                                className="hover:cursor-pointer hover:text-primary"
+                                                onClick={() =>
+                                                    setExpandList((prev) => [
+                                                        ...prev.slice(0, index),
+                                                        !prev[index],
+                                                        ...prev.slice(
+                                                            index + 1
+                                                        ),
+                                                    ])
+                                                }
+                                            />
+                                        </TableCell> */}
                                     </TableRow>
                                     {expandList[index] && (
                                         <TableRow>
                                             <TableCell
-                                                colSpan={4}
+                                                colSpan={6}
                                                 className="py-0"
                                             >
                                                 <Table>
@@ -136,7 +182,7 @@ export default function ViewQuotationDialog({ quotations, children }: Props) {
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
-                                                        {quotation.Quotation?.QuotationItem.map(
+                                                        {customerOrder.CustomerOrder?.CustomerOrderItem.map(
                                                             (item) => (
                                                                 <TableRow
                                                                     key={

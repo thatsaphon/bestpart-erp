@@ -38,7 +38,7 @@ import { useRouter } from 'next/navigation'
 import { updateSalesReceived } from './update-sales-received'
 import { getSalesReceived } from '@/types/sales-received/sales-receive'
 import { SalesReceivedItem } from '@/types/sales-received/sales-receive-item'
-import { Payment } from '@/types/payment/payment'
+import { generalLedgerToPayments, Payment } from '@/types/payment/payment'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
 import AddPaymentComponent from '@/components/add-payment-component'
 
@@ -70,33 +70,9 @@ export default function CreateUpdateSalesReceivedComponents({
         existingSalesReceivedItems
     )
     const [payments, setPayments] = useState<Payment[]>(
-        existingSalesReceived?.SalesReceived?.GeneralLedger.filter(
-            ({ ChartOfAccount: { isCash, isDeposit } }) => isCash || isDeposit
-        ).map(
-            ({
-                chartOfAccountId,
-                amount,
-                ChartOfAccount: {
-                    name,
-                    isAp,
-                    isAr,
-                    isCash,
-                    isDeposit,
-                    isInputTax,
-                    isOutputTax,
-                },
-            }) => ({
-                chartOfAccountId,
-                amount,
-                name,
-                isAp,
-                isAr,
-                isCash,
-                isDeposit,
-                isInputTax,
-                isOutputTax,
-            })
-        ) || []
+        generalLedgerToPayments(
+            existingSalesReceived?.SalesReceived?.GeneralLedger || []
+        )
     )
 
     const onCreateSalesBill = async () => {

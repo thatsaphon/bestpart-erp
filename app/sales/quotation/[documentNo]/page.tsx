@@ -61,7 +61,7 @@ export default async function QuotationDetailPage({
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
                 <h1 className="my-2 text-3xl transition-colors">
-                    รายละเอียดบิลขาย
+                    รายละเอียดใบเสนอราคา
                 </h1>
                 <div className="flex justify-between pr-4">
                     <div className="flex gap-3">
@@ -178,10 +178,10 @@ export default async function QuotationDetailPage({
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.pricePerUnit + item.vat}
+                                    {item.pricePerUnit}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {(item.pricePerUnit + item.vat) * item.quantity}
+                                    {item.pricePerUnit * item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -196,8 +196,7 @@ export default async function QuotationDetailPage({
                                     Number(
                                         document?.Quotation?.QuotationItem.reduce(
                                             (a, b) =>
-                                                a +
-                                                (b.pricePerUnit + b.vat) * b.quantity,
+                                                a + b.pricePerUnit * b.quantity,
                                             0
                                         )
                                     )

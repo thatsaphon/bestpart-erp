@@ -18,6 +18,11 @@ export const getCustomerOrderDefaultFunction = async (
                     },
                 },
             },
+            DocumentRemark: {
+                include: {
+                    User: true,
+                },
+            },
         },
     })
 }

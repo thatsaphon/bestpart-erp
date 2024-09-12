@@ -22,7 +22,11 @@ export default async function getCustomerOrderDetail(documentNo: string) {
                     },
                 },
             },
-            DocumentRemark: true,
+            DocumentRemark: {
+                include: {
+                    User: true,
+                },
+            },
         },
     })
     return quotation

@@ -34,6 +34,11 @@ export const getPurchaseDefaultFunction = async (
                     },
                 },
             },
+            DocumentRemark: {
+                include: {
+                    User: true,
+                },
+            },
         },
     })
 }

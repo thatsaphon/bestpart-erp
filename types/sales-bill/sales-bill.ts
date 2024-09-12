@@ -44,6 +44,11 @@ export const getSalesBillDefaultFunction = async (
                     },
                 },
             },
+            DocumentRemark: {
+                include: {
+                    User: true,
+                },
+            },
         },
     })
 }

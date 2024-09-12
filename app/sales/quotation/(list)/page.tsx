@@ -120,8 +120,7 @@ export default async function PurchaseOrderPage({
                                     invoice.Quotation?.QuotationItem.reduce(
                                         (total, item) =>
                                             total +
-                                            (item.pricePerUnit + item.vat) *
-                                                item.quantity,
+                                            item.pricePerUnit * item.quantity,
                                         0
                                     ) || 0
                                 ).toLocaleString()}

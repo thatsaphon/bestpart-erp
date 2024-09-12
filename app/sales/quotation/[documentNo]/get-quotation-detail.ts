@@ -20,7 +20,11 @@ export default async function getQuotationDetail(documentNo: string) {
                     },
                 },
             },
-            DocumentRemark: true,
+            DocumentRemark: {
+                include: {
+                    User: true,
+                },
+            },
         },
     })
     return quotation

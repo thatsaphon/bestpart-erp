@@ -18,7 +18,7 @@ const nextConfig = {
         outputFileTracingIncludes: {
             '/': ['./master-data/**/*'],
         },
-        serverComponentsExternalPackages: ['@react-pdf/renderer'],
+        // serverComponentsExternalPackages: ['@react-pdf/renderer'],
     },
     images: {
         remotePatterns: [
