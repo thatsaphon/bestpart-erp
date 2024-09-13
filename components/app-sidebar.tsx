@@ -5,7 +5,9 @@ import {
     Bird,
     BookOpen,
     Bot,
+    ChevronsUpDown,
     Code2,
+    Contact,
     Eclipse,
     Frame,
     History,
@@ -34,6 +36,8 @@ import {
     SidebarItem,
     SidebarLabel,
 } from '@/components/ui/sidebar'
+import { FullRoute } from '@/types/routes/document-routes'
+import Link from 'next/link'
 const data = {
     teams: [
         {
@@ -59,51 +63,69 @@ const data = {
     },
     navMain: [
         {
-            title: 'Playground',
-            url: '#',
+            title: 'งานขาย',
+            url: '/sales',
             icon: SquareTerminal,
             isActive: true,
             items: [
                 {
-                    title: 'History',
-                    url: '#',
+                    title: 'บิลขาย',
+                    url: FullRoute.Sales,
                     icon: History,
                     description: 'View your recent prompts',
                 },
                 {
-                    title: 'Starred',
-                    url: '#',
+                    title: 'รับคืนสินค้า',
+                    url: FullRoute.SalesReturn,
                     icon: Star,
                     description: 'Browse your starred prompts',
                 },
                 {
-                    title: 'Settings',
-                    url: '#',
+                    title: 'ใบวางบิล',
+                    url: FullRoute.SalesBill,
+                    icon: Settings2,
+                    description: 'Configure your playground',
+                },
+                {
+                    title: 'ใบเสนอราคา',
+                    url: FullRoute.Quotation,
+                    icon: Settings2,
+                    description: 'Configure your playground',
+                },
+                {
+                    title: 'ใบจองสินค้า',
+                    url: FullRoute.CustomerOrder,
+                    icon: Settings2,
+                    description: 'Configure your playground',
+                },
+                {
+                    title: 'ใบเสร็จรับเงิน',
+                    url: FullRoute.SalesReceived,
                     icon: Settings2,
                     description: 'Configure your playground',
                 },
             ],
         },
         {
-            title: 'Models',
-            url: '#',
+            title: 'จัดซื้อ',
+            url: '/purchase',
             icon: Bot,
             items: [
                 {
-                    title: 'Genesis',
-                    url: '#',
+                    title: 'ใบสั่งซื้อ',
+                    url: FullRoute.PurchaseOrder,
                     icon: Rabbit,
                     description: 'Our fastest model for general use cases.',
                 },
                 {
-                    title: 'Explorer',
-                    url: '#',
+                    title: 'ใบเสร็จรับของ',
+                    url: FullRoute.Purchase,
                     icon: Bird,
                     description: 'Performance and speed for efficiency.',
                 },
                 {
-                    title: 'Quantum',
-                    url: '#',
+                    title: 'ใบสำคัญจ่าย',
+                    url: FullRoute.PurchasePayment,
                     icon: Turtle,
                     description:
                         'The most powerful model for complex computations.',
@@ -111,75 +133,102 @@ const data = {
             ],
         },
         {
-            title: 'Documentation',
-            url: '#',
+            title: 'ผู้ติดต่อ',
+            url: '/contact',
             icon: BookOpen,
             items: [
-                {
-                    title: 'Introduction',
-                    url: '#',
-                },
-                {
-                    title: 'Get Started',
-                    url: '#',
-                },
-                {
-                    title: 'Tutorials',
-                    url: '#',
-                },
-                {
-                    title: 'Changelog',
-                    url: '#',
-                },
+                // {
+                //     title: 'ผู้ติดต่อ',
+                //     url: '/contact',
+                // },
+                // {
+                //     title: 'Get Started',
+                //     url: '#',
+                // },
+                // {
+                //     title: 'Tutorials',
+                //     url: '#',
+                // },
+                // {
+                //     title: 'Changelog',
+                //     url: '#',
+                // },
             ],
         },
         {
-            title: 'API',
+            title: 'สินค้า',
             url: '#',
             icon: Code2,
             items: [
                 {
-                    title: 'Chat',
-                    url: '#',
+                    title: 'สินค้า',
+                    url: '/inventory',
                 },
-                {
-                    title: 'Completion',
-                    url: '#',
-                },
-                {
-                    title: 'Images',
-                    url: '#',
-                },
-                {
-                    title: 'Video',
-                    url: '#',
-                },
-                {
-                    title: 'Speech',
-                    url: '#',
-                },
+                // {
+                //     title: 'Completion',
+                //     url: '#',
+                // },
+                // {
+                //     title: 'Images',
+                //     url: '#',
+                // },
+                // {
+                //     title: 'Video',
+                //     url: '#',
+                // },
+                // {
+                //     title: 'Speech',
+                //     url: '#',
+                // },
             ],
         },
         {
-            title: 'Settings',
+            title: 'บัญชี',
             url: '#',
             icon: Settings2,
             items: [
                 {
-                    title: 'General',
-                    url: '#',
+                    title: 'ผังบัญชี',
+                    url: '/accounting',
                 },
                 {
-                    title: 'Team',
-                    url: '#',
+                    title: 'งบดุล',
+                    url: '/accounting/balance-sheet',
                 },
                 {
-                    title: 'Billing',
-                    url: '#',
+                    title: 'เงินสด',
+                    url: '/accounting/cash',
                 },
                 {
-                    title: 'Limits',
-                    url: '#',
+                    title: 'สินทรัพย์',
+                    url: '/accounting/asset-management',
+                },
+                {
+                    title: 'ใบเสร็จอื่น',
+                    url: '/accounting/other-invoice',
+                },
+                {
+                    title: 'ใบสำคัญจ่ายอื่น',
+                    url: '/accounting/other-payment',
+                },
+            ],
+        },
+        {
+            title: 'Admin',
+            url: '/admin',
+            icon: Contact,
+            items: [
+                {
+                    title: 'ผู้ดูแลระบบ',
+                    url: '/admin',
+                },
+                {
+                    title: 'ผู้ใช้งาน',
+                    url: '/admin/user',
+                },
+                {
+                    title: 'Dashboard',
+                    url: '/admin/dashboard',
                 },
             ],
         },
@@ -247,18 +296,30 @@ export function AppSidebar() {
     return (
         <Sidebar>
             <SidebarHeader>
-                <TeamSwitcher teams={data.teams} />
+                {/* <TeamSwitcher teams={data.teams} /> */}
+                <Link
+                    href={'/'}
+                    className="flex items-center gap-1.5 overflow-hidden px-2 py-1.5 text-left text-sm transition-all"
+                >
+                    <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-primary text-primary-foreground">
+                        <Eclipse className="h-3.5 w-3.5 shrink-0" />
+                    </div>
+                    <div className="line-clamp-1 flex-1 pr-2 font-medium">
+                        BestPart Alai
+                    </div>
+                    {/* <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" /> */}
+                </Link>
             </SidebarHeader>
             <SidebarContent>
                 <SidebarItem>
-                    <SidebarLabel>Platform</SidebarLabel>
+                    <SidebarLabel>Navigation</SidebarLabel>
                     <NavMain
                         items={data.navMain}
                         searchResults={data.searchResults}
                     />
                 </SidebarItem>
                 <SidebarItem>
-                    <SidebarLabel>Projects</SidebarLabel>
+                    <SidebarLabel>Favourites</SidebarLabel>
                     <NavProjects projects={data.projects} />
                 </SidebarItem>
                 <SidebarItem className="mt-auto">

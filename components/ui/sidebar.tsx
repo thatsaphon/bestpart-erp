@@ -47,7 +47,7 @@ const SidebarLayout = React.forwardRef<
         <SidebarContext.Provider value={{ state, open, onOpenChange }}>
             <div
                 ref={ref}
-                data-sidebar={state}
+                data-sidebar={'open'}
                 style={
                     {
                         '--sidebar-width': '16rem',

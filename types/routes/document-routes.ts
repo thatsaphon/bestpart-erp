@@ -42,8 +42,22 @@ const documentRoutes: Record<DocumentType, string> = {
     OtherInvoice: '/accounting/other-invoice',
 }
 
-export enum Route {
-    Sales = 'sales',
+export enum FullRoute {
+    Sales = '/sales/sales-order',
+    SalesReturn = '/sales/sales-return',
+    SalesBill = '/sales/bill',
+    SalesReceived = '/sales/sales-received',
+    Purchase = '/purchase/purchase-received',
+    PurchaseReturn = '/purchase/purchase-return',
+    PurchasePayment = '/purchase/purchase-payment',
+    JournalVoucher = '/accounting/journal-voucher',
+    Quotation = '/sales/quotation',
+    CustomerOrder = '/sales/customer-order',
+    PurchaseOrder = '/purchase/purchase-order',
+    OtherInvoice = '/accounting/other-invoice',
+}
+export enum SubRoute {
+    Sales = 'sales-order',
     SalesReturn = 'sales-return',
     SalesBill = 'bill',
     SalesReceived = 'sales-received',
