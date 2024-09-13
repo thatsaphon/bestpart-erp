@@ -2,17 +2,20 @@
 
 import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import prisma from '@/app/db/db'
 import { DocumentDetail } from '@/types/document-detail'
 import { Payment } from '@/types/payment/payment'
 import { SalesReceivedItem } from '@/types/sales-received/sales-receive-item'
+import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export const createSalesReceived = async (
     documentDetail: DocumentDetail,
     salesReceivedItems: SalesReceivedItem[],
-    payments: Payment[]
+    payments: Payment[],
+    remarks: { id?: number; remark: string; isDeleted?: boolean }[]
 ) => {
     if (!documentDetail.contactId) throw new Error('contact not found')
     if (!salesReceivedItems.length) throw new Error('items not found')
@@ -27,7 +30,8 @@ export const createSalesReceived = async (
     const documentNo =
         documentDetail.documentNo ||
         (await generateDocumentNumber('RV', documentDetail.date))
-    console.log(salesReceivedItems)
+
+    const session = await getServerSession(authOptions)
 
     const result = await prisma.document.create({
         data: {
@@ -38,6 +42,14 @@ export const createSalesReceived = async (
             address: documentDetail.address,
             phone: documentDetail.phone,
             taxId: documentDetail.taxId,
+            createdBy: session?.user?.id,
+            updatedBy: session?.user?.id,
+            DocumentRemark: {
+                create: remarks.map((remark) => ({
+                    remark: remark.remark,
+                    userId: session?.user?.id,
+                })),
+            },
             SalesReceived: {
                 create: {
                     contactId: documentDetail.contactId,

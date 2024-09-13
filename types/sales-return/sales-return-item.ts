@@ -108,7 +108,7 @@ export const getDefaultSalesReturnItem = () => {
     }
 }
 
-export const salesReturnItemsToInventoryDetailType = (
+export const salesReturnItemsToDocumentItems = (
     items: GetSalesReturnItems[] | undefined
 ) => {
     if (!items) return []

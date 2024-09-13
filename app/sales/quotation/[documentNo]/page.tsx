@@ -1,6 +1,3 @@
-import { getPaymentMethods } from '@/actions/get-payment-methods'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
-import prisma from '@/app/db/db'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import {
@@ -13,24 +10,14 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
-import {
-    TooltipProvider,
-    Tooltip,
-    TooltipTrigger,
-    TooltipContent,
-} from '@/components/ui/tooltip'
-import { isBefore, startOfDay } from 'date-fns'
 import Link from 'next/link'
-import { getServerSession } from 'next-auth'
 import { Input } from '@/components/ui/input'
-import React from 'react'
 import { Button } from '@/components/ui/button'
 import getQuotationDetail from './get-quotation-detail'
 import QuotationLinkComponent from './quotation-link-component'
-import { updateRemark } from '../../return/[documentNo]/update-remarks'
-// import { updateRemark } from '../../return/[documentNo]/update-remarks'
+import UpdateDocumentRemark from '@/components/update-document-remark'
+// import { updateRemark } from '../../sales-return/[documentNo]/update-remarks'
 
 type Props = {
     params: {
@@ -42,8 +29,6 @@ export default async function QuotationDetailPage({
     params: { documentNo },
 }: Props) {
     const document = await getQuotationDetail(documentNo)
-    const session = await getServerSession(authOptions)
-    const paymentMethods = await getPaymentMethods()
 
     if (!document)
         return (
@@ -115,39 +100,6 @@ export default async function QuotationDetailPage({
                     </div>
                 </div>
                 <Table className="mt-3">
-                    <TableCaption>
-                        <div className="w-[600px] space-y-1">
-                            <p className="text-left font-bold text-primary">
-                                หมายเหตุ:
-                            </p>
-                            {document?.DocumentRemark.map((remark) => (
-                                <p
-                                    className={cn(
-                                        'text-left text-primary',
-                                        remark.isDeleted &&
-                                            'text-primary/50 line-through'
-                                    )}
-                                    key={remark.id}
-                                >
-                                    {remark.remark}
-                                </p>
-                            ))}
-                            <form
-                                className="grid grid-cols-[500px_1fr] items-center gap-1"
-                                action={async (formData) => {
-                                    'use server'
-                                    const remark = formData.get('remark')
-                                    if (!remark || typeof remark !== 'string')
-                                        return
-
-                                    await updateRemark(document.id, remark)
-                                }}
-                            >
-                                <Input name="remark" />
-                                <Button className="">เพิ่มหมายเหตุ</Button>
-                            </form>
-                        </div>
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>
@@ -203,7 +155,21 @@ export default async function QuotationDetailPage({
                                 )}
                             </TableCell>
                         </TableRow>
-                        <TableRow className="bg-background">
+                        <TableRow>
+                            <TableCell
+                                colSpan={4}
+                                className="space-x-1 text-right"
+                            >
+                                <UpdateDocumentRemark
+                                    existingDocumentRemark={
+                                        document.DocumentRemark
+                                    }
+                                    documentId={document.id}
+                                />
+                            </TableCell>
+                            <TableCell colSpan={2}></TableCell>
+                        </TableRow>
+                        <TableRow>
                             <TableCell
                                 colSpan={6}
                                 className="space-x-1 text-right"

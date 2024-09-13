@@ -5,14 +5,6 @@ import { GetDocumentRemark } from '@/types/remark/document-remark'
 import { Input } from './ui/input'
 import { cn } from '@/lib/utils'
 import { Cross1Icon } from '@radix-ui/react-icons'
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogFooter,
-    DialogTitle,
-    DialogTrigger,
-} from './ui/dialog'
 import { Button } from './ui/button'
 import { addDocumentRemark } from '@/actions/add-document-remark'
 import toast from 'react-hot-toast'

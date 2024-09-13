@@ -15,6 +15,7 @@ import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import BillInvoiceLinkComponent from './bill-invoice-link-component'
+import UpdateDocumentRemark from '@/components/update-document-remark'
 
 type Props = {
     params: {
@@ -41,7 +42,7 @@ export default async function page({ params: { documentNo } }: Props) {
     return (
         <div className="p-3">
             <Link
-                href={'/sales/bill'}
+                href={'/sales/sales-bill'}
                 className="text-primary/50 underline hover:text-primary"
             >{`< ย้อนกลับ`}</Link>
             <h1 className="my-2 text-3xl transition-colors">
@@ -56,7 +57,7 @@ export default async function page({ params: { documentNo } }: Props) {
                     label="ลูกค้า"
                 />
 
-                <Link href={`/sales/bill/${documentNo}/edit`}>
+                <Link href={`/sales/sales-bill/${documentNo}/edit`}>
                     <Button variant={'destructive'}>แก้ไข</Button>
                 </Link>
                 <BillInvoiceLinkComponent document={billingNote[0]} />
@@ -100,16 +101,18 @@ export default async function page({ params: { documentNo } }: Props) {
                         </TableHead>
                         <TableHead></TableHead>
                     </TableRow>
+                    <TableRow>
+                        <TableCell colSpan={4} className="space-x-1 text-right">
+                            <UpdateDocumentRemark
+                                existingDocumentRemark={
+                                    billingNote[0].DocumentRemark
+                                }
+                                documentId={billingNote[0].id}
+                            />
+                        </TableCell>
+                    </TableRow>
                 </TableFooter>
             </Table>
-
-            {/* <div className="mt-4">
-                <ReceivedDialog
-                    bankAccounts={bankAccounts}
-                    billAmount={salesInvoices.reduce((a, b) => a + b.amount, 0)}
-                    documentNo={documentNo}
-                />
-            </div> */}
         </div>
     )
 }

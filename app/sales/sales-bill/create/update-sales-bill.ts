@@ -1,22 +1,25 @@
 'use server'
 
 import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import prisma from '@/app/db/db'
 import { DocumentDetail } from '@/types/document-detail'
 import { SalesBillItem } from '@/types/sales-bill/sales-bill-item'
+import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export const updateSalesBill = async (
     documentId: number,
     documentDetail: DocumentDetail,
-    salesBillItems: SalesBillItem[]
+    salesBillItems: SalesBillItem[],
+    remarks: { id?: number; remark: string; isDeleted: boolean }[]
 ) => {
     if (!documentDetail.contactId) throw new Error('contact not found')
     if (!salesBillItems.length) throw new Error('items not found')
 
     const documentNo = await generateDocumentNumber('SB', documentDetail.date)
-    console.log(salesBillItems)
+    const session = await getServerSession(authOptions)
 
     const result = await prisma.document.update({
         where: { id: documentId },
@@ -28,6 +31,24 @@ export const updateSalesBill = async (
             address: documentDetail.address,
             phone: documentDetail.phone,
             taxId: documentDetail.taxId,
+            DocumentRemark: {
+                create: remarks
+                    .map(({ id, remark }) => ({
+                        id,
+                        remark,
+                        userId: session?.user.id,
+                    }))
+                    .filter(({ id }) => !id),
+                update: remarks
+                    .filter(({ id }) => id)
+                    .map((remark) => ({
+                        where: { id: remark.id },
+                        data: {
+                            remark: remark.remark,
+                            isDeleted: remark.isDeleted,
+                        },
+                    })),
+            },
             SalesBill: {
                 update: {
                     contactId: documentDetail.contactId,
@@ -46,6 +67,6 @@ export const updateSalesBill = async (
         },
     })
 
-    revalidatePath('/sales/bill')
-    redirect(`/sales/bill/${result.documentNo}`)
+    revalidatePath('/sales/sales-bill')
+    redirect(`/sales/sales-bill/${result.documentNo}`)
 }

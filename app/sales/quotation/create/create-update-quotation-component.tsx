@@ -1,9 +1,7 @@
 'use client'
 
-import { DatePickerWithPresets } from '@/components/date-picker-preset'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
     Table,
     TableBody,
@@ -19,37 +17,55 @@ import React, { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import SearchSkuDialog from '@/components/search-sku-dialog'
 import { DocumentItem } from '@/types/document-item'
-import SelectSearchCustomer from '@/components/select-search-customer'
 import { useSession } from 'next-auth/react'
 import ImageToolTip from '@/components/image-tooltip'
-import { DocumentRemark } from '@prisma/client'
 import { cn } from '@/lib/utils'
 import { getSkuByBarcode } from '@/actions/barcode-scanned'
 import { createQuotation } from './create-quotation'
 import { updateQuotation } from './update-quotation'
-import { DocumentDetail } from '@/types/document-detail'
+import {
+    DocumentDetail,
+    getDefaultDocumentDetail,
+} from '@/types/document-detail'
+import CreateDocumentRemark from '@/components/create-document-remark'
+import { GetQuotation } from '@/types/quotation/quotation'
+import { GetCustomerOrder } from '@/types/customer-order/customer-order'
+import { quotationItemsToDocumentItems } from '@/types/quotation/quotation-items'
+import { DocumentDetailForm } from '@/components/document-detail-form'
+import { GetDocumentRemark } from '@/types/remark/document-remark'
 
 type Props = {
-    defaultItems?: DocumentItem[]
-    defaultDocumentDetails?: DocumentDetail
-    defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
+    existingQuotation?: GetQuotation
+    quotations?: GetQuotation[]
+    customerOrders?: GetCustomerOrder[]
 }
 
 export default function CreateOrUpdateQuotationComponent({
-    defaultItems = [],
-    defaultDocumentDetails,
-    defaultRemarks,
+    existingQuotation,
+    quotations = [],
+    customerOrders = [],
 }: Props) {
     const formRef = React.useRef<HTMLFormElement>(null)
+    const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
+        existingQuotation
+            ? {
+                  ...existingQuotation,
+                  contactId: existingQuotation?.Quotation?.contactId,
+              }
+            : getDefaultDocumentDetail()
+    )
     const [open, setOpen] = React.useState(false)
-    const [items, setItems] = React.useState<DocumentItem[]>(defaultItems)
+    const [items, setItems] = React.useState<DocumentItem[]>(
+        quotationItemsToDocumentItems(
+            existingQuotation?.Quotation?.QuotationItem || []
+        )
+    )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
     const session = useSession()
-    const [remarks, setRemarks] = React.useState<
-        { id?: number; remark: string; isDeleted?: boolean }[]
-    >(defaultRemarks || [])
-    const [remarkInput, setRemarkInput] = React.useState<string>('')
+    const [documentRemarks, setDocumentRemarks] = React.useState<
+        GetDocumentRemark[]
+    >(existingQuotation?.DocumentRemark || [])
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -84,46 +100,28 @@ export default function CreateOrUpdateQuotationComponent({
         }
     }, [key, open])
 
-    const addRemark = () => {
-        if (!remarkInput) return
-        setRemarks((prev) => [...prev, { remark: remarkInput }])
-        setRemarkInput('')
-    }
-
-    const removeRemark = (index: number) => {
-        // setRemarks((prev) => prev.filter((_, i) => i !== index))
-        const remarkToRemove = remarks[index]
-        if (remarkToRemove.id) {
-            setRemarks((prev) =>
-                prev.map((remark) =>
-                    remark.id === remarkToRemove.id
-                        ? { ...remark, isDeleted: true }
-                        : remark
-                )
-            )
-        } else {
-            setRemarks((prev) => prev.filter((_, i) => i !== index))
-        }
-    }
-
     return (
         <div className="p-3" id={key} key={key}>
             <form
                 ref={formRef}
                 action={async (formData) => {
                     try {
-                        if (!defaultItems.length) {
-                            await createQuotation(formData, items, remarks)
+                        if (!existingQuotation) {
+                            await createQuotation(
+                                formData,
+                                items,
+                                documentRemarks
+                            )
                             setKey(String(Date.now()))
                             setItems([])
                             toast.success('บันทึกสําเร็จ')
                         }
-                        if (defaultDocumentDetails) {
+                        if (existingQuotation) {
                             await updateQuotation(
-                                defaultDocumentDetails.id,
+                                existingQuotation.id,
                                 formData,
                                 items,
-                                remarks
+                                documentRemarks
                             )
                             toast.success('บันทึกสําเร็จ')
                         }
@@ -134,103 +132,13 @@ export default function CreateOrUpdateQuotationComponent({
                     }
                 }}
             >
-                <div className="flex flex-col gap-2">
-                    <div className="flex gap-3">
-                        <Label className="flex items-center gap-2">
-                            <p className="">วันที่</p>
-                            <DatePickerWithPresets
-                                defaultDate={defaultDocumentDetails?.date}
-                            />
-                        </Label>
-                        <Label className="flex items-center gap-2">
-                            <p className="">No. </p>
-                            <Input
-                                className="w-auto"
-                                name="documentNo"
-                                placeholder="Optional"
-                                defaultValue={
-                                    defaultDocumentDetails?.documentNo
-                                }
-                            />
-                        </Label>
-                    </div>
-                    <div className="my-1 flex items-baseline space-x-2">
-                        <Label>ลูกค้า</Label>
-                        <SelectSearchCustomer
-                            name="customerId"
-                            hasTextArea={true}
-                            placeholder="รหัสลูกค้า"
-                            defaultValue={String(
-                                defaultDocumentDetails?.contactId || ''
-                            )}
-                            defaultAddress={{
-                                name: defaultDocumentDetails?.contactName || '',
-                                address: defaultDocumentDetails?.address || '',
-                                phone: defaultDocumentDetails?.phone || '',
-                                taxId: defaultDocumentDetails?.taxId || '',
-                            }}
-                        />
-                    </div>
-                </div>
+                <DocumentDetailForm
+                    documentDetail={documentDetail}
+                    setDocumentDetail={setDocumentDetail}
+                    label="ลูกค้า"
+                    useSearchParams
+                />
                 <Table>
-                    <TableCaption>
-                        <div className="w-[650px] space-y-1">
-                            <p className="text-left">หมายเหตุ:</p>
-                            {remarks.map((remark, index) => (
-                                <p
-                                    className={cn(
-                                        'grid grid-cols-[1fr_20px] items-center gap-1 text-left text-primary',
-                                        remark.isDeleted &&
-                                            'text-primary/50 line-through'
-                                    )}
-                                    key={'remark-' + index}
-                                >
-                                    <span>{remark.remark}</span>
-                                    <Cross1Icon
-                                        className={cn(
-                                            'font-bold text-destructive hover:cursor-pointer',
-                                            remark.isDeleted && 'hidden'
-                                        )}
-                                        onClick={() => removeRemark(index)}
-                                    />
-                                </p>
-                            ))}
-                            <div className="grid grid-cols-[1fr_140px] items-center gap-1">
-                                <Input
-                                    name="remark"
-                                    onChange={(e) =>
-                                        setRemarkInput(e.target.value)
-                                    }
-                                    value={remarkInput}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault()
-                                            addRemark()
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="button"
-                                    onClick={() => addRemark()}
-                                >
-                                    เพิ่มหมายเหตุ
-                                </Button>
-                            </div>
-                        </div>
-                        <div className="mt-4 flex w-[600px] justify-end gap-1">
-                            <Button
-                                variant="destructive"
-                                type="button"
-                                onClick={(e) => {
-                                    setKey(String(Date.now()))
-                                    setItems(defaultItems)
-                                }}
-                            >
-                                Reset
-                            </Button>
-                            <Button type="submit">Save</Button>
-                        </div>
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>
@@ -508,6 +416,48 @@ export default function CreateOrUpdateQuotationComponent({
                                 )}
                             </TableCell>
                             <TableCell className="text-right"></TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={7}>
+                                <CreateDocumentRemark
+                                    existingDocumentRemark={
+                                        existingQuotation?.DocumentRemark || []
+                                    }
+                                    documentRemarks={documentRemarks}
+                                    setDocumentRemarks={setDocumentRemarks}
+                                />
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={6}>
+                                <div className="flex justify-end gap-2">
+                                    {existingQuotation ? (
+                                        <Button disabled={items.length === 0}>
+                                            แก้ไขใบเสนอราคา
+                                        </Button>
+                                    ) : (
+                                        <Button disabled={items.length === 0}>
+                                            สร้างใบเสนอราคา
+                                        </Button>
+                                    )}
+                                    <Button
+                                        variant={'destructive'}
+                                        type="button"
+                                        onClick={(e) => {
+                                            setKey(String(Date.now()))
+                                            setItems(
+                                                quotationItemsToDocumentItems(
+                                                    existingQuotation?.Quotation
+                                                        ?.QuotationItem || []
+                                                )
+                                            )
+                                        }}
+                                    >
+                                        รีเซ็ต
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableHead></TableHead>
                         </TableRow>
                     </TableFooter>
                 </Table>

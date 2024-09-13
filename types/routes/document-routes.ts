@@ -15,7 +15,7 @@ import { DocumentType } from '@prisma/client'
 // export const documentRoutes: { type: DocumentType; path: string } = [
 //     { type: DocumentType.Sales, path: '/sales/sales-order' },
 //     { type: DocumentType.SalesReturn, path: '/sales/sales-return' },
-//     { type: DocumentType.SalesBill, path: '/sales/bill' },
+//     { type: DocumentType.SalesBill, path: '/sales/sales-bill' },
 //     { type: DocumentType.SalesReceived, path: '/sales/sales-received' },
 //     { type: DocumentType.PurchaseOrder, path: '/purchase/purchase-order' },
 //     { type: DocumentType.Purchase, path: '/purchase/purchase-received' },
@@ -30,7 +30,7 @@ import { DocumentType } from '@prisma/client'
 const documentRoutes: Record<DocumentType, string> = {
     Sales: '/sales/sales-order',
     SalesReturn: '/sales/sales-return',
-    SalesBill: '/sales/bill',
+    SalesBill: '/sales/sales-bill',
     SalesReceived: '/sales/sales-received',
     Purchase: '/purchase/purchase-received',
     PurchaseReturn: '/purchase/purchase-return',
@@ -45,7 +45,7 @@ const documentRoutes: Record<DocumentType, string> = {
 export enum FullRoute {
     Sales = '/sales/sales-order',
     SalesReturn = '/sales/sales-return',
-    SalesBill = '/sales/bill',
+    SalesBill = '/sales/sales-bill',
     SalesReceived = '/sales/sales-received',
     Purchase = '/purchase/purchase-received',
     PurchaseReturn = '/purchase/purchase-return',

@@ -1,8 +1,8 @@
 'use client'
 
-import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/return-invoice-detail'
+import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/sales-return-invoice-detail'
 import BlobProviderClient from '@/components/pdf/blob-provider-client'
-import SalesReturnInvoicePdf_5x9 from '@/components/pdf/return-invoice-5.5-9'
+import SalesReturnInvoicePdf_5x9 from '@/components/pdf/sales-return-invoice-5.5-9'
 import React from 'react'
 
 type Props = {

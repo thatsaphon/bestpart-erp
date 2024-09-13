@@ -26,13 +26,9 @@ export const metadata: Metadata = {
 export default async function UpdateQuotationPage({
     params: { documentNo },
 }: Props) {
-    const quotation = await getQuotationDefaultFunction({
+    const existingQuotation = await getQuotationDefaultFunction({
         documentNo,
     })
-
-    const quotationItems = quotationItemsToDocumentItems(
-        quotation[0].Quotation?.QuotationItem
-    )
 
     return (
         <>
@@ -44,24 +40,7 @@ export default async function UpdateQuotationPage({
             </div>
             <h1 className="my-2 text-3xl transition-colors">สร้างใบเสนอราคา</h1>
             <CreateOrUpdateQuotationComponent
-                defaultItems={quotationItems}
-                // defaultItems={quotation.map((x) => ({
-                //     ...x,
-                //     MainSkuRemarks: mainSkuRemarks.filter(
-                //         (y) => y.mainSkuId === x.mainSkuId
-                //     ),
-                //     SkuMasterRemarks: skuMasterRemarks.filter(
-                //         (y) => y.skuMasterId === x.skuMasterId
-                //     ),
-                //     images: images
-                //         .filter((y) => y.skuMasterId === x.skuMasterId)
-                //         .map((y) => y.images),
-                // }))}
-                defaultDocumentDetails={{
-                    ...quotation[0],
-                    contactId: quotation[0].Quotation?.contactId,
-                }}
-                // defaultRemarks={defaultRemarks}
+                existingQuotation={existingQuotation[0]}
             />
         </>
     )

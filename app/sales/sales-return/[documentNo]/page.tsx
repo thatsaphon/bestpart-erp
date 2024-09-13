@@ -15,12 +15,8 @@ import { Button } from '@/components/ui/button'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
-import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
-import EditPaymentsComponents from './edit-payments-components'
-import { updateRemark } from './update-remarks'
 import SelectSearchCustomer from '@/components/select-search-customer'
-import { cn } from '@/lib/utils'
 import {
     Tooltip,
     TooltipContent,
@@ -30,8 +26,10 @@ import {
 import { isBefore, startOfDay } from 'date-fns'
 // import SalesInvoiceLinkComponent from './sales-invoice-link-component'
 import { Metadata, ResolvingMetadata } from 'next'
-import { getSalesDefaultFunction } from '@/types/sales/sales'
 import { getSalesReturnDefaultFunction } from '@/types/sales-return/sales-return'
+import UpdateDocumentRemark from '@/components/update-document-remark'
+import PaymentComponentReadonly from '@/components/payment-component-readonly'
+import { generalLedgerToPayments } from '@/types/payment/payment'
 
 type Props = {
     params: { documentNo: string }
@@ -69,7 +67,7 @@ export default async function SalesInvoiceDetailPage({
         <>
             <div className="mb-2 p-3">
                 <Link
-                    href={'/sales/return'}
+                    href={'/sales/sales-return'}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
                 <h1 className="my-2 text-3xl transition-colors">
@@ -100,7 +98,7 @@ export default async function SalesInvoiceDetailPage({
                         ) ? (
                             <div>
                                 <Link
-                                    href={`/sales/return/${document?.documentNo}/edit`}
+                                    href={`/sales/sales-return/${document?.documentNo}/edit`}
                                 >
                                     <Button
                                         type="button"
@@ -152,44 +150,6 @@ export default async function SalesInvoiceDetailPage({
                     </div>
                 </div>
                 <Table className="mt-3">
-                    <TableCaption>
-                        <div className="w-[600px] space-y-1">
-                            {/* <EditPaymentsComponents
-                                document={document}
-                                paymentMethods={paymentMethods}
-                            /> */}
-
-                            <p className="text-left font-bold text-primary">
-                                หมายเหตุ:
-                            </p>
-                            {/* {document?.remark.map((remark) => (
-                                <p
-                                    className={cn(
-                                        'text-left text-primary',
-                                        remark.isDeleted &&
-                                            'text-primary/50 line-through'
-                                    )}
-                                    key={remark.id}
-                                >
-                                    {remark.remark}
-                                </p>
-                            ))} */}
-                            <form
-                                className="grid grid-cols-[500px_1fr] items-center gap-1"
-                                action={async (formData) => {
-                                    'use server'
-                                    const remark = formData.get('remark')
-                                    if (!remark || typeof remark !== 'string')
-                                        return
-
-                                    await updateRemark(document.id, remark)
-                                }}
-                            >
-                                <Input name="remark" />
-                                <Button className="">เพิ่มหมายเหตุ</Button>
-                            </form>
-                        </div>
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>
@@ -240,11 +200,43 @@ export default async function SalesInvoiceDetailPage({
                                 )}
                             </TableCell>
                         </TableRow>
-                        <TableRow className="bg-background">
+                        <TableRow>
                             <TableCell
                                 colSpan={6}
                                 className="space-x-1 text-right"
                             ></TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell
+                                colSpan={4}
+                                className="space-x-1 text-right"
+                            >
+                                <UpdateDocumentRemark
+                                    existingDocumentRemark={
+                                        document?.DocumentRemark
+                                    }
+                                    documentId={document?.id}
+                                />
+                                {/* <PaymentComponentReadonly
+                                    payments={generalLedgerToPayments(
+                                        document?.Sales?.GeneralLedger || [],
+                                        true
+                                    )}
+                                /> */}
+                            </TableCell>
+                            <TableCell
+                                colSpan={2}
+                                className="space-x-1 text-right"
+                            >
+                                <PaymentComponentReadonly
+                                    payments={generalLedgerToPayments(
+                                        document?.SalesReturn?.GeneralLedger ||
+                                            [],
+                                        true,
+                                        true
+                                    )}
+                                />
+                            </TableCell>
                         </TableRow>
                     </TableFooter>
                 </Table>

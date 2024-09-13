@@ -66,7 +66,7 @@ export default function CreateDocumentRemark({
                         <Cross1Icon
                             className="text-destructive hover:cursor-pointer"
                             onClick={() =>
-                                documentRemarks.find(
+                                existingDocumentRemark.find(
                                     ({ id }) => remark.id === id
                                 )
                                     ? setDocumentRemarks(

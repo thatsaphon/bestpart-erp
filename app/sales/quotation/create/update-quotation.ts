@@ -15,7 +15,7 @@ export async function updateQuotation(
     id: number,
     formData: FormData,
     items: DocumentItem[],
-    remarks: { id?: number; remark: string }[]
+    remarks: { id?: number; remark: string; isDeleted?: boolean }[]
 ) {
     const validator = z.object({
         customerId: z.string().trim().nullable(),
@@ -100,7 +100,24 @@ export async function updateQuotation(
             taxId: taxId || '',
             date: new Date(date),
             documentNo: documentNo,
-            DocumentRemark: { create: remarks },
+            DocumentRemark: {
+                create: remarks
+                    .map(({ id, remark }) => ({
+                        id,
+                        remark,
+                        userId: session?.user.id,
+                    }))
+                    .filter(({ id }) => !id),
+                update: remarks
+                    .filter(({ id }) => id)
+                    .map((remark) => ({
+                        where: { id: remark.id },
+                        data: {
+                            remark: remark.remark,
+                            isDeleted: remark.isDeleted,
+                        },
+                    })),
+            },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             Quotation: {

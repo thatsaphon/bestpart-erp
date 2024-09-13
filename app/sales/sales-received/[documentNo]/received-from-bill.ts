@@ -100,6 +100,6 @@ export const receivedFromBill = async (
         },
     })
 
-    revalidatePath('/sales/bill')
-    revalidatePath('/sales/bill/' + billId)
+    revalidatePath('/sales/sales-bill')
+    revalidatePath('/sales/sales-bill/' + billId)
 }

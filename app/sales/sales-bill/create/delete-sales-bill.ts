@@ -25,5 +25,5 @@ export const deleteSalesBill = async (documentNo: string) => {
     })
 
     await prisma.$transaction([deleteSalesBill, deleteDocument])
-    redirect('/sales/bill')
+    redirect('/sales/sales-bill')
 }

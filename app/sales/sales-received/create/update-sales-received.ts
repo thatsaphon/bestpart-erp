@@ -1,11 +1,13 @@
 'use server'
 
 import { generateDocumentNumber } from '@/actions/generateDocumentNumber'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import prisma from '@/app/db/db'
 import { DocumentDetail } from '@/types/document-detail'
 import { Payment } from '@/types/payment/payment'
 import { SalesBillItem } from '@/types/sales-bill/sales-bill-item'
 import { SalesReceivedItem } from '@/types/sales-received/sales-receive-item'
+import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -13,7 +15,8 @@ export const updateSalesReceived = async (
     documentId: number,
     documentDetail: DocumentDetail,
     salesReceivedItems: SalesReceivedItem[],
-    payments: Payment[]
+    payments: Payment[],
+    remarks: { id?: number; remark: string; isDeleted?: boolean }[]
 ) => {
     if (!documentDetail.contactId) throw new Error('contact not found')
     if (!salesReceivedItems.length) throw new Error('items not found')
@@ -29,6 +32,8 @@ export const updateSalesReceived = async (
         where: { salesReceivedId: salesReceived.SalesReceived?.id },
     })
 
+    const session = await getServerSession(authOptions)
+
     const updateDocument = prisma.document.update({
         where: { id: documentId },
         data: {
@@ -39,6 +44,25 @@ export const updateSalesReceived = async (
             address: documentDetail.address,
             phone: documentDetail.phone,
             taxId: documentDetail.taxId,
+            updatedBy: session?.user?.id,
+            DocumentRemark: {
+                create: remarks
+                    .map(({ id, remark }) => ({
+                        id,
+                        remark,
+                        userId: session?.user.id,
+                    }))
+                    .filter(({ id }) => !id),
+                update: remarks
+                    .filter(({ id }) => id)
+                    .map((remark) => ({
+                        where: { id: remark.id },
+                        data: {
+                            remark: remark.remark,
+                            isDeleted: remark.isDeleted,
+                        },
+                    })),
+            },
             SalesReceived: {
                 update: {
                     contactId: documentDetail.contactId,

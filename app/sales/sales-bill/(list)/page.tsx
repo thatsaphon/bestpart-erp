@@ -143,7 +143,9 @@ export default async function SalesListPage({
                                     .toLocaleString()}
                             </TableCell>
                             <TableCell>
-                                <Link href={`/sales/bill/${bill.documentNo}`}>
+                                <Link
+                                    href={`/sales/sales-bill/${bill.documentNo}`}
+                                >
                                     <EyeOpenIcon />
                                 </Link>
                             </TableCell>

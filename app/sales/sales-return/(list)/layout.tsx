@@ -7,7 +7,7 @@ import { DateRangePicker } from '@/components/ui/date-range-picker'
 import DateRangePickerSearchParams from '@/components/date-range-picker-search-params'
 
 export const metadata: Metadata = {
-    title: 'ใบวางบิล',
+    title: 'รายการคืนสินค้า',
 }
 
 export default async function RootLayout({
@@ -18,10 +18,10 @@ export default async function RootLayout({
     return (
         <>
             <h1 className="flex items-center gap-2 text-3xl text-primary">
-                <span>ใบวางบิล</span>
-                <Link href={'/sales/bill/create'}>
+                <span>รับคืนสินค้า</span>
+                <Link href={'/sales/sales-return/create'}>
                     <Button className="ml-3" variant={'outline'}>
-                        สร้างใบวางบิล
+                        สร้างใบรับคืนสินค้า
                     </Button>
                 </Link>
             </h1>

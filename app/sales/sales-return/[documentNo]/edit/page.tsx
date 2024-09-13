@@ -38,7 +38,7 @@ export default async function EditSalesInvoicePage({
         <>
             <div className="flex justify-between">
                 <Link
-                    href={`/sales/return/${documentNo}`}
+                    href={`/sales/sales-return/${documentNo}`}
                     className="text-primary/50 underline hover:text-primary"
                 >{`< ย้อนกลับ`}</Link>
 
@@ -53,7 +53,7 @@ export default async function EditSalesInvoicePage({
                 แก้ไขรายละเอียดบิลขาย
             </h1>
             <CreateOrUpdateSalesReturnInvoiceComponent
-                salesReturn={document}
+                existingSalesReturn={document}
                 paymentMethods={paymentMethods}
                 defaultPayments={document.SalesReturn?.GeneralLedger.filter(
                     (gl) => gl.ChartOfAccount.isAr || gl.ChartOfAccount.isCash

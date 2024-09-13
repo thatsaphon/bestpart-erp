@@ -86,7 +86,12 @@ export async function createQuotation(
             taxId: taxId || '',
             date: new Date(date),
             documentNo: documentNo,
-            DocumentRemark: { create: remarks },
+            DocumentRemark: {
+                create: remarks.map(({ remark }) => ({
+                    remark,
+                    userId: session?.user.id,
+                })),
+            },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             Quotation: {

@@ -8,7 +8,6 @@ import { revalidateDocumentType } from './revalidate-document-type'
 
 export const addDocumentRemark = async (documentId: number, remark: string) => {
     const session = await getServerSession(authOptions)
-    console.log(session)
     const result = await prisma.documentRemark.create({
         data: {
             documentId: documentId,

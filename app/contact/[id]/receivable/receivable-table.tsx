@@ -93,8 +93,8 @@ export default function ReceivableTable({ documents }: Props) {
                                                 : document.documentNo.startsWith(
                                                         'CN'
                                                     )
-                                                  ? 'sales/return'
-                                                  : 'sales/bill'
+                                                  ? 'sales/sales-return'
+                                                  : 'sales/sales-bill'
                                         }/${document.documentNo}`}
                                     >
                                         {document.documentNo}

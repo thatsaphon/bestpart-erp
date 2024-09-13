@@ -11,6 +11,9 @@ import { redirect } from 'next/navigation'
 import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 import { DocumentDetail } from '@/types/document-detail'
 import { checkRemaining } from '@/actions/check-remaining'
+import { Payment } from '@/types/payment/payment'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 
 export const updateSalesReturnInvoice = async (
     id: number,
@@ -25,7 +28,7 @@ export const updateSalesReturnInvoice = async (
         documentNo,
     }: DocumentDetail,
     items: DocumentItem[],
-    payments: { id: number; amount: number }[],
+    payments: Payment[],
     remarks: { id?: number; remark: string; isDeleted?: boolean }[]
 ) => {
     const getContact = async () => {
@@ -44,7 +47,7 @@ export const updateSalesReturnInvoice = async (
     let contact: Contact | undefined = await getContact()
 
     if (
-        payments.find((payment) => payment.id === 12000) &&
+        payments.find((payment) => payment.chartOfAccountId === 12000) &&
         (!contact || !contact.credit)
     ) {
         throw new Error(`${contact?.name || ''} ไม่สามารถขายเงินเชื่อได้`)
@@ -123,6 +126,7 @@ export const updateSalesReturnInvoice = async (
             )
         }
     }
+    const session = await getServerSession(authOptions)
 
     const updateInvoice = await prisma.document.update({
         where: { id },
@@ -133,8 +137,15 @@ export const updateSalesReturnInvoice = async (
             taxId: taxId || undefined,
             date: date ? new Date(date) : undefined,
             documentNo: documentNo || undefined,
+            updatedBy: session?.user.first_name,
             DocumentRemark: {
-                create: remarks.filter(({ id }) => !id),
+                create: remarks
+                    .map(({ id, remark }) => ({
+                        id,
+                        remark,
+                        userId: session?.user.id,
+                    }))
+                    .filter(({ id }) => !id),
                 update: remarks
                     .filter(({ id }) => id)
                     .map((remark) => ({
@@ -154,7 +165,7 @@ export const updateSalesReturnInvoice = async (
                             // 11000 = เงินสด, 12000 = ลูกหนี้
                             ...payments.map((payment) => {
                                 return {
-                                    chartOfAccountId: payment.id,
+                                    chartOfAccountId: payment.chartOfAccountId,
                                     amount: -payment.amount,
                                 }
                             }),
@@ -230,7 +241,7 @@ export const updateSalesReturnInvoice = async (
         },
     })
 
-    revalidatePath('/sales/return')
-    revalidatePath(`/sales/return/${documentNo}`)
-    redirect(`/sales/return/${documentNo}`)
+    revalidatePath('/sales/sales-return')
+    revalidatePath(`/sales/sales-return/${documentNo}`)
+    redirect(`/sales/sales-return/${documentNo}`)
 }

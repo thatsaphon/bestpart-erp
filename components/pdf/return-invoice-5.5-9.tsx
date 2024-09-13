@@ -1,6 +1,6 @@
 'use client'
 
-import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/return-invoice-detail'
+import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/sales-return-invoice-detail'
 import { fullDateFormat } from '@/lib/date-format'
 import {
     Page,

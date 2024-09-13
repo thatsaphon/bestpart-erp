@@ -63,10 +63,10 @@ export function NavMenubar() {
                             <Link href={'/sales/sales-order/create'}>
                                 <MenubarItem>สร้างบิลขาย</MenubarItem>
                             </Link>
-                            <Link href={'/sales/return/create'}>
+                            <Link href={'/sales/sales-return/create'}>
                                 <MenubarItem>สร้างใบรับคืนสินค้า</MenubarItem>
                             </Link>
-                            <Link href={'/sales/bill/create'}>
+                            <Link href={'/sales/sales-bill/create'}>
                                 <MenubarItem>สร้างใบวางบิล</MenubarItem>
                             </Link>
                             <Link href={'/sales/quotation/create'}>

@@ -28,7 +28,8 @@ export type GetGeneralLedgerIncludeChartOfAccount = Awaited<
 
 export const generalLedgerToPayments = (
     generalLedger: GetGeneralLedgerIncludeChartOfAccount[],
-    includeAr?: boolean
+    includeAr?: boolean,
+    reverseValue?: boolean
 ) => {
     return (
         generalLedger
@@ -51,7 +52,7 @@ export const generalLedgerToPayments = (
                     },
                 }) => ({
                     chartOfAccountId,
-                    amount,
+                    amount: reverseValue ? -amount : amount,
                     name,
                     isAp,
                     isAr,

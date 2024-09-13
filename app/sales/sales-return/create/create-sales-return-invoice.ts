@@ -14,6 +14,7 @@ import { calculateArPaymentStatus } from '@/lib/calculate-payment-status'
 import { DocumentDetail } from '@/types/document-detail'
 import { checkRemaining } from '@/actions/check-remaining'
 import { DocumentItem } from '@/types/document-item'
+import { Payment } from '@/types/payment/payment'
 
 export const createSalesReturnInvoice = async (
     {
@@ -27,10 +28,7 @@ export const createSalesReturnInvoice = async (
         documentNo,
     }: DocumentDetail,
     items: DocumentItem[],
-    payments: {
-        id: number
-        amount: number
-    }[],
+    payments: Payment[],
     remarks: { id?: number; remark: string }[]
 ) => {
     const getContact = async () => {
@@ -49,7 +47,7 @@ export const createSalesReturnInvoice = async (
     let contact: Contact | undefined = await getContact()
 
     if (
-        payments.find((payment) => payment.id === 12000) &&
+        payments.find((payment) => payment.chartOfAccountId === 12000) &&
         (!contact || !contact.credit)
     ) {
         throw new Error(`${contact?.name || ''} ไม่สามารถขายเงินเชื่อได้`)
@@ -136,7 +134,12 @@ export const createSalesReturnInvoice = async (
             taxId: taxId || '',
             date: new Date(date),
             documentNo: documentNo,
-            DocumentRemark: { create: remarks },
+            DocumentRemark: {
+                create: remarks.map(({ remark }) => ({
+                    remark: remark,
+                    userId: session?.user.id,
+                })),
+            },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
             SalesReturn: {
@@ -147,7 +150,7 @@ export const createSalesReturnInvoice = async (
                             // 11000 = เงินสด, 12000 = ลูกหนี้
                             ...payments.map((payment) => {
                                 return {
-                                    chartOfAccountId: payment.id,
+                                    chartOfAccountId: payment.chartOfAccountId,
                                     amount: -payment.amount,
                                 }
                             }),
@@ -186,11 +189,7 @@ export const createSalesReturnInvoice = async (
                             pricePerUnit: item.pricePerUnit,
                             quantity: item.quantity,
                             unit: item.unit,
-                            vat: +(
-                                item.quantity *
-                                item.quantityPerUnit *
-                                (7 / 107)
-                            ).toFixed(2),
+                            vat: +(item.pricePerUnit * (7 / 107)).toFixed(2),
                             barcode: item.barcode,
                             description: item.detail,
                             name: item.name,
@@ -219,6 +218,6 @@ export const createSalesReturnInvoice = async (
         },
     })
 
-    revalidatePath('/sales/return')
-    redirect(`/sales/return/${invoice.documentNo}`)
+    revalidatePath('/sales/sales-return')
+    redirect(`/sales/sales-return/${invoice.documentNo}`)
 }

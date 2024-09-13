@@ -40,54 +40,57 @@ import {
 import { createSalesReturnInvoice } from './create-sales-return-invoice'
 import { updateSalesReturnInvoice } from './update-sales-return-invoice'
 import { GetSalesReturn } from '@/types/sales-return/sales-return'
-import { salesReturnItemsToInventoryDetailType } from '@/types/sales-return/sales-return-item'
+import { salesReturnItemsToDocumentItems } from '@/types/sales-return/sales-return-item'
+import AddPaymentComponent from '@/components/add-payment-component'
+import { GetQuotation } from '@/types/quotation/quotation'
+import { GetCustomerOrder } from '@/types/customer-order/customer-order'
+import { generalLedgerToPayments, Payment } from '@/types/payment/payment'
+import { GetDocumentRemark } from '@/types/remark/document-remark'
+import CreateDocumentRemark from '@/components/create-document-remark'
 
 type Props = {
-    salesReturn?: GetSalesReturn
+    existingSalesReturn?: GetSalesReturn
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
-    defaultPayments?: { id: number; amount: number }[]
-    defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
+    depositAmount?: number
+    quotations?: GetQuotation[]
+    customerOrders?: GetCustomerOrder[]
 }
 
 export default function CreateOrUpdateSalesReturnInvoiceComponent({
-    salesReturn,
+    existingSalesReturn,
     paymentMethods,
-    defaultPayments,
-    defaultRemarks,
+    depositAmount,
+    quotations,
+    customerOrders,
 }: Props) {
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
-        salesReturn
-            ? { ...salesReturn, contactId: salesReturn?.SalesReturn?.contactId }
+        existingSalesReturn
+            ? {
+                  ...existingSalesReturn,
+                  contactId: existingSalesReturn?.SalesReturn?.contactId,
+              }
             : getDefaultDocumentDetail()
     )
     const formRef = React.useRef<HTMLFormElement>(null)
     const [open, setOpen] = React.useState(false)
     const [items, setItems] = React.useState<DocumentItem[]>(
-        salesReturnItemsToInventoryDetailType(
-            salesReturn?.SalesReturn?.SalesReturnItem
+        salesReturnItemsToDocumentItems(
+            existingSalesReturn?.SalesReturn?.SalesReturnItem
         )
     )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
     const session = useSession()
-    const [remarks, setRemarks] = React.useState<
-        { id?: number; remark: string; isDeleted?: boolean }[]
-    >(defaultRemarks || [])
-    const [remarkInput, setRemarkInput] = React.useState<string>('')
-    const [selectedPayments, setSelectedPayments] = React.useState<
-        { id: number; amount: number }[]
-    >(
-        defaultPayments?.map((payment) => ({
-            id: payment.id,
-            amount: Math.abs(payment.amount),
-        })) || []
+    const [documentRemarks, setDocumentRemarks] = React.useState<
+        GetDocumentRemark[]
+    >(existingSalesReturn?.DocumentRemark || [])
+    const [payments, setPayments] = React.useState<Payment[]>(
+        generalLedgerToPayments(
+            existingSalesReturn?.SalesReturn?.GeneralLedger || [],
+            true,
+            true
+        )
     )
-    const [selectedPayment, setSelectedPayment] = React.useState<
-        number | undefined
-    >()
-    const [paymentAmount, setPaymentAmount] = React.useState<
-        number | undefined
-    >()
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -122,41 +125,6 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
         }
     }, [key, open])
 
-    const addRemark = () => {
-        if (!remarkInput) return
-        setRemarks((prev) => [...prev, { remark: remarkInput }])
-        setRemarkInput('')
-    }
-
-    const removeRemark = (index: number) => {
-        // setRemarks((prev) => prev.filter((_, i) => i !== index))
-        const remarkToRemove = remarks[index]
-        if (remarkToRemove.id) {
-            setRemarks((prev) =>
-                prev.map((remark) =>
-                    remark.id === remarkToRemove.id
-                        ? { ...remark, isDeleted: true }
-                        : remark
-                )
-            )
-        } else {
-            setRemarks((prev) => prev.filter((_, i) => i !== index))
-        }
-    }
-
-    const addPayment = () => {
-        if (!selectedPayment || !paymentAmount) {
-            toast.error('กรุณาเลือกช่องทางการชําระเงินหรือจำนวนเงิน')
-            return
-        }
-        setSelectedPayments((prev) => [
-            ...prev,
-            { id: selectedPayment, amount: paymentAmount },
-        ])
-        setSelectedPayment(undefined)
-        setPaymentAmount(undefined)
-    }
-
     return (
         <div className="p-3" id={key} key={key}>
             <form
@@ -164,10 +132,7 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                 action={async (formData) => {
                     try {
                         if (
-                            selectedPayments.reduce(
-                                (a, b) => a + b.amount,
-                                0
-                            ) !==
+                            payments.reduce((a, b) => a + b.amount, 0) !==
                             items.reduce(
                                 (acc, item) =>
                                     acc + item.pricePerUnit * item.quantity,
@@ -178,25 +143,25 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                 'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
                             )
                         }
-                        if (!salesReturn) {
+                        if (!existingSalesReturn) {
                             await createSalesReturnInvoice(
                                 // formData,
                                 documentDetail,
                                 items,
-                                selectedPayments,
-                                remarks
+                                payments,
+                                documentRemarks
                             )
                             // setKey(String(Date.now()))
                             // setItems([])
                             toast.success('บันทึกสําเร็จ')
                         }
-                        if (salesReturn) {
+                        if (existingSalesReturn) {
                             await updateSalesReturnInvoice(
-                                salesReturn.id,
+                                existingSalesReturn.id,
                                 documentDetail,
                                 items,
-                                selectedPayments,
-                                remarks
+                                payments,
+                                documentRemarks
                             )
                             toast.success('บันทึกสําเร็จ')
                         }
@@ -214,203 +179,6 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                     placeholder="รหัสลูกค้า"
                 />
                 <Table>
-                    <TableCaption>
-                        <div className="w-[650px] space-y-1">
-                            <div className="flex items-center gap-1 text-left">
-                                ช่องทางชำระเงิน:{' '}
-                                {/* {!defaultDocumentDetail ? (
-                                    <></>
-                                ) : defaultDocumentDetail?.paymentStatus ===
-                                  'Paid' ? (
-                                    <Badge className="bg-green-400">
-                                        จ่ายแล้ว
-                                    </Badge>
-                                ) : defaultDocumentDetail?.paymentStatus ===
-                                  'Billed' ? (
-                                    <Badge variant={`secondary`}>
-                                        วางบิลแล้ว
-                                    </Badge>
-                                ) : defaultDocumentDetail?.paymentStatus ===
-                                  'PartialPaid' ? (
-                                    <Badge variant={'destructive'}>
-                                        จ่ายบางส่วน
-                                    </Badge>
-                                ) : !defaultDocumentDetail?.paymentStatus ? (
-                                    <Badge className="bg-green-400">
-                                        เงินสด
-                                    </Badge>
-                                ) : (
-                                    <Badge variant={'destructive'}>
-                                        ยังไม่จ่าย
-                                    </Badge>
-                                )} */}
-                            </div>
-                            {selectedPayments.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className={cn(
-                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary'
-                                        // defaultDocumentDetail?.paymentStatus ===
-                                        //     'Billed' && 'grid-cols-2'
-                                    )}
-                                >
-                                    <p>
-                                        {paymentMethods.find(
-                                            (p) => p.id === item.id
-                                        )?.id === 12000
-                                            ? 'เงินเชื่อ'
-                                            : paymentMethods.find(
-                                                  (p) => p.id === item.id
-                                              )?.name}
-                                    </p>
-                                    <p>{item.amount}</p>
-                                    <Cross1Icon
-                                        className={cn(
-                                            'cursor-pointer text-destructive'
-                                            // defaultDocumentDetail?.paymentStatus ===
-                                            //     'Billed' && 'hidden'
-                                        )}
-                                        onClick={() =>
-                                            setSelectedPayments(
-                                                selectedPayments.filter(
-                                                    (p) => p.id !== item.id
-                                                )
-                                            )
-                                        }
-                                    />
-                                </div>
-                            ))}
-                            <div
-                                className={cn(
-                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1'
-                                    // defaultDocumentDetail?.paymentStatus ===
-                                    //     'Billed' && 'hidden'
-                                )}
-                            >
-                                <Select
-                                    name="paymentMethodId"
-                                    onValueChange={(e) =>
-                                        setSelectedPayment(Number(e))
-                                    }
-                                    value={String(selectedPayment)}
-                                >
-                                    <SelectTrigger className="">
-                                        <SelectValue
-                                            placeholder={'เลือกช่องทางชำระเงิน'}
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>
-                                                ช่องทางชำระเงิน
-                                            </SelectLabel>
-                                            {paymentMethods
-                                                .filter(
-                                                    ({ id }) =>
-                                                        !selectedPayments.find(
-                                                            (p) => p.id === id
-                                                        )
-                                                )
-                                                .map((item) => (
-                                                    <SelectItem
-                                                        key={item.id}
-                                                        value={String(item.id)}
-                                                    >
-                                                        {item.id === 12000
-                                                            ? 'เงินเชื่อ'
-                                                            : item.name}
-                                                    </SelectItem>
-                                                ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                                <Input
-                                    name="amount"
-                                    type="number"
-                                    placeholder="จำนวนเงิน"
-                                    onChange={(e) =>
-                                        setPaymentAmount(Number(e.target.value))
-                                    }
-                                    value={paymentAmount || ''}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault()
-                                            addPayment()
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="button"
-                                    onClick={() => addPayment()}
-                                >
-                                    เพิ่มการชำระเงิน
-                                </Button>
-                            </div>
-                            {salesReturn?.SalesReturn?.salesBillId && (
-                                <p className="text-destructive">วางบิลแล้ว</p>
-                            )}
-
-                            <p className="text-left">หมายเหตุ:</p>
-                            {remarks.map((remark, index) => (
-                                <p
-                                    className={cn(
-                                        'grid grid-cols-[1fr_20px] items-center gap-1 text-left text-primary',
-                                        remark.isDeleted &&
-                                            'text-primary/50 line-through'
-                                    )}
-                                    key={'remark-' + index}
-                                >
-                                    <span>{remark.remark}</span>
-                                    <Cross1Icon
-                                        className={cn(
-                                            'font-bold text-destructive hover:cursor-pointer',
-                                            remark.isDeleted && 'hidden'
-                                        )}
-                                        onClick={() => removeRemark(index)}
-                                    />
-                                </p>
-                            ))}
-                            <div className="grid grid-cols-[1fr_140px] items-center gap-1">
-                                <Input
-                                    name="remark"
-                                    onChange={(e) =>
-                                        setRemarkInput(e.target.value)
-                                    }
-                                    value={remarkInput}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault()
-                                            addRemark()
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="button"
-                                    onClick={() => addRemark()}
-                                >
-                                    เพิ่มหมายเหตุ
-                                </Button>
-                            </div>
-                        </div>
-                        <div className="mt-4 flex w-[600px] justify-end gap-1">
-                            <Button
-                                variant="destructive"
-                                type="button"
-                                onClick={(e) => {
-                                    setKey(String(Date.now()))
-                                    setItems(
-                                        salesReturnItemsToInventoryDetailType(
-                                            salesReturn?.SalesReturn
-                                                ?.SalesReturnItem
-                                        )
-                                    )
-                                }}
-                            >
-                                Reset
-                            </Button>
-                            <Button type="submit">Save</Button>
-                        </div>
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>
@@ -692,6 +460,60 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                 )}
                             </TableCell>
                             <TableCell className="text-right"></TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={7} className="text-center">
+                                <AddPaymentComponent
+                                    paymentMethods={paymentMethods}
+                                    payments={payments}
+                                    setPayments={setPayments}
+                                    depositAmount={depositAmount}
+                                />
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={7}>
+                                <CreateDocumentRemark
+                                    existingDocumentRemark={
+                                        existingSalesReturn?.DocumentRemark ||
+                                        []
+                                    }
+                                    documentRemarks={documentRemarks}
+                                    setDocumentRemarks={setDocumentRemarks}
+                                />
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={6}>
+                                <div className="flex justify-end gap-2">
+                                    {existingSalesReturn ? (
+                                        <Button disabled={items.length === 0}>
+                                            แก้ไขรายการขาย
+                                        </Button>
+                                    ) : (
+                                        <Button disabled={items.length === 0}>
+                                            สร้างรายการขาย
+                                        </Button>
+                                    )}
+                                    <Button
+                                        variant={'destructive'}
+                                        type="button"
+                                        onClick={(e) => {
+                                            setKey(String(Date.now()))
+                                            setItems(
+                                                salesReturnItemsToDocumentItems(
+                                                    existingSalesReturn
+                                                        ?.SalesReturn
+                                                        ?.SalesReturnItem || []
+                                                )
+                                            )
+                                        }}
+                                    >
+                                        รีเซ็ต
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableHead></TableHead>
                         </TableRow>
                     </TableFooter>
                 </Table>

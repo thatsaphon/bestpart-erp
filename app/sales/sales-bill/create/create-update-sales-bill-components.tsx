@@ -1,22 +1,17 @@
 'use client'
 
 import { DocumentDetailForm } from '@/components/document-detail-form'
-import SelectSearchContactSearchParams from '@/components/select-search-contact-search-params'
 import {
     DocumentDetail,
     getDefaultDocumentDetail,
 } from '@/types/document-detail'
 import { SalesBillItem } from '@/types/sales-bill/sales-bill-item'
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
     Dialog,
     DialogClose,
     DialogContent,
-    DialogDescription,
     DialogFooter,
-    DialogHeader,
-    DialogOverlay,
-    DialogPortal,
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
@@ -35,8 +30,9 @@ import { createSalesBill } from './create-sales-bill'
 import toast from 'react-hot-toast'
 import { getSalesBill } from '@/types/sales-bill/sales-bill'
 import { deleteSalesBill } from './delete-sales-bill'
-import { useRouter } from 'next/navigation'
 import { updateSalesBill } from './update-sales-bill'
+import CreateDocumentRemark from '@/components/create-document-remark'
+import { GetDocumentRemark } from '@/types/remark/document-remark'
 
 type Props = {
     existingSalesBill?: getSalesBill
@@ -49,7 +45,6 @@ export default function CreateUpdateSalesBillComponents({
     existingSalesBillItems = [],
     unpaidItems,
 }: Props) {
-    const router = useRouter()
     const [documentDetail, setDocumentDetail] = useState<DocumentDetail>(
         existingSalesBill
             ? {
@@ -62,10 +57,17 @@ export default function CreateUpdateSalesBillComponents({
     const [selectedItems, setSelectedItems] = useState<SalesBillItem[]>(
         existingSalesBillItems
     )
+    const [documentRemarks, setDocumentRemarks] = useState<GetDocumentRemark[]>(
+        existingSalesBill?.DocumentRemark || []
+    )
 
     const onCreateSalesBill = async () => {
         try {
-            const result = await createSalesBill(documentDetail, selectedItems)
+            const result = await createSalesBill(
+                documentDetail,
+                selectedItems,
+                documentRemarks
+            )
             toast.success('บันทึกสําเร็จ')
         } catch (err) {
             if (err instanceof Error) return toast.error(err.message)
@@ -82,7 +84,8 @@ export default function CreateUpdateSalesBillComponents({
             const result = await updateSalesBill(
                 existingSalesBill?.id,
                 documentDetail,
-                selectedItems
+                selectedItems,
+                documentRemarks
             )
             toast.success('บันทึกสําเร็จ')
         } catch (err) {
@@ -301,6 +304,17 @@ export default function CreateUpdateSalesBillComponents({
                                 .toLocaleString()}
                         </TableHead>
                         <TableHead></TableHead>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell colSpan={7}>
+                            <CreateDocumentRemark
+                                existingDocumentRemark={
+                                    existingSalesBill?.DocumentRemark || []
+                                }
+                                documentRemarks={documentRemarks}
+                                setDocumentRemarks={setDocumentRemarks}
+                            />
+                        </TableCell>
                     </TableRow>
                     <TableRow>
                         <TableHead colSpan={5}>

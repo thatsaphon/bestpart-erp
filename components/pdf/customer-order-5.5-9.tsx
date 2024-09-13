@@ -171,10 +171,12 @@ export default function CustomerOrderPdf_5x9({ document }: Props) {
                             </Text>
                             <Text style={styles.col5}>{`${item.unit}`}</Text>
                             <Text style={styles.col6}>
-                                {item.price.toLocaleString()}
+                                {item.pricePerUnit.toLocaleString()}
                             </Text>
                             <Text style={styles.col6}>
-                                {(item.price * item.quantity).toLocaleString()}
+                                {(
+                                    item.pricePerUnit * item.quantity
+                                ).toLocaleString()}
                             </Text>
                         </View>
                     )
@@ -188,7 +190,7 @@ export default function CustomerOrderPdf_5x9({ document }: Props) {
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
                                 document?.CustomerOrder?.CustomerOrderItem.reduce(
-                                    (a, b) => a + b.price * b.quantity,
+                                    (a, b) => a + b.pricePerUnit * b.quantity,
                                     0
                                 ).toLocaleString()
                             }
