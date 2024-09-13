@@ -114,44 +114,6 @@ export default async function SalesInvoiceDetailPage({
                     <SalesInvoiceLinkComponent document={document} />
                 </div>
                 <Table className="mt-3">
-                    <TableCaption>
-                        <div className="w-[600px] space-y-1">
-                            {/* <EditPaymentsComponents
-                                document={document}
-                                paymentMethods={paymentMethods}
-                            /> */}
-
-                            <p className="text-left font-bold text-primary">
-                                หมายเหตุ:
-                            </p>
-                            {/* {document?.remark.map((remark) => (
-                                <p
-                                    className={cn(
-                                        'text-left text-primary',
-                                        remark.isDeleted &&
-                                            'text-primary/50 line-through'
-                                    )}
-                                    key={remark.id}
-                                >
-                                    {remark.remark}
-                                </p>
-                            ))} */}
-                            <form
-                                className="grid grid-cols-[500px_1fr] items-center gap-1"
-                                action={async (formData) => {
-                                    'use server'
-                                    const remark = formData.get('remark')
-                                    if (!remark || typeof remark !== 'string')
-                                        return
-
-                                    await updateRemark(document.id, remark)
-                                }}
-                            >
-                                <Input name="remark" />
-                                <Button className="">เพิ่มหมายเหตุ</Button>
-                            </form>
-                        </div>
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>

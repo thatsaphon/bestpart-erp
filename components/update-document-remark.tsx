@@ -16,6 +16,9 @@ import {
 import { Button } from './ui/button'
 import { addDocumentRemark } from '@/actions/add-document-remark'
 import toast from 'react-hot-toast'
+import ConfirmationDialog from './confirmation-dialog'
+import { shortDateFormat } from '@/lib/date-format'
+import { deleteDocumentRemark } from '@/actions/delete-document-remark'
 
 type Props = {
     existingDocumentRemark: GetDocumentRemark[]
@@ -32,44 +35,39 @@ export default function UpdateDocumentRemark({
         <div>
             <div className="flex items-baseline justify-center gap-x-1">
                 <p className="text-right text-primary/60">หมายเหตุ: </p>
-                <div className="w-[600px] text-left">
-                    {existingDocumentRemark.map((remark, index) => (
-                        <Fragment key={index}>
-                            <span
-                                className={cn(
-                                    'col-start-2 overflow-auto',
-                                    remark.isDeleted && 'line-through'
-                                )}
-                            >
-                                {remark.remark}
-                                <span className="text-primary/50">{` - ${remark.User?.first_name} ${remark.User?.last_name} - ${remark.createdAt}`}</span>
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Cross1Icon className="ml-1 inline text-destructive hover:cursor-pointer" />
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogTitle>ลบหมายเหตุ</DialogTitle>
-                                        <DialogFooter>
-                                            <DialogClose asChild>
-                                                <Button
-                                                    variant="destructive"
-                                                    onClick={() => {}}
-                                                >
-                                                    ยืนยัน
-                                                </Button>
-                                            </DialogClose>
-
-                                            <DialogClose asChild>
-                                                <Button variant="outline">
-                                                    ยกเลิก
-                                                </Button>
-                                            </DialogClose>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
-                            </span>
-                        </Fragment>
-                    ))}
+                <div className="max-w-[1000px] text-left">
+                    {existingDocumentRemark
+                        .sort((a, b) => a.id - b.id)
+                        .map((remark, index) => (
+                            <Fragment key={index}>
+                                <p
+                                    className={cn(
+                                        'col-start-2 overflow-auto',
+                                        remark.isDeleted && 'line-through'
+                                    )}
+                                >
+                                    {remark.remark}
+                                    <span className="text-primary/50">{` - ${remark.User?.first_name} ${remark.User?.last_name} - ${shortDateFormat(remark.createdAt)}`}</span>
+                                    {!remark.isDeleted && (
+                                        <ConfirmationDialog
+                                            title="ลบหมายเหตุ"
+                                            onConfirm={async () => {
+                                                try {
+                                                    await deleteDocumentRemark(
+                                                        remark.id
+                                                    )
+                                                    toast.success(
+                                                        'ลบหมายเหตุสําเร็จ'
+                                                    )
+                                                } catch (err) {}
+                                            }}
+                                        >
+                                            <Cross1Icon className="ml-1 inline text-destructive hover:cursor-pointer" />
+                                        </ConfirmationDialog>
+                                    )}
+                                </p>
+                            </Fragment>
+                        ))}
                 </div>
             </div>
             <div className="mx-auto mt-1 flex w-[700px] items-center justify-center gap-1">
@@ -79,41 +77,25 @@ export default function UpdateDocumentRemark({
                     value={remark}
                     onChange={(e) => setRemark(e.target.value)}
                 />
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button size="sm">เพิ่มหมายเหตุ</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogTitle>ลบหมายเหตุ</DialogTitle>
-
-                        <DialogFooter>
-                            <DialogClose
-                                asChild
-                                onClick={async () => {
-                                    try {
-                                        await addDocumentRemark(
-                                            documentId,
-                                            remark
-                                        )
-                                        toast.success('เพิ่มหมายเหตุสําเร็จ')
-                                    } catch (err) {
-                                        if (err instanceof Error) {
-                                            toast.error(err.message)
-                                            return
-                                        }
-                                        toast.error('เกิดข้อผิดพลาด')
-                                    }
-                                }}
-                            >
-                                <Button variant="default">ยืนยัน</Button>
-                            </DialogClose>
-
-                            <DialogClose asChild>
-                                <Button variant="outline">ยกเลิก</Button>
-                            </DialogClose>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                <ConfirmationDialog
+                    title="เพิ่มหมายเหตุ"
+                    onConfirm={async () => {
+                        try {
+                            await addDocumentRemark(documentId, remark)
+                            toast.success('เพิ่มหมายเหตุสําเร็จ')
+                        } catch (err) {
+                            if (err instanceof Error) {
+                                toast.error(err.message)
+                                return
+                            }
+                            toast.error('เกิดข้อผิดพลาด')
+                        }
+                    }}
+                >
+                    <Button size="sm" disabled={!remark}>
+                        เพิ่มหมายเหตุ
+                    </Button>
+                </ConfirmationDialog>
             </div>
         </div>
     )
