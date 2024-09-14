@@ -89,6 +89,7 @@ export const createPurchaseOrder = async (
             updatedBy: session?.user.username,
             PurchaseOrder: {
                 create: {
+                    status: 'Draft',
                     contactId: contact.id,
                     PurchaseOrderItem: {
                         create: items.map((item) => ({
@@ -96,13 +97,11 @@ export const createPurchaseOrder = async (
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             unit: item.unit,
-                            vatable: item.vatable === true,
                             vat: item.vatable
                                 ? +(item.pricePerUnit * (7 / 107)).toFixed(2)
                                 : 0,
                             barcode: item.barcode,
-                            description: item.detail,
-                            name: item.name,
+                            description: item.name + ' ' + item.detail,
                             skuMasterId: item.skuMasterId,
                             goodsMasterId: item.goodsMasterId,
                             serviceAndNonStockItemId:
@@ -111,7 +110,7 @@ export const createPurchaseOrder = async (
                         })),
                     },
                     CustomerOrderLink: {
-                        connect: customerOrderIds?.map((id) => ({ id })),
+                        connect: customerOrderIds?.map((id) => ({ id })) || [],
                     },
                 },
             },

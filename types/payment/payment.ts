@@ -28,15 +28,34 @@ export type GetGeneralLedgerIncludeChartOfAccount = Awaited<
 
 export const generalLedgerToPayments = (
     generalLedger: GetGeneralLedgerIncludeChartOfAccount[],
-    includeAr?: boolean,
+    {
+        isCash = true,
+        isAr,
+        isDeposit,
+        isAp,
+        isInputTax,
+        isOutputTax,
+    }: {
+        isCash?: boolean
+        isAr?: boolean
+        isDeposit?: boolean
+        isAp?: boolean
+        isInputTax?: boolean
+        isOutputTax?: boolean
+    },
     reverseValue?: boolean
 ) => {
     return (
         generalLedger
-            .filter(
-                ({ ChartOfAccount: { isCash, isDeposit, isAr } }) =>
-                    isCash || isDeposit || (includeAr && isAr)
-            )
+            .filter(({ ChartOfAccount }) => {
+                if (isCash && ChartOfAccount.isCash) return true
+                if (isAr && ChartOfAccount.isAr) return true
+                if (isDeposit && ChartOfAccount.isDeposit) return true
+                if (isAp && ChartOfAccount.isAp) return true
+                if (isInputTax && ChartOfAccount.isInputTax) return true
+                if (isOutputTax && ChartOfAccount.isOutputTax) return true
+                return false
+            })
             .map(
                 ({
                     chartOfAccountId,

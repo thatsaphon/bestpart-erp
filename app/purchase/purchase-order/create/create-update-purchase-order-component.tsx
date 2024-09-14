@@ -31,27 +31,46 @@ import {
     DocumentDetail,
     getDefaultDocumentDetail,
 } from '@/types/document-detail'
-import { GetPurchase } from '@/types/purchase/purchase'
-import { purchaseItemsToInventoryDetailType } from '@/types/purchase/purchase-item'
+import { purchaseItemsToDocumentItems } from '@/types/purchase/purchase-item'
+import { GetCustomerOrder } from '@/types/customer-order/customer-order'
+import { GetPurchaseOrder } from '@/types/purchase-order/purchase-order'
+import { purchaseOrderItemsToDocumentItems } from '@/types/purchase-order/purchase-order-item'
+import { GetDocumentRemark } from '@/types/remark/document-remark'
+import ViewCustomerOrderDialog from '@/components/view-customer-order-dialog'
 
 type Props = {
-    purchase?: GetPurchase
+    existingPurchaseOrder?: GetPurchaseOrder
+    existingCustomerOrders?: GetCustomerOrder[]
+    openCustomerOrders?: GetCustomerOrder[]
 }
 
 export default function CreateOrUpdatePurchaseOrderComponent({
-    purchase,
+    existingPurchaseOrder,
+    existingCustomerOrders = [],
+    openCustomerOrders = [],
 }: Props) {
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
-        purchase
-            ? { ...purchase, contactId: purchase?.Purchase?.contactId }
+        existingPurchaseOrder
+            ? {
+                  ...existingPurchaseOrder,
+                  contactId: existingPurchaseOrder?.PurchaseOrder?.contactId,
+              }
             : getDefaultDocumentDetail()
     )
     const [open, setOpen] = React.useState(false)
     const [items, setItems] = React.useState<DocumentItem[]>(
-        purchaseItemsToInventoryDetailType(purchase?.Purchase?.PurchaseItem)
+        purchaseOrderItemsToDocumentItems(
+            existingPurchaseOrder?.PurchaseOrder?.PurchaseOrderItem
+        )
     )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
+    const [documentRemarks, setDocumentRemarks] = React.useState<
+        GetDocumentRemark[]
+    >(existingPurchaseOrder?.DocumentRemark || [])
+    // const [linkCustomerOrders, setLinkCustomerOrders] = React.useState<
+    //     GetCustomerOrder[]
+    // >(existingCustomerOrders || [])
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -94,15 +113,15 @@ export default function CreateOrUpdatePurchaseOrderComponent({
             <form
                 action={async (formData) => {
                     try {
-                        if (!purchase) {
+                        if (!existingPurchaseOrder) {
                             await createPurchaseOrder(documentDetail, items)
                             // setKey(String(Date.now()))
                             // setItems([])
                         }
 
-                        if (purchase) {
+                        if (existingPurchaseOrder) {
                             await updatePurchaseOrder(
-                                purchase.id,
+                                existingPurchaseOrder.id,
                                 documentDetail,
                                 items
                             )
@@ -120,7 +139,17 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                     setDocumentDetail={setDocumentDetail}
                     label="คู่ค้า"
                     placeholder="รหัสคู่ค้า"
+                    disabled={!!existingPurchaseOrder}
+                    useSearchParams={!existingPurchaseOrder}
                 />
+                <div className="flex items-center gap-2">
+                    <ViewCustomerOrderDialog
+                        customerOrders={[
+                            ...existingCustomerOrders,
+                            ...openCustomerOrders,
+                        ]}
+                    />
+                </div>
 
                 <Table>
                     <TableCaption className="space-x-1 text-right"></TableCaption>

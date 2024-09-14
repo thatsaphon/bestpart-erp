@@ -189,7 +189,11 @@ export default async function SalesInvoiceDetailPage({
                                 <PaymentComponentReadonly
                                     payments={generalLedgerToPayments(
                                         document?.Sales?.GeneralLedger || [],
-                                        true
+                                        {
+                                            isCash: true,
+                                            isAr: true,
+                                            isDeposit: true,
+                                        }
                                     )}
                                 />
                             </TableCell>

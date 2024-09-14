@@ -16,6 +16,7 @@ import PaginationComponent from '@/components/pagination-component'
 import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { fullDateFormat } from '@/lib/date-format'
+import CustomerOrderStatusBadge from '../customer-order-status-badge'
 
 type Props = {
     searchParams: {
@@ -120,31 +121,12 @@ export default async function CustomerOrderPage({
                                     'เงินสด'}
                             </TableCell>
                             <TableCell className="text-center">
-                                {invoice.CustomerOrder?.status === 'Open' ? (
-                                    <Badge variant={'destructive'}>Open</Badge>
-                                ) : invoice.CustomerOrder?.status ===
-                                  'Ordered' ? (
-                                    <Badge variant={'destructive'}>
-                                        สั่งของแล้ว
-                                    </Badge>
-                                ) : invoice.CustomerOrder?.status ===
-                                  'Received' ? (
-                                    <Badge variant={'destructive'}>
-                                        ได้รับสินค้าแล้ว
-                                    </Badge>
-                                ) : invoice.CustomerOrder?.status ===
-                                  'Closed' ? (
-                                    <Badge
-                                        className="bg-green-400"
-                                        variant={'outline'}
-                                    >
-                                        สำเร็จแล้ว
-                                    </Badge>
-                                ) : (
-                                    <Badge variant={'outline'}>
-                                        ยกเลิกแล้ว
-                                    </Badge>
-                                )}
+                                <CustomerOrderStatusBadge
+                                    status={
+                                        invoice.CustomerOrder?.status ||
+                                        'Pending'
+                                    }
+                                />
                             </TableCell>
                             <TableCell className="text-right">
                                 {Math.abs(
@@ -155,7 +137,8 @@ export default async function CustomerOrderPage({
                                 {Math.abs(
                                     invoice.CustomerOrder?.CustomerOrderItem.reduce(
                                         (sum, item) =>
-                                            sum + item.price * item.quantity,
+                                            sum +
+                                            item.pricePerUnit * item.quantity,
                                         0
                                     ) || 0
                                 ).toLocaleString()}

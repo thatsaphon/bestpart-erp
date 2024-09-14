@@ -87,7 +87,7 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
     const [payments, setPayments] = React.useState<Payment[]>(
         generalLedgerToPayments(
             existingSalesReturn?.SalesReturn?.GeneralLedger || [],
-            true,
+            { isCash: true, isAr: true, isDeposit: true },
             true
         )
     )

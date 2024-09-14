@@ -3,6 +3,7 @@
 import getCustomerOrderDetail from '@/app/sales/customer-order/[documentNo]/get-customer-order-detail'
 import getQuotationDetail from '@/app/sales/quotation/[documentNo]/get-quotation-detail'
 import { fullDateFormat } from '@/lib/date-format'
+import { GetCustomerOrder } from '@/types/customer-order/customer-order'
 import {
     Page,
     Text,
@@ -12,7 +13,7 @@ import {
     Font,
 } from '@react-pdf/renderer'
 
-type Props = { document: Awaited<ReturnType<typeof getCustomerOrderDetail>> }
+type Props = { document: GetCustomerOrder }
 
 Font.register({
     family: 'Inter Sarabun',

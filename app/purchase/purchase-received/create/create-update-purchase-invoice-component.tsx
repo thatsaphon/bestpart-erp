@@ -32,7 +32,7 @@ import {
     getDefaultDocumentDetail,
 } from '@/types/document-detail'
 import { GetPurchase } from '@/types/purchase/purchase'
-import { purchaseItemsToInventoryDetailType } from '@/types/purchase/purchase-item'
+import { purchaseItemsToDocumentItems } from '@/types/purchase/purchase-item'
 
 type Props = {
     purchase?: GetPurchase
@@ -48,7 +48,7 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
     )
     const [open, setOpen] = React.useState(false)
     const [items, setItems] = React.useState<DocumentItem[]>(
-        purchaseItemsToInventoryDetailType(purchase?.Purchase?.PurchaseItem)
+        purchaseItemsToDocumentItems(purchase?.Purchase?.PurchaseItem)
     )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')

@@ -38,54 +38,54 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { GetCustomerOrder } from '@/types/customer-order/customer-order'
+import { customerOrderItemsToDocumentItems } from '@/types/customer-order/customer-order-items'
+import { GetDocumentRemark } from '@/types/remark/document-remark'
+import { generalLedgerToPayments, Payment } from '@/types/payment/payment'
+import {
+    DocumentDetail,
+    getDefaultDocumentDetail,
+} from '@/types/document-detail'
+import { DocumentDetailForm } from '@/components/document-detail-form'
+import CreateDocumentRemark from '@/components/create-document-remark'
+import AddPaymentComponent from '@/components/add-payment-component'
 
 type Props = {
-    defaultItems?: (DocumentItem & { description: string })[]
-    defaultDocumentDetails?: {
-        id: number
-        date: Date
-        documentNo: string
-        contactId: number
-        contactName: string
-        address: string
-        phone: string
-        taxId: string
-        documentRemarks: DocumentRemark[]
-        // paymentStatus: PaymentStatus
-    }
+    existingCustomerOrder?: GetCustomerOrder
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
-    defaultPayments?: { id: number; amount: number }[]
-    defaultRemarks?: { id: number; remark: string; isDeleted?: boolean }[]
 }
 
 export default function CreateOrUpdateCustomerOrderComponent({
-    defaultItems = [],
-    defaultDocumentDetails,
+    existingCustomerOrder,
     paymentMethods,
-    defaultPayments,
-    defaultRemarks,
 }: Props) {
     const formRef = useRef<HTMLFormElement>(null)
+    const [documentDetail, setDocumentDetail] = useState<DocumentDetail>(
+        existingCustomerOrder
+            ? {
+                  ...existingCustomerOrder,
+                  contactId: existingCustomerOrder.CustomerOrder?.contactId,
+              }
+            : getDefaultDocumentDetail()
+    )
     const [open, setOpen] = useState(false)
-    const [items, setItems] = useState<
-        (DocumentItem & { description: string })[]
-    >(defaultItems.map((item) => ({ ...item })))
+    const [items, setItems] = useState<DocumentItem[]>(
+        customerOrderItemsToDocumentItems(
+            existingCustomerOrder?.CustomerOrder?.CustomerOrderItem || []
+        )
+    )
     const [barcodeInput, setBarcodeInput] = useState<string>('')
     const [key, setKey] = useState('1')
     const session = useSession()
-    const [remarks, setRemarks] = useState<
-        { id?: number; remark: string; isDeleted?: boolean }[]
-    >(defaultRemarks || [])
-    const [remarkInput, setRemarkInput] = useState<string>('')
-    const [selectedPayments, setSelectedPayments] = React.useState<
-        { id: number; amount: number }[]
-    >(defaultPayments || [])
-    const [selectedPayment, setSelectedPayment] = React.useState<
-        number | undefined
-    >()
-    const [paymentAmount, setPaymentAmount] = React.useState<
-        number | undefined
-    >()
+    const [documentRemarks, setDocumentRemarks] = useState<GetDocumentRemark[]>(
+        existingCustomerOrder?.DocumentRemark || []
+    )
+    const [payments, setPayments] = useState<Payment[]>(
+        generalLedgerToPayments(
+            existingCustomerOrder?.CustomerOrder?.GeneralLedger || [],
+            { isCash: true }
+        )
+    )
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -120,65 +120,30 @@ export default function CreateOrUpdateCustomerOrderComponent({
         }
     }, [key, open])
 
-    const addRemark = () => {
-        if (!remarkInput) return
-        setRemarks((prev) => [...prev, { remark: remarkInput }])
-        setRemarkInput('')
-    }
-
-    const removeRemark = (index: number) => {
-        // setRemarks((prev) => prev.filter((_, i) => i !== index))
-        const remarkToRemove = remarks[index]
-        if (remarkToRemove.id) {
-            setRemarks((prev) =>
-                prev.map((remark) =>
-                    remark.id === remarkToRemove.id
-                        ? { ...remark, isDeleted: true }
-                        : remark
-                )
-            )
-        } else {
-            setRemarks((prev) => prev.filter((_, i) => i !== index))
-        }
-    }
-
-    const addPayment = () => {
-        if (!selectedPayment || !paymentAmount) {
-            toast.error('กรุณาเลือกช่องทางการชําระเงินหรือจำนวนเงิน')
-            return
-        }
-        setSelectedPayments((prev) => [
-            ...prev,
-            { id: selectedPayment, amount: paymentAmount },
-        ])
-        setSelectedPayment(undefined)
-        setPaymentAmount(undefined)
-    }
-
     return (
         <div className="p-3" id={key} key={key}>
             <form
                 ref={formRef}
                 action={async (formData) => {
                     try {
-                        if (!defaultItems.length) {
+                        if (!existingCustomerOrder) {
                             await createCustomerOrder(
-                                formData,
+                                documentDetail,
                                 items,
-                                selectedPayments,
-                                remarks
+                                payments,
+                                documentRemarks
                             )
                             setKey(String(Date.now()))
                             setItems([])
                             toast.success('บันทึกสําเร็จ')
                         }
-                        if (defaultDocumentDetails) {
+                        if (existingCustomerOrder) {
                             await updateCustomerOrder(
-                                defaultDocumentDetails.id,
-                                formData,
+                                existingCustomerOrder?.id,
+                                documentDetail,
                                 items,
-                                selectedPayments,
-                                remarks
+                                payments,
+                                documentRemarks
                             )
                             toast.success('บันทึกสําเร็จ')
                         }
@@ -189,208 +154,21 @@ export default function CreateOrUpdateCustomerOrderComponent({
                     }
                 }}
             >
-                <div className="flex flex-col gap-2">
-                    <div className="flex gap-3">
-                        <Label className="flex items-center gap-2">
-                            <p className="">วันที่</p>
-                            <DatePickerWithPresets
-                                defaultDate={defaultDocumentDetails?.date}
-                            />
-                        </Label>
-                        <Label className="flex items-center gap-2">
-                            <p className="">No. </p>
-                            <Input
-                                className="w-auto"
-                                name="documentNo"
-                                placeholder="Optional"
-                                defaultValue={
-                                    defaultDocumentDetails?.documentNo
-                                }
-                            />
-                        </Label>
-                    </div>
-                    <div className="my-1 flex items-baseline space-x-2">
-                        <Label>ลูกค้า</Label>
-                        <SelectSearchCustomer
-                            name="customerId"
-                            hasTextArea={true}
-                            placeholder="รหัสลูกค้า"
-                            defaultValue={String(
-                                defaultDocumentDetails?.contactId || ''
-                            )}
-                            defaultAddress={{
-                                name: defaultDocumentDetails?.contactName || '',
-                                address: defaultDocumentDetails?.address || '',
-                                phone: defaultDocumentDetails?.phone || '',
-                                taxId: defaultDocumentDetails?.taxId || '',
-                            }}
-                        />
-                    </div>
+                <DocumentDetailForm
+                    documentDetail={documentDetail}
+                    setDocumentDetail={setDocumentDetail}
+                    useSearchParams={existingCustomerOrder ? false : true}
+                    disabled={existingCustomerOrder ? true : false}
+                    label="ลูกค้า"
+                />
+                <div>
+                    {existingCustomerOrder && (
+                        <Badge>
+                            {existingCustomerOrder.CustomerOrder?.status}
+                        </Badge>
+                    )}
                 </div>
                 <Table>
-                    <TableCaption>
-                        <div className="w-[650px] space-y-1">
-                            <div className="flex items-center gap-1 text-left">
-                                ช่องทางชำระเงิน:{' '}
-                            </div>
-                            {selectedPayments.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className={cn(
-                                        'grid grid-cols-[1fr_1fr_140px] items-center gap-1 text-primary'
-                                    )}
-                                >
-                                    <p>
-                                        {paymentMethods.find(
-                                            (p) => p.id === item.id
-                                        )?.id === 12000
-                                            ? 'เงินเชื่อ'
-                                            : paymentMethods.find(
-                                                  (p) => p.id === item.id
-                                              )?.name}
-                                    </p>
-                                    <p>{item.amount}</p>
-                                    <Cross1Icon
-                                        className={cn(
-                                            'cursor-pointer text-destructive'
-                                        )}
-                                        onClick={() =>
-                                            setSelectedPayments(
-                                                selectedPayments.filter(
-                                                    (p) => p.id !== item.id
-                                                )
-                                            )
-                                        }
-                                    />
-                                </div>
-                            ))}
-                            <div
-                                className={cn(
-                                    'grid grid-cols-[1fr_1fr_140px] items-center gap-1'
-                                )}
-                            >
-                                <Select
-                                    name="paymentMethodId"
-                                    onValueChange={(e) =>
-                                        setSelectedPayment(Number(e))
-                                    }
-                                    value={String(selectedPayment)}
-                                >
-                                    <SelectTrigger className="">
-                                        <SelectValue
-                                            placeholder={'เลือกช่องทางชำระเงิน'}
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>
-                                                ช่องทางชำระเงิน
-                                            </SelectLabel>
-                                            {paymentMethods
-                                                .filter(
-                                                    ({ id }) =>
-                                                        !selectedPayments.find(
-                                                            (p) => p.id === id
-                                                        )
-                                                )
-                                                .map((item) => (
-                                                    <SelectItem
-                                                        key={item.id}
-                                                        value={String(item.id)}
-                                                    >
-                                                        {item.id === 12000
-                                                            ? 'เงินเชื่อ'
-                                                            : item.name}
-                                                    </SelectItem>
-                                                ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                                <Input
-                                    name="amount"
-                                    type="number"
-                                    placeholder="จำนวนเงิน"
-                                    onChange={(e) =>
-                                        setPaymentAmount(Number(e.target.value))
-                                    }
-                                    value={paymentAmount || ''}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault()
-                                            addPayment()
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="button"
-                                    onClick={() => addPayment()}
-                                >
-                                    เพิ่มการชำระเงิน
-                                </Button>
-                            </div>
-
-                            <p className="text-left">หมายเหตุ:</p>
-                            {remarks.map((remark, index) => (
-                                <p
-                                    className={cn(
-                                        'grid grid-cols-[1fr_20px] items-center gap-1 text-left text-primary',
-                                        remark.isDeleted &&
-                                            'text-primary/50 line-through'
-                                    )}
-                                    key={'remark-' + index}
-                                >
-                                    <span>{remark.remark}</span>
-                                    <Cross1Icon
-                                        className={cn(
-                                            'font-bold text-destructive hover:cursor-pointer',
-                                            remark.isDeleted && 'hidden'
-                                        )}
-                                        onClick={() => removeRemark(index)}
-                                    />
-                                </p>
-                            ))}
-                            <div className="grid grid-cols-[1fr_140px] items-center gap-1">
-                                <Input
-                                    name="remark"
-                                    onChange={(e) =>
-                                        setRemarkInput(e.target.value)
-                                    }
-                                    value={remarkInput}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault()
-                                            addRemark()
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="button"
-                                    onClick={() => addRemark()}
-                                >
-                                    เพิ่มหมายเหตุ
-                                </Button>
-                            </div>
-                        </div>
-                        <div className="mt-4 flex w-[600px] justify-end gap-1">
-                            <Button
-                                variant="destructive"
-                                type="button"
-                                onClick={(e) => {
-                                    setKey(String(Date.now()))
-                                    setItems(
-                                        defaultItems.map((item) => ({
-                                            ...item,
-                                            description:
-                                                item.name + '-' + item.detail,
-                                        }))
-                                    )
-                                }}
-                            >
-                                Reset
-                            </Button>
-                            <Button type="submit">Save</Button>
-                        </div>
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>
@@ -411,10 +189,10 @@ export default function CreateOrUpdateCustomerOrderComponent({
                                 <TableCell>
                                     <Textarea
                                         id={`description-${index}`}
-                                        value={item.description}
+                                        value={item.name}
                                         onChange={(e) => {
                                             const newItems = [...items]
-                                            newItems[index].description =
+                                            newItems[index].name =
                                                 e.target.value
                                             setItems(newItems)
                                         }}
@@ -422,8 +200,7 @@ export default function CreateOrUpdateCustomerOrderComponent({
                                             if (e.key === 'Enter') {
                                                 e.preventDefault()
                                                 const newItems = [...items]
-                                                newItems[index].description +=
-                                                    '\n'
+                                                newItems[index].name += '\n'
                                                 setItems(newItems)
                                             }
                                         }}
@@ -633,7 +410,7 @@ export default function CreateOrUpdateCustomerOrderComponent({
                                                     {
                                                         ...result,
                                                         quantity,
-                                                        description:
+                                                        name:
                                                             result.name +
                                                             '\n' +
                                                             result.detail,
@@ -681,7 +458,7 @@ export default function CreateOrUpdateCustomerOrderComponent({
                                             {
                                                 ...data,
                                                 quantity: 1,
-                                                description:
+                                                name:
                                                     data.name +
                                                     '\n' +
                                                     data.detail,
@@ -704,7 +481,7 @@ export default function CreateOrUpdateCustomerOrderComponent({
                                             ...items,
                                             {
                                                 ...defaultInventoryDetail(),
-                                                description: '',
+                                                name: '',
                                             },
                                         ])
                                     }
@@ -727,6 +504,62 @@ export default function CreateOrUpdateCustomerOrderComponent({
                                 )}
                             </TableCell>
                             <TableCell className="text-right"></TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={7} className="text-center">
+                                <AddPaymentComponent
+                                    paymentMethods={paymentMethods.filter(
+                                        ({ isCash }) => isCash
+                                    )}
+                                    payments={payments}
+                                    setPayments={setPayments}
+                                />
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={7}>
+                                <CreateDocumentRemark
+                                    existingDocumentRemark={
+                                        existingCustomerOrder?.DocumentRemark ||
+                                        []
+                                    }
+                                    documentRemarks={documentRemarks}
+                                    setDocumentRemarks={setDocumentRemarks}
+                                />
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={6}>
+                                <div className="flex justify-end gap-2">
+                                    {existingCustomerOrder ? (
+                                        <Button disabled={items.length === 0}>
+                                            แก้ไขใบจองสินค้า
+                                        </Button>
+                                    ) : (
+                                        <Button disabled={items.length === 0}>
+                                            สร้างใบจองสินค้า
+                                        </Button>
+                                    )}
+                                    <Button
+                                        variant={'destructive'}
+                                        type="button"
+                                        onClick={(e) => {
+                                            setKey(String(Date.now()))
+                                            setItems(
+                                                customerOrderItemsToDocumentItems(
+                                                    existingCustomerOrder
+                                                        ?.CustomerOrder
+                                                        ?.CustomerOrderItem ||
+                                                        []
+                                                )
+                                            )
+                                        }}
+                                    >
+                                        รีเซ็ต
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableHead></TableHead>
                         </TableRow>
                     </TableFooter>
                 </Table>

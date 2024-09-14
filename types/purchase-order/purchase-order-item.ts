@@ -7,10 +7,10 @@ import {
 } from '@prisma/client'
 import { DocumentItem } from '../document-item'
 
-export const getPurchaseItemsDefaultFunction = async (
-    where: Prisma.PurchaseItemWhereInput
+export const getPurchaseOrderItemsDefaultFunction = async (
+    where: Prisma.PurchaseOrderItemWhereInput
 ) => {
-    return await prisma.purchaseItem.findMany({
+    return await prisma.purchaseOrderItem.findMany({
         where: where,
         include: {
             SkuMaster: {
@@ -34,12 +34,12 @@ export const getPurchaseItemsDefaultFunction = async (
     })
 }
 
-export type GetPurchaseItems = Awaited<
-    ReturnType<typeof getPurchaseItemsDefaultFunction>
+export type GetPurchaseOrderItems = Awaited<
+    ReturnType<typeof getPurchaseOrderItemsDefaultFunction>
 >[number]
 
-export const purchaseItemsToDocumentItems = (
-    items: GetPurchaseItems[] | undefined
+export const purchaseOrderItemsToDocumentItems = (
+    items: GetPurchaseOrderItems[] | undefined
 ) => {
     if (!items) return []
     return items.map(
@@ -60,7 +60,6 @@ export const purchaseItemsToDocumentItems = (
                 MainSkuRemark: item.SkuMaster?.MainSku?.MainSkuRemark,
                 SkuMasterRemark: item.SkuMaster?.SkuMasterRemark,
                 serviceAndNonStockItemId: item.serviceAndNonStockItemId,
-                vatable: item.vatable,
             }) as DocumentItem
     )
 }

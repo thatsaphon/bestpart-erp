@@ -16,6 +16,7 @@ import PaginationComponent from '@/components/pagination-component'
 import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { fullDateFormat } from '@/lib/date-format'
+import PurchaseOrderStatusBadge from '../purchase-order-status-badge'
 
 type Props = {
     searchParams: {
@@ -37,7 +38,7 @@ export default async function PurchaseOrderPage({
         to = format(new Date(), 'yyyy-MM-dd'),
     },
 }: Props) {
-    const purchaseInvoices = await prisma.document.findMany({
+    const purchaseOrders = await prisma.document.findMany({
         where: {
             type: 'PurchaseOrder',
             AND: [
@@ -61,6 +62,7 @@ export default async function PurchaseOrderPage({
                     Contact: true,
                     PurchaseOrderItem: true,
                     CustomerOrderLink: true,
+                    Purchase: true,
                 },
             },
         },
@@ -94,17 +96,21 @@ export default async function PurchaseOrderPage({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {purchaseInvoices.map((invoice) => (
+                    {purchaseOrders.map((invoice) => (
                         <TableRow key={invoice.documentNo}>
                             <TableCell>
                                 {fullDateFormat(invoice.date)}
                             </TableCell>
                             <TableCell>{invoice.documentNo}</TableCell>
                             <TableCell>{invoice.referenceNo}</TableCell>
-                            <TableCell>
-                                {invoice.contactName || 'เงินสด'}
+                            <TableCell>{invoice.contactName}</TableCell>
+                            <TableCell className="text-center">
+                                <PurchaseOrderStatusBadge
+                                    status={
+                                        invoice.PurchaseOrder?.status || 'Draft'
+                                    }
+                                />
                             </TableCell>
-                            <TableCell className="text-center"></TableCell>
                             <TableCell className="text-right">
                                 {Math.abs(
                                     invoice.PurchaseOrder?.PurchaseOrderItem.reduce(
@@ -116,7 +122,9 @@ export default async function PurchaseOrderPage({
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
-                                <Link href={`/purchase/${invoice.documentNo}`}>
+                                <Link
+                                    href={`/purchase/purchase-order/${invoice.documentNo}`}
+                                >
                                     <EyeOpenIcon />
                                 </Link>
                             </TableCell>

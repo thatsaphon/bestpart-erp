@@ -307,10 +307,11 @@ model Sales {
   contactId     Int?
   GeneralLedger GeneralLedger[]
 
-  SalesBill       SalesBill?     @relation(fields: [salesBillId], references: [id])
-  salesBillId     Int?
-  SalesReceived   SalesReceived? @relation(fields: [salesReceivedId], references: [id])
-  salesReceivedId Int?
+  SalesBill         SalesBill?      @relation(fields: [salesBillId], references: [id])
+  salesBillId       Int?
+  SalesReceived     SalesReceived?  @relation(fields: [salesReceivedId], references: [id])
+  salesReceivedId   Int?
+  CustomerOrderLink CustomerOrder[]
 }
 
 enum SalesStatus {
@@ -692,9 +693,10 @@ model KnowledgeImage {
 model PurchaseOrder {
   id Int @id @default(autoincrement())
 
-  Document          Document        @relation(fields: [documentId], references: [id])
-  documentId        Int             @unique
+  Document          Document            @relation(fields: [documentId], references: [id])
+  documentId        Int                 @unique
   CustomerOrderLink CustomerOrder[]
+  status            PurchaseOrderStatus
 
   Contact   Contact @relation(fields: [contactId], references: [id])
   contactId Int
@@ -706,9 +708,12 @@ model PurchaseOrder {
 }
 
 enum PurchaseOrderStatus {
-  Open
-  Partial
-  Closed
+  Draft
+  Submitted
+  PartiallyReceived
+  FullyReceived // by Officer 
+  Closed // by Supervisor
+  Cancelled
 }
 
 model PurchaseOrderItem {
@@ -722,6 +727,7 @@ model PurchaseOrderItem {
   serviceAndNonStockItemId Int?
 
   barcode         String?
+  description     String?
   unit            String
   quantityPerUnit Float   @default(1)
 
@@ -748,6 +754,7 @@ model CustomerOrder {
   status CustomerOrderStatus
 
   PurchasOrderLink PurchaseOrder[]
+  SalesLink        Sales[]
 
   GeneralLedger GeneralLedger[]
 
@@ -759,10 +766,12 @@ model CustomerOrder {
 }
 
 enum CustomerOrderStatus {
-  Open
+  Pending
+  POCreated
   Ordered
   Received
-  Closed
+  SOCreated // by Officer
+  Closed // by Supervisor
   Cancelled
 }
 

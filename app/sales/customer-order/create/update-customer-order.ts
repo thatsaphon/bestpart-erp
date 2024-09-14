@@ -11,6 +11,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { DocumentDetail } from '@/types/document-detail'
+import { Payment } from '@/types/payment/payment'
 
 export async function updateCustomerOrder(
     id: number,
@@ -23,12 +24,9 @@ export async function updateCustomerOrder(
         date,
         documentNo,
     }: DocumentDetail,
-    items: (DocumentItem & { description: string })[],
-    payments: {
-        id: number
-        amount: number
-    }[],
-    remarks: { id?: number; remark: string }[]
+    items: DocumentItem[],
+    payments: Payment[],
+    remarks: { id?: number; remark: string; isDeleted?: boolean }[]
 ) {
     const customerOrder = await prisma.document.findUnique({
         where: {
@@ -91,7 +89,24 @@ export async function updateCustomerOrder(
             taxId: taxId || '',
             date: new Date(date),
             documentNo: documentNo,
-            DocumentRemark: { create: remarks },
+            DocumentRemark: {
+                create: remarks
+                    .map(({ id, remark }) => ({
+                        id,
+                        remark,
+                        userId: session?.user.id,
+                    }))
+                    .filter(({ id }) => !id),
+                update: remarks
+                    .filter(({ id }) => id)
+                    .map((remark) => ({
+                        where: { id: remark.id },
+                        data: {
+                            remark: remark.remark,
+                            isDeleted: remark.isDeleted,
+                        },
+                    })),
+            },
             createdBy: session?.user.first_name,
             updatedBy: session?.user.first_name,
 
@@ -114,7 +129,7 @@ export async function updateCustomerOrder(
                             },
                         },
                         create: items.map((item) => ({
-                            description: item.description,
+                            description: item.name,
                             pricePerUnit: item.pricePerUnit,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
@@ -127,7 +142,8 @@ export async function updateCustomerOrder(
                             payments.length > 0
                                 ? [
                                       ...payments.map((payment) => ({
-                                          chartOfAccountId: payment.id,
+                                          chartOfAccountId:
+                                              payment.chartOfAccountId,
                                           amount: payment.amount,
                                       })),
                                       {

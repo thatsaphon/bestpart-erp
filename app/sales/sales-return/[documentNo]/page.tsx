@@ -232,7 +232,11 @@ export default async function SalesInvoiceDetailPage({
                                     payments={generalLedgerToPayments(
                                         document?.SalesReturn?.GeneralLedger ||
                                             [],
-                                        true,
+                                        {
+                                            isCash: true,
+                                            isAr: true,
+                                            isDeposit: true,
+                                        },
                                         true
                                     )}
                                 />

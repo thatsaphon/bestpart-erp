@@ -26,16 +26,6 @@ export const getPurchaseInvoiceDetail = async (documentNo: string) => {
                     User: true,
                 },
             },
-            // ApSubledger: { include: { Contact: true } },
-            // SkuIn: {
-            //     include: {
-            //         GoodsMaster: {
-            //             include: { SkuMaster: { include: { mainSku: true } } },
-            //         },
-            //     },
-            // },
-            // GeneralLedger: true,
-            // remark: true,
         },
     })
 }

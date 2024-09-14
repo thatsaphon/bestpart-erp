@@ -1,7 +1,6 @@
-import { getPaymentMethods } from '@/actions/get-payment-methods'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { DatePickerWithPresets } from '@/components/date-picker-preset'
-import SelectSearchCustomer from '@/components/select-search-customer'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
     Table,
     TableBody,
@@ -12,35 +11,26 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Label } from '@/components/ui/label'
+import { Textarea } from '../../../../components/ui/textarea'
+import { Button } from '../../../../components/ui/button'
+import { getPurchaseInvoiceDetail } from '@/app/actions/purchase/purchase-invoice-detail'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
-import { getServerSession } from 'next-auth'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import getCustomerOrderDetail from './get-customer-order-detail'
-import CustomerOrderLinkComponent from './customer-order-link-component'
-import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
-import UpdateDocumentRemark from '@/components/update-document-remark'
-import PaymentComponentReadonly from '@/components/payment-component-readonly'
-import { generalLedgerToPayments } from '@/types/payment/payment'
+import SelectSearchVendor from '../../../../components/select-search-vendor'
+import { getPurchaseOrderDefaultFunction } from '@/types/purchase-order/purchase-order'
 import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
-import CustomerOrderStatusBadge from './customer-order-status'
+import UpdateDocumentRemark from '@/components/update-document-remark'
 
 type Props = {
-    params: {
-        documentNo: string
-    }
+    params: { documentNo: string }
 }
 
-export default async function CustomerOrderDetailPage({
+export default async function PurchaseOrderDetailPage({
     params: { documentNo },
 }: Props) {
-    // const document = await getCustomerOrderDetail(documentNo)
-    const [document] = await getCustomerOrderDefaultFunction({
-        documentNo,
-    })
+    const [document] = await getPurchaseOrderDefaultFunction({ documentNo })
     const session = await getServerSession(authOptions)
-    const paymentMethods = await getPaymentMethods()
 
     if (!document)
         return (
@@ -50,36 +40,39 @@ export default async function CustomerOrderDetailPage({
                 </Table>
             </>
         )
+
     return (
         <>
             <div className="mb-2 p-3">
-                <Link
-                    href={'/sales/customer-order'}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
+                <div className="flex justify-between">
+                    <Link
+                        href={`/purchase/purchase-order`}
+                        className="text-primary/50 underline hover:text-primary"
+                    >{`< ย้อนกลับ`}</Link>
+                </div>
                 <h1 className="my-2 text-3xl transition-colors">
-                    รายละเอียดใบจองสินค้า
+                    รายละเอียดใบสั่งซื้อ
                 </h1>
-                <DocumentDetailReadonly
-                    label="ลูกค้า"
-                    documentDetail={{
-                        ...document,
-                        contactId: document?.CustomerOrder?.Contact?.id,
-                    }}
-                />
-                {document?.CustomerOrder && (
-                    <div className="flex items-baseline gap-2 p-3">
-                        <CustomerOrderStatusBadge
-                            status={document?.CustomerOrder?.status}
-                        />
-                        {!!document.CustomerOrder.PurchasOrderLink.length && (
-                            <div>ใบสั่งซื้อ</div>
-                        )}
-                        {!!document.CustomerOrder.SalesLink.length && (
-                            <div>บิลขาย</div>
-                        )}
-                    </div>
-                )}
+                <div className="flex gap-3">
+                    <DocumentDetailReadonly
+                        documentDetail={{
+                            ...document,
+                            contactId: document?.PurchaseOrder?.Contact?.id,
+                        }}
+                    />
+                    {session?.user.role === 'ADMIN' && (
+                        <div>
+                            <Link
+                                href={`/purchase/purchase-order/${document?.documentNo}/edit`}
+                            >
+                                <Button type="button" variant={'destructive'}>
+                                    Edit
+                                </Button>
+                            </Link>
+                        </div>
+                    )}
+                </div>
+
                 <Table className="mt-3">
                     <TableHeader>
                         <TableRow>
@@ -91,25 +84,27 @@ export default async function CustomerOrderDetailPage({
                             <TableHead className="text-right">Unit</TableHead>
                             <TableHead className="text-right">Price</TableHead>
                             <TableHead className="text-right">Total</TableHead>
+                            <TableHead className="text-right"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {document?.CustomerOrder?.CustomerOrderItem.map(
+                        {document?.PurchaseOrder?.PurchaseOrderItem.map(
                             (item) => (
                                 <TableRow key={item.barcode}>
                                     <TableCell>{item.barcode}</TableCell>
                                     <TableCell>
-                                        <p>{item?.description}</p>
+                                        <p>{item.SkuMaster?.MainSku.name}</p>
+                                        <p>{item.SkuMaster?.detail}</p>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         {item.quantity}
                                     </TableCell>
                                     <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                     <TableCell className="text-right">
-                                        {item.pricePerUnit}
+                                        {item.costPerUnit}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        {item.pricePerUnit * item.quantity}
+                                        {item.costPerUnit * item.quantity}
                                     </TableCell>
                                 </TableRow>
                             )
@@ -123,9 +118,11 @@ export default async function CustomerOrderDetailPage({
                             <TableCell className="text-right">
                                 {Math.abs(
                                     Number(
-                                        document?.CustomerOrder?.CustomerOrderItem.reduce(
-                                            (a, b) =>
-                                                a + b.pricePerUnit * b.quantity,
+                                        document?.PurchaseOrder?.PurchaseOrderItem.reduce(
+                                            (sum, item) =>
+                                                sum +
+                                                item.costPerUnit *
+                                                    item.quantity,
                                             0
                                         )
                                     )
@@ -144,17 +141,8 @@ export default async function CustomerOrderDetailPage({
                                     documentId={document.id}
                                 />
                             </TableCell>
-                            <TableCell colSpan={2}>
-                                <PaymentComponentReadonly
-                                    payments={generalLedgerToPayments(
-                                        document.CustomerOrder?.GeneralLedger ||
-                                            [],
-                                        { isCash: true }
-                                    )}
-                                />
-                            </TableCell>
+                            <TableCell colSpan={2}></TableCell>
                         </TableRow>
-
                         <TableRow>
                             <TableCell
                                 colSpan={6}

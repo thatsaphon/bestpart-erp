@@ -9,7 +9,7 @@ import {
 } from '@prisma/client'
 import Link from 'next/link'
 import { salesItemsToDocumentItems } from '@/types/sales/sales-item'
-import { purchaseItemsToInventoryDetailType } from '@/types/purchase/purchase-item'
+import { purchaseItemsToDocumentItems } from '@/types/purchase/purchase-item'
 import { getPurchaseDefaultFunction } from '@/types/purchase/purchase'
 
 type Props = { params: { documentNo: string } }

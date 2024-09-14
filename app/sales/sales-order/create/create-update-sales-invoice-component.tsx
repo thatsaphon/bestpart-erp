@@ -70,7 +70,11 @@ export default function CreateOrUpdateSalesInvoiceComponent({
         GetDocumentRemark[]
     >(existingSales?.DocumentRemark || [])
     const [payments, setPayments] = React.useState<Payment[]>(
-        generalLedgerToPayments(existingSales?.Sales?.GeneralLedger || [], true)
+        generalLedgerToPayments(existingSales?.Sales?.GeneralLedger || [], {
+            isCash: true,
+            isAr: true,
+            isDeposit: true,
+        })
     )
 
     useEffect(() => {

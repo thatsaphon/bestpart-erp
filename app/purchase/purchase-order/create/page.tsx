@@ -1,10 +1,14 @@
 import Link from 'next/link'
 import React from 'react'
 import CreateOrUpdatePurchaseOrderComponent from './create-update-purchase-order-component'
+import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
 
 type Props = {}
 
-export default function CreatePurchaseOrderPage({}: Props) {
+export default async function CreatePurchaseOrderPage({}: Props) {
+    // const customerOrders = await getCustomerOrderDefaultFunction({
+    //     CustomerOrder: { status: { in: ['Open'] } },
+    // })
     return (
         <>
             <div className="flex justify-between">
@@ -14,7 +18,9 @@ export default function CreatePurchaseOrderPage({}: Props) {
                 >{`< ย้อนกลับ`}</Link>
             </div>
             <h1 className="my-2 text-3xl transition-colors">สร้างใบสั่งซื้อ</h1>
-            <CreateOrUpdatePurchaseOrderComponent />
+            <CreateOrUpdatePurchaseOrderComponent
+            // openCustomerOrders={customerOrders}
+            />
         </>
     )
 }
