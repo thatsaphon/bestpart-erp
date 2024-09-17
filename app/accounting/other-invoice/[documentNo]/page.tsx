@@ -21,7 +21,6 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { getOtherInvoiceDetail } from './getOtherInvoiceDetail'
 import SelectSearchVendor from '@/components/select-search-vendor'
-import { updateRemark } from '@/app/sales/[documentNo]/update-remarks'
 import EditOtherInvoicePaymentsComponents from './edit-other-invoice-payments-components'
 import DeleteOtherInvoiceButton from './delete-other-invoice-button'
 
@@ -56,7 +55,7 @@ export default async function OtherInvoiceDetailPage({
                     รายละเอียดบิล
                 </h1>
                 <div className="flex justify-between pr-4">
-                    <div className="flex gap-3">
+                    {/* <div className="flex gap-3">
                         <div className="space-x-2">
                             <Label>วันที่</Label>
                             <DatePickerWithPresets
@@ -81,7 +80,7 @@ export default async function OtherInvoiceDetailPage({
                                 />
                             </div>
                         )}
-                    </div>
+                    </div> */}
                     {/* <Suspense fallback={<div>Loading...</div>}>
                     </Suspense> */}
                     {/* <BlobProviderClient
@@ -90,7 +89,7 @@ export default async function OtherInvoiceDetailPage({
                         documentType={'SalesInvoicePdf_5x9'}
                     /> */}
                 </div>
-                <div className="flex gap-3">
+                {/* <div className="flex gap-3">
                     <div className="my-1 flex items-baseline space-x-2">
                         <Label>ลูกค้า</Label>
                         <SelectSearchVendor
@@ -109,46 +108,8 @@ export default async function OtherInvoiceDetailPage({
                             disabled
                         />
                     </div>
-                </div>
+                </div> */}
                 <Table className="mt-3">
-                    <TableCaption>
-                        <div className="w-[600px] space-y-1">
-                            <EditOtherInvoicePaymentsComponents
-                                document={document}
-                                paymentMethods={paymentMethods}
-                            />
-
-                            <p className="text-left font-bold text-primary">
-                                หมายเหตุ:
-                            </p>
-                            {document?.remark.map((remark) => (
-                                <p
-                                    className={cn(
-                                        'text-left text-primary',
-                                        remark.isDeleted &&
-                                            'text-primary/50 line-through'
-                                    )}
-                                    key={remark.id}
-                                >
-                                    {remark.remark}
-                                </p>
-                            ))}
-                            <form
-                                className="grid grid-cols-[500px_1fr] items-center gap-1"
-                                action={async (formData) => {
-                                    'use server'
-                                    const remark = formData.get('remark')
-                                    if (!remark || typeof remark !== 'string')
-                                        return
-
-                                    await updateRemark(document.id, remark)
-                                }}
-                            >
-                                <Input name="remark" />
-                                <Button className="">เพิ่มหมายเหตุ</Button>
-                            </form>
-                        </div>
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>เลชบัญชี</TableHead>
@@ -168,7 +129,7 @@ export default async function OtherInvoiceDetailPage({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {document?.GeneralLedger.filter(
+                        {/* {document?.GeneralLedger.filter(
                             ({ chartOfAccountId }) =>
                                 !paymentMethods
                                     .map(({ id }) => id)
@@ -197,11 +158,8 @@ export default async function OtherInvoiceDetailPage({
                                             .residualValue
                                     }
                                 </TableCell>
-                                {/* <TableCell className="text-right">
-                                    {(item.price + item.vat) * item.quantity}
-                                </TableCell> */}
                             </TableRow>
-                        ))}
+                        ))} */}
                     </TableBody>
                     <TableFooter>
                         <TableRow>
@@ -209,7 +167,7 @@ export default async function OtherInvoiceDetailPage({
                                 Total
                             </TableCell>
                             <TableCell className="text-right">
-                                {Math.abs(
+                                {/* {Math.abs(
                                     Number(
                                         document?.GeneralLedger.filter(
                                             (item) =>
@@ -220,7 +178,7 @@ export default async function OtherInvoiceDetailPage({
                                                     )
                                         )?.reduce((a, b) => a + b.amount, 0)
                                     )
-                                )}
+                                )} */}
                             </TableCell>
                             <TableCell colSpan={3}></TableCell>
                         </TableRow>

@@ -45,13 +45,13 @@ model Document {
   date        DateTime
   Image       SkuMasterImage[]
 
-  contactName    String
-  address        String
-  phone          String
-  taxId          String
-  DocumentRemark DocumentRemark[]
-  DocumentFile   DocumentFile[]
-  type           DocumentType
+  contactName      String
+  address          String
+  phone            String
+  taxId            String
+  DocumentRemark   DocumentRemark[]
+  DocumentAttached DocumentAttached[]
+  type             DocumentType
 
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @default(now()) @updatedAt
@@ -108,8 +108,7 @@ model ChartOfAccount {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @default(now()) @updatedAt
 
-  AccountOwner              AccountOwner[]
-  AssetTypeToChartOfAccount AssetTypeToChartOfAccount?
+  AccountOwner AccountOwner[]
 
   isCash      Boolean @default(false)
   isAr        Boolean @default(false)
@@ -364,6 +363,7 @@ model ServiceAndNonStockItem {
   PurchaseReturnItem PurchaseReturnItem[]
   QuotationItem      QuotationItem[]
   PurchaseOrderItem  PurchaseOrderItem[]
+  OtherInvoiceItem   OtherInvoiceItem[]
 }
 
 model SalesReturn {
@@ -580,7 +580,7 @@ model SkuMasterImage {
   @@index([skuMasterId])
 }
 
-model DocumentFile {
+model DocumentAttached {
   id         Int      @id @default(autoincrement())
   url        String
   Document   Document @relation(fields: [documentId], references: [id])
@@ -604,6 +604,21 @@ model OtherInvoiceItem {
   id             Int          @id @default(autoincrement())
   OtherInvoice   OtherInvoice @relation(fields: [otherInvoiceId], references: [id])
   otherInvoiceId Int
+
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
+
+  name        String?
+  description String?
+
+  unit            String
+  quantityPerUnit Float  @default(1)
+
+  quantity    Float
+  costPerUnit Float
+  vat         Float
+
+  vatable Boolean @default(true)
 
   AssetMovement AssetMovement?
 
@@ -646,13 +661,6 @@ model AssetFile {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-}
-
-model AssetTypeToChartOfAccount {
-  id               Int            @id @default(autoincrement())
-  AssetType        AssetType
-  chartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
-  chartOfAccountId Int            @unique
 }
 
 model AssetMovement {

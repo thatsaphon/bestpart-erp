@@ -12,7 +12,10 @@ export const getOtherInvoiceDetail = async (documentNo: string) => {
                     OtherInvoiceItem: {
                         include: {
                             AssetMovement: { include: { Asset: true } },
-                            ChartOfAccount: true,
+                            // ChartOfAccount: true,
+                            ServiceAndNonStockItem: {
+                                include: { ChartOfAccount: true },
+                            },
                         },
                     },
                     GeneralLedger: true,

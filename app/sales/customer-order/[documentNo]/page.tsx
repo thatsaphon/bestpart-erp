@@ -24,7 +24,7 @@ import UpdateDocumentRemark from '@/components/update-document-remark'
 import PaymentComponentReadonly from '@/components/payment-component-readonly'
 import { generalLedgerToPayments } from '@/types/payment/payment'
 import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
-import CustomerOrderStatusBadge from './customer-order-status'
+import CustomerOrderStatusBadge from '../customer-order-status-badge'
 
 type Props = {
     params: {
