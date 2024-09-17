@@ -21,6 +21,14 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { searchSkuTree } from '@/actions/search-sku-tree'
+import { SkuTree } from '@/types/sku-tree/sku-tree'
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from '@/components/ui/accordion'
 
 type Props = {
     searchParams: {
@@ -46,136 +54,75 @@ export default async function InventoryListPage({
     },
 }: Props) {
     try {
-        const skuList = await searchDistinctMainSku(search, Number(page))
+        const skuTree = await searchSkuTree(search, Number(page), {
+            createdAt: 'desc',
+        })
 
-        const numberOfPage = Math.ceil(skuList.count / Number(limit))
+        const numberOfPage = Math.ceil(skuTree.count / Number(limit))
 
         return (
             <>
                 {view === 'card' ? (
                     <div className="mt-2 flex flex-wrap gap-3">
-                        {skuList.items.map((item, index) => (
+                        {/* {skuTree.items.map((item, index) => (
                             <InventoryCard key={item[0].name} mainSkus={item} />
-                        ))}
+                        ))} */}
                     </div>
                 ) : (
-                    <Table>
-                        <TableCaption>Table of inventory</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Part No.</TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Detail</TableHead>
-                                <TableHead>หน่วย</TableHead>
-                                <TableHead>Stock</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {skuList.items.map((item) => (
-                                <TableRow
-                                    key={item[0].goodsMasterId}
-                                    className="group"
-                                >
-                                    <TableCell>{item[0].partNumber}</TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-1">
-                                            {item[0].name}
-                                            <EditMainSkuDialog
-                                                mainSkus={item}
-                                            />
-                                            <ImageToolTip
-                                                images={item
-                                                    .flatMap((i) => i.images)
-                                                    .filter((i) => i)}
-                                            />
-                                        </div>
-                                        <div className="flex flex-wrap gap-1">
-                                            {item[0].MainSkuRemarks?.map(
-                                                (remark) => (
-                                                    <Badge
-                                                        key={remark.name}
-                                                        variant={'outline'}
-                                                        className="text-primary/50 group-hover:text-primary"
-                                                    >
-                                                        {remark.name}
-                                                    </Badge>
-                                                )
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-primary/50 group-hover:text-primary">
-                                        {item.map((goods) => (
-                                            <p
-                                                key={'detail-' + goods.barcode}
-                                                className="flex items-center gap-1"
+                    <Accordion type="multiple" className="w-[800px]">
+                        {skuTree.items.map((item, index) => (
+                            <AccordionItem
+                                value={`${item.mainSkuId}`}
+                                key={index}
+                            >
+                                <AccordionTrigger>
+                                    <span>
+                                        {item.name}
+                                        <span className="w-[300px] text-primary/50">
+                                            {item.partNumber
+                                                ? ` - ${item.partNumber}`
+                                                : ''}
+                                        </span>
+                                    </span>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="grid grid-cols-4">
+                                        {item.SkuMaster.map((sku) => (
+                                            <React.Fragment
+                                                key={`${item.mainSkuId}-${sku.skuMasterId}`}
                                             >
-                                                {goods.detail}
-                                                {!!goods.SkuMasterRemarks
-                                                    .length && (
-                                                    <TooltipProvider>
-                                                        <Tooltip>
-                                                            <TooltipTrigger>
-                                                                <InfoCircledIcon />
-                                                            </TooltipTrigger>
-                                                            <TooltipContent className="space-x-1 p-2">
-                                                                {/* {item.map()} */}
-                                                                {goods.SkuMasterRemarks?.map(
-                                                                    (
-                                                                        remark
-                                                                    ) => (
-                                                                        <Badge
-                                                                            key={`remark-${goods.barcode}-${remark.name}`}
-                                                                            variant={
-                                                                                'outline'
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                remark.name
-                                                                            }
-                                                                        </Badge>
-                                                                    )
-                                                                )}
-                                                            </TooltipContent>{' '}
-                                                        </Tooltip>
-                                                    </TooltipProvider>
+                                                <div className="col-start-1 text-lg underline">
+                                                    {sku.detail}
+                                                </div>
+                                                {sku.GoodsMaster.map(
+                                                    (goods) => (
+                                                        <React.Fragment
+                                                            key={`${item.mainSkuId}-${sku.skuMasterId}-${goods.goodsMasterId}`}
+                                                        >
+                                                            <div className="col-start-1">
+                                                                {
+                                                                    goods.remaining
+                                                                }
+                                                            </div>
+                                                            <div>
+                                                                {goods.barcode}
+                                                            </div>
+                                                            <div>{`${goods.unit}(${goods.quantityPerUnit})`}</div>
+                                                            <div>
+                                                                {
+                                                                    goods.pricePerUnit
+                                                                }
+                                                            </div>
+                                                        </React.Fragment>
+                                                    )
                                                 )}
-                                            </p>
+                                            </React.Fragment>
                                         ))}
-                                    </TableCell>
-                                    <TableCell className="text-primary/50 group-hover:text-primary">
-                                        {item.map((goods) => (
-                                            <p key={'unit-' + goods.barcode}>
-                                                {`${goods.unit}`}
-                                            </p>
-                                        ))}
-                                    </TableCell>
-                                    <TableCell className="text-primary/50 group-hover:text-primary">
-                                        {item.map((goods) => (
-                                            <p
-                                                key={
-                                                    'remaining-' + goods.barcode
-                                                }
-                                            >
-                                                {goods.remaining}
-                                            </p>
-                                        ))}
-                                    </TableCell>
-                                    <TableCell className="text-primary/50 group-hover:text-primary">
-                                        {item.map((goods) => (
-                                            <p key={'price-' + goods.barcode}>
-                                                {goods.pricePerUnit}
-                                            </p>
-                                        ))}
-                                    </TableCell>
-                                    <TableCell className="text-primary/50 group-hover:text-primary">
-                                        {/* <ChevronDown /> */}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
                 )}
                 <PaginationInventory
                     numberOfPage={numberOfPage}

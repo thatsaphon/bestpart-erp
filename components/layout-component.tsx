@@ -10,6 +10,7 @@ import { Input } from './ui/input'
 import { SidebarLayout, SidebarTrigger } from './ui/sidebar'
 import { AppSidebar } from './app-sidebar'
 import { cookies } from 'next/headers'
+import QuickSearchInventory from './quick-search-inventory'
 
 export default async function LayoutComponent({
     children,
@@ -27,25 +28,8 @@ export default async function LayoutComponent({
             <div className="flex min-h-screen flex-col">
                 <div className="flex w-full items-center justify-between bg-background py-1 pr-5">
                     <div className="flex w-screen items-center justify-end pr-5">
-                        {/* <Link
-                            className="mr-5 flex h-7 items-center justify-center rounded-full px-4 text-center text-sm font-bold text-primary transition-colors"
-                            href={'/'}
-                        >
-                            BestPart Alai
-                        </Link> */}
-                        {/* <SidebarTrigger /> */}
-                        {/* <nav className="flex flex-1 space-x-6">
-                            <NavMenubar />
-                        </nav> */}
                         <div className="mr-2 flex items-center gap-2">
-                            <div className="relative">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    type="search"
-                                    placeholder="Search products..."
-                                    className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-                                />
-                            </div>
+                            <QuickSearchInventory />
                             <ModeToggle />
                             <UserAvatar user={session?.user} />
                         </div>
