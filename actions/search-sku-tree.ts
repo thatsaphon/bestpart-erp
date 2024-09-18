@@ -5,83 +5,12 @@ import { MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
 import { DocumentItem } from '@/types/document-item'
 
 export const searchSkuTree = async (
-    query: string,
+    where: Prisma.MainSkuWhereInput,
     page: number = 1,
     orderBy: Prisma.MainSkuOrderByWithRelationInput = { name: 'asc' }
 ) => {
-    const splitQuery = query.trim().split(' ')
-
     const items = await prisma.mainSku.findMany({
-        where: {
-            AND: [
-                ...splitQuery
-                    .filter((q) => q)
-                    .map((q) => ({
-                        OR: [
-                            {
-                                SkuMaster: {
-                                    some: {
-                                        GoodsMaster: {
-                                            some: {
-                                                barcode: {
-                                                    contains: q,
-                                                    mode: 'insensitive',
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                            {
-                                SkuMaster: {
-                                    some: {
-                                        detail: {
-                                            contains: q,
-                                            mode: 'insensitive',
-                                        },
-                                    },
-                                },
-                            },
-                            {
-                                SkuMaster: {
-                                    some: {
-                                        SkuMasterRemark: {
-                                            some: {
-                                                name: {
-                                                    contains: q,
-                                                    mode: 'insensitive',
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                            {
-                                name: {
-                                    contains: q,
-                                    mode: 'insensitive',
-                                },
-                            },
-                            {
-                                partNumber: {
-                                    contains: q,
-                                    mode: 'insensitive',
-                                },
-                            },
-                            {
-                                MainSkuRemark: {
-                                    some: {
-                                        name: {
-                                            contains: q,
-                                            mode: 'insensitive',
-                                        },
-                                    },
-                                },
-                            },
-                        ] as Prisma.MainSkuWhereInput[],
-                    })),
-            ],
-        },
+        where,
         include: {
             SkuMaster: {
                 include: {
@@ -97,76 +26,7 @@ export const searchSkuTree = async (
         orderBy: { name: 'asc' },
     })
     const count = await prisma.mainSku.count({
-        where: {
-            AND: [
-                ...splitQuery
-                    .filter((q) => q)
-                    .map((q) => ({
-                        OR: [
-                            {
-                                SkuMaster: {
-                                    some: {
-                                        GoodsMaster: {
-                                            some: {
-                                                barcode: {
-                                                    contains: q,
-                                                    mode: 'insensitive',
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                            {
-                                SkuMaster: {
-                                    some: {
-                                        detail: {
-                                            contains: q,
-                                            mode: 'insensitive',
-                                        },
-                                    },
-                                },
-                            },
-                            {
-                                SkuMaster: {
-                                    some: {
-                                        SkuMasterRemark: {
-                                            some: {
-                                                name: {
-                                                    contains: q,
-                                                    mode: 'insensitive',
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                            {
-                                name: {
-                                    contains: q,
-                                    mode: 'insensitive',
-                                },
-                            },
-                            {
-                                partNumber: {
-                                    contains: q,
-                                    mode: 'insensitive',
-                                },
-                            },
-                            {
-                                MainSkuRemark: {
-                                    some: {
-                                        name: {
-                                            contains: q,
-                                            mode: 'insensitive',
-                                        },
-                                    },
-                                },
-                            },
-                        ] as Prisma.MainSkuWhereInput[],
-                    })),
-            ],
-        },
+        where,
     })
 
     const remaining = await prisma.stockMovement.groupBy({
@@ -185,9 +45,12 @@ export const searchSkuTree = async (
             mainSkuId: mainSku.id,
             partNumber: mainSku.partNumber || '',
             name: mainSku.name,
+            MainSkuRemark: mainSku.MainSkuRemark,
             SkuMaster: mainSku.SkuMaster.map((sku) => ({
                 skuMasterId: sku.id,
                 detail: sku.detail,
+                SkuMasterRemark: sku.SkuMasterRemark,
+                Image: sku.Image,
                 GoodsMaster: sku.GoodsMaster.map((goods) => ({
                     mainSkuId: mainSku.id,
                     goodsMasterId: goods.id,

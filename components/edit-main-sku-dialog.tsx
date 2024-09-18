@@ -41,6 +41,8 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
     function groupBySkuMasters(mainSkus: DocumentItem[]) {
         const groups: { [key: string]: DocumentItem[] } = {}
         mainSkus.forEach((mainSku) => {
+            if (!mainSku.skuMasterId) return
+
             if (!groups[mainSku.skuMasterId]) {
                 groups[mainSku.skuMasterId] = []
             }
@@ -61,7 +63,7 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
             <DialogTrigger asChild>
                 <Pencil2Icon className="ml-2 inline h-4 w-4 hover:cursor-pointer" />
             </DialogTrigger>
-            <DialogContent className="max-h-[80vh] overflow-y-scroll">
+            <DialogContent className="max-h-[80vh] w-[80vw] overflow-y-scroll">
                 <DialogHeader className="">
                     <form
                         action={async (formData) => {
@@ -138,7 +140,7 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
                                         try {
                                             await disconnectMainSkuRemark(
                                                 remark.id,
-                                                mainSkus[0].mainSkuId
+                                                mainSkus[0].mainSkuId as number
                                             )
                                             toast.success('Remark updated')
                                         } catch (err) {
@@ -151,7 +153,7 @@ export default function EditMainSkuDialog({ mainSkus }: Props) {
                             </Badge>
                         ))}
                         <AddMainSkuRemarkInput
-                            mainSku={mainSkus[0].mainSkuId}
+                            mainSku={mainSkus[0].mainSkuId as number}
                         />
                     </div>
                 </DialogHeader>

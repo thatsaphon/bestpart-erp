@@ -1,3 +1,3 @@
-import { searchSkuTree } from '../../actions/search-sku-tree'
+import { searchSkuTreeByKeyword } from '../../actions/search-sku-tree-query'
 
-export type SkuTree = Awaited<ReturnType<typeof searchSkuTree>>
+export type SkuTree = Awaited<ReturnType<typeof searchSkuTreeByKeyword>>

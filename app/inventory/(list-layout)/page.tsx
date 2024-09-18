@@ -21,7 +21,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { searchSkuTree } from '@/actions/search-sku-tree'
+import { searchSkuTreeByKeyword } from '@/actions/search-sku-tree-query'
 import { SkuTree } from '@/types/sku-tree/sku-tree'
 import {
     Accordion,
@@ -29,6 +29,11 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { PencilIcon } from 'lucide-react'
+import Link from 'next/link'
 
 type Props = {
     searchParams: {
@@ -54,81 +59,118 @@ export default async function InventoryListPage({
     },
 }: Props) {
     try {
-        const skuTree = await searchSkuTree(search, Number(page), {
+        const skuTree = await searchSkuTreeByKeyword(search, Number(page), {
             createdAt: 'desc',
         })
 
         const numberOfPage = Math.ceil(skuTree.count / Number(limit))
 
         return (
-            <>
-                {view === 'card' ? (
-                    <div className="mt-2 flex flex-wrap gap-3">
-                        {/* {skuTree.items.map((item, index) => (
-                            <InventoryCard key={item[0].name} mainSkus={item} />
-                        ))} */}
-                    </div>
-                ) : (
-                    <Accordion type="multiple" className="w-[800px]">
-                        {skuTree.items.map((item, index) => (
-                            <AccordionItem
-                                value={`${item.mainSkuId}`}
-                                key={index}
-                            >
-                                <AccordionTrigger>
-                                    <span>
+            <div className="w-[800px] space-y-2">
+                <Accordion type="multiple">
+                    {skuTree.items.map((item, index) => (
+                        <AccordionItem value={`${item.mainSkuId}`} key={index}>
+                            <AccordionTrigger>
+                                <div className="flex flex-wrap gap-2">
+                                    <p>
                                         {item.name}
                                         <span className="w-[300px] text-primary/50">
                                             {item.partNumber
                                                 ? ` - ${item.partNumber}`
                                                 : ''}
                                         </span>
-                                    </span>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="grid grid-cols-4">
-                                        {item.SkuMaster.map((sku) => (
-                                            <React.Fragment
-                                                key={`${item.mainSkuId}-${sku.skuMasterId}`}
-                                            >
-                                                <div className="col-start-1 text-lg underline">
-                                                    {sku.detail}
-                                                </div>
-                                                {sku.GoodsMaster.map(
-                                                    (goods) => (
-                                                        <React.Fragment
-                                                            key={`${item.mainSkuId}-${sku.skuMasterId}-${goods.goodsMasterId}`}
-                                                        >
-                                                            <div className="col-start-1">
-                                                                {
-                                                                    goods.remaining
-                                                                }
-                                                            </div>
-                                                            <div>
-                                                                {goods.barcode}
-                                                            </div>
-                                                            <div>{`${goods.unit}(${goods.quantityPerUnit})`}</div>
-                                                            <div>
-                                                                {
-                                                                    goods.pricePerUnit
-                                                                }
-                                                            </div>
-                                                        </React.Fragment>
-                                                    )
-                                                )}
-                                            </React.Fragment>
+                                    </p>
+                                    <div className="flex gap-2">
+                                        {item.MainSkuRemark.map((remark) => (
+                                            <Badge variant={'outline'}>
+                                                {remark.name}
+                                            </Badge>
                                         ))}
                                     </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                )}
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                                <div className="grid grid-cols-[1fr_100px_1fr_1fr_1fr] gap-2">
+                                    <div>
+                                        <Link
+                                            href={`/inventory/${item.mainSkuId}`}
+                                        >
+                                            <PencilIcon className="h-4 w-4" />
+                                        </Link>
+                                    </div>
+                                    <div className="text-center">จำนวน</div>
+                                    <div>Barcode</div>
+                                    <div>หน่วย</div>
+                                    <div className="text-right">ราคา</div>
+                                    <Separator className="col-span-5" />
+                                    {item.SkuMaster.map((sku, index) => (
+                                        <React.Fragment
+                                            key={`${item.mainSkuId}-${sku.skuMasterId}`}
+                                        >
+                                            <div className="col-start-1 row-span-2">
+                                                <p>
+                                                    {sku.detail}{' '}
+                                                    <ImageToolTip
+                                                        images={sku.Image}
+                                                        alt={`${item.name}-${sku.detail}`}
+                                                    />{' '}
+                                                </p>
+                                                {sku.SkuMasterRemark.length >
+                                                    0 && (
+                                                    <div
+                                                        className={'flex gap-2'}
+                                                    >
+                                                        {sku.SkuMasterRemark.map(
+                                                            (remark) => (
+                                                                <Badge
+                                                                    variant={
+                                                                        'outline'
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        remark.name
+                                                                    }
+                                                                </Badge>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {sku.GoodsMaster.map((goods, i) => (
+                                                <React.Fragment
+                                                    key={`${item.mainSkuId}-${sku.skuMasterId}-${goods.goodsMasterId}`}
+                                                >
+                                                    <div
+                                                        className={cn(
+                                                            'col-start-2 text-center'
+                                                        )}
+                                                    >
+                                                        {goods.remaining}
+                                                    </div>
+                                                    <div>{goods.barcode}</div>
+                                                    <div>{`${goods.unit}(${goods.quantityPerUnit})`}</div>
+                                                    <div className="text-right">
+                                                        {goods.pricePerUnit}
+                                                    </div>
+                                                </React.Fragment>
+                                            ))}
+                                            {index !==
+                                                item.SkuMaster.length - 1 && (
+                                                <Separator className="col-span-5 col-start-1" />
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
                 <PaginationInventory
                     numberOfPage={numberOfPage}
                     searchParams={searchParams}
                 />
-            </>
+            </div>
         )
     } catch (error) {
         console.log(error)

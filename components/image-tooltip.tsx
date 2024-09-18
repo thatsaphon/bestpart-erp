@@ -22,9 +22,7 @@ export default function ImageToolTip({ images, alt = 'image' }: Props) {
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <CardDescription>
-                                <ImageIcon className="h-4 w-4" />
-                            </CardDescription>
+                            <ImageIcon className="inline h-4 w-4" />
                         </TooltipTrigger>
                         <TooltipContent>
                             <div className="grid w-[650px] grid-cols-3 gap-2 pb-2">
