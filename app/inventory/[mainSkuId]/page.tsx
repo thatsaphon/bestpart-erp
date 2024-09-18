@@ -57,8 +57,8 @@ export default async function MainSkuDetailPage({
                         </CardHeader>
                         <CardContent>
                             <div className="flex flex-wrap justify-between gap-2 lg:grid lg:grid-cols-2">
-                                <div className="grid grid-cols-4 gap-2 border-b-2 p-4">
-                                    <div className="text-center">จำนวน</div>
+                                <div className="grid grid-cols-[80px_1fr_1fr_1fr] place-content-start gap-2 rounded-md border-2 border-dashed p-4">
+                                    <div className="text-center">คงเหลือ</div>
                                     <div>Barcode</div>
                                     <div>หน่วย</div>
                                     <div className="text-right">ราคา</div>

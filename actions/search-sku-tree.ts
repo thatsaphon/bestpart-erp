@@ -64,9 +64,9 @@ export const searchSkuTree = async (
                     pricePerUnit: goods.pricePerUnit,
                     partNumber: mainSku.partNumber || '',
                     remaining:
-                        remaining.find(
+                        (remaining.find(
                             (r) => r.skuMasterId === goods.skuMasterId
-                        )?._sum.quantity || 0,
+                        )?._sum.quantity || 0) / goods.quantityPerUnit,
                     Image: sku.Image,
                     MainSkuRemark: mainSku.MainSkuRemark,
                     SkuMasterRemark: sku.SkuMasterRemark,

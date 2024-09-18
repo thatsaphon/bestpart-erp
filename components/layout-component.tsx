@@ -1,16 +1,13 @@
 import { Separator } from '@/components/ui/separator'
 import { ModeToggle } from '@/components/mode-toggle'
-import { NavMenubar } from '@/components/nav-menubar'
 import UserAvatar from './user-avatar'
-import Link from 'next/link'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { getServerSession } from 'next-auth'
-import { Search } from 'lucide-react'
-import { Input } from './ui/input'
-import { SidebarLayout, SidebarTrigger } from './ui/sidebar'
+import { SidebarLayout } from './ui/sidebar'
 import { AppSidebar } from './app-sidebar'
 import { cookies } from 'next/headers'
 import QuickSearchInventory from './quick-search-inventory'
+import BreadcrumbUrl from './breadcrumb-url'
 
 export default async function LayoutComponent({
     children,
@@ -27,7 +24,9 @@ export default async function LayoutComponent({
             <AppSidebar />
             <div className="flex min-h-screen flex-col">
                 <div className="flex w-full items-center justify-between bg-background py-1 pr-5">
-                    <div className="flex w-screen items-center justify-end pr-5">
+                    <div className="flex w-screen items-center justify-between pr-5">
+                        <BreadcrumbUrl />
+
                         <div className="mr-2 flex items-center gap-2">
                             <QuickSearchInventory />
                             <ModeToggle />
