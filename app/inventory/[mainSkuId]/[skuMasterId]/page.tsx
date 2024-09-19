@@ -18,6 +18,7 @@ import { shortDateFormat } from '@/lib/date-format'
 import { getSkuMasterHistory } from '@/types/sku-tree/sku-history'
 import SkuMasterHistoryTable from './sku-master-history-table'
 import QuickSearchInventory from '@/components/quick-search-inventory'
+import UploadImage from './upload-image'
 
 type Props = {
     params: {
@@ -52,7 +53,7 @@ export default async function SkuMasterDetailPage({
             </h2>
             <Separator className="my-2" />
             <Tabs defaultValue="detail">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="detail">Detail</TabsTrigger>
                     <TabsTrigger value="history">History</TabsTrigger>
                     <TabsTrigger value="upload">Upload Image</TabsTrigger>
@@ -63,7 +64,12 @@ export default async function SkuMasterDetailPage({
                 <TabsContent value="history">
                     <SkuMasterHistoryTable histories={histories} />
                 </TabsContent>
-                <TabsContent value="upload"></TabsContent>
+                <TabsContent value="upload">
+                    <UploadImage
+                        skuMasterId={Number(skuMasterId)}
+                        fileName={`${skuTree.name}-${skuTree.SkuMaster[0].detail}`}
+                    />
+                </TabsContent>
             </Tabs>
         </div>
     )

@@ -342,15 +342,20 @@ export default function UpdateSkuMasterForm({ skuMaster }: Props) {
                         </div>
                         <div className="grid grid-cols-3 gap-2">
                             {skuMaster.Image.map((image) => (
-                                <Image
-                                    key={`image-${skuMaster.skuMasterId}-${image}`}
-                                    src={image.path}
-                                    alt={skuMaster.detail}
-                                    className="w-full"
-                                    width={300}
-                                    height={300}
-                                    unoptimized
-                                />
+                                <div className="relative">
+                                    <Image
+                                        key={`image-${skuMaster.skuMasterId}-${image}`}
+                                        src={image.path}
+                                        alt={skuMaster.detail}
+                                        className="w-full"
+                                        width={300}
+                                        height={300}
+                                        unoptimized
+                                    />
+                                    <div className="absolute right-0 top-0">
+                                        <Cross1Icon className="hover:cursor-pointer" />
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     </div>
