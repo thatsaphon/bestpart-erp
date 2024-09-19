@@ -117,6 +117,19 @@ export const createPurchaseOrder = async (
         },
     })
 
+    await prisma.skuRemainingCache.updateMany({
+        where: {
+            skuMasterId: {
+                in: items
+                    .filter((item) => typeof item.skuMasterId === 'number')
+                    .map((item) => item.skuMasterId) as number[],
+            },
+        },
+        data: {
+            shouldRecheck: true,
+        },
+    })
+
     revalidatePath('/purchase/purchase-order')
     redirect(`/purchase/purchase-order/${invoice.documentNo}`)
 }

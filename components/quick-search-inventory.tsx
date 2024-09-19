@@ -23,6 +23,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { SkuTree } from '@/types/sku-tree/sku-tree'
+import Link from 'next/link'
 
 type Props = {}
 
@@ -86,18 +87,24 @@ export default function QuickSearchInventory({}: Props) {
                     <Command>
                         <CommandList>
                             <CommandEmpty>No product found.</CommandEmpty>
-                            <CommandGroup>
+                            <CommandGroup heading="สินค้า">
                                 {searchItems.items.map((item, index) => (
                                     <CommandItem
                                         key={index}
                                         value={`${item.mainSkuId}`}
+                                        onSelect={() => {}}
                                     >
-                                        {item.name}{' '}
-                                        <span className="text-primary/50">
-                                            {item.partNumber
-                                                ? ` - ${item.partNumber}`
-                                                : ''}
-                                        </span>
+                                        <Link
+                                            href={`/inventory/${item.mainSkuId}`}
+                                            target="_blank"
+                                        >
+                                            {item.name}{' '}
+                                            <span className="text-primary/50">
+                                                {item.partNumber
+                                                    ? ` - ${item.partNumber}`
+                                                    : ''}
+                                            </span>
+                                        </Link>
                                     </CommandItem>
                                 ))}
                             </CommandGroup>

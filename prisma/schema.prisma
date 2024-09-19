@@ -248,8 +248,8 @@ model SkuRemainingCache {
 }
 
 model MainSkuRemark {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id     Int    @id @default(autoincrement())
+  remark String @unique
 
   MainSku MainSku[]
 
@@ -261,8 +261,8 @@ model MainSkuRemark {
 }
 
 model SkuMasterRemark {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id     Int    @id @default(autoincrement())
+  remark String @unique
 
   SkuMaster SkuMaster[]
 
@@ -287,12 +287,13 @@ model GoodsMaster {
   SalesItem    SalesItem[]
   PurchaseItem PurchaseItem[]
 
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @default(now()) @updatedAt
-  PurchaseOrderItem  PurchaseOrderItem[]
-  QuotationItem      QuotationItem[]
-  SalesReturnItem    SalesReturnItem[]
-  PurchaseReturnItem PurchaseReturnItem[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now()) @updatedAt
+  PurchaseOrderItem   PurchaseOrderItem[]
+  QuotationItem       QuotationItem[]
+  SalesReturnItem     SalesReturnItem[]
+  PurchaseReturnItem  PurchaseReturnItem[]
+  StockAdjustmentItem StockAdjustmentItem[]
 
   @@index([skuMasterId])
 }
@@ -540,11 +541,15 @@ model StockAdjustmentItem {
   id                Int             @id @default(autoincrement())
   SkuMaster         SkuMaster       @relation(fields: [skuMasterId], references: [id])
   skuMasterId       Int
+  GoodsMaster       GoodsMaster     @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId     Int
   StockAdjustment   StockAdjustment @relation(fields: [stockAdjustmentId], references: [id])
   stockAdjustmentId Int
 
-  quantity      Float
-  estimatedCost Float
+  quantity        Float
+  estimatedCost   Float
+  unit            String
+  quantityPerUnit Float
 }
 
 model JournalVoucher {
@@ -745,10 +750,10 @@ model PurchaseOrderItem {
 
   estimatedDeliveryDate DateTime
 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @default(now()) @updatedAt
-  PurchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
-  purchaseOrderId Int?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now()) @updatedAt
+  PurchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId Int
 }
 
 model CustomerOrder {

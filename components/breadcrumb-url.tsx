@@ -26,9 +26,9 @@ export default function BreadcrumbUrl({}: Props) {
         const newItems = pathName
             .split('/')
             .map(
-                (item, index) =>
+                (item, index, arr) =>
                     ({
-                        href: `/${item}`,
+                        href: `/${arr.slice(1, index + 1).join('/')}`,
                         label: item
                             .split('-')
                             .map(

@@ -83,7 +83,7 @@ export default async function InventoryListPage({
                                     <div className="flex gap-2">
                                         {item.MainSkuRemark.map((remark) => (
                                             <Badge variant={'outline'}>
-                                                {remark.name}
+                                                {remark.remark}
                                             </Badge>
                                         ))}
                                     </div>
@@ -128,7 +128,7 @@ export default async function InventoryListPage({
                                                                     }
                                                                 >
                                                                     {
-                                                                        remark.name
+                                                                        remark.remark
                                                                     }
                                                                 </Badge>
                                                             )

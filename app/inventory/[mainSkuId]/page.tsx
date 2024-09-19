@@ -8,8 +8,11 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { PencilIcon } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
+import UpdateMainSkuForm from './update-main-sku-form'
 
 type Props = {
     params: {
@@ -29,28 +32,27 @@ export default async function MainSkuDetailPage({
 
     return (
         <div className="p-3">
-            <h1 className="text-3xl">{skuTree.name}</h1>
-            <h2 className="text-primary">{skuTree.partNumber}</h2>
-            <h2 className="flex gap-2 text-primary">
-                {skuTree.MainSkuRemark.map((remark) => (
-                    <Badge key={remark.name} variant={'outline'}>
-                        {remark.name}
-                    </Badge>
-                ))}
-            </h2>
+            <UpdateMainSkuForm skuTree={skuTree} />
             <Separator className="my-2" />
             <div className="flex w-full flex-col gap-2">
                 {skuTree.SkuMaster.map((skuMaster) => (
                     <Card key={`${skuMaster.skuMasterId}`}>
                         <CardHeader>
-                            <CardTitle>{skuMaster.detail}</CardTitle>
+                            <CardTitle>
+                                {skuMaster.detail}
+                                <Link
+                                    href={`/inventory/${skuTree.mainSkuId}/${skuMaster.skuMasterId}`}
+                                >
+                                    <PencilIcon className="ml-2 inline h-4 w-4" />
+                                </Link>
+                            </CardTitle>
                             <CardDescription>
                                 {skuMaster.SkuMasterRemark.map((remark) => (
                                     <Badge
-                                        key={`remark-${skuMaster.skuMasterId}-${remark.name}`}
+                                        key={`remark-${skuMaster.skuMasterId}-${remark.remark}`}
                                         variant={'outline'}
                                     >
-                                        {remark.name}
+                                        {remark.remark}
                                     </Badge>
                                 ))}
                             </CardDescription>

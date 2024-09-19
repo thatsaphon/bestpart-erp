@@ -3,6 +3,7 @@
 import prisma from '@/app/db/db'
 import { MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
 import { DocumentItem } from '@/types/document-item'
+import { checkRemaining } from './check-remaining'
 
 export const searchSku = async (query: string, page: number = 1) => {
     const splitQuery = query.trim().split(' ')
@@ -150,13 +151,10 @@ export const searchSku = async (query: string, page: number = 1) => {
         },
     })
 
-    const remaining = await prisma.stockMovement.groupBy({
-        by: ['skuMasterId'],
-        where: { skuMasterId: { in: items.map((item) => item.skuMasterId) } },
-        _sum: {
-            quantity: true,
-        },
-    })
+    const remaining = await checkRemaining(
+        items.map((item) => item.skuMasterId)
+    )
+
     return {
         items: items.map((goods) => ({
             mainSkuId: goods.SkuMaster.mainSkuId,
@@ -171,8 +169,8 @@ export const searchSku = async (query: string, page: number = 1) => {
             pricePerUnit: goods.pricePerUnit,
             partNumber: goods.SkuMaster.MainSku.partNumber || '',
             remaining:
-                remaining.find((r) => r.skuMasterId === goods.skuMasterId)?._sum
-                    .quantity || 0,
+                remaining.find((r) => r.skuMasterId === goods.skuMasterId)
+                    ?.remaining || 0,
             Image: goods.SkuMaster.Image,
             MainSkuRemark: goods.SkuMaster.MainSku.MainSkuRemark,
             SkuMasterRemark: goods.SkuMaster.SkuMasterRemark,

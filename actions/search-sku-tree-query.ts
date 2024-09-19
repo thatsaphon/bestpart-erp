@@ -3,6 +3,7 @@
 import prisma from '@/app/db/db'
 import { MainSkuRemark, Prisma, SkuMasterRemark } from '@prisma/client'
 import { DocumentItem } from '@/types/document-item'
+import { checkRemaining } from './check-remaining'
 
 export const searchSkuTreeByKeyword = async (
     keyword: string,
@@ -47,7 +48,7 @@ export const searchSkuTreeByKeyword = async (
                                     some: {
                                         SkuMasterRemark: {
                                             some: {
-                                                name: {
+                                                remark: {
                                                     contains: q,
                                                     mode: 'insensitive',
                                                 },
@@ -71,7 +72,7 @@ export const searchSkuTreeByKeyword = async (
                             {
                                 MainSkuRemark: {
                                     some: {
-                                        name: {
+                                        remark: {
                                             contains: q,
                                             mode: 'insensitive',
                                         },
@@ -132,7 +133,7 @@ export const searchSkuTreeByKeyword = async (
                                     some: {
                                         SkuMasterRemark: {
                                             some: {
-                                                name: {
+                                                remark: {
                                                     contains: q,
                                                     mode: 'insensitive',
                                                 },
@@ -156,7 +157,7 @@ export const searchSkuTreeByKeyword = async (
                             {
                                 MainSkuRemark: {
                                     some: {
-                                        name: {
+                                        remark: {
                                             contains: q,
                                             mode: 'insensitive',
                                         },
@@ -169,17 +170,10 @@ export const searchSkuTreeByKeyword = async (
         },
     })
 
-    const remaining = await prisma.stockMovement.groupBy({
-        by: ['skuMasterId'],
-        where: {
-            skuMasterId: {
-                in: items.flatMap((item) => item.SkuMaster).map((i) => i.id),
-            },
-        },
-        _sum: {
-            quantity: true,
-        },
-    })
+    const remaining = await checkRemaining(
+        items.flatMap((item) => item.SkuMaster).map((i) => i.id)
+    )
+
     return {
         items: items.map((mainSku) => ({
             mainSkuId: mainSku.id,
@@ -206,7 +200,7 @@ export const searchSkuTreeByKeyword = async (
                     remaining:
                         (remaining.find(
                             (r) => r.skuMasterId === goods.skuMasterId
-                        )?._sum.quantity || 0) / goods.quantityPerUnit,
+                        )?.remaining || 0) / goods.quantityPerUnit,
                     Image: sku.Image,
                     MainSkuRemark: mainSku.MainSkuRemark,
                     SkuMasterRemark: sku.SkuMasterRemark,
