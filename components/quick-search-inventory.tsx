@@ -41,7 +41,6 @@ export default function QuickSearchInventory({}: Props) {
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-        console.log(event)
         if (event.code === 'KeyF' && event.ctrlKey) {
             setOpen(true)
             ref.current?.focus()
