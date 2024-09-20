@@ -1,28 +1,8 @@
-import { InventoryCard } from '@/components/inventory-card'
 import PaginationInventory from '../pagination-inventory'
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
-import { searchDistinctMainSku } from './search-distinct-main-sku'
-import EditMainSkuDialog from '@/components/edit-main-sku-dialog'
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import ImageToolTip from '@/components/image-tooltip'
-import { InfoCircledIcon } from '@radix-ui/react-icons'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { searchSkuTreeByKeyword } from '@/actions/search-sku-tree-query'
-import { SkuTree } from '@/types/sku-tree/sku-tree'
 import {
     Accordion,
     AccordionContent,
@@ -31,7 +11,6 @@ import {
 } from '@/components/ui/accordion'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 import { PencilIcon } from 'lucide-react'
 import Link from 'next/link'
 

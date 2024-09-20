@@ -184,7 +184,7 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                                         item.SkuMasterRemark &&
                                         item.MainSkuRemark.length > 0 &&
                                         item.SkuMasterRemark.length > 0 ? (
-                                            <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemark?.map((remark) => remark.name), ...item.SkuMasterRemark?.map((remark) => remark.name)].join(', ')}`}</p>
+                                            <p className="text-primary/50">{`Remark: ${[...item.MainSkuRemark?.map((remark) => remark.remark), ...item.SkuMasterRemark?.map((remark) => remark.remark)].join(', ')}`}</p>
                                         ) : (
                                             <></>
                                         )}

@@ -70,6 +70,8 @@ model Document {
   JournalVoucher  JournalVoucher?
   StockAdjustment StockAdjustment?
   OtherInvoice    OtherInvoice?
+  StockMovement   StockMovement[]
+  DocumentView    DocumentView?
 }
 
 enum DocumentType {
@@ -90,14 +92,16 @@ enum DocumentType {
 model DocumentRemark {
   id Int @id @default(autoincrement())
 
-  Document   Document? @relation(fields: [documentId], references: [id])
-  documentId Int?
-  remark     String    @default("")
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @default(now()) @updatedAt
-  isDeleted  Boolean   @default(false)
-  User       User?     @relation(fields: [userId], references: [id])
-  userId     String?
+  Document       Document?     @relation(fields: [documentId], references: [id])
+  documentId     Int?
+  remark         String        @default("")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+  isDeleted      Boolean       @default(false)
+  User           User?         @relation(fields: [userId], references: [id])
+  userId         String?
+  DocumentView   DocumentView? @relation(fields: [documentViewId], references: [id])
+  documentViewId Int?
 }
 
 model ChartOfAccount {
@@ -189,6 +193,7 @@ model Contact {
   Quotation       Quotation[]
   PurchaseOrder   PurchaseOrder[]
   OtherInvoice    OtherInvoice[]
+  StockMovement   StockMovement[]
 }
 
 model MainSku {
@@ -229,6 +234,7 @@ model SkuMaster {
   PurchaseOrderItem PurchaseOrderItem[]
   QuotationItem     QuotationItem[]
   canNegative       Boolean             @default(false)
+  StockMovement     StockMovement[]
 
   @@index([mainSkuId])
 }
@@ -353,6 +359,8 @@ model ServiceAndNonStockItem {
   id               Int            @id @default(autoincrement())
   ChartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
   chartOfAccountId Int
+
+  name String
 
   canSales        Boolean
   canPurchase     Boolean
@@ -586,12 +594,14 @@ model SkuMasterImage {
 }
 
 model DocumentAttached {
-  id         Int      @id @default(autoincrement())
-  url        String
-  Document   Document @relation(fields: [documentId], references: [id])
-  documentId Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+  id             Int           @id @default(autoincrement())
+  url            String
+  Document       Document      @relation(fields: [documentId], references: [id])
+  documentId     Int
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+  DocumentView   DocumentView? @relation(fields: [documentViewId], references: [id])
+  documentViewId Int?
 }
 
 model OtherInvoice {
@@ -846,12 +856,38 @@ model QuotationItem {
 }
 
 view StockMovement {
-  documentId   String       @id
-  documentNo   String
-  skuMasterId  Int
-  date         DateTime
+  documentId      Int
+  Document        Document     @relation(fields: [documentId], references: [id])
+  documentNo      String
+  Contact         Contact?     @relation(fields: [contactId], references: [id])
+  contactId       Int?
+  SkuMaster       SkuMaster    @relation(fields: [skuMasterId], references: [id])
+  skuMasterId     Int
+  date            DateTime
+  documentType    DocumentType
+  movementCount   Float
+  quantity        Float
+  quantityPerUnit Float
+  unit            String
+  costPerUnit     Float
+  pricePerUnit    Float
+
+  @@id([documentId, skuMasterId])
+}
+
+view DocumentView {
+  id         Int      @id
+  documentId Int      @unique
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentNo String
+
   documentType DocumentType
-  quantity     Float
-  costPerUnit  Float
-  pricePerUnit Float
+  contactId    Int
+  contactName  String
+  date         DateTime
+
+  createdAt        DateTime
+  updatedAt        DateTime
+  DocumentRemark   DocumentRemark[]
+  DocumentAttached DocumentAttached[]
 }

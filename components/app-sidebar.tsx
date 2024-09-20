@@ -5,6 +5,7 @@ import {
     Bird,
     BookOpen,
     Bot,
+    Box,
     ChevronsUpDown,
     Code2,
     Contact,
@@ -38,6 +39,8 @@ import {
 } from '@/components/ui/sidebar'
 import { FullRoute } from '@/types/routes/document-routes'
 import Link from 'next/link'
+import { title } from 'process'
+import { url } from 'inspector'
 const data = {
     teams: [
         {
@@ -59,7 +62,7 @@ const data = {
     user: {
         name: 'shadcn',
         email: 'm@example.com',
-        avatar: '/avatars/shadcn.jpg',
+        // avatar: '/avatars/shadcn.jpg',
     },
     navMain: [
         {
@@ -155,6 +158,7 @@ const data = {
                 // },
             ],
         },
+
         {
             title: 'สินค้า',
             url: '#',
@@ -229,6 +233,18 @@ const data = {
                 {
                     title: 'Dashboard',
                     url: '/admin/dashboard',
+                },
+            ],
+        },
+        {
+            title: 'ตั้งค่า',
+            url: '/setting',
+            icon: Settings2,
+            items: [
+                {
+                    title: 'Non-stock item',
+                    url: '/setting/non-stock-item',
+                    icon: Box,
                 },
             ],
         },

@@ -34,6 +34,7 @@ export function NavMain({
         items?: {
             title: string
             url: string
+            icon?: LucideIcon
         }[]
     }[]
     searchResults: React.ComponentProps<typeof SidebarSearch>['results']

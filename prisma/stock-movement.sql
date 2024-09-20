@@ -1,6 +1,6 @@
 CREATE VIEW "StockMovement" AS
 SELECT
-    "documentId", "documentNo", "date", 'Sales' as "documentType", "skuMasterId", -("quantity" * "quantityPerUnit") as quantity, 0 as "costPerUnit", "pricePerUnit" 
+    "documentId", "documentNo", "contactId", "date", 'Sales' as "documentType", "skuMasterId", -("quantity" * "quantityPerUnit") as "movementCount", "quantityPerUnit", "quantity", "unit", 0 as "costPerUnit", "pricePerUnit"
 FROM
     "Document"
 INNER JOIN
@@ -9,7 +9,7 @@ INNER JOIN
     "SalesItem" ON "Sales".id = "SalesItem"."salesId"
 UNION
 SELECT
-    "documentId", "documentNo", "date", 'SalesReturn' as "documentType", "skuMasterId", ("quantity" * "quantityPerUnit") as quantity, 0 as "costPerUnit", "pricePerUnit" 
+    "documentId", "documentNo", "contactId", "date", 'SalesReturn' as "documentType", "skuMasterId", ("quantity" * "quantityPerUnit") as "movementCount", "quantityPerUnit", "quantity", "unit", 0 as "costPerUnit", "pricePerUnit" 
 FROM
     "Document"
 INNER JOIN
@@ -18,7 +18,7 @@ INNER JOIN
     "SalesReturnItem" ON "SalesReturn".id = "SalesReturnItem"."salesReturnId"
 UNION
 SELECT
-    "documentId", "documentNo", "date", 'Purchase' as "documentType", "skuMasterId", ("quantity" * "quantityPerUnit") as quantity, "costPerUnit", 0 as pricePerUnit 
+    "documentId", "documentNo", "contactId", "date", 'Purchase' as "documentType", "skuMasterId", ("quantity" * "quantityPerUnit") as "movementCount", "quantityPerUnit", "quantity", "unit", "costPerUnit", 0 as pricePerUnit 
 FROM
     "Document"
 INNER JOIN
@@ -27,7 +27,7 @@ INNER JOIN
     "PurchaseItem" ON "Purchase".id = "PurchaseItem"."purchaseId"
 UNION
 SELECT
-    "documentId", "documentNo", "date", 'PurchaseReturn' as "documentType", "skuMasterId", -("quantity" * "quantityPerUnit") as quantity, "costPerUnit", 0 as pricePerUnit 
+    "documentId", "documentNo", "contactId", "date", 'PurchaseReturn' as "documentType", "skuMasterId", -("quantity" * "quantityPerUnit") as "movementCount", "quantityPerUnit", "quantity", "unit", "costPerUnit", 0 as pricePerUnit 
 FROM
     "Document"
 INNER JOIN
@@ -36,7 +36,7 @@ INNER JOIN
     "PurchaseReturnItem" ON "PurchaseReturn".id = "PurchaseReturnItem"."purchaseReturnId"
 UNION
 SELECT
-    "documentId", "documentNo", "date", 'StockAdjustment' as "documentType", "skuMasterId", "quantity", "estimatedCost" as "costPerUnit", 0 as pricePerUnit 
+    "documentId", "documentNo", null as "contactId", "date", 'StockAdjustment' as "documentType", "skuMasterId", ("quantity" * "quantityPerUnit") as "movementCount", "quantityPerUnit", "quantity", "unit", "estimatedCost" as "costPerUnit", 0 as pricePerUnit 
 FROM
     "Document"
 INNER JOIN

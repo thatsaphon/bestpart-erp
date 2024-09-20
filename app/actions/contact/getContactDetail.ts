@@ -8,24 +8,113 @@ export const getContactDetail = async (id: string) => {
             id: Number(id),
         },
         include: {
-            ArSubledger: {
+            CustomerOrder: {
                 include: {
-                    Document: {
+                    CustomerOrderItem: true,
+                },
+            },
+            OtherInvoice: {
+                include: {
+                    OtherInvoiceItem: true,
+                },
+            },
+            PurchaseOrder: {
+                include: {
+                    PurchaseOrderItem: true,
+                },
+            },
+            Purchase: {
+                include: {
+                    PurchaseItem: true,
+                },
+            },
+            PurchasePayment: {
+                include: {
+                    Purchase: {
                         include: {
-                            GeneralLedger: {
-                                where: { chartOfAccountId: 12000 },
+                            PurchaseItem: true,
+                        },
+                    },
+                    PurchaseReturn: {
+                        include: {
+                            PurchaseReturnItem: true,
+                        },
+                    },
+                },
+            },
+            PurchaseReturn: {
+                include: {
+                    PurchaseReturnItem: true,
+                },
+            },
+            Quotation: {
+                include: {
+                    QuotationItem: true,
+                },
+            },
+            Sales: {
+                include: {
+                    SalesItem: true,
+                },
+            },
+            SalesBill: {
+                include: {
+                    Sales: {
+                        include: {
+                            SalesItem: true,
+                        },
+                    },
+                    SalesReturn: {
+                        include: {
+                            SalesReturnItem: true,
+                        },
+                    },
+                },
+            },
+            SalesReceived: {
+                include: {
+                    Sales: {
+                        include: {
+                            SalesItem: true,
+                        },
+                    },
+                    SalesReturn: {
+                        include: {
+                            SalesReturnItem: true,
+                        },
+                    },
+                    SalesBill: {
+                        include: {
+                            Sales: {
+                                include: {
+                                    SalesItem: true,
+                                },
+                            },
+                            SalesReturn: {
+                                include: {
+                                    SalesReturnItem: true,
+                                },
                             },
                         },
                     },
                 },
             },
-            ApSubledger: {
+            SalesReturn: {
                 include: {
-                    Document: {
+                    SalesReturnItem: true,
+                },
+            },
+            SkuMaster: {
+                include: {
+                    MainSku: true,
+                },
+            },
+            StockMovement: {
+                include: {
+                    Document: true,
+                    SkuMaster: {
                         include: {
-                            GeneralLedger: {
-                                where: { chartOfAccountId: 21000 },
-                            },
+                            MainSku: true,
                         },
                     },
                 },

@@ -211,9 +211,9 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                         ].map((remark) => (
                                             <p
                                                 className="text-primary/50"
-                                                key={`${remark.id}-${remark.name}`}
+                                                key={`${remark.id}-${remark.remark}`}
                                             >
-                                                {remark?.name}
+                                                {remark?.remark}
                                             </p>
                                         ))}
                                     </div>

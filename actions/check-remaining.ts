@@ -26,16 +26,16 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
             },
         },
         _sum: {
-            quantity: true,
+            movementCount: true,
         },
     })
 
     const stockMovement2 = filter.map((x) => ({
         skuMasterId: x.skuMasterId,
         _sum: {
-            quantity:
+            movementCount:
                 stockMovement.find((y) => y.skuMasterId === x.skuMasterId)?._sum
-                    .quantity || 0,
+                    .movementCount || 0,
         },
     }))
 
@@ -45,14 +45,14 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
                 skuMasterId: x.skuMasterId,
             },
             update: {
-                remaining: x._sum.quantity || 0,
+                remaining: x._sum.movementCount || 0,
                 date: new Date(),
                 shouldRecheck: false,
             },
             create: {
                 date: new Date(),
                 skuMasterId: x.skuMasterId,
-                remaining: x._sum.quantity || 0,
+                remaining: x._sum.movementCount || 0,
                 shouldRecheck: false,
             },
         })
@@ -72,7 +72,7 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
         ),
         ...stockMovement.map((x) => ({
             skuMasterId: x.skuMasterId,
-            remaining: x._sum.quantity || 0,
+            remaining: x._sum.movementCount || 0,
             remainingAt: new Date(),
         })),
         ...filter

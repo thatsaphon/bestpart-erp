@@ -42,28 +42,28 @@ export default async function ContactPage({
             isAp: type === 'ap' ? true : undefined,
         },
         include: {
-            ArSubledger: {
+            Sales: {
                 include: {
-                    Document: {
-                        include: {
-                            GeneralLedger: {
-                                where: { chartOfAccountId: 12000 },
-                            },
-                        },
-                    },
+                    SalesItem: true,
+                    GeneralLedger: true,
                 },
             },
-            ApSubledger: {
+            Purchase: {
                 include: {
-                    Document: {
-                        include: {
-                            GeneralLedger: {
-                                where: { chartOfAccountId: 21000 },
-                            },
-                        },
-                    },
+                    PurchaseItem: true,
+                    GeneralLedger: true,
                 },
             },
+            // CustomerOrder: true,
+            // OtherInvoice: true,
+            // PurchaseOrder: true,
+            // PurchasePayment: true,
+            // PurchaseReturn: true,
+            // Quotation: true,
+            // SalesBill: true,
+            // SalesReceived: true,
+            // SalesReturn: true,
+            // SkuMaster: true,
         },
         orderBy: [{ name: 'asc' }],
     })
@@ -165,7 +165,20 @@ export default async function ContactPage({
                                     <Link
                                         href={`/contact/${contact.id}/receivable`}
                                     >
-                                        {contact.ArSubledger.filter(
+                                        {contact.Sales.reduce(
+                                            (acc, curr) =>
+                                                acc +
+                                                curr.GeneralLedger.reduce(
+                                                    (acc, curr) =>
+                                                        curr.chartOfAccountId ===
+                                                        12000
+                                                            ? acc + curr.amount
+                                                            : acc,
+                                                    0
+                                                ),
+                                            0
+                                        )}
+                                        {/* {contact.ArSubledger.filter(
                                             ({ paymentStatus }) =>
                                                 paymentStatus === 'NotPaid'
                                         ).reduce(
@@ -177,11 +190,26 @@ export default async function ContactPage({
                                                     0
                                                 ),
                                             0
-                                        )}
+                                        )} */}
                                     </Link>
                                 </TableCell>
                                 <TableCell>
                                     {
+                                        -contact.Purchase.reduce(
+                                            (acc, curr) =>
+                                                acc +
+                                                curr.GeneralLedger.reduce(
+                                                    (acc, curr) =>
+                                                        curr.chartOfAccountId ===
+                                                        21000
+                                                            ? acc + curr.amount
+                                                            : acc,
+                                                    0
+                                                ),
+                                            0
+                                        )
+                                    }
+                                    {/* {
                                         -contact.ApSubledger.reduce(
                                             (acc, curr) =>
                                                 acc +
@@ -192,7 +220,7 @@ export default async function ContactPage({
                                                 ),
                                             0
                                         )
-                                    }
+                                    } */}
                                 </TableCell>
                                 <TableCell>
                                     <Link href={`/contact/${contact.id}`}>
