@@ -64,10 +64,6 @@ export const createSalesInvoice = async (
         },
     })
 
-    if (goodsMasters.length !== items.length) {
-        throw new Error('goods not found')
-    }
-
     //check ServiceAndNonStockItem
     const serviceAndNonStockItems =
         await prisma.serviceAndNonStockItem.findMany({
@@ -79,6 +75,10 @@ export const createSalesInvoice = async (
                 },
             },
         })
+
+    if (goodsMasters.length + serviceAndNonStockItems.length !== items.length) {
+        throw new Error('goods not found')
+    }
 
     const remainings = await checkRemaining(
         goodsMasters.map((item) => item.skuMasterId)
@@ -158,6 +158,7 @@ export const createSalesInvoice = async (
                             {
                                 chartOfAccountId: 41000,
                                 amount: -items
+                                    .filter((item) => item.goodsMasterId)
                                     .reduce(
                                         (sum, item) =>
                                             sum +
@@ -169,6 +170,26 @@ export const createSalesInvoice = async (
                                     )
                                     .toFixed(2),
                             },
+                            ...items
+                                .filter((item) => item.serviceAndNonStockItemId)
+                                .map((item) => {
+                                    const nonStockItem =
+                                        serviceAndNonStockItems.find(
+                                            (x) =>
+                                                x.id ===
+                                                item.serviceAndNonStockItemId
+                                        )
+                                    return {
+                                        chartOfAccountId:
+                                            nonStockItem?.chartOfAccountId as number,
+                                        amount: -(
+                                            (item.pricePerUnit *
+                                                item.quantity *
+                                                100) /
+                                            107
+                                        ).toFixed(2),
+                                    }
+                                }),
                             // ภาษีขาย
                             {
                                 chartOfAccountId: 23100,

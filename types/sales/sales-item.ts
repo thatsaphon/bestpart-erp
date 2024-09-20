@@ -117,7 +117,9 @@ export const salesItemsToDocumentItems = (
             ({
                 barcode: item.barcode,
                 detail: item.SkuMaster?.detail,
-                name: item.SkuMaster?.MainSku?.name,
+                name:
+                    item.SkuMaster?.MainSku?.name ||
+                    item.ServiceAndNonStockItem?.name,
                 goodsMasterId: item.goodsMasterId,
                 mainSkuId: item.SkuMaster?.mainSkuId,
                 partNumber: item.SkuMaster?.MainSku?.partNumber,

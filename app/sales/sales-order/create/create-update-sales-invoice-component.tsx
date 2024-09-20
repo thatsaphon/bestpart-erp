@@ -204,17 +204,19 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                         {item.partNumber}
                                     </p>
                                     <div>
-                                        {[
-                                            ...item.MainSkuRemark,
-                                            ...item.SkuMasterRemark,
-                                        ].map((remark) => (
-                                            <p
-                                                className="text-primary/50"
-                                                key={`${remark.id}-${remark.remark}`}
-                                            >
-                                                {remark?.remark}
-                                            </p>
-                                        ))}
+                                        {item.MainSkuRemark &&
+                                            item.SkuMasterRemark &&
+                                            [
+                                                ...item.MainSkuRemark,
+                                                ...item.SkuMasterRemark,
+                                            ].map((remark) => (
+                                                <p
+                                                    className="text-primary/50"
+                                                    key={`${remark.id}-${remark.remark}`}
+                                                >
+                                                    {remark?.remark}
+                                                </p>
+                                            ))}
                                     </div>
                                     <div>
                                         <ImageToolTip images={item.Image} />

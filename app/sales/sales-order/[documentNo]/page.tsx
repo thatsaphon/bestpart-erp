@@ -131,8 +131,8 @@ export default async function SalesInvoiceDetailPage({
                             <TableRow key={item.barcode}>
                                 <TableCell>{item.barcode}</TableCell>
                                 <TableCell>
-                                    <p>{item.SkuMaster?.MainSku.name}</p>
-                                    <p>{item.SkuMaster?.detail}</p>
+                                    <p>{item.name}</p>
+                                    <p>{item.description}</p>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {item.quantity}
