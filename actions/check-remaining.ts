@@ -9,6 +9,7 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
     )
     const cache = await checkCacheRemaining(nonDuplicatedSkuMasterIds)
 
+    //หาจำนวนคงเหลือที่ต้องหาซ้ำ
     const filter = cache.filter(
         (x) =>
             x.remaining == null ||
@@ -29,7 +30,16 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
         },
     })
 
-    const stockMovementUpserts = stockMovement.map((x) => {
+    const stockMovement2 = filter.map((x) => ({
+        skuMasterId: x.skuMasterId,
+        _sum: {
+            quantity:
+                stockMovement.find((y) => y.skuMasterId === x.skuMasterId)?._sum
+                    .quantity || 0,
+        },
+    }))
+
+    const stockMovementUpserts = stockMovement2.map((x) => {
         return prisma.skuRemainingCache.upsert({
             where: {
                 skuMasterId: x.skuMasterId,
@@ -48,26 +58,7 @@ export const checkRemaining = async (skuMasterIds: number[]) => {
         })
     })
 
-    const stockMovementUpserts2 = filter
-        .filter(
-            (x) =>
-                !stockMovement.map((x) => x.skuMasterId).includes(x.skuMasterId)
-        )
-        .map((x) => {
-            return prisma.skuRemainingCache.create({
-                data: {
-                    date: new Date(),
-                    remaining: 0,
-                    skuMasterId: x.skuMasterId,
-                    shouldRecheck: false,
-                },
-            })
-        })
-
-    await prisma.$transaction([
-        ...stockMovementUpserts,
-        ...stockMovementUpserts2,
-    ])
+    await prisma.$transaction([...stockMovementUpserts])
 
     return [
         ...cache.filter(

@@ -26,7 +26,7 @@ export const searchSku = async (query: string, page: number = 1) => {
                             SkuMaster: {
                                 SkuMasterRemark: {
                                     some: {
-                                        name: {
+                                        remark: {
                                             contains: q,
                                             mode: 'insensitive',
                                         },
@@ -59,7 +59,7 @@ export const searchSku = async (query: string, page: number = 1) => {
                                 MainSku: {
                                     MainSkuRemark: {
                                         some: {
-                                            name: {
+                                            remark: {
                                                 contains: q,
                                                 mode: 'insensitive',
                                             },
@@ -103,7 +103,7 @@ export const searchSku = async (query: string, page: number = 1) => {
                             SkuMaster: {
                                 SkuMasterRemark: {
                                     some: {
-                                        name: {
+                                        remark: {
                                             contains: q,
                                             mode: 'insensitive',
                                         },
@@ -136,7 +136,7 @@ export const searchSku = async (query: string, page: number = 1) => {
                                 MainSku: {
                                     MainSkuRemark: {
                                         some: {
-                                            name: {
+                                            remark: {
                                                 contains: q,
                                                 mode: 'insensitive',
                                             },

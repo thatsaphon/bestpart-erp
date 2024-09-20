@@ -13,6 +13,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import UpdateMainSkuForm from './update-main-sku-form'
+import { Button } from '@/components/ui/button'
 
 type Props = {
     params: {
@@ -73,7 +74,7 @@ export default async function MainSkuDetailPage({
                                                     {goodsMaster.remaining}
                                                 </div>
                                                 <div>{goodsMaster.barcode}</div>
-                                                <div>{`${goodsMaster.unit}(${goodsMaster.unit})`}</div>
+                                                <div>{`${goodsMaster.unit}(${goodsMaster.quantityPerUnit})`}</div>
                                                 <div className="text-right">
                                                     {goodsMaster.pricePerUnit.toLocaleString()}
                                                 </div>
@@ -102,6 +103,12 @@ export default async function MainSkuDetailPage({
                         </CardContent>
                     </Card>
                 ))}
+                <Link
+                    href={`/inventory/${skuTree.mainSkuId}/create`}
+                    className="w-full"
+                >
+                    <Button type="button">เพิ่มสินค้า</Button>
+                </Link>
             </div>
         </div>
     )

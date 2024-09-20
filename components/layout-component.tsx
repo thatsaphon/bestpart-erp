@@ -8,6 +8,7 @@ import { AppSidebar } from './app-sidebar'
 import { cookies } from 'next/headers'
 import QuickSearchInventory from './quick-search-inventory'
 import BreadcrumbUrl from './breadcrumb-url'
+import GenerateBarcodeButton from './generate-barcode-button'
 
 export default async function LayoutComponent({
     children,
@@ -28,6 +29,7 @@ export default async function LayoutComponent({
                         <BreadcrumbUrl />
 
                         <div className="mr-2 flex items-center gap-2">
+                            <GenerateBarcodeButton />
                             <QuickSearchInventory />
                             <ModeToggle />
                             <UserAvatar user={session?.user} />
