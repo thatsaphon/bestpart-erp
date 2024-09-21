@@ -1,17 +1,10 @@
 import { Badge, BadgeProps } from '@/components/ui/badge'
+import { purchaseOrderStatus } from '@/types/purchase-order/purchase-order-status'
 import { PurchaseOrderStatus } from '@prisma/client'
 import React from 'react'
 
 type Props = BadgeProps & { status: PurchaseOrderStatus }
 
-const purchaseOrderStatus = {
-    Draft: 'ร่าง',
-    Submitted: 'สั่งซื้อแล้ว',
-    PartiallyReceived: 'รับของบางส่วน',
-    FullyReceived: 'รับของแล้ว',
-    Closed: 'Closed',
-    Cancelled: 'ยกเลิก',
-}
 const variant = {
     Draft: 'destructive' as const,
     Submitted: 'outline' as const,

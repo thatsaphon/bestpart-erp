@@ -24,20 +24,18 @@ export default async function EditPurchaseOrderPage({
         type: 'PurchaseOrder',
     })
     if (!purchaseOrder) return null
-
-    // const openCustomerOrders = await getCustomerOrderDefaultFunction({
-    //     CustomerOrder: { status: { in: ['Open'] } },
-    // })
-
-    // const existingCustomerOrders = await getCustomerOrderDefaultFunction({
-    //     CustomerOrder: {
-    //         id: {
-    //             in: purchaseOrder.PurchaseOrder?.CustomerOrderLink?.map(
-    //                 (customerOrder) => customerOrder.id
-    //             ),
-    //         },
-    //     },
-    // })
+    const customerOrders = await getCustomerOrderDefaultFunction({
+        OR: [
+            { CustomerOrder: { status: { in: ['Pending'] } } },
+            {
+                id: {
+                    in: purchaseOrder?.PurchaseOrder?.CustomerOrderLink.map(
+                        (customerOrder) => customerOrder.documentId
+                    ),
+                },
+            },
+        ],
+    })
 
     return (
         <>
@@ -51,6 +49,7 @@ export default async function EditPurchaseOrderPage({
             <h1 className="my-2 text-3xl transition-colors">แก้ไขใบสั่งซื้อ</h1>
             <CreateOrUpdatePurchaseOrderComponent
                 existingPurchaseOrder={purchaseOrder}
+                pendingOrExistingCustomerOrders={customerOrders}
                 // openCustomerOrders={openCustomerOrders}
                 // existingCustomerOrders={existingCustomerOrders}
             />

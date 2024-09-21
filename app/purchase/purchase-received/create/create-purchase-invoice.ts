@@ -24,7 +24,7 @@ export const createPurchaseInvoice = async (
         referenceNo,
     }: DocumentDetail,
     items: DocumentItem[],
-    purchaseOrderId?: number
+    purchaseOrderIds: number[] = []
 ) => {
     const contact = await prisma.contact.findUnique({
         where: {
@@ -155,9 +155,11 @@ export const createPurchaseInvoice = async (
                                 item.serviceAndNonStockItemId,
                         })),
                     },
-                    PurchaseOrder: purchaseOrderId
-                        ? { connect: { id: purchaseOrderId } }
-                        : {},
+                    PurchaseOrder: {
+                        connect: purchaseOrderIds.map((id) => ({
+                            documentId: id,
+                        })),
+                    },
                 },
             },
         },

@@ -25,6 +25,17 @@ import PaymentComponentReadonly from '@/components/payment-component-readonly'
 import { generalLedgerToPayments } from '@/types/payment/payment'
 import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
 import CustomerOrderStatusBadge from '../customer-order-status-badge'
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { customerOrderStatus } from '@/types/customer-order/customer-order-status'
+import { updateCustomerOrderStatus } from './update-customer-order-status'
+import { CustomerOrderStatus } from '@prisma/client'
 
 type Props = {
     params: {
@@ -72,6 +83,7 @@ export default async function CustomerOrderDetailPage({
                         <CustomerOrderStatusBadge
                             status={document?.CustomerOrder?.status}
                         />
+
                         {!!document.CustomerOrder.PurchasOrderLink.length && (
                             <div>ใบสั่งซื้อ</div>
                         )}
@@ -80,6 +92,48 @@ export default async function CustomerOrderDetailPage({
                         )}
                     </div>
                 )}
+                <form
+                    action={async (formData) => {
+                        'use server'
+                        if (!document.CustomerOrder) return
+
+                        const status = formData.get(
+                            'status'
+                        ) as CustomerOrderStatus
+                        await updateCustomerOrderStatus(
+                            document.CustomerOrder?.id,
+                            status
+                        )
+                    }}
+                >
+                    <div className="flex items-center gap-2">
+                        <Label>เปลี่ยนสถานะ</Label>
+
+                        <Select
+                            defaultValue={document?.CustomerOrder?.status}
+                            name="status"
+                        >
+                            <SelectTrigger className="w-[200px]">
+                                <SelectValue placeholder="เลือกสถานะ" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    {Object.entries(customerOrderStatus).map(
+                                        ([status, statusName]) => (
+                                            <SelectItem
+                                                key={status}
+                                                value={status}
+                                            >
+                                                {statusName}
+                                            </SelectItem>
+                                        )
+                                    )}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        <Button type="submit">บันทึก</Button>
+                    </div>
+                </form>
                 <Table className="mt-3">
                     <TableHeader>
                         <TableRow>

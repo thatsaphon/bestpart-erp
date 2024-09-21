@@ -18,6 +18,8 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
 import SelectSearchVendor from '../../../../components/select-search-vendor'
+import { getPurchaseOrderDefaultFunction } from '@/types/purchase-order/purchase-order'
+import PurchaseOrderHoverCard from '@/components/purchase-order-hover-card'
 
 type Props = {
     params: { documentNo: string }
@@ -28,6 +30,14 @@ export default async function PurchaseInvoiceDetailPage({
 }: Props) {
     const document = await getPurchaseInvoiceDetail(documentNo)
     const session = await getServerSession(authOptions)
+
+    const purchaseOrders = await getPurchaseOrderDefaultFunction({
+        id: {
+            in: document?.Purchase?.PurchaseOrder.map(
+                (purchaseOrder) => purchaseOrder.documentId
+            ),
+        },
+    })
 
     if (!document)
         return (
@@ -99,6 +109,15 @@ export default async function PurchaseInvoiceDetailPage({
                             disabled
                         />
                     </div>
+                </div>
+                <div>
+                    ใบสั่งซื้อ{' '}
+                    {purchaseOrders.map((purchaseOrder) => (
+                        <PurchaseOrderHoverCard
+                            key={purchaseOrder.id}
+                            purchaseOrder={purchaseOrder}
+                        />
+                    ))}
                 </div>
                 <Table className="mt-3">
                     <TableCaption>

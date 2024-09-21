@@ -37,17 +37,17 @@ import { GetPurchaseOrder } from '@/types/purchase-order/purchase-order'
 import { purchaseOrderItemsToDocumentItems } from '@/types/purchase-order/purchase-order-item'
 import { GetDocumentRemark } from '@/types/remark/document-remark'
 import ViewCustomerOrderDialog from '@/components/view-customer-order-dialog'
+import CustomerOrderHoverCard from '@/components/customer-order-hover-card'
+import { custom } from 'zod'
 
 type Props = {
     existingPurchaseOrder?: GetPurchaseOrder
-    existingCustomerOrders?: GetCustomerOrder[]
-    openCustomerOrders?: GetCustomerOrder[]
+    pendingOrExistingCustomerOrders?: GetCustomerOrder[]
 }
 
 export default function CreateOrUpdatePurchaseOrderComponent({
     existingPurchaseOrder,
-    existingCustomerOrders = [],
-    openCustomerOrders = [],
+    pendingOrExistingCustomerOrders = [],
 }: Props) {
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
         existingPurchaseOrder
@@ -68,9 +68,12 @@ export default function CreateOrUpdatePurchaseOrderComponent({
     const [documentRemarks, setDocumentRemarks] = React.useState<
         GetDocumentRemark[]
     >(existingPurchaseOrder?.DocumentRemark || [])
-    // const [linkCustomerOrders, setLinkCustomerOrders] = React.useState<
-    //     GetCustomerOrder[]
-    // >(existingCustomerOrders || [])
+    const [selectedCustomerOrderIds, setSelectedCustomerOrderIds] =
+        React.useState<number[]>(
+            existingPurchaseOrder?.PurchaseOrder?.CustomerOrderLink.map(
+                (customerOrder) => customerOrder.documentId
+            ) || []
+        )
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -114,7 +117,11 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                 action={async (formData) => {
                     try {
                         if (!existingPurchaseOrder) {
-                            await createPurchaseOrder(documentDetail, items)
+                            await createPurchaseOrder(
+                                documentDetail,
+                                items,
+                                selectedCustomerOrderIds
+                            )
                             // setKey(String(Date.now()))
                             // setItems([])
                         }
@@ -123,7 +130,8 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                             await updatePurchaseOrder(
                                 existingPurchaseOrder.id,
                                 documentDetail,
-                                items
+                                items,
+                                selectedCustomerOrderIds
                             )
                             toast.success('บันทึกสําเร็จ')
                         }
@@ -144,11 +152,34 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                 />
                 <div className="flex items-center gap-2">
                     <ViewCustomerOrderDialog
-                        customerOrders={[
-                            ...existingCustomerOrders,
-                            ...openCustomerOrders,
-                        ]}
+                        customerOrders={[...pendingOrExistingCustomerOrders]}
+                        selectedCustomerOrderIds={selectedCustomerOrderIds}
+                        onSelect={(customerOrder) => {
+                            console.log('onSelect')
+                            setSelectedCustomerOrderIds([
+                                ...selectedCustomerOrderIds,
+                                customerOrder.id,
+                            ])
+                        }}
+                        onRemove={(customerOrder) => {
+                            setSelectedCustomerOrderIds(
+                                selectedCustomerOrderIds.filter(
+                                    (id) => id !== customerOrder.id
+                                )
+                            )
+                        }}
                     />
+                    <div className="flex gap-2">
+                        {pendingOrExistingCustomerOrders
+                            .filter((pending) =>
+                                selectedCustomerOrderIds.includes(pending.id)
+                            )
+                            .map((customerOrder) => (
+                                <CustomerOrderHoverCard
+                                    customerOrder={customerOrder}
+                                />
+                            ))}
+                    </div>
                 </div>
 
                 <Table>

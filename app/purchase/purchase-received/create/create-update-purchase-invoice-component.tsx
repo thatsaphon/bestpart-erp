@@ -31,27 +31,43 @@ import {
     DocumentDetail,
     getDefaultDocumentDetail,
 } from '@/types/document-detail'
-import { GetPurchase } from '@/types/purchase/purchase'
+import { GetPurchase as GetPurchase } from '@/types/purchase/purchase'
 import { purchaseItemsToDocumentItems } from '@/types/purchase/purchase-item'
+import { GetPurchaseOrder } from '@/types/purchase-order/purchase-order'
+import ViewPurchaseOrderDialog from '@/components/view-purchase-order-dialog'
+import PurchaseOrderHoverCard from '@/components/purchase-order-hover-card'
 
 type Props = {
-    purchase?: GetPurchase
+    existingPurchaseReceived?: GetPurchase
+    pendingOrExistingPurchaseOrders?: GetPurchaseOrder[]
 }
 
 export default function CreateOrUpdatePurchaseInvoiceComponent({
-    purchase,
+    existingPurchaseReceived,
+    pendingOrExistingPurchaseOrders = [],
 }: Props) {
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
-        purchase
-            ? { ...purchase, contactId: purchase?.Purchase?.contactId }
+        existingPurchaseReceived
+            ? {
+                  ...existingPurchaseReceived,
+                  contactId: existingPurchaseReceived?.Purchase?.contactId,
+              }
             : getDefaultDocumentDetail()
     )
     const [open, setOpen] = React.useState(false)
     const [items, setItems] = React.useState<DocumentItem[]>(
-        purchaseItemsToDocumentItems(purchase?.Purchase?.PurchaseItem)
+        purchaseItemsToDocumentItems(
+            existingPurchaseReceived?.Purchase?.PurchaseItem
+        )
     )
     const [barcodeInput, setBarcodeInput] = React.useState<string>('')
     const [key, setKey] = React.useState('1')
+    const [selectedPurchaseOrderIds, setSelectedPurchaseOrderIds] =
+        React.useState<number[]>(
+            existingPurchaseReceived?.Purchase?.PurchaseOrder.map(
+                (purchaseReceived) => purchaseReceived.documentId
+            ) || []
+        )
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -94,17 +110,22 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
             <form
                 action={async (formData) => {
                     try {
-                        if (!purchase) {
-                            await createPurchaseInvoice(documentDetail, items)
+                        if (!existingPurchaseReceived) {
+                            await createPurchaseInvoice(
+                                documentDetail,
+                                items,
+                                selectedPurchaseOrderIds
+                            )
                             // setKey(String(Date.now()))
                             // setItems([])
                         }
 
-                        if (purchase) {
+                        if (existingPurchaseReceived) {
                             await updatePurchaseInvoice(
-                                purchase.id,
+                                existingPurchaseReceived.id,
                                 documentDetail,
-                                items
+                                items,
+                                selectedPurchaseOrderIds
                             )
                             toast.success('บันทึกสําเร็จ')
                         }
@@ -121,7 +142,31 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                     label="คู่ค้า"
                     placeholder="รหัสคู่ค้า"
                 />
-
+                <ViewPurchaseOrderDialog
+                    purchaseOrders={pendingOrExistingPurchaseOrders}
+                    selectedPurchaseOrderIds={selectedPurchaseOrderIds}
+                    onSelect={(data) => {
+                        setSelectedPurchaseOrderIds((prev) => [
+                            ...prev,
+                            data.id,
+                        ])
+                    }}
+                    onRemove={(data) => {
+                        setSelectedPurchaseOrderIds((prev) =>
+                            prev.filter((id) => id !== data.id)
+                        )
+                    }}
+                />
+                {pendingOrExistingPurchaseOrders
+                    .filter((purchaseOrder) =>
+                        selectedPurchaseOrderIds.includes(purchaseOrder.id)
+                    )
+                    .map((purchaseOrder) => (
+                        <PurchaseOrderHoverCard
+                            key={purchaseOrder.id}
+                            purchaseOrder={purchaseOrder}
+                        />
+                    ))}
                 <Table>
                     <TableCaption className="space-x-1 text-right"></TableCaption>
                     <TableHeader>

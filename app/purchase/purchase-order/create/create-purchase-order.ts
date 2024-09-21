@@ -110,7 +110,10 @@ export const createPurchaseOrder = async (
                         })),
                     },
                     CustomerOrderLink: {
-                        connect: customerOrderIds?.map((id) => ({ id })) || [],
+                        connect:
+                            customerOrderIds?.map((id) => ({
+                                documentId: id,
+                            })) || [],
                     },
                 },
             },

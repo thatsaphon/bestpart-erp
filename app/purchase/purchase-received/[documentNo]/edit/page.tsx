@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { salesItemsToDocumentItems } from '@/types/sales/sales-item'
 import { purchaseItemsToDocumentItems } from '@/types/purchase/purchase-item'
 import { getPurchaseDefaultFunction } from '@/types/purchase/purchase'
+import { getPurchaseOrderDefaultFunction } from '@/types/purchase-order/purchase-order'
 
 type Props = { params: { documentNo: string } }
 
@@ -23,6 +24,25 @@ export default async function EditPurchaseInvoicePage({
     })
     if (!purchaseInvoice) return null
 
+    const pendingOrExistingPurchaseOrders =
+        await getPurchaseOrderDefaultFunction({
+            OR: [
+                {
+                    PurchaseOrder: {
+                        status: {
+                            in: ['Draft', 'PartiallyReceived', 'Submitted'],
+                        },
+                    },
+                },
+                {
+                    id: {
+                        in: purchaseInvoice?.Purchase?.PurchaseOrder.map(
+                            (purchaseOrder) => purchaseOrder.documentId
+                        ),
+                    },
+                },
+            ],
+        })
     return (
         <>
             {' '}
@@ -34,7 +54,10 @@ export default async function EditPurchaseInvoicePage({
             </div>
             <h1 className="my-2 text-3xl transition-colors">สร้างบิลซื้อ</h1>
             <CreateOrUpdatePurchaseInvoiceComponent
-                purchase={purchaseInvoice}
+                existingPurchaseReceived={purchaseInvoice}
+                pendingOrExistingPurchaseOrders={
+                    pendingOrExistingPurchaseOrders
+                }
             />
         </>
     )

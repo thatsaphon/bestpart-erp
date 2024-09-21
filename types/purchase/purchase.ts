@@ -32,6 +32,7 @@ export const getPurchaseDefaultFunction = async (
                             },
                         },
                     },
+                    PurchaseOrder: true,
                 },
             },
             DocumentRemark: {

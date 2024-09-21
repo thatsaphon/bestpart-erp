@@ -1,18 +1,11 @@
 import { Badge, BadgeProps } from '@/components/ui/badge'
+import { customerOrderStatus } from '@/types/customer-order/customer-order-status'
 import { CustomerOrderStatus } from '@prisma/client'
 import React from 'react'
 
 type Props = BadgeProps & { status: CustomerOrderStatus }
 
-const customerOrderStatus = {
-    Pending: 'ยังไม่สั่งของ',
-    POCreated: 'ออก PO แล้ว',
-    Ordered: 'สั่งของแล้ว',
-    Received: 'ร้านได้รับสินค้าแล้ว',
-    SOCreated: 'ขายแล้ว',
-    Closed: 'Closed',
-    Cancelled: 'ยกเลิก',
-}
+
 const variant = {
     Pending: 'destructive' as const,
     POCreated: 'destructive' as const,

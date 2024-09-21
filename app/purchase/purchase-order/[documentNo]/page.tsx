@@ -21,6 +21,10 @@ import SelectSearchVendor from '../../../../components/select-search-vendor'
 import { getPurchaseOrderDefaultFunction } from '@/types/purchase-order/purchase-order'
 import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
 import UpdateDocumentRemark from '@/components/update-document-remark'
+import PurchaseOrderStatusBadge from '../purchase-order-status-badge'
+import PurchaseOrderUpdateStatusComponent from './purchase-order-update-status-component'
+import CustomerOrderHoverCard from '@/components/customer-order-hover-card'
+import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
 
 type Props = {
     params: { documentNo: string }
@@ -32,7 +36,15 @@ export default async function PurchaseOrderDetailPage({
     const [document] = await getPurchaseOrderDefaultFunction({ documentNo })
     const session = await getServerSession(authOptions)
 
-    if (!document)
+    const customerOrders = await getCustomerOrderDefaultFunction({
+        id: {
+            in: document?.PurchaseOrder?.CustomerOrderLink.map(
+                (customerOrder) => customerOrder.documentId
+            ),
+        },
+    })
+
+    if (!document || !document.PurchaseOrder)
         return (
             <>
                 <Table>
@@ -50,9 +62,14 @@ export default async function PurchaseOrderDetailPage({
                         className="text-primary/50 underline hover:text-primary"
                     >{`< ย้อนกลับ`}</Link>
                 </div>
-                <h1 className="my-2 text-3xl transition-colors">
-                    รายละเอียดใบสั่งซื้อ
-                </h1>
+                <div className="flex items-baseline gap-2">
+                    <h1 className="my-2 text-3xl transition-colors">
+                        รายละเอียดใบสั่งซื้อ
+                    </h1>
+                    <PurchaseOrderStatusBadge
+                        status={document.PurchaseOrder.status}
+                    />
+                </div>
                 <div className="flex gap-3">
                     <DocumentDetailReadonly
                         documentDetail={{
@@ -72,7 +89,19 @@ export default async function PurchaseOrderDetailPage({
                         </div>
                     )}
                 </div>
-
+                <div>
+                    ใบจองสินค้า{' '}
+                    {customerOrders.map((customerOrder) => (
+                        <CustomerOrderHoverCard
+                            key={customerOrder.id}
+                            customerOrder={customerOrder}
+                        />
+                    ))}
+                </div>
+                <PurchaseOrderUpdateStatusComponent
+                    existingStatus={document?.PurchaseOrder?.status}
+                    purchaseOrderId={document.PurchaseOrder.id}
+                />
                 <Table className="mt-3">
                     <TableHeader>
                         <TableRow>

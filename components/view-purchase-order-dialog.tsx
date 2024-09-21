@@ -22,31 +22,31 @@ import {
 import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
-import { GetCustomerOrder } from '@/types/customer-order/customer-order'
+import { GetPurchaseOrder } from '@/types/purchase-order/purchase-order'
 
 type Props = {
-    customerOrders: GetCustomerOrder[]
+    purchaseOrders: GetPurchaseOrder[]
     children?: React.ReactNode
-    selectedCustomerOrderIds?: number[]
-    onSelect?: (data: GetCustomerOrder) => void
-    onRemove?: (data: GetCustomerOrder) => void
+    selectedPurchaseOrderIds?: number[]
+    onSelect?: (data: GetPurchaseOrder) => void
+    onRemove?: (data: GetPurchaseOrder) => void
 }
 
-export default function ViewCustomerOrderDialog({
-    customerOrders,
+export default function ViewPurchaseOrderDialog({
+    purchaseOrders,
     children,
-    selectedCustomerOrderIds = [],
+    selectedPurchaseOrderIds = [],
     onSelect,
     onRemove,
 }: Props) {
     const [expandList, setExpandList] = React.useState<boolean[]>(
-        customerOrders.map(() => false)
+        purchaseOrders.map(() => false)
     )
     const [open, setOpen] = React.useState(false)
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                {children || <Button variant="outline">ใบจองสินค้า</Button>}
+                {children || <Button variant="outline">ใบสั่งซื้อ</Button>}
             </DialogTrigger>
             <DialogContent className="flex h-[500px] min-w-[900px] flex-col">
                 <DialogHeader>
@@ -63,16 +63,13 @@ export default function ViewCustomerOrderDialog({
                                 <TableHead className="text-right">
                                     Amount
                                 </TableHead>
-                                <TableHead className="text-right">
-                                    มัดจำ
-                                </TableHead>
                                 {onSelect && onRemove && (
                                     <TableHead className="w-[100px]"></TableHead>
                                 )}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {customerOrders.length === 0 && (
+                            {purchaseOrders.length === 0 && (
                                 <TableRow>
                                     <TableCell
                                         colSpan={5}
@@ -82,8 +79,8 @@ export default function ViewCustomerOrderDialog({
                                     </TableCell>
                                 </TableRow>
                             )}
-                            {customerOrders.map((customerOrder, index) => (
-                                <React.Fragment key={customerOrder.id}>
+                            {purchaseOrders.map((purchaseOrder, index) => (
+                                <React.Fragment key={purchaseOrder.id}>
                                     <TableRow
                                         onClick={() =>
                                             setExpandList((prev) => [
@@ -92,7 +89,7 @@ export default function ViewCustomerOrderDialog({
                                                 ...prev.slice(index + 1),
                                             ])
                                         }
-                                        key={customerOrder.id}
+                                        key={purchaseOrder.id}
                                         className={cn(
                                             'hover:cursor-pointer',
                                             expandList[index]
@@ -101,75 +98,60 @@ export default function ViewCustomerOrderDialog({
                                         )}
                                     >
                                         <TableCell>
-                                            {customerOrder.documentNo}
+                                            {purchaseOrder.documentNo}
                                         </TableCell>
                                         <TableCell>
                                             {format(
-                                                customerOrder.date,
+                                                purchaseOrder.date,
                                                 'dd/MM/yyyy'
                                             )}
                                         </TableCell>
                                         <TableCell>
                                             {
-                                                customerOrder.CustomerOrder
+                                                purchaseOrder.PurchaseOrder
                                                     ?.Contact?.name
                                             }
                                         </TableCell>
                                         <TableCell className="text-center">
                                             {
-                                                customerOrder.CustomerOrder
+                                                purchaseOrder.PurchaseOrder
                                                     ?.status
                                             }
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {customerOrder.CustomerOrder?.CustomerOrderItem.reduce(
+                                            {purchaseOrder.PurchaseOrder?.PurchaseOrderItem.reduce(
                                                 (total, item) =>
                                                     total +
-                                                    item.pricePerUnit *
+                                                    item.costPerUnit *
                                                         item.quantity,
                                                 0
                                             )}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {
-                                                -(
-                                                    customerOrder.CustomerOrder?.GeneralLedger.reduce(
-                                                        (total, item) =>
-                                                            item.ChartOfAccount
-                                                                .isDeposit
-                                                                ? total +
-                                                                  item.amount
-                                                                : total,
-                                                        0
-                                                    )?.toFixed(2) || 0
-                                                )
-                                            }
                                         </TableCell>
                                         {onSelect && onRemove && (
                                             <TableCell>
                                                 <Button
                                                     type="button"
                                                     onClick={() => {
-                                                        !selectedCustomerOrderIds.includes(
-                                                            customerOrder.id
+                                                        !selectedPurchaseOrderIds.includes(
+                                                            purchaseOrder.id
                                                         )
                                                             ? onSelect(
-                                                                  customerOrder
+                                                                  purchaseOrder
                                                               )
                                                             : onRemove(
-                                                                  customerOrder
+                                                                  purchaseOrder
                                                               )
                                                     }}
                                                     variant={
-                                                        selectedCustomerOrderIds.includes(
-                                                            customerOrder.id
+                                                        selectedPurchaseOrderIds.includes(
+                                                            purchaseOrder.id
                                                         )
                                                             ? 'outline'
                                                             : 'default'
                                                     }
                                                 >
-                                                    {selectedCustomerOrderIds.includes(
-                                                        customerOrder.id
+                                                    {selectedPurchaseOrderIds.includes(
+                                                        purchaseOrder.id
                                                     )
                                                         ? 'ยกเลิก'
                                                         : 'เลือก'}
@@ -211,7 +193,7 @@ export default function ViewCustomerOrderDialog({
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
-                                                        {customerOrder.CustomerOrder?.CustomerOrderItem.map(
+                                                        {purchaseOrder.PurchaseOrder?.PurchaseOrderItem.map(
                                                             (item) => (
                                                                 <TableRow
                                                                     key={
@@ -238,11 +220,11 @@ export default function ViewCustomerOrderDialog({
                                                                     </TableCell>
                                                                     <TableCell className="text-right">
                                                                         {
-                                                                            item.pricePerUnit
+                                                                            item.costPerUnit
                                                                         }
                                                                     </TableCell>
                                                                     <TableCell className="pr-0 text-right">
-                                                                        {item.pricePerUnit *
+                                                                        {item.costPerUnit *
                                                                             item.quantity}
                                                                     </TableCell>
                                                                 </TableRow>
@@ -258,13 +240,13 @@ export default function ViewCustomerOrderDialog({
                                                                 Total
                                                             </TableCell>
                                                             <TableCell className="text-right">
-                                                                {customerOrder.CustomerOrder?.CustomerOrderItem.reduce(
+                                                                {purchaseOrder.PurchaseOrder?.PurchaseOrderItem.reduce(
                                                                     (
                                                                         total,
                                                                         item
                                                                     ) =>
                                                                         total +
-                                                                        item.pricePerUnit *
+                                                                        item.costPerUnit *
                                                                             item.quantity,
                                                                     0
                                                                 ).toLocaleString()}
