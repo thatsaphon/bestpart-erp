@@ -5,9 +5,9 @@ import prisma from '@/app/db/db'
 import { getUnpaidInvoices } from '@/types/sales-bill/unpaid-invoice'
 import { unpaidInvoiceToSalesBillItems } from '@/types/sales-bill/unpaid-invoice-to-sales-bill-item'
 import { getUnpaidBills } from '@/types/sales-received/unpaid-bill'
-import { unpaidBillsToSalesReceivedItems } from '@/types/sales-received/unpaid-bills-to-sales-Received-item copy'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { getDepositAmount } from '@/actions/get-deposit-amount'
+import { unpaidBillsToSalesReceivedItems } from '@/types/sales-received/unpaid-bills-to-sales-Received-item'
 
 type Props = {
     searchParams: {
@@ -35,12 +35,6 @@ export default async function CreateBillPage({
 
     return (
         <>
-            <div className="flex justify-between">
-                <Link
-                    href={`/sales/sales-bill`}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
-            </div>
             <h1 className="my-2 text-3xl transition-colors">
                 สร้างใบเสร็จรับเงิน
             </h1>

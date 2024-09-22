@@ -534,8 +534,6 @@ model PurchasePayment {
   Purchase       Purchase[]
   PurchaseReturn PurchaseReturn[]
   GeneralLedger  GeneralLedger[]
-
-  amount Float
 }
 
 model StockAdjustment {

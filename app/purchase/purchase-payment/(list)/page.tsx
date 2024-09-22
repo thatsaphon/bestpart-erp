@@ -141,13 +141,13 @@ export default async function PaymentPage({
                                                 isDeposit,
                                             },
                                         }
-                                    ) => (isCash ? a + amount : a),
+                                    ) => (isCash ? a + -amount : a),
                                     0
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
                                 <Link
-                                    href={`/purchase/purchase-received/${payment.documentNo}`}
+                                    href={`/purchase/purchase-payment/${payment.documentNo}`}
                                 >
                                     <EyeOpenIcon />
                                 </Link>

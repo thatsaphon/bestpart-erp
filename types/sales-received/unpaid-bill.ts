@@ -91,4 +91,4 @@ export const getUnpaidBills = async (contactId: number) => {
     })
 }
 
-export type getUnpaidBills = Awaited<ReturnType<typeof getUnpaidBills>>[number]
+export type GetUnpaidBills = Awaited<ReturnType<typeof getUnpaidBills>>[number]

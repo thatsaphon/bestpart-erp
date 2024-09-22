@@ -1,8 +1,8 @@
 import { SalesReceivedItem } from './sales-receive-item'
-import { getUnpaidBills } from './unpaid-bill'
+import { GetUnpaidBills } from './unpaid-bill'
 
 export const unpaidBillsToSalesReceivedItems = (
-    unpaidBills: getUnpaidBills[]
+    unpaidBills: GetUnpaidBills[]
 ): SalesReceivedItem[] => {
     return unpaidBills
         .map((x) => {

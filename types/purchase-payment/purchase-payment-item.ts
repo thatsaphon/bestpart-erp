@@ -10,32 +10,31 @@ export type PurchasePaymentItem = {
 }
 
 export const purchasePaymentToPurchasePaymentItems = (
-    salesReceive: GetPurchasePayment
+    purchasePayment: GetPurchasePayment
 ): PurchasePaymentItem[] => {
     const purchasePaymentItems: PurchasePaymentItem[] = []
-
     const purchase =
-        salesReceive.PurchasePayment?.Purchase.map((x) => ({
+        purchasePayment.PurchasePayment?.Purchase.map((x) => ({
             id: x.id,
             type: 'Purchase' as const,
             date: x.Document.date,
             documentId: x.Document.id,
             documentNo: x.Document.documentNo,
             amount: x.GeneralLedger.reduce(
-                (a, b) => (b.ChartOfAccount.isAr ? a + b.amount : a),
+                (a, b) => (b.ChartOfAccount.isAp ? a + -b.amount : a),
                 0
             ),
         })) || []
 
     const purchaseReturn =
-        salesReceive.PurchasePayment?.PurchaseReturn.map((x) => ({
+        purchasePayment.PurchasePayment?.PurchaseReturn.map((x) => ({
             id: x.id,
             type: 'PurchaseReturn' as const,
             date: x.Document.date,
             documentId: x.Document.id,
             documentNo: x.Document.documentNo,
             amount: x.GeneralLedger.reduce(
-                (a, b) => (b.ChartOfAccount.isAr ? a + b.amount : a),
+                (a, b) => (b.ChartOfAccount.isAp ? a + -b.amount : a),
                 0
             ),
         })) || []

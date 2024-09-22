@@ -8,7 +8,7 @@ import { salesBillToSalesBillItems } from '@/types/sales-bill/sales-bill-item'
 import { getSalesReceivedDefaultFunction } from '@/types/sales-received/sales-receive'
 import { salesReceiveToSalesReceiveItems } from '@/types/sales-received/sales-receive-item'
 import { unpaidBillsToSalesReceivedItems } from '@/types/sales-received/unpaid-bills-to-sales-Received-item copy'
-import { getUnpaidBills } from '@/types/sales-received/unpaid-bill'
+import { GetUnpaidBills } from '@/types/sales-received/unpaid-bill'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { getDepositAmount } from '@/actions/get-deposit-amount'
 
