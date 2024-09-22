@@ -37,7 +37,7 @@ export async function updateCustomerOrder(
                 include: {
                     GeneralLedger: true,
                     Contact: true,
-                    PurchasOrderLink: true,
+                    PurchaseOrder: true,
                     CustomerOrderItem: true,
                 },
             },

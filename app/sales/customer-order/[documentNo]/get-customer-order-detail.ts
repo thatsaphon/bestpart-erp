@@ -10,7 +10,7 @@ export default async function getCustomerOrderDetail(documentNo: string) {
                 include: {
                     Contact: true,
                     CustomerOrderItem: true,
-                    PurchasOrderLink: true,
+                    PurchaseOrder: true,
                     GeneralLedger: {
                         where: {
                             chartOfAccountId: {

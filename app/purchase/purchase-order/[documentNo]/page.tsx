@@ -38,7 +38,7 @@ export default async function PurchaseOrderDetailPage({
 
     const customerOrders = await getCustomerOrderDefaultFunction({
         id: {
-            in: document?.PurchaseOrder?.CustomerOrderLink.map(
+            in: document?.PurchaseOrder?.CustomerOrder.map(
                 (customerOrder) => customerOrder.documentId
             ),
         },

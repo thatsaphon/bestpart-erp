@@ -18,7 +18,7 @@ import { getServerSession } from 'next-auth'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import getCustomerOrderDetail from './get-customer-order-detail'
-import CustomerOrderLinkComponent from './customer-order-link-component'
+import CustomerOrderComponent from './customer-order-link-component'
 import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
 import UpdateDocumentRemark from '@/components/update-document-remark'
 import PaymentComponentReadonly from '@/components/payment-component-readonly'
@@ -84,7 +84,7 @@ export default async function CustomerOrderDetailPage({
                             status={document?.CustomerOrder?.status}
                         />
 
-                        {!!document.CustomerOrder.PurchasOrderLink.length && (
+                        {!!document.CustomerOrder.PurchaseOrder.length && (
                             <div>ใบสั่งซื้อ</div>
                         )}
                         {!!document.CustomerOrder.SalesLink.length && (

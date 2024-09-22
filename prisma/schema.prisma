@@ -313,11 +313,11 @@ model Sales {
   contactId     Int?
   GeneralLedger GeneralLedger[]
 
-  SalesBill         SalesBill?      @relation(fields: [salesBillId], references: [id])
-  salesBillId       Int?
-  SalesReceived     SalesReceived?  @relation(fields: [salesReceivedId], references: [id])
-  salesReceivedId   Int?
-  CustomerOrderLink CustomerOrder[]
+  SalesBill       SalesBill?      @relation(fields: [salesBillId], references: [id])
+  salesBillId     Int?
+  SalesReceived   SalesReceived?  @relation(fields: [salesReceivedId], references: [id])
+  salesReceivedId Int?
+  CustomerOrder   CustomerOrder[]
 }
 
 enum SalesStatus {
@@ -716,10 +716,10 @@ model KnowledgeImage {
 model PurchaseOrder {
   id Int @id @default(autoincrement())
 
-  Document          Document            @relation(fields: [documentId], references: [id])
-  documentId        Int                 @unique
-  CustomerOrderLink CustomerOrder[]
-  status            PurchaseOrderStatus
+  Document      Document            @relation(fields: [documentId], references: [id])
+  documentId    Int                 @unique
+  CustomerOrder CustomerOrder[]
+  status        PurchaseOrderStatus
 
   Contact   Contact @relation(fields: [contactId], references: [id])
   contactId Int
@@ -776,8 +776,8 @@ model CustomerOrder {
 
   status CustomerOrderStatus
 
-  PurchasOrderLink PurchaseOrder[]
-  SalesLink        Sales[]
+  PurchaseOrder PurchaseOrder[]
+  SalesLink     Sales[]
 
   GeneralLedger GeneralLedger[]
 

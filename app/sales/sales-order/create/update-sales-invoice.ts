@@ -30,7 +30,8 @@ export const updateSalesInvoice = async (
     }: DocumentDetail,
     items: DocumentItem[],
     payments: Payment[],
-    remarks: GetDocumentRemark[]
+    remarks: GetDocumentRemark[],
+    customerOrderIds: number[] = []
 ) => {
     const getContact = async () => {
         if (contactId) {
@@ -247,6 +248,9 @@ export const updateSalesInvoice = async (
                                 item.serviceAndNonStockItemId,
                             skuMasterId: item.skuMasterId,
                         })),
+                    },
+                    CustomerOrder: {
+                        set: customerOrderIds.map((id) => ({ documentId: id })),
                     },
                 },
             },

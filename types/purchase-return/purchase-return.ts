@@ -3,16 +3,15 @@
 import prisma from '@/app/db/db'
 import { Prisma } from '@prisma/client'
 
-export const getPurchaseOrderDefaultFunction = async (
+export const getPurchaseReturnDefaultFunction = async (
     where: Prisma.DocumentWhereInput
 ) => {
     return await prisma.document.findMany({
         where: where,
         include: {
-            PurchaseOrder: {
+            PurchaseReturn: {
                 include: {
-                    Contact: true,
-                    PurchaseOrderItem: {
+                    PurchaseReturnItem: {
                         include: {
                             SkuMaster: {
                                 include: {
@@ -33,7 +32,7 @@ export const getPurchaseOrderDefaultFunction = async (
                             },
                         },
                     },
-                    CustomerOrder: true,
+                    GeneralLedger: { include: { ChartOfAccount: true } },
                 },
             },
             DocumentRemark: {
@@ -45,6 +44,6 @@ export const getPurchaseOrderDefaultFunction = async (
     })
 }
 
-export type GetPurchaseOrder = Awaited<
-    ReturnType<typeof getPurchaseOrderDefaultFunction>
+export type GetPurchaseReturn = Awaited<
+    ReturnType<typeof getPurchaseReturnDefaultFunction>
 >[number]

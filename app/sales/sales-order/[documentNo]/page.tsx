@@ -29,6 +29,8 @@ import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
 import PaymentComponentReadonly from '@/components/payment-component-readonly'
 import { generalLedgerToPayments } from '@/types/payment/payment'
 import UpdateDocumentRemark from '@/components/update-document-remark'
+import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
+import CustomerOrderHoverCard from '@/components/customer-order-hover-card'
 
 type Props = {
     params: { documentNo: string }
@@ -59,6 +61,16 @@ export default async function SalesInvoiceDetailPage({
                 </Table>
             </>
         )
+
+    const customerOrders = document.Sales?.CustomerOrder?.length
+        ? await getCustomerOrderDefaultFunction({
+              id: {
+                  in: document?.Sales?.CustomerOrder.map(
+                      (customerOrder) => customerOrder.documentId
+                  ),
+              },
+          })
+        : []
 
     return (
         <>
@@ -113,6 +125,17 @@ export default async function SalesInvoiceDetailPage({
                     </div>
                     <SalesInvoiceLinkComponent document={document} />
                 </div>
+                {!!customerOrders.length && (
+                    <div className="flex items-baseline gap-2">
+                        <span>ใบจองสินค้า:</span>
+                        {customerOrders.map((customerOrder) => (
+                            <CustomerOrderHoverCard
+                                customerOrder={customerOrder}
+                                key={customerOrder.id}
+                            />
+                        ))}
+                    </div>
+                )}
                 <Table className="mt-3">
                     <TableHeader>
                         <TableRow>

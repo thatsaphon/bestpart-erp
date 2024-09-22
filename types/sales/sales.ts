@@ -33,6 +33,7 @@ export const getSalesDefaultFunction = async (
                         },
                     },
                     GeneralLedger: { include: { ChartOfAccount: true } },
+                    CustomerOrder: true,
                 },
             },
             DocumentRemark: {

@@ -29,7 +29,8 @@ export const createSalesInvoice = async (
     }: DocumentDetail,
     items: DocumentItem[],
     payments: Payment[],
-    remarks: { id?: number; remark: string }[]
+    remarks: { id?: number; remark: string }[],
+    customerOrderIds: number[] = []
 ) => {
     const getContact = async () => {
         if (contactId) {
@@ -221,6 +222,11 @@ export const createSalesInvoice = async (
                             serviceAndNonStockItemId:
                                 item.serviceAndNonStockItemId,
                             skuMasterId: item.skuMasterId,
+                        })),
+                    },
+                    CustomerOrder: {
+                        connect: customerOrderIds.map((id) => ({
+                            documentId: id,
                         })),
                     },
                 },

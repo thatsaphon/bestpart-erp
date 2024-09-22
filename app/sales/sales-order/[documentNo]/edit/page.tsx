@@ -35,14 +35,25 @@ export default async function EditSalesInvoicePage({
         type: 'Sales',
     })
     const paymentMethods = await getPaymentMethods()
-    const customerOrders = document.Sales?.contactId
+    const pendingOrExistingCustomerOrders = document.Sales?.contactId
         ? await getCustomerOrderDefaultFunction({
-              CustomerOrder: {
-                  contactId: document.Sales.contactId,
-                  status: {
-                      notIn: ['Cancelled', 'Closed'],
+              OR: [
+                  {
+                      CustomerOrder: {
+                          contactId: document.Sales.contactId,
+                          status: {
+                              notIn: ['Cancelled', 'Closed'],
+                          },
+                      },
                   },
-              },
+                  {
+                      id: {
+                          in: document.Sales.CustomerOrder.map(
+                              (x) => x.documentId
+                          ),
+                      },
+                  },
+              ],
           })
         : []
     const quotations = document.Sales?.contactId
@@ -79,7 +90,9 @@ export default async function EditSalesInvoicePage({
                 existingSales={document}
                 paymentMethods={paymentMethods}
                 quotations={quotations}
-                customerOrders={customerOrders}
+                pendingOrExistingCustomerOrders={
+                    pendingOrExistingCustomerOrders
+                }
                 depositAmount={depositAmount}
             />
         </>

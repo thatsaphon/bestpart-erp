@@ -37,11 +37,9 @@ export default async function PaymentPage({
         to = format(new Date(), 'yyyy-MM-dd'),
     },
 }: Props) {
-    const purchaseInvoices = await prisma.document.findMany({
+    const purchasePayments = await prisma.document.findMany({
         where: {
-            documentNo: {
-                startsWith: 'PINV',
-            },
+            type: 'PurchasePayment',
             AND: [
                 {
                     date: {
@@ -58,17 +56,37 @@ export default async function PaymentPage({
             ],
         },
         include: {
-            ApSubledger: {
-                select: {
+            PurchasePayment: {
+                include: {
                     Contact: true,
-                    paymentStatus: true,
+                    Purchase: {
+                        include: {
+                            PurchaseItem: true,
+                            Document: true,
+                            GeneralLedger: {
+                                include: { ChartOfAccount: true },
+                            },
+                        },
+                    },
+                    PurchaseReturn: {
+                        include: {
+                            PurchaseReturnItem: true,
+                            Document: true,
+                            GeneralLedger: {
+                                include: { ChartOfAccount: true },
+                            },
+                        },
+                    },
+                    GeneralLedger: {
+                        include: {
+                            ChartOfAccount: true,
+                        },
+                    },
                 },
             },
-            GeneralLedger: {
-                where: {
-                    chartOfAccountId: {
-                        in: [21000, 11000],
-                    },
+            DocumentRemark: {
+                include: {
+                    User: true,
                 },
             },
         },
@@ -79,9 +97,7 @@ export default async function PaymentPage({
 
     const documentCount = await prisma.document.count({
         where: {
-            documentNo: {
-                startsWith: 'PINV',
-            },
+            type: 'PurchasePayment',
         },
     })
     const numberOfPage = Math.ceil(documentCount / Number(limit))
@@ -98,47 +114,40 @@ export default async function PaymentPage({
                         </TableHead>
                         <TableHead className="w-[100px]">Ref</TableHead>
                         <TableHead>คู่ค้า</TableHead>
-                        <TableHead className="text-center">Status</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {purchaseInvoices.map((invoice) => (
-                        <TableRow key={invoice.documentNo}>
+                    {purchasePayments.map((payment) => (
+                        <TableRow key={payment.documentNo}>
                             <TableCell>
-                                {fullDateFormat(invoice.date)}
+                                {fullDateFormat(payment.date)}
                             </TableCell>
-                            <TableCell>{invoice.documentNo}</TableCell>
-                            <TableCell>{invoice.referenceNo}</TableCell>
+                            <TableCell>{payment.documentNo}</TableCell>
+                            <TableCell>{payment.referenceNo}</TableCell>
                             <TableCell>
-                                {invoice.ApSubledger?.Contact.name || 'เงินสด'}
-                            </TableCell>
-                            <TableCell className="text-center">
-                                {invoice.ApSubledger?.paymentStatus ===
-                                'NotPaid' ? (
-                                    <Badge variant={'destructive'}>
-                                        ยังไม่จ่าย
-                                    </Badge>
-                                ) : invoice.ApSubledger?.paymentStatus ===
-                                  'Billed' ? (
-                                    <Badge variant={'outline'}>
-                                        วางบิลแล้ว
-                                    </Badge>
-                                ) : (
-                                    <Badge className="bg-green-400">
-                                        จ่ายแล้ว
-                                    </Badge>
-                                )}
+                                {payment.PurchasePayment?.Contact.name ||
+                                    'เงินสด'}
                             </TableCell>
                             <TableCell className="text-right">
-                                {Math.abs(
-                                    invoice.GeneralLedger[0]?.amount
+                                {payment.PurchasePayment?.GeneralLedger.reduce(
+                                    (
+                                        a,
+                                        {
+                                            amount,
+                                            ChartOfAccount: {
+                                                isCash,
+                                                isDeposit,
+                                            },
+                                        }
+                                    ) => (isCash ? a + amount : a),
+                                    0
                                 ).toLocaleString()}
                             </TableCell>
                             <TableCell className="text-right">
                                 <Link
-                                    href={`/purchase/purchase-received/${invoice.documentNo}`}
+                                    href={`/purchase/purchase-received/${payment.documentNo}`}
                                 >
                                     <EyeOpenIcon />
                                 </Link>

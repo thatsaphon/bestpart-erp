@@ -29,7 +29,7 @@ export default async function EditPurchaseOrderPage({
             { CustomerOrder: { status: { in: ['Pending'] } } },
             {
                 id: {
-                    in: purchaseOrder?.PurchaseOrder?.CustomerOrderLink.map(
+                    in: purchaseOrder?.PurchaseOrder?.CustomerOrder.map(
                         (customerOrder) => customerOrder.documentId
                     ),
                 },

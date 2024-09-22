@@ -20,7 +20,7 @@ export default async function CreateSalesInvoicePage({
 }: Props) {
     const paymentMethods = await getPaymentMethods()
 
-    const customerOrders = contactId
+    const pendingCustomerOrders = contactId
         ? await getCustomerOrderDefaultFunction({
               CustomerOrder: {
                   contactId: Number(contactId),
@@ -41,17 +41,11 @@ export default async function CreateSalesInvoicePage({
     const depositAmount = await getDepositAmount(Number(contactId))
     return (
         <>
-            <div className="flex justify-between">
-                <Link
-                    href={`/sales/sales-order`}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
-            </div>
             <h1 className="my-2 text-3xl transition-colors">สร้างบิลขาย</h1>
             <CreateOrUpdateSalesInvoiceComponent
                 paymentMethods={paymentMethods}
                 quotations={quotations}
-                customerOrders={customerOrders}
+                pendingOrExistingCustomerOrders={pendingCustomerOrders}
                 depositAmount={depositAmount}
             />
         </>

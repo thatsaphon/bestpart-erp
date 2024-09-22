@@ -168,8 +168,7 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                         <Text style={styles.col5}>{`${item.unit}`}</Text>
                         <Text style={styles.col6}>
                             {(
-                                (item.pricePerUnit + item.vat) *
-                                item.quantity
+                                item.pricePerUnit * item.quantity
                             ).toLocaleString()}
                         </Text>
                     </View>
@@ -201,9 +200,7 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                                 Number(
                                     document?.Sales?.SalesItem.reduce(
                                         (a, b) =>
-                                            a +
-                                            (b.pricePerUnit + b.vat) *
-                                                b.quantity,
+                                            a + b.pricePerUnit * b.quantity,
                                         0
                                     )
                                 )
@@ -218,9 +215,7 @@ export default function SalesInvoicePdf_5x9({ document }: Props) {
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
                                 document?.Sales?.SalesItem.reduce(
-                                    (a, b) =>
-                                        a +
-                                        (b.pricePerUnit + b.vat) * b.quantity,
+                                    (a, b) => a + b.pricePerUnit * b.quantity,
                                     0
                                 ).toLocaleString()
                             }

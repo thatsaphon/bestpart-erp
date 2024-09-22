@@ -109,7 +109,7 @@ export const createPurchaseOrder = async (
                             estimatedDeliveryDate: addDays(new Date(), 7),
                         })),
                     },
-                    CustomerOrderLink: {
+                    CustomerOrder: {
                         connect:
                             customerOrderIds?.map((id) => ({
                                 documentId: id,

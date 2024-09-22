@@ -61,7 +61,7 @@ export default async function PurchaseOrderPage({
                 include: {
                     Contact: true,
                     PurchaseOrderItem: true,
-                    CustomerOrderLink: true,
+                    CustomerOrder: true,
                     Purchase: true,
                 },
             },

@@ -16,7 +16,7 @@ export const getCustomerOrderDefaultFunction = async (
                     GeneralLedger: {
                         include: { ChartOfAccount: true },
                     },
-                    PurchasOrderLink: true,
+                    PurchaseOrder: true,
                     SalesLink: true,
                 },
             },

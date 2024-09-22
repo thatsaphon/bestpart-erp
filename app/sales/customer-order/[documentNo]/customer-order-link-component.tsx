@@ -8,7 +8,7 @@ import { GetCustomerOrder } from '@/types/customer-order/customer-order'
 
 type Props = { document: GetCustomerOrder }
 
-export default function CustomerOrderLinkComponent({ document }: Props) {
+export default function CustomerOrderComponent({ document }: Props) {
     return (
         <BlobProviderClient>
             <CustomerOrderPdf_5x9 document={document} />

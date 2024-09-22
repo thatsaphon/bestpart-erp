@@ -70,7 +70,7 @@ export default function CreateOrUpdatePurchaseOrderComponent({
     >(existingPurchaseOrder?.DocumentRemark || [])
     const [selectedCustomerOrderIds, setSelectedCustomerOrderIds] =
         React.useState<number[]>(
-            existingPurchaseOrder?.PurchaseOrder?.CustomerOrderLink.map(
+            existingPurchaseOrder?.PurchaseOrder?.CustomerOrder.map(
                 (customerOrder) => customerOrder.documentId
             ) || []
         )

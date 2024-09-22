@@ -37,13 +37,14 @@ import ViewQuotationDialog from '@/components/view-quotation-dialog'
 import ViewCustomerOrderDialog from '@/components/view-customer-order-dialog'
 import CreateDocumentRemark from '@/components/create-document-remark'
 import { GetDocumentRemark } from '@/types/remark/document-remark'
+import CustomerOrderHoverCard from '@/components/customer-order-hover-card'
 
 type Props = {
     existingSales?: GetSales
     paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
     depositAmount?: number
     quotations?: GetQuotation[]
-    customerOrders?: GetCustomerOrder[]
+    pendingOrExistingCustomerOrders?: GetCustomerOrder[]
 }
 
 export default function CreateOrUpdateSalesInvoiceComponent({
@@ -51,7 +52,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     paymentMethods,
     depositAmount = 0,
     quotations = [],
-    customerOrders = [],
+    pendingOrExistingCustomerOrders = [],
 }: Props) {
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
         existingSales
@@ -76,6 +77,12 @@ export default function CreateOrUpdateSalesInvoiceComponent({
             isDeposit: true,
         })
     )
+    const [selectedCustomerOrderIds, setSelectedCustomerOrderIds] =
+        React.useState<number[]>(
+            existingSales?.Sales?.CustomerOrder.map(
+                (customerOrder) => customerOrder.documentId
+            ) || []
+        )
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -134,7 +141,8 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 documentDetail,
                                 items,
                                 payments,
-                                documentRemarks
+                                documentRemarks,
+                                selectedCustomerOrderIds
                             )
                             // setKey(String(Date.now()))
                             // setItems([])
@@ -146,7 +154,8 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 documentDetail,
                                 items,
                                 payments,
-                                documentRemarks
+                                documentRemarks,
+                                selectedCustomerOrderIds
                             )
                             toast.success('บันทึกสําเร็จ')
                         }
@@ -171,12 +180,45 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             ดูใบเสนอราคา
                         </Button>
                     </ViewQuotationDialog>
-                    <ViewCustomerOrderDialog customerOrders={customerOrders}>
+                    <ViewCustomerOrderDialog
+                        customerOrders={pendingOrExistingCustomerOrders}
+                        selectedCustomerOrderIds={selectedCustomerOrderIds}
+                        onSelect={(customerOrder) => {
+                            setSelectedCustomerOrderIds([
+                                ...selectedCustomerOrderIds,
+                                customerOrder.id,
+                            ])
+                        }}
+                        onRemove={(customerOrder) => {
+                            setSelectedCustomerOrderIds(
+                                selectedCustomerOrderIds.filter(
+                                    (id) => id !== customerOrder.id
+                                )
+                            )
+                        }}
+                    >
                         <Button type="button" variant={'outline'}>
                             ดูใบจองสินค้า
                         </Button>
                     </ViewCustomerOrderDialog>
                 </div>
+                {pendingOrExistingCustomerOrders.length && (
+                    <div className="flex items-center gap-2">
+                        <span>ใบจองสินค้า:</span>
+                        {pendingOrExistingCustomerOrders
+                            .filter((customerOrder) =>
+                                selectedCustomerOrderIds.includes(
+                                    customerOrder.id
+                                )
+                            )
+                            .map((customerOrder) => (
+                                <CustomerOrderHoverCard
+                                    key={customerOrder.id}
+                                    customerOrder={customerOrder}
+                                />
+                            ))}
+                    </div>
+                )}
                 <Table>
                     <TableHeader>
                         <TableRow>
