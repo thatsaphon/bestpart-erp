@@ -127,6 +127,12 @@ const data = {
                     description: 'Performance and speed for efficiency.',
                 },
                 {
+                    title: 'ใบลดหนี้/คืนสินค้า',
+                    url: FullRoute.PurchaseReturn,
+                    icon: Bird,
+                    description: 'Performance and speed for efficiency.',
+                },
+                {
                     title: 'ใบสำคัญจ่าย',
                     url: FullRoute.PurchasePayment,
                     icon: Turtle,

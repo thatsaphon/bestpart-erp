@@ -32,6 +32,7 @@ id,name,type
 41100,ส่วนลด,Revenue
 41200,รับคืนสินค้า,Revenue
 51000,ซื้อ,Expense
+51100,คืนสินค้า,Expense
 52000,ต้นทุนขาย,Expense
 61000,รายได้อื่น,OtherIncome
 71000,ค่าใช้จ่ายอื่นๆ,OtherExpense
