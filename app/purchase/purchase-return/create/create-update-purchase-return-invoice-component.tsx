@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input'
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableFooter,
     TableHead,
@@ -20,18 +19,6 @@ import SearchSkuDialog from '@/components/search-sku-dialog'
 import { DocumentItem } from '@/types/document-item'
 import { useSession } from 'next-auth/react'
 import ImageToolTip from '@/components/image-tooltip'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import { getPaymentMethods } from '@/actions/get-payment-methods'
-import { cn } from '@/lib/utils'
-import { salesItemsToDocumentItems } from '@/types/sales/sales-item'
 import { DocumentDetailForm } from '@/components/document-detail-form'
 import {
     DocumentDetail,
@@ -39,11 +26,6 @@ import {
 } from '@/types/document-detail'
 import { createPurchaseReturnInvoice } from './create-purchase-return-invoice'
 import { updatePurchaseReturnInvoice } from './update-purchase-return-invoice'
-import { salesReturnItemsToDocumentItems } from '@/types/sales-return/sales-return-item'
-import AddPaymentComponent from '@/components/add-payment-component'
-import { GetQuotation } from '@/types/quotation/quotation'
-import { GetCustomerOrder } from '@/types/customer-order/customer-order'
-import { generalLedgerToPayments, Payment } from '@/types/payment/payment'
 import { GetDocumentRemark } from '@/types/remark/document-remark'
 import CreateDocumentRemark from '@/components/create-document-remark'
 import { GetPurchaseReturn } from '@/types/purchase-return/purchase-return'

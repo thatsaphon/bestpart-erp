@@ -1,16 +1,11 @@
 import Link from 'next/link'
-import React from 'react'
 import CreateUpdateSalesReceivedComponents from '../../create/create-update-sales-received-components'
-import prisma from '@/app/db/db'
-import { getUnpaidInvoices } from '@/types/sales-bill/unpaid-invoice'
-import { unpaidInvoiceToSalesBillItems } from '@/types/sales-bill/unpaid-invoice-to-sales-bill-item'
-import { salesBillToSalesBillItems } from '@/types/sales-bill/sales-bill-item'
 import { getSalesReceivedDefaultFunction } from '@/types/sales-received/sales-receive'
 import { salesReceiveToSalesReceiveItems } from '@/types/sales-received/sales-receive-item'
-import { unpaidBillsToSalesReceivedItems } from '@/types/sales-received/unpaid-bills-to-sales-Received-item copy'
-import { GetUnpaidBills } from '@/types/sales-received/unpaid-bill'
+import { getUnpaidBills } from '@/types/sales-received/unpaid-bill'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { getDepositAmount } from '@/actions/get-deposit-amount'
+import { unpaidBillsToSalesReceivedItems } from '@/types/sales-received/unpaid-bills-to-sales-Received-item'
 
 type Props = {
     params: {
