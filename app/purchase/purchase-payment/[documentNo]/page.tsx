@@ -53,10 +53,6 @@ export default async function PurchasePaymentDetailPage({
 
     return (
         <div className="p-3">
-            <Link
-                href={'/purchase/purchase-payment'}
-                className="text-primary/50 underline hover:text-primary"
-            >{`< ย้อนกลับ`}</Link>
             <h1 className="my-2 text-3xl transition-colors">
                 รายละเอียดใบวางบิล
             </h1>

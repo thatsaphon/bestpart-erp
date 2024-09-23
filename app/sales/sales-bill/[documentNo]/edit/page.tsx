@@ -20,12 +20,6 @@ export default async function SalesBillEditPage({
     if (!salesBill[0] || !salesBill[0].SalesBill) {
         return (
             <>
-                <div className="flex justify-between">
-                    <Link
-                        href={`/sales/sales-bill`}
-                        className="text-primary/50 underline hover:text-primary"
-                    >{`< ย้อนกลับ`}</Link>
-                </div>
                 <h1 className="my-2 text-3xl transition-colors">
                     แก้ไขใบวางบิล
                 </h1>
@@ -43,12 +37,6 @@ export default async function SalesBillEditPage({
     const unpaidItems = unpaidInvoiceToSalesBillItems(unpaidInvoices)
     return (
         <>
-            <div className="flex justify-between">
-                <Link
-                    href={`/sales/sales-bill`}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
-            </div>
             <h1 className="my-2 text-3xl transition-colors">สร้างใบวางบิล</h1>
             <CreateUpdateSalesBillComponents
                 key={documentNo}

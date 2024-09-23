@@ -39,19 +39,10 @@ export default async function EditPurchaseOrderPage({
 
     return (
         <>
-            {' '}
-            <div className="flex justify-between">
-                <Link
-                    href={`/purchase/purchase-received/${documentNo}`}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
-            </div>
             <h1 className="my-2 text-3xl transition-colors">แก้ไขใบสั่งซื้อ</h1>
             <CreateOrUpdatePurchaseOrderComponent
                 existingPurchaseOrder={purchaseOrder}
                 pendingOrExistingCustomerOrders={customerOrders}
-                // openCustomerOrders={openCustomerOrders}
-                // existingCustomerOrders={existingCustomerOrders}
             />
         </>
     )

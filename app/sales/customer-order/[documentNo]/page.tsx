@@ -64,10 +64,6 @@ export default async function CustomerOrderDetailPage({
     return (
         <>
             <div className="mb-2 p-3">
-                <Link
-                    href={'/sales/customer-order'}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
                 <h1 className="my-2 text-3xl transition-colors">
                     รายละเอียดใบจองสินค้า
                 </h1>

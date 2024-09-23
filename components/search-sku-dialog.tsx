@@ -76,6 +76,8 @@ export default function SearchSkuDialog({
     const [selectedNonStockItems, setSelectedNonStockItems] =
         React.useState<ServiceAndNonStockItem>()
 
+    const [tabs, setTabs] = React.useState<string>('stock')
+
     useEffect(() => {
         const fetchData = async () => {
             const data = await getServiceAndNonStockItemsDefaultFunction({
@@ -86,14 +88,31 @@ export default function SearchSkuDialog({
         fetchData()
     }, [])
 
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Tab') {
+                event.preventDefault()
+                if (tabs === 'stock') {
+                    setTabs('non-stock')
+                } else {
+                    setTabs('stock')
+                }
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [tabs])
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             {children && <DialogTrigger>{children}</DialogTrigger>}
-            <DialogContent className="max-h-[90vh] w-auto min-w-[70vw] max-w-[90vw] overflow-scroll">
+            <DialogContent className="max-h-[90vh] min-h-[300px] w-auto min-w-[70vw] max-w-[90vw] content-start overflow-scroll">
                 <DialogHeader>
                     <DialogTitle>ค้นหาสินค้า</DialogTitle>
                 </DialogHeader>
-                <Tabs defaultValue="stock">
+                <Tabs defaultValue="stock" value={tabs} onValueChange={setTabs}>
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="stock">สินค้า</TabsTrigger>
                         <TabsTrigger value="non-stock">
@@ -101,21 +120,46 @@ export default function SearchSkuDialog({
                         </TabsTrigger>
                     </TabsList>
                     <TabsContent value="stock">
-                        <div className="space-x-2">
-                            <Input
-                                id="search-sku"
-                                placeholder="Search"
-                                className="w-[240px]"
-                                onChange={(e) =>
-                                    setSearchKeyword(e.target.value)
-                                }
-                                onKeyDown={async (e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault()
+                        <div className="flex w-full justify-center">
+                            <div className="flex w-[500px] space-x-2">
+                                <Input
+                                    id="search-sku"
+                                    placeholder="Search"
+                                    className=""
+                                    autoFocus
+                                    onChange={(e) =>
+                                        setSearchKeyword(e.target.value)
+                                    }
+                                    onKeyDown={async (e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault()
+                                            try {
+                                                const result =
+                                                    await searchSkuTreeByKeyword(
+                                                        e.currentTarget.value
+                                                    )
+                                                setSkuTree(result)
+                                                setCount(result.count)
+                                            } catch (error) {
+                                                if (error instanceof Error)
+                                                    return toast.error(
+                                                        error.message
+                                                    )
+                                                toast.error(
+                                                    'Something went wrong'
+                                                )
+                                            }
+                                        }
+                                    }}
+                                />
+                                <Button
+                                    type="button"
+                                    variant={'outline'}
+                                    onClick={async () => {
                                         try {
                                             const result =
                                                 await searchSkuTreeByKeyword(
-                                                    e.currentTarget.value
+                                                    searchKeyword
                                                 )
                                             setSkuTree(result)
                                             setCount(result.count)
@@ -126,29 +170,11 @@ export default function SearchSkuDialog({
                                                 )
                                             toast.error('Something went wrong')
                                         }
-                                    }
-                                }}
-                            />
-                            <Button
-                                type="button"
-                                variant={'outline'}
-                                onClick={async () => {
-                                    try {
-                                        const result =
-                                            await searchSkuTreeByKeyword(
-                                                searchKeyword
-                                            )
-                                        setSkuTree(result)
-                                        setCount(result.count)
-                                    } catch (error) {
-                                        if (error instanceof Error)
-                                            return toast.error(error.message)
-                                        toast.error('Something went wrong')
-                                    }
-                                }}
-                            >
-                                Search
-                            </Button>
+                                    }}
+                                >
+                                    Search
+                                </Button>
+                            </div>
                         </div>
                         <Accordion type="multiple">
                             {skuTree.items.map((item, index) => (
@@ -246,72 +272,6 @@ export default function SearchSkuDialog({
                                                 )}
                                             </TableBody>
                                         </Table>
-                                        {/* <div className="grid grid-cols-[1fr_100px_1fr_1fr_1fr] gap-2">
-                                    <div></div>
-                                    <div className="text-center">จำนวน</div>
-                                    <div>Barcode</div>
-                                    <div>หน่วย</div>
-                                    <div className="text-right">ราคา</div>
-                                    <Separator className="col-span-5" />
-                                    {item.SkuMaster.map((sku, index) => (
-                                        <React.Fragment
-                                            key={`${item.mainSkuId}-${sku.skuMasterId}`}
-                                        >
-                                            <div className="col-start-1 row-span-2">
-                                                <p>
-                                                    {sku.detail}{' '}
-                                                    <ImageToolTip
-                                                        images={sku.Image}
-                                                        alt={`${item.name}-${sku.detail}`}
-                                                    />{' '}
-                                                </p>
-                                                {sku.SkuMasterRemark.length >
-                                                    0 && (
-                                                    <div
-                                                        className={'flex gap-2'}
-                                                    >
-                                                        {sku.SkuMasterRemark.map(
-                                                            (remark) => (
-                                                                <Badge
-                                                                    variant={
-                                                                        'outline'
-                                                                    }
-                                                                >
-                                                                    {
-                                                                        remark.remark
-                                                                    }
-                                                                </Badge>
-                                                            )
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {sku.GoodsMaster.map((goods, i) => (
-                                                <React.Fragment
-                                                    key={`${item.mainSkuId}-${sku.skuMasterId}-${goods.goodsMasterId}`}
-                                                >
-                                                    <div
-                                                        className={cn(
-                                                            'col-start-2 text-center'
-                                                        )}
-                                                    >
-                                                        {goods.remaining}
-                                                    </div>
-                                                    <div>{goods.barcode}</div>
-                                                    <div>{`${goods.unit}(${goods.quantityPerUnit})`}</div>
-                                                    <div className="text-right">
-                                                        {goods.pricePerUnit}
-                                                    </div>
-                                                </React.Fragment>
-                                            ))}
-                                            {index !==
-                                                item.SkuMaster.length - 1 && (
-                                                <Separator className="col-span-5 col-start-1" />
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </div> */}
                                     </AccordionContent>
                                 </AccordionItem>
                             ))}
@@ -334,50 +294,83 @@ export default function SearchSkuDialog({
                             page={page}
                         />
                     </TabsContent>
-                    <TabsContent value="non-stock">
-                        <Select
-                            value={String(selectedNonStockItems?.id)}
-                            onValueChange={(e) =>
-                                setSelectedNonStockItems(
-                                    serviceAndNonStockItems.find(
-                                        (item) => item.id === Number(e)
-                                    ) || serviceAndNonStockItems[0]
-                                )
-                            }
-                        >
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="เลือกบัญชี" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>เลือกรายการ</SelectLabel>
-                                    {serviceAndNonStockItems.map((item) => (
-                                        <SelectItem
-                                            value={String(item.id)}
-                                            key={item.id}
-                                        >
-                                            {`${item.id} - ${item.name}`}
-                                        </SelectItem>
-                                    ))}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                        <Button
-                            type="button"
-                            onClick={() => {
-                                if (!selectedNonStockItems) {
-                                    toast.error('กรุณาเลือกรายการก่อน')
-                                    return
-                                }
-                                onSelected(
-                                    nonStockItemToDocumentItem(
-                                        selectedNonStockItems
+                    <TabsContent
+                        value="non-stock"
+                        className="flex w-full justify-center"
+                    >
+                        <div className="flex w-[500px] flex-col">
+                            {serviceAndNonStockItems.map((item) => (
+                                <div
+                                    className="flex items-center justify-between p-1"
+                                    key={item.id}
+                                >
+                                    <Button
+                                        variant="link"
+                                        className="hover:cursor-default"
+                                    >
+                                        {item.name}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        className="w-[200px]"
+                                        variant={'outline'}
+                                        onClick={() =>
+                                            onSelected(
+                                                nonStockItemToDocumentItem(item)
+                                            )
+                                        }
+                                    >
+                                        เลือก
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex gap-2">
+                            {/* <Select
+                                value={String(selectedNonStockItems?.id)}
+                                onValueChange={(e) =>
+                                    setSelectedNonStockItems(
+                                        serviceAndNonStockItems.find(
+                                            (item) => item.id === Number(e)
+                                        ) || serviceAndNonStockItems[0]
                                     )
-                                )
-                            }}
-                        >
-                            เพิ่ม
-                        </Button>
+                                }
+                            >
+                                <SelectTrigger className="w-[180px]" autoFocus>
+                                    <SelectValue placeholder="เลือกบัญชี" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>เลือกรายการ</SelectLabel>
+                                        {serviceAndNonStockItems.map((item) => (
+                                            <SelectItem
+                                                value={String(item.id)}
+                                                key={item.id}
+                                            >
+                                                {`${item.id} - ${item.name}`}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    if (!selectedNonStockItems) {
+                                        toast.error('กรุณาเลือกรายการก่อน')
+                                        return
+                                    }
+                                    onSelected(
+                                        nonStockItemToDocumentItem(
+                                            selectedNonStockItems
+                                        )
+                                    )
+                                }}
+                            >
+                                เพิ่ม
+                            </Button> */}
+                        </div>
                     </TabsContent>
                 </Tabs>
             </DialogContent>

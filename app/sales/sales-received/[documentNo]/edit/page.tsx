@@ -20,12 +20,6 @@ export default async function SalesReceivedEditPage({
     if (!salesReceived[0] || !salesReceived[0].SalesReceived) {
         return (
             <>
-                <div className="flex justify-between">
-                    <Link
-                        href={`/sales/sales-bill`}
-                        className="text-primary/50 underline hover:text-primary"
-                    >{`< ย้อนกลับ`}</Link>
-                </div>
                 <h1 className="my-2 text-3xl transition-colors">
                     สร้างใบวางบิล
                 </h1>
@@ -50,12 +44,6 @@ export default async function SalesReceivedEditPage({
     )
     return (
         <>
-            <div className="flex justify-between">
-                <Link
-                    href={`/sales/sales-bill`}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
-            </div>
             <h1 className="my-2 text-3xl transition-colors">
                 แก้ไขใบเสร็จรับเงิน
             </h1>

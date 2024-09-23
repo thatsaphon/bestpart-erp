@@ -23,12 +23,6 @@ export default async function UpdateCustomerOrderPage({
 
     return (
         <>
-            <div className="flex justify-between">
-                <Link
-                    href={`/sales/customer-order`}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
-            </div>
             <h1 className="my-2 text-3xl transition-colors">
                 แก้ไขใบจองสินค้า
             </h1>

@@ -46,7 +46,7 @@ export default function PaginationClientComponent({
                             </PaginationLink>
                         </PaginationItem>
                     ))}
-                    {page !== numberOfPage && (
+                    {numberOfPage !== 0 && page !== numberOfPage && (
                         <PaginationItem>
                             <PaginationNext
                                 type="button"

@@ -45,13 +45,6 @@ export default async function EditPurchaseInvoicePage({
         })
     return (
         <>
-            {' '}
-            <div className="flex justify-between">
-                <Link
-                    href={`/purchase/purchase-received/${documentNo}`}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
-            </div>
             <h1 className="my-2 text-3xl transition-colors">สร้างบิลซื้อ</h1>
             <CreateOrUpdatePurchaseInvoiceComponent
                 existingPurchaseReceived={purchaseInvoice}

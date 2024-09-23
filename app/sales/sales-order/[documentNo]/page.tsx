@@ -75,10 +75,6 @@ export default async function SalesInvoiceDetailPage({
     return (
         <>
             <div className="mb-2 p-3">
-                <Link
-                    href={'/sales/sales-order'}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
                 <h1 className="my-2 text-3xl transition-colors">
                     รายละเอียดบิลขาย
                 </h1>

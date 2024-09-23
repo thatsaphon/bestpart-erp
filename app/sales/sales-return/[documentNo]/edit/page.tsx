@@ -36,19 +36,6 @@ export default async function EditSalesInvoicePage({
 
     return (
         <>
-            <div className="flex justify-between">
-                <Link
-                    href={`/sales/sales-return/${documentNo}`}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
-
-                {/* <Link href="/sales/create">
-                    <Button
-                        variant="ghost"
-                        className="mb-2"
-                    >{`Create New`}</Button>
-                </Link> */}
-            </div>
             <h1 className="my-2 text-3xl transition-colors">
                 แก้ไขรายละเอียดบิลขาย
             </h1>

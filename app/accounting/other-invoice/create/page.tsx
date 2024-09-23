@@ -25,12 +25,6 @@ export default async function CreateOtherExpensePage({}: Props) {
     })
     return (
         <>
-            <div className="flex justify-between">
-                <Link
-                    href={`/accounting/payment`}
-                    className="text-primary/50 underline hover:text-primary"
-                >{`< ย้อนกลับ`}</Link>
-            </div>
             <h1 className="my-2 text-2xl transition-colors">
                 บันทึกบิลค่าใช้จ่ายใหม่
             </h1>

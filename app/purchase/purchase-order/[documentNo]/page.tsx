@@ -56,12 +56,6 @@ export default async function PurchaseOrderDetailPage({
     return (
         <>
             <div className="mb-2 p-3">
-                <div className="flex justify-between">
-                    <Link
-                        href={`/purchase/purchase-order`}
-                        className="text-primary/50 underline hover:text-primary"
-                    >{`< ย้อนกลับ`}</Link>
-                </div>
                 <div className="flex items-baseline gap-2">
                     <h1 className="my-2 text-3xl transition-colors">
                         รายละเอียดใบสั่งซื้อ
