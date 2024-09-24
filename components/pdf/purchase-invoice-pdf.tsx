@@ -1,7 +1,7 @@
 'use client'
 
-import { getPurchaseInvoiceDetail } from '@/app/actions/purchase/purchase-invoice-detail'
 import { fullDateFormat } from '@/lib/date-format'
+import { GetPurchase } from '@/types/purchase/purchase'
 import {
     Page,
     Text,
@@ -11,7 +11,7 @@ import {
     Font,
 } from '@react-pdf/renderer'
 
-type Props = { document: Awaited<ReturnType<typeof getPurchaseInvoiceDetail>> }
+type Props = { document: GetPurchase }
 
 import { bahttext } from 'bahttext'
 
@@ -147,12 +147,12 @@ export default function PurchaseInvoicePdf({ document }: Props) {
                     <Text style={styles.col5}>หน่วย</Text>
                     <Text style={styles.col6}>รวม</Text>
                 </View>
-                {document?.SkuIn.map((item, index) => (
+                {document?.Purchase?.PurchaseItem.map((item, index) => (
                     <View style={styles.row} key={item.barcode} wrap={false}>
                         <Text style={styles.col1}>{index + 1}</Text>
                         <Text style={styles.col2}>{item.barcode}</Text>
                         <Text style={styles.col3}>
-                            {`${item.GoodsMaster.SkuMaster.mainSku.name}\n${item.GoodsMaster.SkuMaster.detail}`}
+                            {`${item.name}\n${item.description}`}
                         </Text>
                         <Text style={styles.col4}>
                             {item.quantity / item.quantityPerUnit}
@@ -160,79 +160,25 @@ export default function PurchaseInvoicePdf({ document }: Props) {
                         <Text
                             style={styles.col5}
                         >{`${item.unit}(${item.quantityPerUnit})`}</Text>
-                        <Text style={styles.col6}>{item.cost + item.vat}</Text>
+                        <Text style={styles.col6}>{item.costPerUnit}</Text>
                     </View>
                 ))}
                 <View style={{ ...styles.footer }}>
                     <View style={styles.sum}>
-                        <Text>
-                            จ่ายด้วยเงินสด{' '}
-                            {
-                                document?.GeneralLedger.find(
-                                    ({ chartOfAccountId }) =>
-                                        chartOfAccountId === 11000
-                                )?.amount
-                            }
-                        </Text>
-                        <Text>
-                            ลงบิล{' '}
-                            {
-                                document?.GeneralLedger.find(
-                                    ({ chartOfAccountId }) =>
-                                        chartOfAccountId === 12000
-                                )?.amount
-                            }
-                        </Text>
-                        <Text>
-                            {`(${bahttext(
-                                Number(
-                                    document?.SkuIn.reduce(
-                                        (a, b) => a + b.cost,
-                                        0
-                                    )
-                                )
-                            )})`}
-                        </Text>
-                    </View>
-                    <View style={styles.sum}>
-                        <Text>ราคาก่อนภาษี: </Text>
-                        <Text>VAT 7%: </Text>
                         <Text>รวมเป็นเงินทั้งสิ้น: </Text>
                     </View>
                     <View style={styles.sum}>
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
-                                document?.SkuIn.reduce(
-                                    (a, b) => a + b.cost + b.vat,
+                                document?.Purchase?.PurchaseItem.reduce(
+                                    (a, b) => a + b.costPerUnit,
                                     0
                                 )
                             }
                         >
-                            {document?.SkuIn.reduce(
-                                (a, b) => a + b.cost + b.vat,
-                                0
-                            )}
-                        </Text>
-                        <Text
-                            render={({ pageNumber, totalPages }) =>
-                                pageNumber === totalPages &&
-                                document?.SkuIn.reduce((a, b) => a + b.vat, 0)
-                            }
-                        >
-                            {document?.SkuIn.reduce((a, b) => a + b.vat, 0)}
-                        </Text>
-                        <Text
-                            render={({ pageNumber, totalPages }) =>
-                                pageNumber === totalPages &&
-                                document?.SkuIn.reduce(
-                                    (a, b) => a + b.cost + b.vat,
-                                    0
-                                )
-                            }
-                        >
-                            {document?.SkuIn.reduce(
-                                (a, b) => a + b.cost + b.vat,
+                            {document?.Purchase?.PurchaseItem.reduce(
+                                (a, b) => a + b.costPerUnit,
                                 0
                             )}
                         </Text>

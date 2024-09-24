@@ -42,7 +42,7 @@ export const generalLedgerToPayments = (
         isAp?: boolean
         isInputTax?: boolean
         isOutputTax?: boolean
-    },
+    } = { isCash: true },
     reverseValue?: boolean
 ) => {
     return (

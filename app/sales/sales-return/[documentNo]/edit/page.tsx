@@ -42,13 +42,6 @@ export default async function EditSalesInvoicePage({
             <CreateOrUpdateSalesReturnInvoiceComponent
                 existingSalesReturn={document}
                 paymentMethods={paymentMethods}
-                defaultPayments={document.SalesReturn?.GeneralLedger.filter(
-                    (gl) => gl.ChartOfAccount.isAr || gl.ChartOfAccount.isCash
-                ).map((x) => ({
-                    id: x.chartOfAccountId,
-                    amount: x.amount,
-                }))}
-                defaultRemarks={document.DocumentRemark}
             />
         </>
     )

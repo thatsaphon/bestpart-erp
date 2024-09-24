@@ -1,10 +1,8 @@
 'use client'
 
-import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import { fullDateFormat } from '@/lib/date-format'
 import { getSalesBill } from '@/types/sales-bill/sales-bill'
 import { salesBillToSalesBillItems } from '@/types/sales-bill/sales-bill-item'
-import { Prisma } from '@prisma/client'
 import {
     Page,
     Text,

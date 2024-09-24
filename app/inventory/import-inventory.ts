@@ -69,7 +69,7 @@ export async function uploadFile(formData: FormData) {
             },
         },
         include: {
-            mainSku: true,
+            MainSku: true,
         },
     })
 
@@ -78,12 +78,13 @@ export async function uploadFile(formData: FormData) {
             return {
                 skuMasterId: x.id,
                 barcode:
-                    objects.filter((y) => y.name === x.mainSku.name)[0]
+                    objects.filter((y) => y.name === x.MainSku.name)[0]
                         .SkuMaster.create.GoodsMaster.create.barcode || '',
-                price: objects.filter((y) => y.name === x.mainSku.name)[0]
-                    .SkuMaster.create.GoodsMaster.create.price,
-                quantity: 1,
+                pricePerUnit: objects.filter(
+                    (y) => y.name === x.MainSku.name
+                )[0].SkuMaster.create.GoodsMaster.create.price,
                 unit: 'ตัว',
+                quantityPerUnit: 1,
             }
         }),
         skipDuplicates: true,

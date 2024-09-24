@@ -14,7 +14,7 @@ import {
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
-import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
+
 import { getApPaymentMethods } from '@/app/actions/accounting'
 import SelectSearchCustomer from '@/components/select-search-customer'
 import { cn } from '@/lib/utils'

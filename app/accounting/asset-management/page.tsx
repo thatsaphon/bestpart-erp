@@ -22,14 +22,14 @@ type Props = {}
 
 export default async function AssetManagementPage({}: Props) {
     // AssetType
-    const assets = await prisma.assetRegistration.findMany({
+    const assets = await prisma.asset.findMany({
         include: {
             AssetMovement: {
-                include: {
-                    Document: true,
-                },
+                // include: {
+                //     Document: true,
+                // },
             },
-            AssetRegistrationDocument: true,
+            // AssetRegistrationDocument: true,
         },
     })
 

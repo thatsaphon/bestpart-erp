@@ -41,6 +41,8 @@ import { SalesReceivedItem } from '@/types/sales-received/sales-receive-item'
 import { generalLedgerToPayments, Payment } from '@/types/payment/payment'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
 import AddPaymentComponent from '@/components/add-payment-component'
+import { GetDocumentRemark } from '@/types/remark/document-remark'
+import CreateDocumentRemark from '@/components/create-document-remark'
 
 type Props = {
     existingSalesReceived?: getSalesReceived
@@ -74,6 +76,9 @@ export default function CreateUpdateSalesReceivedComponents({
             existingSalesReceived?.SalesReceived?.GeneralLedger || []
         )
     )
+    const [documentRemarks, setDocumentRemarks] = useState<GetDocumentRemark[]>(
+        existingSalesReceived?.DocumentRemark || []
+    )
 
     const onCreateSalesBill = async () => {
         for (let payment of payments) {
@@ -100,7 +105,8 @@ export default function CreateUpdateSalesReceivedComponents({
             const result = await createSalesReceived(
                 documentDetail,
                 selectedItems,
-                payments
+                payments,
+                documentRemarks
             )
             toast.success('บันทึกสําเร็จ')
         } catch (err) {
@@ -139,7 +145,8 @@ export default function CreateUpdateSalesReceivedComponents({
                 existingSalesReceived?.id,
                 documentDetail,
                 selectedItems,
-                payments
+                payments,
+                documentRemarks
             )
             toast.success('บันทึกสําเร็จ')
         } catch (err) {
@@ -393,6 +400,17 @@ export default function CreateUpdateSalesReceivedComponents({
                             </div>
                         </TableHead>
                         <TableHead></TableHead>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell colSpan={7}>
+                            <CreateDocumentRemark
+                                existingDocumentRemark={
+                                    existingSalesReceived?.DocumentRemark || []
+                                }
+                                documentRemarks={documentRemarks}
+                                setDocumentRemarks={setDocumentRemarks}
+                            />
+                        </TableCell>
                     </TableRow>
                 </TableFooter>
             </Table>

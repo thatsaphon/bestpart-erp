@@ -104,7 +104,8 @@ export default function SelectSearchCustomer<T>({
         async function fetchCustomerData(customerId: string) {
             if (defaultValue) {
                 try {
-                    const result = await searchAccountReceivableById(customerId)
+                    const result =
+                        await searchAccountReceivableById(+customerId)
                     setSelectedResult(result)
                 } catch (err) {
                     if (err instanceof Error) {
@@ -156,7 +157,7 @@ export default function SelectSearchCustomer<T>({
                                     try {
                                         const result =
                                             await searchAccountReceivableById(
-                                                selectedId
+                                                +selectedId
                                             )
                                         setTextAreaFromData(result)
                                         setSelectedResult(result)
@@ -325,7 +326,7 @@ export default function SelectSearchCustomer<T>({
                                     page={page}
                                 />
                             </TableCaption>
-                            <TableHeader className="bg-primary-foreground/60 ">
+                            <TableHeader className="bg-primary-foreground/60">
                                 <TableRow>
                                     <TableHead>Id</TableHead>
                                     <TableHead>ชื่อลูกค้า</TableHead>

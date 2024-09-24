@@ -91,16 +91,14 @@ enum DocumentType {
 model DocumentRemark {
   id Int @id @default(autoincrement())
 
-  Document       Document?     @relation(fields: [documentId], references: [id])
-  documentId     Int?
-  remark         String        @default("")
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt
-  isDeleted      Boolean       @default(false)
-  User           User?         @relation(fields: [userId], references: [id])
-  userId         String?
-  DocumentView   DocumentView? @relation(fields: [documentViewId], references: [id])
-  documentViewId Int?
+  Document   Document? @relation(fields: [documentId], references: [id])
+  documentId Int?
+  remark     String    @default("")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
+  isDeleted  Boolean   @default(false)
+  User       User?     @relation(fields: [userId], references: [id])
+  userId     String?
 }
 
 model ChartOfAccount {
@@ -590,14 +588,12 @@ model SkuMasterImage {
 }
 
 model DocumentAttached {
-  id             Int           @id @default(autoincrement())
-  url            String
-  Document       Document      @relation(fields: [documentId], references: [id])
-  documentId     Int
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt
-  DocumentView   DocumentView? @relation(fields: [documentViewId], references: [id])
-  documentViewId Int?
+  id         Int      @id @default(autoincrement())
+  url        String
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
 }
 
 model OtherInvoice {
@@ -882,8 +878,6 @@ view DocumentView {
   contactName  String
   date         DateTime
 
-  createdAt        DateTime
-  updatedAt        DateTime
-  DocumentRemark   DocumentRemark[]
-  DocumentAttached DocumentAttached[]
+  createdAt DateTime
+  updatedAt DateTime
 }

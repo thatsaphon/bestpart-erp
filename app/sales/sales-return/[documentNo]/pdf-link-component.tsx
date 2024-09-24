@@ -1,12 +1,12 @@
 'use client'
 
-import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/sales-return-invoice-detail'
 import BlobProviderClient from '@/components/pdf/blob-provider-client'
-import SalesReturnInvoicePdf_5x9 from '@/components/pdf/sales-return-invoice-5.5-9'
+import SalesReturnInvoicePdf_5x9 from '@/components/pdf/return-invoice-5.5-9'
+import { GetSalesReturn } from '@/types/sales-return/sales-return'
 import React from 'react'
 
 type Props = {
-    document: Awaited<ReturnType<typeof getSalesReturnInvoiceDetail>>
+    document: GetSalesReturn
 }
 
 export default function ReturnInvoicePdfLinkComponent({ document }: Props) {

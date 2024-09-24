@@ -61,7 +61,7 @@ export default async function OtherPaymentPage({
                     OtherInvoiceItem: {
                         include: {
                             AssetMovement: { include: { Asset: true } },
-                            ChartOfAccount: true,
+                            // ChartOfAccount: true,
                         },
                     },
                     GeneralLedger: true,

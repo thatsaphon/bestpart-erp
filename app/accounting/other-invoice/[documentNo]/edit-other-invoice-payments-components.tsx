@@ -1,7 +1,6 @@
 'use client'
 
 import { getPaymentMethods } from '@/actions/get-payment-methods'
-import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import {
     Select,
     SelectContent,

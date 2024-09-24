@@ -1,7 +1,7 @@
 'use client'
 
-import { getSalesInvoiceDetail } from '@/app/actions/sales/invoice-detail'
 import { fullDateFormat } from '@/lib/date-format'
+import { GetPurchaseReturn } from '@/types/purchase-return/purchase-return'
 import {
     Page,
     Text,
@@ -10,10 +10,11 @@ import {
     StyleSheet,
     Font,
 } from '@react-pdf/renderer'
-
-type Props = { document: Awaited<ReturnType<typeof getSalesInvoiceDetail>> }
-
 import { bahttext } from 'bahttext'
+
+type Props = {
+    document: GetPurchaseReturn
+}
 
 Font.register({
     family: 'Inter Sarabun',
@@ -31,15 +32,17 @@ Font.register({
     fonts: [{ src: '/fonts/Inter-VariableFont_slnt,wght.ttf' }],
 })
 
-export default function CreditSalesInvoicePdf({ document }: Props) {
+export default function PurchaseReturnInvoicePdf_5x9({ document }: Props) {
     const styles = StyleSheet.create({
         page: {
             flexDirection: 'column',
-            fontSize: 8,
+            fontSize: 9,
             gap: 5,
             fontFamily: 'Inter Sarabun',
             alignItems: 'center',
             padding: 40,
+            paddingLeft: 40,
+            paddingRight: 30,
             paddingBottom: 120,
         },
         title: {
@@ -59,9 +62,8 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
             flexDirection: 'row',
             gap: 5,
             width: '100%',
-            paddingLeft: 20,
-            paddingRight: 30,
             alignItems: 'flex-start',
+            justifyContent: 'space-between',
         },
         col1: {
             width: 20,
@@ -88,7 +90,7 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
         footer: {
             position: 'absolute',
             left: 0,
-            right: 70,
+            right: 30,
             bottom: 80,
             flexDirection: 'row',
             alignItems: 'flex-end',
@@ -103,37 +105,39 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
         },
         footer2: {
             position: 'absolute',
-            left: 50,
-            right: 0,
-            bottom: 50,
+            left: 40,
+            right: 30,
+            bottom: 40,
             flexDirection: 'row',
-            // alignItems: 'flex-end',
-            columnGap: 150,
-            // justifyContent: 'space-around',
+            justifyContent: 'space-between',
         },
     })
 
     return (
         <Document>
             <Page
-                size={['396', '648']}
-                orientation="landscape"
+                size={['612', '396']}
+                orientation="portrait"
                 style={styles.page}
                 fixed
             >
                 <View style={styles.title} fixed>
                     <Text style={{ textAlign: 'center', width: '100%' }}>
-                        ใบกำกับภาษีอย่างย่อ/ใบเสร็จรับเงิน{' '}
+                        ใบรับคืนสินค้า/ใบลดหนี้
+                    </Text>
+                    <Text style={{ textAlign: 'center', width: '100%' }}>
+                        หจก.จ.สุพรรณบุรีอะไหล่
+                    </Text>
+                    <Text style={{ textAlign: 'center', width: '100%' }}>
+                        เลขประจำตัวผู้เสียภาษี: 123456789012{' '}
                     </Text>
                 </View>
                 <View style={styles.header} fixed>
-                    <View style={{ flexDirection: 'column' }}>
-                        <Text>{document?.contactName}</Text>
-                        <Text>{document?.address}</Text>
+                    <View style={{ gap: 2 }}>
+                        <Text>{`ชื่อลูกค้า: ${document?.contactName}`}</Text>
                         <Text>{`โทร: ${document?.phone}`}</Text>
-                        <Text>{`เลขประจำตัวผู้เสียภาษี: ${document?.taxId}`}</Text>
                     </View>
-                    <View style={{ marginLeft: '10', gap: 2 }}>
+                    <View style={{ gap: 2 }}>
                         <Text>เลขที่: {document?.documentNo}</Text>
                         <Text>วันที่: {fullDateFormat(document?.date)}</Text>
                         <Text
@@ -151,47 +155,60 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
                     <Text style={styles.col5}>หน่วย</Text>
                     <Text style={styles.col6}>รวม</Text>
                 </View>
-                {document?.SkuOut.map((item, index) => (
-                    <View style={styles.row} key={item.barcode} wrap={false}>
-                        <Text style={styles.col1}>{index + 1}</Text>
-                        <Text style={styles.col2}>{item.barcode}</Text>
-                        <Text style={styles.col3}>
-                            {`${item.GoodsMaster.SkuMaster.mainSku.name}\n${item.GoodsMaster.SkuMaster.detail}`}
-                        </Text>
-                        <Text style={styles.col4}>
-                            {item.quantity / item.quantityPerUnit}
-                        </Text>
-                        <Text
-                            style={styles.col5}
-                        >{`${item.unit}(${item.quantityPerUnit})`}</Text>
-                        <Text style={styles.col6}>{item.price + item.vat}</Text>
-                    </View>
-                ))}
+                {document?.PurchaseReturn?.PurchaseReturnItem.map(
+                    (item, index) => (
+                        <View
+                            style={styles.row}
+                            key={item.barcode}
+                            wrap={false}
+                        >
+                            <Text style={styles.col1}>{index + 1}</Text>
+                            <Text style={styles.col2}>{item.barcode}</Text>
+                            <Text style={styles.col3}>
+                                {`${item.name} - ${item.description}`}
+                            </Text>
+                            <Text style={styles.col4}>
+                                {(
+                                    item.quantity / item.quantityPerUnit
+                                ).toLocaleString()}
+                            </Text>
+                            <Text style={styles.col5}>{`${item.unit}`}</Text>
+                            <Text style={styles.col6}>
+                                {(
+                                    item.costPerUnit * item.quantity
+                                ).toLocaleString()}
+                            </Text>
+                        </View>
+                    )
+                )}
                 <View style={{ ...styles.footer }}>
                     <View style={styles.sum}>
-                        <Text>
-                            จ่ายด้วยเงินสด{' '}
-                            {
-                                document?.GeneralLedger.find(
-                                    ({ chartOfAccountId }) =>
-                                        chartOfAccountId === 11000
-                                )?.amount
-                            }
-                        </Text>
-                        <Text>
-                            ลงบิล{' '}
-                            {
-                                document?.GeneralLedger.find(
-                                    ({ chartOfAccountId }) =>
-                                        chartOfAccountId === 12000
-                                )?.amount
-                            }
-                        </Text>
+                        {document?.PurchaseReturn?.GeneralLedger.filter(
+                            ({ ChartOfAccount: { isCash, isAr } }) =>
+                                isCash && isAr
+                        ).map((item) => (
+                            <View
+                                key={item.chartOfAccountId}
+                                style={{
+                                    justifyContent: 'flex-end',
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                }}
+                            >
+                                <Text style={{ textAlign: 'right' }}>
+                                    {`${item.chartOfAccountId === 12000 ? 'หักลบเงินเชื่อ' : item.chartOfAccountId === 11000 ? 'คืนเป็นเงินสด' : item.ChartOfAccount?.name} :`}
+                                </Text>
+                                <Text style={{ width: 50, textAlign: 'right' }}>
+                                    {`${-item.amount.toLocaleString()}`} บาท
+                                </Text>
+                            </View>
+                        ))}
                         <Text>
                             {`(${bahttext(
                                 Number(
-                                    document?.SkuOut.reduce(
-                                        (a, b) => a + b.price,
+                                    document?.PurchaseReturn?.PurchaseReturnItem.reduce(
+                                        (a, b) =>
+                                            a + b.costPerUnit * b.quantity,
                                         0
                                     )
                                 )
@@ -199,47 +216,18 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
                         </Text>
                     </View>
                     <View style={styles.sum}>
-                        <Text>ราคาก่อนภาษี: </Text>
-                        <Text>VAT 7%: </Text>
                         <Text>รวมเป็นเงินทั้งสิ้น: </Text>
                     </View>
                     <View style={styles.sum}>
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
-                                document?.SkuOut.reduce(
-                                    (a, b) => a + b.price + b.vat,
+                                document?.PurchaseReturn?.PurchaseReturnItem.reduce(
+                                    (a, b) => a + b.costPerUnit * b.quantity,
                                     0
-                                )
+                                ).toLocaleString()
                             }
-                        >
-                            {document?.SkuOut.reduce(
-                                (a, b) => a + b.price + b.vat,
-                                0
-                            )}
-                        </Text>
-                        <Text
-                            render={({ pageNumber, totalPages }) =>
-                                pageNumber === totalPages &&
-                                document?.SkuOut.reduce((a, b) => a + b.vat, 0)
-                            }
-                        >
-                            {document?.SkuOut.reduce((a, b) => a + b.vat, 0)}
-                        </Text>
-                        <Text
-                            render={({ pageNumber, totalPages }) =>
-                                pageNumber === totalPages &&
-                                document?.SkuOut.reduce(
-                                    (a, b) => a + b.price + b.vat,
-                                    0
-                                )
-                            }
-                        >
-                            {document?.SkuOut.reduce(
-                                (a, b) => a + b.price + b.vat,
-                                0
-                            )}
-                        </Text>
+                        ></Text>
                     </View>
                 </View>
 
@@ -252,9 +240,13 @@ export default function CreditSalesInvoicePdf({ document }: Props) {
                 ></Text>
 
                 <View style={{ ...styles.footer2 }}>
-                    <Text>ผู้รับสินค้า</Text>
-                    <Text>ผู้จัดสินค้า</Text>
-                    <Text>ผู้รับเงิน</Text>
+                    <Text style={{ width: 120 }}>
+                        ผู้คิดเงิน:{`\n`}
+                        {document?.createdBy}
+                    </Text>
+                    <Text style={{ width: 120 }}>ผู้จัดสินค้า</Text>
+                    <Text style={{ width: 120 }}>ผู้รับเงิน</Text>
+                    <Text style={{ width: 120 }}>ผู้รับสินค้า</Text>
                 </View>
             </Page>
         </Document>

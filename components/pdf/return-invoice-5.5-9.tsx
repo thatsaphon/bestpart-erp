@@ -1,7 +1,7 @@
 'use client'
 
-import { getSalesReturnInvoiceDetail } from '@/app/actions/sales/sales-return-invoice-detail'
 import { fullDateFormat } from '@/lib/date-format'
+import { GetSalesReturn } from '@/types/sales-return/sales-return'
 import {
     Page,
     Text,
@@ -13,7 +13,7 @@ import {
 import { bahttext } from 'bahttext'
 
 type Props = {
-    document: Awaited<ReturnType<typeof getSalesReturnInvoiceDetail>>
+    document: GetSalesReturn
 }
 
 Font.register({
@@ -155,12 +155,12 @@ export default function SalesReturnInvoicePdf_5x9({ document }: Props) {
                     <Text style={styles.col5}>หน่วย</Text>
                     <Text style={styles.col6}>รวม</Text>
                 </View>
-                {document?.SkuIn.map((item, index) => (
+                {document?.SalesReturn?.SalesReturnItem.map((item, index) => (
                     <View style={styles.row} key={item.barcode} wrap={false}>
                         <Text style={styles.col1}>{index + 1}</Text>
                         <Text style={styles.col2}>{item.barcode}</Text>
                         <Text style={styles.col3}>
-                            {`${item.GoodsMaster.SkuMaster.mainSku.name} - ${item.GoodsMaster.SkuMaster.detail}`}
+                            {`${item.name} - ${item.description}`}
                         </Text>
                         <Text style={styles.col4}>
                             {(
@@ -170,18 +170,16 @@ export default function SalesReturnInvoicePdf_5x9({ document }: Props) {
                         <Text style={styles.col5}>{`${item.unit}`}</Text>
                         <Text style={styles.col6}>
                             {(
-                                (item.cost + item.vat) *
-                                item.quantity
+                                item.pricePerUnit * item.quantity
                             ).toLocaleString()}
                         </Text>
                     </View>
                 ))}
                 <View style={{ ...styles.footer }}>
                     <View style={styles.sum}>
-                        {document?.GeneralLedger.filter(
-                            ({ chartOfAccountId }) =>
-                                chartOfAccountId >= 11000 &&
-                                chartOfAccountId <= 12000
+                        {document?.SalesReturn?.GeneralLedger.filter(
+                            ({ ChartOfAccount: { isCash, isAr } }) =>
+                                isCash && isAr
                         ).map((item) => (
                             <View
                                 key={item.chartOfAccountId}
@@ -202,9 +200,9 @@ export default function SalesReturnInvoicePdf_5x9({ document }: Props) {
                         <Text>
                             {`(${bahttext(
                                 Number(
-                                    document?.SkuIn.reduce(
+                                    document?.SalesReturn?.SalesReturnItem.reduce(
                                         (a, b) =>
-                                            a + (b.cost + b.vat) * b.quantity,
+                                            a + b.pricePerUnit * b.quantity,
                                         0
                                     )
                                 )
@@ -218,8 +216,8 @@ export default function SalesReturnInvoicePdf_5x9({ document }: Props) {
                         <Text
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
-                                document?.SkuIn.reduce(
-                                    (a, b) => a + (b.cost + b.vat) * b.quantity,
+                                document?.SalesReturn?.SalesReturnItem.reduce(
+                                    (a, b) => a + b.pricePerUnit * b.quantity,
                                     0
                                 ).toLocaleString()
                             }
