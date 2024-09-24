@@ -18,7 +18,6 @@ export async function createUser(formData: FormData) {
             username,
             password: hashPassword,
             role: role as Role,
-            flag: {},
         },
     })
 }

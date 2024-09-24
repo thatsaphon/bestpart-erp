@@ -48,7 +48,6 @@ export const getDefaultSalesReturnItem = () => {
         createdAt: new Date(),
         GoodsMaster: {
             barcode: '',
-            flag: '',
             createdAt: new Date(),
             id: 0,
             pricePerUnit: 0,

@@ -2,10 +2,11 @@
 import prisma from '@/app/db/db'
 import { AuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@auth/prisma-adapter'
+import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import bcrypt from 'bcrypt'
 import { revalidatePath } from 'next/cache'
 import { nextDay } from 'date-fns'
+import { setCookies } from '@/actions/set-cookies'
 
 export const authOptions: AuthOptions = {
     providers: [
@@ -23,6 +24,7 @@ export const authOptions: AuthOptions = {
                     placeholder: 'jsmith',
                 },
                 password: { label: 'Password', type: 'password' },
+                email: { label: 'email', type: 'email' },
             },
             async authorize(credentials, req) {
                 // You need to provide your own logic here that takes the credentials
@@ -45,11 +47,11 @@ export const authOptions: AuthOptions = {
                     return {
                         id: user.id,
                         username: user.username,
-                        first_name: user.first_name,
-                        last_name: user.last_name,
+                        first_name: user.first_name ?? '',
+                        last_name: user.last_name ?? '',
                         role: user.role,
-                        avatarUrl: user.avatarUrl,
-                        flag: user.flag,
+                        avatarUrl: user.avatarUrl ?? '',
+                        email: '',
                     }
                 } else {
                     throw new Error('Invalid email or password')
@@ -70,20 +72,19 @@ export const authOptions: AuthOptions = {
                 token.first_name = user.first_name
                 token.last_name = user.last_name
                 token.role = user.role
-                token.flag = user.flag
                 token.avatarUrl = user.avatarUrl
             }
             return token
         },
         session: async ({ session, token }) => {
             // revalidatePath('/')
+            // await setCookies()
             if (session.user) {
                 session.user.id = token.id
                 session.user.username = token.username
                 session.user.first_name = token.first_name
                 session.user.last_name = token.last_name
                 session.user.role = token.role
-                session.user.flag = token.flag
                 session.user.avatarUrl = token.avatarUrl
             }
             return session

@@ -80,44 +80,6 @@ export const createSalesReturnInvoice = async (
             },
         })
 
-    const remainings = await checkRemaining(
-        goodsMasters.map((item) => item.skuMasterId)
-    )
-
-    const groupBySkuMasterId = items.reduce(
-        (acc: Record<number, DocumentItem[]>, item) => {
-            if (!item.skuMasterId) return acc
-            if (!acc[item.skuMasterId]) {
-                acc[item.skuMasterId] = []
-            }
-            acc[item.skuMasterId].push(item)
-            return acc
-        },
-        {}
-    )
-
-    const itemsRemainings = Object.entries(groupBySkuMasterId).map(
-        ([key, value]) => ({
-            skuMasterId: Number(key),
-            quantity: value?.reduce(
-                (sum, item) => sum + item.quantity * item.quantityPerUnit,
-                0
-            ),
-            name: value?.[0].name,
-            remainings:
-                remainings.find((r) => r.skuMasterId === Number(key))
-                    ?.remaining || 0,
-        })
-    )
-
-    for (const item of itemsRemainings) {
-        if (item.quantity > item.remainings) {
-            throw new Error(
-                `${item.name} \nต้องการขาย ${item.quantity} ชิ้น \nแต่ยอดคงเหลือ ${item.remainings} ชิ้น`
-            )
-        }
-    }
-
     if (!documentNo) {
         documentNo = await generateDocumentNumber('CN', date.toISOString())
     }
@@ -158,6 +120,7 @@ export const createSalesReturnInvoice = async (
                             {
                                 chartOfAccountId: 41200,
                                 amount: +items
+                                    .filter((item) => item.goodsMasterId)
                                     .reduce(
                                         (sum, item) =>
                                             sum +
@@ -168,6 +131,26 @@ export const createSalesReturnInvoice = async (
                                     )
                                     .toFixed(2),
                             },
+                            ...items
+                                .filter((item) => item.serviceAndNonStockItemId)
+                                .map((item) => {
+                                    const nonStockItem =
+                                        serviceAndNonStockItems.find(
+                                            (x) =>
+                                                x.id ===
+                                                item.serviceAndNonStockItemId
+                                        )
+                                    return {
+                                        chartOfAccountId:
+                                            nonStockItem?.chartOfAccountId as number,
+                                        amount: +(
+                                            (item.pricePerUnit *
+                                                item.quantity *
+                                                100) /
+                                            107
+                                        ).toFixed(2),
+                                    }
+                                }),
                             // ภาษีขาย
                             {
                                 chartOfAccountId: 23100,

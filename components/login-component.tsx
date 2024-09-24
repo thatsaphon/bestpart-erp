@@ -16,6 +16,7 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { setCookies } from '@/actions/set-cookies'
 
 type Props = {}
 
@@ -43,6 +44,7 @@ export default function LoginComponent({}: Props) {
                 console.error(result.error)
                 return
             } else {
+                setCookies()
                 toast.success('Login success')
                 router.refresh()
             }

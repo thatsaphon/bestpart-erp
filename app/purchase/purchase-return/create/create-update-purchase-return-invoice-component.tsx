@@ -401,6 +401,7 @@ export default function CreateOrUpdatePurchaseReturnInvoiceComponent({
                                             ?.focus()
                                     }, 100)
                                 }}
+                                nonStockTypes={['Purchase']}
                             />
                         </TableRow>
                     </TableBody>

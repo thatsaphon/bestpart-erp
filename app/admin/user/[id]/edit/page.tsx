@@ -15,7 +15,6 @@ export default async function EditUserPage({ params: { id } }: Props) {
             first_name: true,
             last_name: true,
             role: true,
-            flag: true,
             avatarUrl: true,
             createdAt: true,
             updatedAt: true,

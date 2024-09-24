@@ -12,7 +12,6 @@ declare module 'next-auth' {
             first_name: string
             last_name: string
             role: $Enums.Role
-            flag: { [key: string]: any }
             avatarUrl: string
         }
     }
@@ -22,7 +21,6 @@ declare module 'next-auth' {
         first_name: string
         last_name: string
         role: $Enums.Role
-        flag: { [key: string]: any }
         avatarUrl: string
     }
 }
@@ -35,7 +33,6 @@ declare module 'next-auth/jwt' {
         first_name: string
         last_name: string
         role: $Enums.Role
-        flag: { [key: string]: any }
         avatarUrl: string
     }
 }

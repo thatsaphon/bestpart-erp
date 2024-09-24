@@ -400,6 +400,7 @@ export default function CreateOrUpdateQuotationComponent({
                                             ?.focus()
                                     }, 100)
                                 }}
+                                nonStockTypes={['Sales']}
                             />
                         </TableRow>
                     </TableBody>

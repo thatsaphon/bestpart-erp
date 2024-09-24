@@ -25,7 +25,6 @@ export default async function UserPage({}: Props) {
             last_name: true,
             avatarUrl: true,
             role: true,
-            flag: true,
         },
     })
 
@@ -66,8 +65,6 @@ export default async function UserPage({}: Props) {
                                     <Edit2Icon className="h-4 w-4" />
                                 </Link>
                             </TableCell>
-                            {/* <TableCell>{user.flag}</TableCell>
-                            <TableCell>{user.created_at}</TableCell> */}
                         </TableRow>
                     ))}
                 </TableBody>

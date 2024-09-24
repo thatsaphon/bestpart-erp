@@ -444,6 +444,7 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                             ?.focus()
                                     }, 100)
                                 }}
+                                nonStockTypes={['Sales']}
                             />
                         </TableRow>
                     </TableBody>

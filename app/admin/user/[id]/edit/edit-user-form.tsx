@@ -24,7 +24,6 @@ const filteredUser = Prisma.validator<Prisma.UserDefaultArgs>()({
         first_name: true,
         last_name: true,
         role: true,
-        flag: true,
         avatarUrl: true,
         createdAt: true,
         updatedAt: true,

@@ -27,7 +27,6 @@ export default async function CashPage({}: Props) {
             AccountOwner: { select: { chartOfAccountId: true } },
             role: true,
             avatarUrl: true,
-            flag: true,
         },
     })
     const validated = AuthPayloadSchema.array().safeParse(users)
@@ -41,7 +40,7 @@ export default async function CashPage({}: Props) {
     return (
         <main className="max-w-[724px] p-3">
             <div className="mb-3 flex items-center justify-between">
-                <h1 className="text-3xl font-bold ">Cash</h1>
+                <h1 className="text-3xl font-bold">Cash</h1>
                 <Card>
                     <CardContent className="py-2">
                         <p className="h-full">Account Number: 11000</p>

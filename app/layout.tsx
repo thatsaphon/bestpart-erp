@@ -11,6 +11,9 @@ import SessionProvider from '@/components/session-provider'
 import { authOptions } from './api/auth/[...nextauth]/authOptions'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { NextRequest } from 'next/server'
+import { cookies } from 'next/headers'
+import { getServiceAndNonStockItemsDefaultFunction } from '@/types/service-and-non-stock-item/service-and-non-stock-item'
+import { setCookies } from '@/actions/set-cookies'
 
 export const fontSans = FontSans({
     subsets: ['latin'],

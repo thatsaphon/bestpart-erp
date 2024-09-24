@@ -34,7 +34,6 @@ export const createUser = async (formData: FormData) => {
             last_name,
             password: hashPassword,
             role: role as Role,
-            flag: {},
         },
     })
 

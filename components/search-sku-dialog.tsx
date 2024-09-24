@@ -56,6 +56,7 @@ type Props = {
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
     children?: React.ReactNode
     onSelected: (data: DocumentItem) => void
+    nonStockTypes?: ('Sales' | 'Purchase' | 'OtherInvoice')[]
 }
 
 export default function SearchSkuDialog({
@@ -63,6 +64,7 @@ export default function SearchSkuDialog({
     setIsOpen,
     children,
     onSelected,
+    nonStockTypes = ['Sales'],
 }: Props) {
     const [skuTree, setSkuTree] = React.useState<SkuTree>({
         items: [],
@@ -81,7 +83,9 @@ export default function SearchSkuDialog({
     useEffect(() => {
         const fetchData = async () => {
             const data = await getServiceAndNonStockItemsDefaultFunction({
-                canSales: true,
+                canSales: nonStockTypes.includes('Sales'),
+                canPurchase: nonStockTypes.includes('Purchase'),
+                canOtherInvoice: nonStockTypes.includes('OtherInvoice'),
             })
             setServiceAndNonStockItems(data)
         }

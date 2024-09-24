@@ -449,6 +449,7 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                                             ?.focus()
                                     }, 200)
                                 }}
+                                nonStockTypes={['Purchase']}
                             />
                         </TableRow>
                     </TableBody>

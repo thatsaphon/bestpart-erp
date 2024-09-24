@@ -17,7 +17,6 @@ export default async function UserPage({ params: { id } }: Props) {
             first_name: true,
             last_name: true,
             role: true,
-            flag: true,
             avatarUrl: true,
             createdAt: true,
             updatedAt: true,

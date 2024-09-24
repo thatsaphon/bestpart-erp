@@ -471,6 +471,7 @@ export default function CreateOrUpdateCustomerOrderComponent({
                                                 ?.focus()
                                         }, 100)
                                     }}
+                                    nonStockTypes={['Sales']}
                                 />
                             </TableCell>
                             <TableCell className="w-4 text-right">
