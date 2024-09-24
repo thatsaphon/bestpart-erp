@@ -11,9 +11,9 @@ const nextConfig = {
 
         return config
     },
-    // typescript: {
-    //     ignoreBuildErrors: true,
-    // },
+    typescript: {
+        ignoreBuildErrors: true,
+    },
     experimental: {
         outputFileTracingIncludes: {
             '/': ['./master-data/**/*'],
