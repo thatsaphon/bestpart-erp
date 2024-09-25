@@ -40,7 +40,7 @@ export async function generateMetadata(
     parent: ResolvingMetadata
 ): Promise<Metadata> {
     return {
-        title: `รายละเอียดบิลขาย - ${params.documentNo}`,
+        title: `รายละเอียดใบรับคืน - ${params.documentNo}`,
     }
 }
 
@@ -67,7 +67,7 @@ export default async function SalesInvoiceDetailPage({
         <>
             <div className="mb-2 p-3">
                 <h1 className="my-2 text-3xl transition-colors">
-                    รายละเอียดบิลขาย
+                    รายละเอียดใบรับคืน
                 </h1>
                 <div className="flex justify-between pr-4">
                     <div className="flex gap-3">
@@ -163,8 +163,8 @@ export default async function SalesInvoiceDetailPage({
                             <TableRow key={item.barcode}>
                                 <TableCell>{item.barcode}</TableCell>
                                 <TableCell>
-                                    <p>{item.SkuMaster?.MainSku.name}</p>
-                                    <p>{item.SkuMaster?.detail}</p>
+                                    <p>{item.name}</p>
+                                    <p>{item.description}</p>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {item.quantity}

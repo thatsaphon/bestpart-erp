@@ -205,10 +205,15 @@ export default function CreateOrUpdateSalesReturnInvoiceComponent({
                                         {item.partNumber}
                                     </p>
                                     <div>
-                                        {[
-                                            ...item.MainSkuRemark,
-                                            ...item.SkuMasterRemark,
-                                        ].map((remark) => (
+                                        {item.MainSkuRemark?.map((remark) => (
+                                            <p
+                                                className="text-primary/50"
+                                                key={`${remark.id}-${remark.remark}`}
+                                            >
+                                                {remark?.remark}
+                                            </p>
+                                        ))}
+                                        {item.SkuMasterRemark?.map((remark) => (
                                             <p
                                                 className="text-primary/50"
                                                 key={`${remark.id}-${remark.remark}`}

@@ -96,23 +96,22 @@ export async function createQuotation(
             updatedBy: session?.user.first_name,
             Quotation: {
                 create: {
+                    contactId: contact?.id,
                     QuotationItem: {
                         create: items.map((item) => ({
                             goodsMasterId: item.goodsMasterId,
+                            serviceAndNonStockItemId:
+                                item.serviceAndNonStockItemId,
                             skuMasterId: item.skuMasterId,
                             barcode: String(item.barcode),
-                            description: item.name + ' - ' + item.detail,
+                            name: item.name,
+                            description: item.detail,
                             unit: item.unit,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             pricePerUnit: +item.pricePerUnit.toFixed(2),
                             vat: +((7 / 107) * item.pricePerUnit).toFixed(2),
                         })),
-                    },
-                    Contact: {
-                        connect: {
-                            id: contact?.id,
-                        },
                     },
                 },
             },

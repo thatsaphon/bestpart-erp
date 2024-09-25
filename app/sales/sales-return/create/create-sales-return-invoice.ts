@@ -64,7 +64,10 @@ export const createSalesReturnInvoice = async (
         },
     })
 
-    if (goodsMasters.length !== items.length) {
+    if (
+        goodsMasters.length !==
+        items.filter((item) => typeof item.goodsMasterId === 'number').length
+    ) {
         throw new Error('goods not found')
     }
 

@@ -62,7 +62,7 @@ export const updateSalesReturnInvoice = async (
             },
         },
     })
-    if (goodsMasters.length !== items.length) {
+    if (goodsMasters.length !== items.filter((item) => item.barcode).length) {
         throw new Error('goods not found')
     }
 

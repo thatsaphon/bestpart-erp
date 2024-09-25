@@ -129,8 +129,11 @@ export async function updateQuotation(
                         create: items.map((item) => ({
                             goodsMasterId: item.goodsMasterId,
                             skuMasterId: item.skuMasterId,
+                            serviceAndNonStockItemId:
+                                item.serviceAndNonStockItemId,
                             barcode: String(item.barcode),
-                            description: item.name + ' - ' + item.detail,
+                            name: item.name,
+                            description: item.detail,
                             unit: item.unit,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,

@@ -837,6 +837,7 @@ model QuotationItem {
   barcode         String?
   unit            String?
   quantityPerUnit Float   @default(1)
+  name            String?
   description     String?
 
   quantity     Float

@@ -382,7 +382,11 @@ export default function CreateOrUpdateQuotationComponent({
                                 setIsOpen={setOpen}
                                 onSelected={(data) => {
                                     const isExist = items.find(
-                                        (item) => item.barcode === data.barcode
+                                        (item) =>
+                                            item.goodsMasterId ===
+                                                data.goodsMasterId ||
+                                            item.serviceAndNonStockItemId ===
+                                                data.serviceAndNonStockItemId
                                     )
                                     if (isExist) {
                                         return toast.error(

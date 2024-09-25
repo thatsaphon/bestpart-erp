@@ -111,15 +111,10 @@ export default async function QuotationDetailPage({
                     <TableBody>
                         {document?.Quotation?.QuotationItem.map((item) => (
                             <TableRow key={item.barcode}>
-                                <TableCell>{item.barcode}</TableCell>
+                                <TableCell>{item.barcode || '-'}</TableCell>
                                 <TableCell>
-                                    <p>
-                                        {
-                                            item?.GoodsMaster?.SkuMaster.MainSku
-                                                .name
-                                        }
-                                    </p>
-                                    <p>{item?.GoodsMaster?.SkuMaster.detail}</p>
+                                    <p>{item.name}</p>
+                                    <p>{item.description}</p>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {item.quantity}

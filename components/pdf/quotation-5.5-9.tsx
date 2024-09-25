@@ -165,8 +165,7 @@ export default function QuotationPdf_5x9({ document }: Props) {
                         <Text style={styles.col5}>{`${item.unit}`}</Text>
                         <Text style={styles.col6}>
                             {(
-                                (item.pricePerUnit + item.vat) *
-                                item.quantity
+                                item.pricePerUnit * item.quantity
                             ).toLocaleString()}
                         </Text>
                     </View>
@@ -180,9 +179,7 @@ export default function QuotationPdf_5x9({ document }: Props) {
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
                                 document?.Quotation?.QuotationItem.reduce(
-                                    (a, b) =>
-                                        a +
-                                        (b.pricePerUnit + b.vat) * b.quantity,
+                                    (a, b) => a + b.pricePerUnit * b.quantity,
                                     0
                                 ).toLocaleString()
                             }
