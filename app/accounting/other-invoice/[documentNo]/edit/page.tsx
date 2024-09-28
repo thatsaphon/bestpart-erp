@@ -5,7 +5,7 @@ import {
     getApPaymentMethods,
     getPaymentMethods,
 } from '@/app/actions/accounting'
-import CreateUpdateOtherExpenseComponent from '../../create/create-update-other-expense'
+import CreateUpdateOtherInvoiceComponent from '../../create/create-update-other-invoice'
 import { AccountType, AssetType, DocumentRemark, Prisma } from '@prisma/client'
 
 type Props = {
@@ -109,7 +109,7 @@ export default async function UpdateOtherExpensePage({
             <h1 className="my-2 text-2xl transition-colors">
                 บันทึกบิลค่าใช้จ่ายใหม่
             </h1>
-            <CreateUpdateOtherExpenseComponent
+            <CreateUpdateOtherInvoiceComponent
                 chartOfAccounts={otherExpenses}
                 paymentMethods={paymentMethods}
                 defaultDocumentDetails={document[0]}

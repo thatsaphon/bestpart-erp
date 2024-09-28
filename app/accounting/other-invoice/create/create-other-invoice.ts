@@ -13,39 +13,13 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import deleteOtherInvoice from '../[documentNo]/delete-other-invoice'
+import { DocumentItem } from '@/types/document-item'
+import { DocumentDetail } from '@/types/document-detail'
 
 export type OtherInvoiceItems = {}
 
 export const createOtherInvoice = async (
-    formData: FormData,
-    items: {
-        chartOfAccountId: number
-        chartOfAccountName: string
-        amount: number
-        chartOfAccountType: AccountType
-        assetName?: string
-        assetUsefulLife?: number
-        assetResidualValue?: number
-        assetType: AssetType | undefined
-    }[],
-    payments: {
-        id: number
-        amount: number
-    }[],
-    remarks: { id?: number; remark: string }[]
-) => {
-    const validator = z.object({
-        contactId: z.string().trim().optional(),
-        contactName: z.string().trim().optional(),
-        address: z.string().trim().optional(),
-        phone: z.string().trim().optional().nullable(),
-        taxId: z.string().trim().optional().nullable(),
-        date: z.string().trim().min(1, 'date must not be empty'),
-        documentNo: z.string().trim().optional().nullable(),
-        referenceNo: z.string().trim().optional().nullable(),
-    })
-
-    let {
+    {
         contactId,
         contactName,
         address,
@@ -54,18 +28,36 @@ export const createOtherInvoice = async (
         date,
         documentNo,
         referenceNo,
-    } = await validator.parse({
-        contactId: formData.get('contactId') || undefined,
-        contactName: formData.get('contactName') || undefined,
-        address: formData.get('address') || undefined,
-        phone: formData.get('phone') || undefined,
-        taxId: formData.get('taxId') || undefined,
-        date: formData.get('date'),
-        documentNo: formData.get('documentNo') || undefined,
-        referenceNo: formData.get('referenceNo') || undefined,
-    })
-
+    }: DocumentDetail,
+    items: DocumentItem[],
+    payments: {
+        id: number
+        amount: number
+    }[],
+    remarks: { id?: number; remark: string }[]
+) => {
     if (!documentNo) documentNo = await generateDocumentNumber('INV', date)
+
+    const serviceAndNonStockItemsGLCreate = await Promise.all(
+        items
+            .filter((item) => item.serviceAndNonStockItemId)
+            .map(async (item) => {
+                const serviceAndNonStockItem =
+                    await prisma.serviceAndNonStockItem.findUniqueOrThrow({
+                        where: {
+                            id: item.serviceAndNonStockItemId,
+                        },
+                    })
+                return {
+                    chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
+                    amount: +(
+                        item.quantity *
+                        item.pricePerUnit *
+                        (item.vatable ? 100 / 107 : 1)
+                    ).toFixed(2),
+                }
+            })
+    )
 
     const createdBy = await getServerSession(authOptions)
 
@@ -81,84 +73,40 @@ export const createOtherInvoice = async (
             contactName: contactName || '',
             phone: phone || '',
             taxId: taxId || '',
-            remark: { create: remarks },
+            DocumentRemark: { create: remarks },
             referenceNo: referenceNo,
-            GeneralLedger: {
-                create: [
-                    ...items
-                        .filter((item) => !item.assetType)
-                        .map((item) => ({
-                            chartOfAccountId: item.chartOfAccountId,
-                            amount: item.amount,
+            OtherInvoice: {
+                create: {
+                    contactId: Number(contactId) || undefined,
+                    OtherInvoiceItem: {
+                        create: items.map((item) => ({
+                            serviceAndNonStockItemId:
+                                item.serviceAndNonStockItemId,
+                            quantity: item.quantity,
+                            unit: item.unit,
+                            costPerUnit: item.pricePerUnit,
+                            vat: item.vatable
+                                ? +(item.pricePerUnit * (7 / 107)).toFixed(2)
+                                : 0,
+                            name: item.name,
+                            description: item.detail,
                         })),
-                    ...payments.map((payment) => {
-                        return {
-                            chartOfAccountId: payment.id,
-                            amount: -payment.amount,
-                        }
-                    }),
-                ],
-            },
-            ApSubledger: !!contactId
-                ? {
-                      create: {
-                          contactId: Number(contactId),
-                          paymentStatus: calculateApPaymentStatus(payments),
-                      },
-                  }
-                : undefined,
-            AssetMovement: {
-                create: items
-                    .filter((item) => item.assetType)
-                    .map((item) => ({
-                        AssetRegistration: {
-                            create: {
-                                name: item.assetName as string,
-                                description: '',
-                                type: item.assetType as AssetType,
-                                acquisitionDate: new Date(date),
-                                usefulLife: item.assetUsefulLife,
-                                cost: item.amount,
-                                remark: '',
-                                residualValue: item.assetResidualValue,
-                            },
-                        },
-                        date: new Date(date),
-                        value: item.amount,
-                        GeneralLedger: {
-                            create: {
-                                chartOfAccountId: item.chartOfAccountId,
-                                amount: item.amount,
-                            },
-                        },
-                    })),
-            },
-        },
-        include: {
-            AssetMovement: { include: { GeneralLedger: true } },
-        },
-    })
-
-    try {
-        await prisma.$queryRawUnsafe(`
-            INSERT INTO "_DocumentToGeneralLedger" ("A", "B") VALUES ${document.AssetMovement.map(
-                (item) => `(${document.id}, ${item.GeneralLedger.id})`
-            ).join(', ')}
-            `)
-    } catch (err) {
-        await deleteOtherInvoice(documentNo)
-        await prisma.generalLedger.deleteMany({
-            where: {
-                id: {
-                    in: document.AssetMovement.map(
-                        (item) => item.GeneralLedger.id
-                    ),
+                    },
+                    GeneralLedger: {
+                        create: [
+                            ...serviceAndNonStockItemsGLCreate,
+                            ...payments.map((payment) => {
+                                return {
+                                    chartOfAccountId: payment.id,
+                                    amount: -payment.amount,
+                                }
+                            }),
+                        ],
+                    },
                 },
             },
-        })
-
-        throw err
-    }
+        },
+    })
 
     revalidatePath('/accounting/other-invoice')
     redirect('/accounting/other-invoice/')

@@ -605,6 +605,7 @@ model OtherInvoice {
 
   OtherInvoiceItem OtherInvoiceItem[]
   GeneralLedger    GeneralLedger[]
+  AssetMovement    AssetMovement[]
 }
 
 model OtherInvoiceItem {
@@ -626,10 +627,6 @@ model OtherInvoiceItem {
   vat         Float
 
   vatable Boolean @default(true)
-
-  AssetMovement AssetMovement?
-
-  amount Float
 }
 
 enum AssetType {
@@ -677,10 +674,10 @@ model AssetMovement {
   Asset   Asset @relation(fields: [assetId], references: [id])
   assetId Int
 
-  OtherInvoiceItem   OtherInvoiceItem? @relation(fields: [otherInvoiceItemId], references: [id])
-  otherInvoiceItemId Int?              @unique
-  JournalVoucher     JournalVoucher?   @relation(fields: [journalVoucherId], references: [id])
-  journalVoucherId   Int?
+  OtherInvoice     OtherInvoice?   @relation(fields: [otherInvoiceId], references: [id])
+  otherInvoiceId   Int?
+  JournalVoucher   JournalVoucher? @relation(fields: [journalVoucherId], references: [id])
+  journalVoucherId Int?
 
   value Float
 

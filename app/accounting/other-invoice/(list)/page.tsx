@@ -58,12 +58,7 @@ export default async function OtherPaymentPage({
             OtherInvoice: {
                 include: {
                     Contact: true,
-                    OtherInvoiceItem: {
-                        include: {
-                            AssetMovement: { include: { Asset: true } },
-                            // ChartOfAccount: true,
-                        },
-                    },
+                    OtherInvoiceItem: true,
                     GeneralLedger: true,
                 },
             },
