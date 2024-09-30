@@ -71,6 +71,7 @@ model Document {
   OtherInvoice    OtherInvoice?
   StockMovement   StockMovement[]
   DocumentView    DocumentView?
+  OtherPayment    OtherPayment?
 }
 
 enum DocumentType {
@@ -147,6 +148,7 @@ model GeneralLedger {
   JournalVoucher   JournalVoucher?  @relation(fields: [journalVoucherId], references: [id])
   OtherInvoice     OtherInvoice?    @relation(fields: [otherInvoiceId], references: [id])
   CustomerOrder    CustomerOrder?   @relation(fields: [customerOrderId], references: [id])
+  OtherPayment     OtherPayment?    @relation(fields: [otherPaymentId], references: [id])
 
   salesId           Int?
   salesReturnId     Int?
@@ -157,6 +159,7 @@ model GeneralLedger {
   journalVoucherId  Int?
   otherInvoiceId    Int?
   customerOrderId   Int?
+  otherPaymentId    Int?
 
   @@index([chartOfAccountId])
 }
@@ -191,6 +194,7 @@ model Contact {
   PurchaseOrder   PurchaseOrder[]
   OtherInvoice    OtherInvoice[]
   StockMovement   StockMovement[]
+  OtherPayment    OtherPayment[]
 }
 
 model MainSku {
@@ -606,6 +610,8 @@ model OtherInvoice {
   OtherInvoiceItem OtherInvoiceItem[]
   GeneralLedger    GeneralLedger[]
   AssetMovement    AssetMovement[]
+  OtherPayment     OtherPayment?      @relation(fields: [otherPaymentId], references: [id])
+  otherPaymentId   Int?
 }
 
 model OtherInvoiceItem {
@@ -627,6 +633,17 @@ model OtherInvoiceItem {
   vat         Float
 
   vatable Boolean @default(true)
+}
+
+model OtherPayment {
+  id         Int      @id @default(autoincrement())
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+  Contact    Contact  @relation(fields: [contactId], references: [id])
+  contactId  Int
+
+  OtherInvoice  OtherInvoice[]
+  GeneralLedger GeneralLedger[]
 }
 
 enum AssetType {

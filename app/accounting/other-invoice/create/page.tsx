@@ -11,6 +11,7 @@ export default async function CreateOtherExpensePage({}: Props) {
     const nonStockItems = await getServiceAndNonStockItemsDefaultFunction({
         canOtherInvoice: true,
     })
+    const paymentMethods = await getPaymentMethods()
 
     return (
         <>
@@ -19,6 +20,7 @@ export default async function CreateOtherExpensePage({}: Props) {
             </h1>
             <CreateUpdateOtherInvoiceComponent
                 nonStockItems={nonStockItems}
+                paymentMethods={paymentMethods}
                 // chartOfAccounts={otherExpenses}
                 // paymentMethods={await getPaymentMethods()}
             />

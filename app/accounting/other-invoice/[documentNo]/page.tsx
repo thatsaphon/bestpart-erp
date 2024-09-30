@@ -1,6 +1,3 @@
-import { DatePickerWithPresets } from '@/components/date-picker-preset'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
     Table,
     TableBody,
@@ -13,16 +10,16 @@ import {
 } from '@/components/ui/table'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
-import Link from 'next/link'
 
 import { getApPaymentMethods } from '@/app/actions/accounting'
-import SelectSearchCustomer from '@/components/select-search-customer'
-import { cn } from '@/lib/utils'
+import { getOtherInvoiceDefaultFunction } from '@/types/other-invoice/other-invoice'
+import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
+import PaymentComponentReadonly from '@/components/payment-component-readonly'
+import { generalLedgerToPayments } from '@/types/payment/payment'
+import UpdateDocumentRemark from '@/components/update-document-remark'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { getOtherInvoiceDetail } from './getOtherInvoiceDetail'
-import SelectSearchVendor from '@/components/select-search-vendor'
-import EditOtherInvoicePaymentsComponents from './edit-other-invoice-payments-components'
-import DeleteOtherInvoiceButton from './delete-other-invoice-button'
 
 type Props = {
     params: { documentNo: string }
@@ -31,9 +28,9 @@ type Props = {
 export default async function OtherInvoiceDetailPage({
     params: { documentNo },
 }: Props) {
-    const document = await getOtherInvoiceDetail(documentNo)
+    const [document] = await getOtherInvoiceDefaultFunction({ documentNo })
     const session = await getServerSession(authOptions)
-    const paymentMethods = await getApPaymentMethods()
+    const paymentMethods = await getPaymentMethods()
 
     if (!document)
         return (
@@ -50,139 +47,95 @@ export default async function OtherInvoiceDetailPage({
                 <h1 className="my-2 text-3xl transition-colors">
                     รายละเอียดบิล
                 </h1>
-                <div className="flex justify-between pr-4">
-                    {/* <div className="flex gap-3">
-                        <div className="space-x-2">
-                            <Label>วันที่</Label>
-                            <DatePickerWithPresets
-                                defaultDate={document?.date}
-                                disabled
-                            />
-                        </div>
-                        <div className="space-x-2">
-                            <Label>No.</Label>
-                            <Input
-                                className="w-auto"
-                                placeholder="Optional"
-                                defaultValue={document?.documentNo}
-                                disabled
-                            />
-                        </div>
-
-                        {session?.user.role === 'ADMIN' && (
-                            <div>
-                                <DeleteOtherInvoiceButton
-                                    documentNo={documentNo}
-                                />
-                            </div>
-                        )}
-                    </div> */}
-                    {/* <Suspense fallback={<div>Loading...</div>}>
-                    </Suspense> */}
-                    {/* <BlobProviderClient
-                        key={new Date().getTime()}
-                        document={document}
-                        documentType={'SalesInvoicePdf_5x9'}
-                    /> */}
+                <div className="flex items-baseline gap-3">
+                    <DocumentDetailReadonly
+                        documentDetail={{
+                            ...document,
+                            contactId: document.OtherInvoice?.contactId,
+                        }}
+                    />
+                    <Link
+                        href={
+                            '/accounting/other-invoice/' + documentNo + '/edit'
+                        }
+                    >
+                        <Button type="button" variant={'destructive'}>
+                            แก้ไข
+                        </Button>
+                    </Link>
                 </div>
-                {/* <div className="flex gap-3">
-                    <div className="my-1 flex items-baseline space-x-2">
-                        <Label>ลูกค้า</Label>
-                        <SelectSearchVendor
-                            name={'customerId'}
-                            hasTextArea={true}
-                            // placeholder="Optional"
-                            defaultValue={String(
-                                document?.ApSubledger?.Contact.id || ''
-                            )}
-                            defaultAddress={{
-                                name: document?.contactName || '',
-                                address: document?.address || '',
-                                phone: document?.phone || '',
-                                taxId: document?.taxId || '',
-                            }}
-                            disabled
-                        />
-                    </div>
-                </div> */}
                 <Table className="mt-3">
                     <TableHeader>
                         <TableRow>
-                            <TableHead>เลชบัญชี</TableHead>
-                            <TableHead>ชื่อบัญชี</TableHead>
+                            <TableHead>ชื่อรายการ</TableHead>
+                            <TableHead>รายละเอียด</TableHead>
+                            <TableHead className="text-right">จำนวน</TableHead>
+                            <TableHead className="text-right">หน่วย</TableHead>
                             <TableHead className="text-right">
-                                จำนวนเงิน
+                                ราคาต่อหน่วย
                             </TableHead>
-                            <TableHead className="text-right">
-                                ชื่อสินทรัพย์
-                            </TableHead>
-                            <TableHead className="text-right">
-                                อายุการใช้งาน
-                            </TableHead>
-                            <TableHead className="text-right">
-                                มูลค่าคงเหลือ
-                            </TableHead>
+                            <TableHead className="text-right">รวม</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {/* {document?.GeneralLedger.filter(
-                            ({ chartOfAccountId }) =>
-                                !paymentMethods
-                                    .map(({ id }) => id)
-                                    .includes(chartOfAccountId)
-                        ).map((item) => (
-                            <TableRow key={item.id}>
-                                <TableCell>{item.chartOfAccountId}</TableCell>
-                                <TableCell>
-                                    {item.ChartOfAccount.name}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {item.amount}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {item.AssetMovement?.AssetRegistration.name}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {
-                                        item.AssetMovement?.AssetRegistration
-                                            .usefulLife
-                                    }
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {
-                                        item.AssetMovement?.AssetRegistration
-                                            .residualValue
-                                    }
-                                </TableCell>
-                            </TableRow>
-                        ))} */}
+                        {document.OtherInvoice?.OtherInvoiceItem.map(
+                            (item, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{item.name}</TableCell>
+                                    <TableCell>{item.description}</TableCell>
+                                    <TableCell className="text-right">
+                                        {item.quantity}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {item.unit}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {item.costPerUnit.toLocaleString()}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {(
+                                            item.costPerUnit * item.quantity
+                                        ).toLocaleString()}
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        )}
                     </TableBody>
                     <TableFooter>
                         <TableRow>
-                            <TableCell colSpan={2} className="text-right">
+                            <TableCell colSpan={5} className="text-right">
                                 Total
                             </TableCell>
                             <TableCell className="text-right">
-                                {/* {Math.abs(
-                                    Number(
-                                        document?.GeneralLedger.filter(
-                                            (item) =>
-                                                !paymentMethods
-                                                    .map(({ id }) => id)
-                                                    .includes(
-                                                        item.chartOfAccountId
-                                                    )
-                                        )?.reduce((a, b) => a + b.amount, 0)
-                                    )
-                                )} */}
+                                {document.OtherInvoice?.OtherInvoiceItem.reduce(
+                                    (a, b) => a + b.quantity * b.costPerUnit,
+                                    0
+                                ).toLocaleString()}
                             </TableCell>
                             <TableCell colSpan={3}></TableCell>
                         </TableRow>
-                        <TableRow className="bg-background">
+                        <TableRow>
+                            <TableCell colSpan={3}>
+                                <UpdateDocumentRemark
+                                    existingDocumentRemark={
+                                        document.DocumentRemark
+                                    }
+                                    documentId={document.id}
+                                />
+                            </TableCell>
                             <TableCell
-                                colSpan={6}
+                                colSpan={3}
                                 className="space-x-1 text-right"
-                            ></TableCell>
+                            >
+                                <PaymentComponentReadonly
+                                    payments={generalLedgerToPayments(
+                                        document.OtherInvoice?.GeneralLedger ||
+                                            [],
+                                        { isCash: true, isAp: true },
+                                        true
+                                    )}
+                                />
+                            </TableCell>
                         </TableRow>
                     </TableFooter>
                 </Table>

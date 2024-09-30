@@ -15,6 +15,9 @@ export async function getPaymentMethods() {
                 {
                     isDeposit: true,
                 },
+                {
+                    isAp: true,
+                },
             ],
         },
         select: {
@@ -22,6 +25,7 @@ export async function getPaymentMethods() {
             name: true,
             type: true,
             isAr: true,
+            isAp: true,
             isCash: true,
             isDeposit: true,
         },

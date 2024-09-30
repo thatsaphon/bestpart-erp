@@ -17,6 +17,9 @@ import {
 import { fullDateFormat } from '@/lib/date-format'
 import { AssetType } from '@prisma/client'
 import React from 'react'
+import CreateAssetDialog from './create-asset-dialog'
+import { EyeIcon } from 'lucide-react'
+import Link from 'next/link'
 
 type Props = {}
 
@@ -32,10 +35,12 @@ export default async function AssetManagementPage({}: Props) {
             // AssetRegistrationDocument: true,
         },
     })
-
     return (
         <main className="h-full w-full p-3">
-            <h1 className="mb-3 text-3xl font-bold">Asset Management</h1>
+            <div className="flex items-center gap-2">
+                <h1 className="mb-3 text-3xl font-bold">Asset Management</h1>
+                <CreateAssetDialog />
+            </div>
 
             <div className="p-6">
                 <Accordion
@@ -55,9 +60,14 @@ export default async function AssetManagementPage({}: Props) {
                                         <TableRow>
                                             <TableHead>Name</TableHead>
                                             <TableHead>Description</TableHead>
-                                            <TableHead>Price</TableHead>
+                                            <TableHead className="text-right">
+                                                Price
+                                            </TableHead>
                                             <TableHead>Date</TableHead>
-                                            <TableHead>Useful Life</TableHead>
+                                            <TableHead className="text-right">
+                                                Useful Life
+                                            </TableHead>
+                                            <TableHead></TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -73,20 +83,24 @@ export default async function AssetManagementPage({}: Props) {
                                                     <TableCell>
                                                         {asset.description}
                                                     </TableCell>
-                                                    <TableCell>
-                                                        {asset.AssetMovement.find(
-                                                            (movement) =>
-                                                                movement.value >
-                                                                0
-                                                        )?.value.toLocaleString()}
+                                                    <TableCell className="text-right">
+                                                        {asset.cost.toLocaleString()}
                                                     </TableCell>
                                                     <TableCell>
                                                         {fullDateFormat(
                                                             asset.acquisitionDate
                                                         )}
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell className="text-right">
                                                         {asset.usefulLife}
+                                                    </TableCell>
+
+                                                    <TableCell>
+                                                        <Link
+                                                            href={`/accounting/asset-management/${asset.id}`}
+                                                        >
+                                                            <EyeIcon className="h-4 w-4" />
+                                                        </Link>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}

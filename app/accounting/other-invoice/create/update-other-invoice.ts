@@ -16,10 +16,12 @@ import deleteOtherInvoice from '../[documentNo]/delete-other-invoice'
 import { DocumentItem } from '@/types/document-item'
 import { DocumentDetail } from '@/types/document-detail'
 import { Payment } from '@/types/payment/payment'
+import { GetDocumentRemark } from '@/types/remark/document-remark'
 
 export type OtherInvoiceItems = {}
 
-export const createOtherInvoice = async (
+export const updateOtherInvoice = async (
+    documentId: number,
     {
         contactId,
         contactName,
@@ -32,7 +34,7 @@ export const createOtherInvoice = async (
     }: DocumentDetail,
     items: DocumentItem[],
     payments: Payment[],
-    remarks: { id?: number; remark: string }[]
+    remarks: GetDocumentRemark[]
 ) => {
     if (!documentNo) documentNo = await generateDocumentNumber('INV', date)
 
@@ -64,9 +66,23 @@ export const createOtherInvoice = async (
             })
     )
 
+    const document = await prisma.document.findUniqueOrThrow({
+        where: {
+            id: documentId,
+        },
+        include: {
+            OtherInvoice: {
+                include: { GeneralLedger: true, OtherInvoiceItem: true },
+            },
+        },
+    })
+
     const session = await getServerSession(authOptions)
 
-    const document = await prisma.document.create({
+    await prisma.document.update({
+        where: {
+            id: documentId,
+        },
         data: {
             date: new Date(date),
             documentNo: documentNo,
@@ -78,16 +94,29 @@ export const createOtherInvoice = async (
             phone: phone || '',
             taxId: taxId || '',
             DocumentRemark: {
-                create: remarks.map(({ remark }) => ({
-                    remark: remark,
-                    userId: session?.user.id,
-                })),
+                create: remarks
+                    .map(({ id, remark }) => ({
+                        id,
+                        remark,
+                        userId: session?.user.id,
+                    }))
+                    .filter(({ id }) => !id),
+                update: remarks
+                    .filter(({ id }) => id)
+                    .map((remark) => ({
+                        where: { id: remark.id },
+                        data: {
+                            remark: remark.remark,
+                            isDeleted: remark.isDeleted,
+                        },
+                    })),
             },
             referenceNo: referenceNo,
             OtherInvoice: {
-                create: {
+                update: {
                     contactId: Number(contactId) || undefined,
                     OtherInvoiceItem: {
+                        delete: document.OtherInvoice?.OtherInvoiceItem,
                         create: items.map((item) => ({
                             serviceAndNonStockItemId:
                                 item.serviceAndNonStockItemId,
@@ -102,6 +131,7 @@ export const createOtherInvoice = async (
                         })),
                     },
                     GeneralLedger: {
+                        delete: document.OtherInvoice?.GeneralLedger,
                         create: [
                             ...serviceAndNonStockItemsGLCreate,
                             ...payments.map((payment) => {

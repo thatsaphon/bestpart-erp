@@ -36,7 +36,6 @@ import { createOtherInvoice } from './create-other-invoice'
 import toast from 'react-hot-toast'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
 import { DocumentItem } from '@/types/document-item'
-import { updateOtherInvoice } from '../[documentNo]/edit/update-other-invoice'
 import { DocumentDetailForm } from '@/components/document-detail-form'
 import {
     DocumentDetail,
@@ -44,25 +43,73 @@ import {
 } from '@/types/document-detail'
 import { GetServiceAndNonStockItem } from '@/types/service-and-non-stock-item/service-and-non-stock-item'
 import { nonStockItemToDocumentItem } from '@/types/service-and-non-stock-item/non-stock-to-document-item'
+import {
+    inputNumberPreventDefault,
+    onFocusPreventDefault,
+} from '@/lib/input-number-prevent-default'
+import { generalLedgerToPayments, Payment } from '@/types/payment/payment'
+import { GetOtherInvoice } from '@/types/other-invoice/other-invoice'
+import { GetDocumentRemark } from '@/types/remark/document-remark'
+import AddPaymentComponent from '@/components/add-payment-component'
+import CreateDocumentRemark from '@/components/create-document-remark'
+import { getApPaymentMethods } from '@/app/actions/accounting'
+import { otherInvoiceItemToDocumentItem } from '@/types/other-invoice/other-invoice-item'
+import { updateOtherInvoice } from './update-other-invoice'
 
 type Props = {
+    existingOtherInvoice?: GetOtherInvoice
     nonStockItems: GetServiceAndNonStockItem[]
+    paymentMethods: Awaited<ReturnType<typeof getPaymentMethods>>
 }
 
 export default function CreateUpdateOtherInvoiceComponent({
+    existingOtherInvoice,
     nonStockItems,
+    paymentMethods,
 }: Props) {
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
         getDefaultDocumentDetail()
     )
-    const [items, setItems] = React.useState<DocumentItem[]>([])
+    const [items, setItems] = React.useState<DocumentItem[]>(
+        otherInvoiceItemToDocumentItem(
+            existingOtherInvoice?.OtherInvoice?.OtherInvoiceItem
+        )
+    )
     const [selectedNonStockItem, setSelectedNonStockItem] =
-        React.useState<number>()
+        React.useState<GetServiceAndNonStockItem>()
+
+    const [payments, setPayments] = React.useState<Payment[]>(
+        generalLedgerToPayments(
+            existingOtherInvoice?.OtherInvoice?.GeneralLedger || [],
+            { isAp: true, isCash: true },
+            true
+        )
+    )
+    const [documentRemarks, setDocumentRemarks] = React.useState<
+        GetDocumentRemark[]
+    >(existingOtherInvoice?.DocumentRemark || [])
     return (
         <form
             className="p-3"
             action={async (formData) => {
                 try {
+                    if (!existingOtherInvoice) {
+                        await createOtherInvoice(
+                            documentDetail,
+                            items,
+                            payments,
+                            documentRemarks
+                        )
+                    } else {
+                        await updateOtherInvoice(
+                            existingOtherInvoice.id,
+                            documentDetail,
+                            items,
+                            payments,
+                            documentRemarks
+                        )
+                    }
+                    toast.success('บันทึกสําเร็จ')
                 } catch (err) {
                     if (err instanceof Error) {
                         return toast.error(err.message)
@@ -131,6 +178,10 @@ export default function CreateUpdateOtherInvoiceComponent({
                             <TableCell className="text-rignt">
                                 <div className="flex justify-end">
                                     <Input
+                                        onKeyDown={(e) => {
+                                            inputNumberPreventDefault(e)
+                                        }}
+                                        onFocus={onFocusPreventDefault}
                                         type="number"
                                         className="w-24 text-right"
                                         placeholder="จำนวน"
@@ -179,6 +230,10 @@ export default function CreateUpdateOtherInvoiceComponent({
                             <TableCell className="text-rignt">
                                 <div className="flex justify-end">
                                     <Input
+                                        onKeyDown={(e) => {
+                                            inputNumberPreventDefault(e)
+                                        }}
+                                        onFocus={onFocusPreventDefault}
                                         type="number"
                                         name="amount"
                                         className="w-24 text-right"
@@ -223,9 +278,13 @@ export default function CreateUpdateOtherInvoiceComponent({
                     <TableRow>
                         <TableCell colSpan={6}>
                             <Select
-                                value={String(selectedNonStockItem)}
+                                value={String(selectedNonStockItem?.id)}
                                 onValueChange={(value) => {
-                                    setSelectedNonStockItem(+value)
+                                    setSelectedNonStockItem(
+                                        nonStockItems.find(
+                                            ({ id }) => id === Number(value)
+                                        )
+                                    )
                                 }}
                             >
                                 <SelectTrigger>
@@ -258,10 +317,7 @@ export default function CreateUpdateOtherInvoiceComponent({
                                     setItems([
                                         ...items,
                                         nonStockItemToDocumentItem(
-                                            nonStockItems.find(
-                                                ({ id }) =>
-                                                    id === selectedNonStockItem
-                                            )!
+                                            selectedNonStockItem
                                         ),
                                     ])
                                 }}
@@ -283,11 +339,59 @@ export default function CreateUpdateOtherInvoiceComponent({
                             )}
                         </TableCell>
                     </TableRow>
+                    <TableRow>
+                        <TableCell colSpan={7} className="text-center">
+                            <AddPaymentComponent
+                                paymentMethods={paymentMethods}
+                                payments={payments}
+                                setPayments={setPayments}
+                            />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell colSpan={7}>
+                            <CreateDocumentRemark
+                                existingDocumentRemark={
+                                    existingOtherInvoice?.DocumentRemark || []
+                                }
+                                documentRemarks={documentRemarks}
+                                setDocumentRemarks={setDocumentRemarks}
+                            />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell colSpan={6}>
+                            <div className="flex justify-end gap-2">
+                                {existingOtherInvoice ? (
+                                    <Button disabled={items.length === 0}>
+                                        แก้ไขใบเสร็จอื่น
+                                    </Button>
+                                ) : (
+                                    <Button disabled={items.length === 0}>
+                                        สร้างใบเสร็จอื่น
+                                    </Button>
+                                )}
+                                {/* <Button
+                                        variant={'destructive'}
+                                        type="button"
+                                        onClick={(e) => {
+                                            setItems(
+                                                salesReturnItemsToDocumentItems(
+                                                    existingSalesReturn
+                                                        ?.SalesReturn
+                                                        ?.SalesReturnItem || []
+                                                )
+                                            )
+                                        }}
+                                    >
+                                        รีเซ็ต
+                                    </Button> */}
+                            </div>
+                        </TableCell>
+                        <TableHead></TableHead>
+                    </TableRow>
                 </TableFooter>
             </Table>
-            <div className="mx-[20%] flex justify-end">
-                <Button disabled={items.length === 0}>ยืนยัน</Button>
-            </div>
         </form>
     )
 }

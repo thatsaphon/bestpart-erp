@@ -15,6 +15,8 @@ import React from 'react'
 import Link from 'next/link'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import { fullDateFormat } from '@/lib/date-format'
+import { generalLedgerToPayments } from '@/types/payment/payment'
+import { getOtherInvoiceDefaultFunction } from '@/types/other-invoice/other-invoice'
 
 type Props = {
     searchParams: {
@@ -36,38 +38,16 @@ export default async function OtherPaymentPage({
         to = format(new Date(), 'yyyy-MM-dd'),
     },
 }: Props) {
-    const otherInvoice = await prisma.document.findMany({
-        where: {
+    const otherInvoice = await getOtherInvoiceDefaultFunction(
+        {
             type: 'OtherInvoice',
-            AND: [
-                {
-                    date: {
-                        gte: new Date(from),
-                    },
-                },
-                {
-                    date: {
-                        lt: new Date(
-                            new Date(to).setDate(new Date(to).getDate() + 1)
-                        ),
-                    },
-                },
-            ],
         },
-        include: {
-            OtherInvoice: {
-                include: {
-                    Contact: true,
-                    OtherInvoiceItem: true,
-                    GeneralLedger: true,
-                },
-            },
-        },
-        orderBy: [{ date: 'desc' }, { documentNo: 'desc' }],
-        take: +limit,
-        skip: (Number(page) - 1) * Number(limit),
-    })
-    console.log(otherInvoice)
+        {
+            orderBy: [{ date: 'desc' }, { documentNo: 'desc' }],
+            take: +limit,
+            skip: (Number(page) - 1) * Number(limit),
+        }
+    )
 
     const documentCount = await prisma.document.count({
         where: {
@@ -118,6 +98,26 @@ export default async function OtherPaymentPage({
                                 {invoice.OtherInvoice?.Contact?.name || '-'}
                             </TableCell>
                             <TableCell>{invoice.createdBy}</TableCell>
+                            <TableCell className="text-center">
+                                {generalLedgerToPayments(
+                                    invoice.OtherInvoice?.GeneralLedger || [],
+                                    { isAp: true, isCash: false },
+                                    true
+                                ).length === 0 ? (
+                                    <Badge>เงินสด</Badge>
+                                ) : invoice.OtherInvoice?.otherPaymentId ? (
+                                    <Badge>จ่ายแล้ว</Badge>
+                                ) : (
+                                    <Badge>ยังไม่จ่าย</Badge>
+                                )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                                {invoice.OtherInvoice?.OtherInvoiceItem.reduce(
+                                    (acc, item) =>
+                                        acc + item.costPerUnit * item.quantity,
+                                    0
+                                ).toLocaleString()}
+                            </TableCell>
                             {/* <TableCell className="text-center">
                                 {invoice.ApSubledger?.paymentStatus ===
                                 'Paid' ? (
