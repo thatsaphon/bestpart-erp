@@ -18,20 +18,22 @@ import { Button } from '@/components/ui/button'
 import { updateAsset } from './update-asset'
 import AssetUpdateForm from './asset-update-form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import AssetMovement from './asset-movement'
+import { getAssetDefaultFunction } from '@/types/asset/asset'
 
 type Props = {
     params: { id: string }
 }
 
 export default async function AssetDetailPage({ params: { id } }: Props) {
-    const asset = await prisma.asset.findUnique({ where: { id: +id } })
+    const [asset] = await getAssetDefaultFunction({ id: +id })
 
     if (!asset) return <>ไม่พบข้อมูล</>
 
     return (
         <div className="p-3">
             <h1 className="text-3xl">จัดการสินทรัพย์</h1>
-            <Tabs className="mt-3" defaultValue="detail">
+            <Tabs className="mt-3" defaultValue="movement">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="detail">Detail</TabsTrigger>
                     <TabsTrigger value="movement">Movement</TabsTrigger>
@@ -39,7 +41,9 @@ export default async function AssetDetailPage({ params: { id } }: Props) {
                 <TabsContent value="detail">
                     <AssetUpdateForm asset={asset} />
                 </TabsContent>
-                <TabsContent value="movement"></TabsContent>
+                <TabsContent value="movement">
+                    <AssetMovement asset={asset} />
+                </TabsContent>
             </Tabs>
         </div>
     )

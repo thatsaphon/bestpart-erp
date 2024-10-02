@@ -39,6 +39,11 @@ import { CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { updateAsset } from './update-asset'
 import toast from 'react-hot-toast'
+import {
+    inputNumberPreventDefault,
+    onFocusPreventDefault,
+} from '@/lib/input-number-prevent-default'
+import DateFormfield from '@/components/date-formfield'
 
 const [firstKey, ...otherKeys] = typedObjectKeys(AssetType)
 
@@ -147,55 +152,10 @@ export default function AssetUpdateForm({ asset }: Props) {
                         </FormItem>
                     )}
                 />
-                <FormField
-                    control={form.control}
+                <DateFormfield
+                    formControl={form.control}
                     name="acquisitionDate"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                            <FormLabel>Acquisition Date</FormLabel>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <FormControl>
-                                        <Button
-                                            variant={'outline'}
-                                            className={cn(
-                                                'w-full pl-3 text-left font-normal',
-                                                !field.value &&
-                                                    'text-muted-foreground'
-                                            )}
-                                        >
-                                            {field.value ? (
-                                                format(field.value, 'PPP')
-                                            ) : (
-                                                <span>Pick a date</span>
-                                            )}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                    </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                    className="w-auto p-0"
-                                    align="start"
-                                >
-                                    <Calendar
-                                        mode="single"
-                                        selected={field.value}
-                                        onSelect={field.onChange}
-                                        disabled={(date) =>
-                                            date > new Date() ||
-                                            date < new Date('1900-01-01')
-                                        }
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
-                            <FormDescription>
-                                Your date of birth is used to calculate your
-                                age.
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
+                    label="Acquisition Date"
                 />
                 <FormField
                     control={form.control}
@@ -204,7 +164,12 @@ export default function AssetUpdateForm({ asset }: Props) {
                         <FormItem>
                             <FormLabel>อายุการใช้งาน</FormLabel>
                             <FormControl>
-                                <Input type="number" {...field} />
+                                <Input
+                                    type="number"
+                                    {...field}
+                                    onKeyDown={inputNumberPreventDefault}
+                                    onFocus={onFocusPreventDefault}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -217,7 +182,12 @@ export default function AssetUpdateForm({ asset }: Props) {
                         <FormItem>
                             <FormLabel>ต้นทุน</FormLabel>
                             <FormControl>
-                                <Input type="number" {...field} />
+                                <Input
+                                    type="number"
+                                    {...field}
+                                    onKeyDown={inputNumberPreventDefault}
+                                    onFocus={onFocusPreventDefault}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -230,7 +200,12 @@ export default function AssetUpdateForm({ asset }: Props) {
                         <FormItem>
                             <FormLabel>มูลค่าลดลง</FormLabel>
                             <FormControl>
-                                <Input type="number" {...field} />
+                                <Input
+                                    type="number"
+                                    {...field}
+                                    onKeyDown={inputNumberPreventDefault}
+                                    onFocus={onFocusPreventDefault}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

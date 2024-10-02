@@ -340,7 +340,7 @@ export function AppSidebar() {
                         searchResults={data.searchResults}
                     />
                 </SidebarItem>
-                <SidebarItem>
+                {/* <SidebarItem>
                     <SidebarLabel>Favourites</SidebarLabel>
                     <NavProjects projects={data.projects} />
                 </SidebarItem>
@@ -350,7 +350,7 @@ export function AppSidebar() {
                 </SidebarItem>
                 <SidebarItem>
                     <StorageCard />
-                </SidebarItem>
+                </SidebarItem> */}
             </SidebarContent>
             <SidebarFooter>
                 <NavUser user={data.user} />
