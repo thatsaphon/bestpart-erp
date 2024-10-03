@@ -26,6 +26,7 @@ export type DocumentItem = {
     remainingAt?: Date
     Image: SkuMasterImage[]
     vatable?: boolean
+    isIncludeVat?: boolean
 }
 
 export const defaultInventoryDetail = (): DocumentItem => {
@@ -47,5 +48,6 @@ export const defaultInventoryDetail = (): DocumentItem => {
         remaining: 0,
         Image: [],
         vatable: true,
+        isIncludeVat: true,
     }
 }

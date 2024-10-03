@@ -59,7 +59,7 @@ export default function AddAssetMovementDialog({ assetId }: Props) {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <PlusCircleIcon className="h-5 w-5" />
+                <Button type="button">เพิ่ม</Button>
             </DialogTrigger>
             <DialogContent className="w-auto max-w-[90vw]">
                 <DialogHeader>

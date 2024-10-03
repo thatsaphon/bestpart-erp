@@ -48,16 +48,6 @@ const data = {
             logo: Eclipse,
             plan: 'Enterprise',
         },
-        // {
-        //     name: 'Acme Corp.',
-        //     logo: Eclipse,
-        //     plan: 'Startup',
-        // },
-        // {
-        //     name: 'Evil Corp.',
-        //     logo: Rabbit,
-        //     plan: 'Free',
-        // },
     ],
     user: {
         name: 'shadcn',
@@ -145,24 +135,7 @@ const data = {
             title: 'ผู้ติดต่อ',
             url: '/contact',
             icon: BookOpen,
-            items: [
-                // {
-                //     title: 'ผู้ติดต่อ',
-                //     url: '/contact',
-                // },
-                // {
-                //     title: 'Get Started',
-                //     url: '#',
-                // },
-                // {
-                //     title: 'Tutorials',
-                //     url: '#',
-                // },
-                // {
-                //     title: 'Changelog',
-                //     url: '#',
-                // },
-            ],
+            items: [],
         },
 
         {
@@ -174,52 +147,36 @@ const data = {
                     title: 'สินค้า',
                     url: '/inventory',
                 },
-                // {
-                //     title: 'Completion',
-                //     url: '#',
-                // },
-                // {
-                //     title: 'Images',
-                //     url: '#',
-                // },
-                // {
-                //     title: 'Video',
-                //     url: '#',
-                // },
-                // {
-                //     title: 'Speech',
-                //     url: '#',
-                // },
             ],
         },
         {
             title: 'บัญชี',
-            url: '#',
+            url: '/accounting',
             icon: Settings2,
             items: [
                 {
                     title: 'ผังบัญชี',
-                    url: '/accounting',
+                    url: FullRoute.ChartOfAccounts,
                 },
                 {
                     title: 'งบดุล',
-                    url: '/accounting/balance-sheet',
+                    url: FullRoute.BalanceSheet,
                 },
                 {
                     title: 'เงินสด',
-                    url: '/accounting/cash',
+                    url: FullRoute.Cash,
                 },
                 {
                     title: 'สินทรัพย์',
-                    url: '/accounting/asset-management',
+                    url: FullRoute.AssetManagement,
                 },
                 {
                     title: 'ใบเสร็จอื่น',
-                    url: '/accounting/other-invoice',
+                    url: FullRoute.OtherInvoice,
                 },
                 {
                     title: 'ใบสำคัญจ่ายอื่น',
-                    url: '/accounting/other-payment',
+                    url: FullRoute.OtherPayment,
                 },
             ],
         },

@@ -45,7 +45,7 @@ export async function createChartOfAccounts(
                 },
             },
         })
-        revalidatePath('/accounting')
+        revalidatePath('/accounting/chart-of-account')
         return { message: 'success' }
     } catch (err) {
         console.log(err)
@@ -70,7 +70,7 @@ export async function deleteChartOfAccount(id: number) {
             include: { AccountOwner: true },
         }),
     ])
-    revalidatePath('/accounting')
+    revalidatePath('/accounting/chart-of-account')
 }
 
 export async function getPaymentMethods() {

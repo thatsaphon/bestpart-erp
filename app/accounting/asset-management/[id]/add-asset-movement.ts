@@ -24,6 +24,10 @@ export const addAssetMovement = async (
         },
     })
 
+    if (!document.JournalVoucher && !document.OtherInvoice) {
+        throw new Error('เอกสารไม่อยู่ในรายการปรับปรุงหรือใบเสร็จอื่นๆ')
+    }
+
     await prisma.assetMovement.create({
         data: {
             assetId: assetId,

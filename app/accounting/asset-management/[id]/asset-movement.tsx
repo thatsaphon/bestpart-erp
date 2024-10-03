@@ -20,6 +20,9 @@ type Props = {
 export default function AssetMovement({ asset }: Props) {
     return (
         <>
+            <div className="p-2">
+                <AddAssetMovementDialog assetId={asset.id} />
+            </div>
             <Table>
                 <TableHeader>
                     <TableRow>

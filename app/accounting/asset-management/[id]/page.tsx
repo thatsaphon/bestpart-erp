@@ -20,6 +20,7 @@ import AssetUpdateForm from './asset-update-form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AssetMovement from './asset-movement'
 import { getAssetDefaultFunction } from '@/types/asset/asset'
+import { notFound } from 'next/navigation'
 
 type Props = {
     params: { id: string }
@@ -28,7 +29,7 @@ type Props = {
 export default async function AssetDetailPage({ params: { id } }: Props) {
     const [asset] = await getAssetDefaultFunction({ id: +id })
 
-    if (!asset) return <>ไม่พบข้อมูล</>
+    if (!asset) return notFound()
 
     return (
         <div className="p-3">

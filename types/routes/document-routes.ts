@@ -50,11 +50,17 @@ export enum FullRoute {
     Purchase = '/purchase/purchase-received',
     PurchaseReturn = '/purchase/purchase-return',
     PurchasePayment = '/purchase/purchase-payment',
-    JournalVoucher = '/accounting/journal-voucher',
     Quotation = '/sales/quotation',
     CustomerOrder = '/sales/customer-order',
     PurchaseOrder = '/purchase/purchase-order',
+    Contact = '/contact',
+    ChartOfAccounts = '/accounting/chart-of-accounts',
+    BalanceSheet = '/accounting/balance-sheet',
+    Cash = '/accounting/cash',
+    AssetManagement = '/accounting/asset-management',
     OtherInvoice = '/accounting/other-invoice',
+    OtherPayment = '/accounting/other-payment',
+    JournalVoucher = '/accounting/journal-voucher',
 }
 export enum SubRoute {
     Sales = 'sales-order',
@@ -64,12 +70,41 @@ export enum SubRoute {
     Purchase = 'purchase-received',
     PurchaseReturn = 'purchase-return',
     PurchasePayment = 'purchase-payment',
-    JournalVoucher = 'journal-voucher',
     Quotation = 'quotation',
     CustomerOrder = 'customer-order',
     PurchaseOrder = 'purchase-order',
+    Contact = 'contact',
+    ChartOfAccounts = 'chart-of-accounts',
+    BalanceSheet = 'balance-sheet',
+    Cash = 'cash',
+    AssetManagement = 'asset-management',
     OtherInvoice = 'other-invoice',
+    OtherPayment = 'other-payment',
+    JournalVoucher = 'journal-voucher',
 }
 
-// export const documentRoutes: <Record<Prisma,string>> = {
-// }
+export const NestedRoutes = {
+    '/sales': {
+        SalesOrder: FullRoute.Sales,
+        SalesReturn: FullRoute.SalesReturn,
+        SalesBill: FullRoute.SalesBill,
+        SalesReceived: FullRoute.SalesReceived,
+    },
+    '/purchase': {
+        PurchaseReceived: FullRoute.Purchase,
+        PurchaseReturn: FullRoute.PurchaseReturn,
+        PurchasePayment: FullRoute.PurchasePayment,
+    },
+    '/contact': {
+        Contact: FullRoute.Contact,
+    },
+    '/accounting': {
+        ChartOfAccounts: FullRoute.ChartOfAccounts,
+        BalanceSheet: FullRoute.BalanceSheet,
+        Cash: FullRoute.Cash,
+        AssetManagement: FullRoute.AssetManagement,
+        OtherInvoice: FullRoute.OtherInvoice,
+        OtherPayment: FullRoute.OtherPayment,
+        JournalVoucher: FullRoute.JournalVoucher,
+    },
+}

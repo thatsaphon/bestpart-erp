@@ -6,7 +6,6 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import bcrypt from 'bcrypt'
 import { revalidatePath } from 'next/cache'
 import { nextDay } from 'date-fns'
-import { setCookies } from '@/actions/set-cookies'
 
 export const authOptions: AuthOptions = {
     providers: [

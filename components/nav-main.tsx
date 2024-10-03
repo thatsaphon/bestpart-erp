@@ -51,9 +51,7 @@ export function NavMain({
                     <Collapsible
                         key={item.title}
                         asChild
-                        defaultOpen={
-                            item.isActive || pathname.includes(item.url)
-                        }
+                        defaultOpen={pathname.includes(item.url)}
                     >
                         <li>
                             <div className="relative flex items-center">

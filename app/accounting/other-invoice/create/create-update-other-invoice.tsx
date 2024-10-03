@@ -55,6 +55,7 @@ import CreateDocumentRemark from '@/components/create-document-remark'
 import { getApPaymentMethods } from '@/app/actions/accounting'
 import { otherInvoiceItemToDocumentItem } from '@/types/other-invoice/other-invoice-item'
 import { updateOtherInvoice } from './update-other-invoice'
+import { Switch } from '@/components/ui/switch'
 
 type Props = {
     existingOtherInvoice?: GetOtherInvoice
@@ -88,6 +89,9 @@ export default function CreateUpdateOtherInvoiceComponent({
     const [documentRemarks, setDocumentRemarks] = React.useState<
         GetDocumentRemark[]
     >(existingOtherInvoice?.DocumentRemark || [])
+
+    const [vatable, setVatable] = React.useState(true)
+    const [isIncludeVat, setIsIncludeVat] = React.useState(true)
     return (
         <form
             className="p-3"
@@ -126,18 +130,24 @@ export default function CreateUpdateOtherInvoiceComponent({
                     label="คู่ค้า"
                 />
             </div>
+            <div className="p-2">
+                <div className="flex items-center space-x-2">
+                    <Switch
+                        id="vatable"
+                        checked={vatable}
+                        onCheckedChange={setVatable}
+                    />
+                    <Label htmlFor="vatable">มีภาษีมูลค่าเพิ่ม</Label>
+                    <Switch
+                        id="inclued-vat"
+                        checked={isIncludeVat}
+                        onCheckedChange={setIsIncludeVat}
+                        disabled={!vatable}
+                    />
+                    <Label htmlFor="inclued-vat">รวมภาษี</Label>
+                </div>
+            </div>
             <Table>
-                {/* <PaymentRemark
-                    paymentMethods={paymentMethods}
-                    defaultDocumentDetails={defaultDocumentDetails}
-                    defaultPayments={defaultPayments}
-                    defaultRemarks={defaultRemarks}
-                    selectedPayments={selectedPayments}
-                    setSelectedPayments={setSelectedPayments}
-                    remarks={remarks}
-                    setRemarks={setRemarks}
-                /> */}
-                {/* <TableCaption></TableCaption> */}
                 <TableHeader>
                     <TableRow>
                         <TableHead>ชื่อรายการ</TableHead>
@@ -329,7 +339,7 @@ export default function CreateUpdateOtherInvoiceComponent({
                 </TableBody>
                 <TableFooter>
                     <TableRow>
-                        <TableCell colSpan={2} className="text-right">
+                        <TableCell colSpan={5} className="text-right">
                             รวม
                         </TableCell>
                         <TableCell className="text-right">
@@ -371,21 +381,6 @@ export default function CreateUpdateOtherInvoiceComponent({
                                         สร้างใบเสร็จอื่น
                                     </Button>
                                 )}
-                                {/* <Button
-                                        variant={'destructive'}
-                                        type="button"
-                                        onClick={(e) => {
-                                            setItems(
-                                                salesReturnItemsToDocumentItems(
-                                                    existingSalesReturn
-                                                        ?.SalesReturn
-                                                        ?.SalesReturnItem || []
-                                                )
-                                            )
-                                        }}
-                                    >
-                                        รีเซ็ต
-                                    </Button> */}
                             </div>
                         </TableCell>
                         <TableHead></TableHead>

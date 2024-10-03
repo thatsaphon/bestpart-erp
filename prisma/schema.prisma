@@ -478,7 +478,8 @@ model PurchaseItem {
   Purchase   Purchase @relation(fields: [purchaseId], references: [id])
   purchaseId Int
 
-  vatable Boolean @default(true)
+  vatable      Boolean @default(true)
+  isIncludeVat Boolean @default(true)
 
   @@index([skuMasterId])
   @@index([goodsMasterId])
@@ -519,7 +520,8 @@ model PurchaseReturnItem {
   PurchaseReturn   PurchaseReturn @relation(fields: [purchaseReturnId], references: [id])
   purchaseReturnId Int
 
-  vatable Boolean @default(true)
+  vatable      Boolean @default(true)
+  isIncludeVat Boolean @default(true)
 
   @@index([skuMasterId])
   @@index([goodsMasterId])
@@ -632,7 +634,8 @@ model OtherInvoiceItem {
   costPerUnit Float
   vat         Float
 
-  vatable Boolean @default(true)
+  vatable      Boolean @default(true)
+  isIncludeVat Boolean @default(true)
 }
 
 model OtherPayment {
