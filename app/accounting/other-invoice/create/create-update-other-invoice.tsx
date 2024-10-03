@@ -97,10 +97,15 @@ export default function CreateUpdateOtherInvoiceComponent({
             className="p-3"
             action={async (formData) => {
                 try {
+                    const modifiedItems = items.map((item) => ({
+                        ...item,
+                        vatable: vatable,
+                        isIncludeVat: isIncludeVat,
+                    }))
                     if (!existingOtherInvoice) {
                         await createOtherInvoice(
                             documentDetail,
-                            items,
+                            modifiedItems,
                             payments,
                             documentRemarks
                         )
@@ -108,7 +113,7 @@ export default function CreateUpdateOtherInvoiceComponent({
                         await updateOtherInvoice(
                             existingOtherInvoice.id,
                             documentDetail,
-                            items,
+                            modifiedItems,
                             payments,
                             documentRemarks
                         )
@@ -130,7 +135,7 @@ export default function CreateUpdateOtherInvoiceComponent({
                     label="คู่ค้า"
                 />
             </div>
-            <div className="p-2">
+            {/* <div className="p-2">
                 <div className="flex items-center space-x-2">
                     <Switch
                         id="vatable"
@@ -146,7 +151,7 @@ export default function CreateUpdateOtherInvoiceComponent({
                     />
                     <Label htmlFor="inclued-vat">รวมภาษี</Label>
                 </div>
-            </div>
+            </div> */}
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -338,15 +343,101 @@ export default function CreateUpdateOtherInvoiceComponent({
                     </TableRow>
                 </TableBody>
                 <TableFooter>
+                    {vatable && (
+                        <React.Fragment>
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-right">
+                                    <div className="flex w-full items-center justify-end space-x-2">
+                                        <Switch
+                                            id="vatable"
+                                            checked={vatable}
+                                            onCheckedChange={setVatable}
+                                        />
+                                        <Label htmlFor="vatable">
+                                            มีภาษีมูลค่าเพิ่ม
+                                        </Label>
+                                        <Switch
+                                            id="inclued-vat"
+                                            checked={isIncludeVat}
+                                            onCheckedChange={setIsIncludeVat}
+                                            disabled={!vatable}
+                                        />
+                                        <Label htmlFor="inclued-vat">
+                                            รวมภาษี
+                                        </Label>
+                                    </div>
+                                </TableCell>
+                                <TableCell colSpan={1} className="text-right">
+                                    ราคาก่อนภาษี
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {(+items
+                                        .reduce(
+                                            (sum, item) =>
+                                                isIncludeVat
+                                                    ? sum +
+                                                      item.pricePerUnit *
+                                                          (100 / 107)
+                                                    : sum + item.pricePerUnit,
+                                            0
+                                        )
+                                        .toFixed(2)).toLocaleString()}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-right">
+                                    ภาษีมูลค่าเพิ่ม
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {(+items
+                                        .reduce(
+                                            (sum, item) =>
+                                                isIncludeVat
+                                                    ? sum +
+                                                      item.pricePerUnit *
+                                                          (7 / 107)
+                                                    : sum +
+                                                      (item.pricePerUnit * 7) /
+                                                          100,
+                                            0
+                                        )
+                                        .toFixed(2)).toLocaleString()}
+                                </TableCell>
+                            </TableRow>
+                        </React.Fragment>
+                    )}
                     <TableRow>
-                        <TableCell colSpan={5} className="text-right">
+                        <TableCell colSpan={4} className="text-right">
+                            {!vatable && (
+                                <div className="flex w-full items-center justify-end space-x-2">
+                                    <Switch
+                                        id="vatable"
+                                        checked={vatable}
+                                        onCheckedChange={setVatable}
+                                    />
+                                    <Label htmlFor="vatable">
+                                        มีภาษีมูลค่าเพิ่ม
+                                    </Label>
+                                    <Switch
+                                        id="inclued-vat"
+                                        checked={isIncludeVat}
+                                        onCheckedChange={setIsIncludeVat}
+                                        disabled={!vatable}
+                                    />
+                                    <Label htmlFor="inclued-vat">รวมภาษี</Label>
+                                </div>
+                            )}
+                        </TableCell>
+                        <TableCell colSpan={1} className="text-right">
                             รวม
                         </TableCell>
                         <TableCell className="text-right">
-                            {items.reduce(
-                                (sum, item) => sum + item.pricePerUnit,
-                                0
-                            )}
+                            {(+(
+                                items.reduce(
+                                    (sum, item) => sum + item.pricePerUnit,
+                                    0
+                                ) * (!vatable ? 1 : isIncludeVat ? 1 : 1.07)
+                            ).toFixed(2)).toLocaleString()}
                         </TableCell>
                     </TableRow>
                     <TableRow>

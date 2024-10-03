@@ -104,6 +104,13 @@ export const createOtherInvoice = async (
                     GeneralLedger: {
                         create: [
                             ...serviceAndNonStockItemsGLCreate,
+                            {
+                                chartOfAccountId: 15100,
+                                amount: +(
+                                    payments.reduce((a, b) => a + b.amount, 0) *
+                                    (7 / 107)
+                                ).toFixed(2),
+                            },
                             ...payments.map((payment) => {
                                 return {
                                     chartOfAccountId: payment.chartOfAccountId,
