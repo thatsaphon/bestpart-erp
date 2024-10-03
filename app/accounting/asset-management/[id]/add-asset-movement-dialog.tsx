@@ -54,7 +54,7 @@ export default function AddAssetMovementDialog({ assetId }: Props) {
     })
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         console.log(values)
-        await addAssetMovement()
+        await addAssetMovement(assetId, values)
     }
     return (
         <Dialog>

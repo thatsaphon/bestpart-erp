@@ -44,17 +44,32 @@ export default function AssetMovement({ asset }: Props) {
                                 }
                             </TableCell>
                             <TableCell>{assetMovement.description}</TableCell>
-                            <TableCell>{assetMovement.value}</TableCell>
+                            <TableCell>
+                                {assetMovement.value.toLocaleString()}
+                            </TableCell>
                         </TableRow>
                     ))}
-                    <TableRow>
+                    {/* <TableRow>
                         <TableCell colSpan={4}>
                             <div className="flex w-full justify-center">
                                 <AddAssetMovementDialog assetId={asset.id} />
                             </div>
                         </TableCell>
-                    </TableRow>
+                    </TableRow> */}
                 </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <TableCell colSpan={3} className="text-right">
+                            รวม
+                        </TableCell>
+                        <TableCell>
+                            {asset.AssetMovement.reduce(
+                                (a, b) => a + b.value,
+                                0
+                            ).toLocaleString()}
+                        </TableCell>
+                    </TableRow>
+                </TableFooter>
             </Table>
         </>
     )
