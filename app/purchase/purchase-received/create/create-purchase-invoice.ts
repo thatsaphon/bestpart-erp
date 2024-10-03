@@ -11,6 +11,7 @@ import { DocumentItem } from '@/types/document-item'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { DocumentDetail } from '@/types/document-detail'
+import { roundAndRemoveZeroGenralLedgers } from '@/lib/round-genral-ledger'
 
 export const createPurchaseInvoice = async (
     {
@@ -23,7 +24,10 @@ export const createPurchaseInvoice = async (
         documentNo,
         referenceNo,
     }: DocumentDetail,
-    items: DocumentItem[],
+    items: (DocumentItem & {
+        costPerUnitIncVat: number
+        costPerUnitExVat: number
+    })[],
     purchaseOrderIds: number[] = []
 ) => {
     const contact = await prisma.contact.findUnique({
@@ -66,11 +70,7 @@ export const createPurchaseInvoice = async (
                     })
                 return {
                     chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
-                    amount: -(
-                        item.quantity *
-                        item.pricePerUnit *
-                        (item.vatable ? 100 / 107 : 1)
-                    ).toFixed(2),
+                    amount: -(item.quantity * item.costPerUnitExVat).toFixed(2),
                 }
             })
     )
@@ -91,14 +91,15 @@ export const createPurchaseInvoice = async (
                 create: {
                     contactId: contactId,
                     GeneralLedger: {
-                        create: [
+                        create: roundAndRemoveZeroGenralLedgers([
                             // เจ้าหนี้การค้า
                             {
                                 chartOfAccountId: 21000,
                                 amount: -items
                                     .reduce(
                                         (a, b) =>
-                                            a + b.pricePerUnit * b.quantity,
+                                            a +
+                                            b.costPerUnitIncVat * b.quantity,
                                         0
                                     )
                                     .toFixed(2),
@@ -110,10 +111,7 @@ export const createPurchaseInvoice = async (
                                     .filter((item) => item.goodsMasterId)
                                     .reduce(
                                         (a, b) =>
-                                            a +
-                                            b.pricePerUnit *
-                                                b.quantity *
-                                                (b.vatable ? 100 / 107 : 1),
+                                            a + b.costPerUnitExVat * b.quantity,
                                         0
                                     )
                                     .toFixed(2),
@@ -127,25 +125,24 @@ export const createPurchaseInvoice = async (
                                     .reduce(
                                         (a, b) =>
                                             a +
-                                            b.pricePerUnit *
-                                                b.quantity *
+                                            (b.costPerUnitIncVat -
+                                                b.costPerUnitExVat) *
                                                 (7 / 107),
                                         0
                                     )
                                     .toFixed(2),
                             },
-                        ],
+                        ]),
                     },
                     PurchaseItem: {
                         create: items.map((item) => ({
-                            costPerUnit: item.pricePerUnit,
+                            costPerUnitIncVat: item.costPerUnitIncVat,
+                            costPerUnitExVat: item.costPerUnitExVat,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             unit: item.unit,
                             vatable: item.vatable === true,
-                            vat: item.vatable
-                                ? +(item.pricePerUnit * (7 / 107)).toFixed(2)
-                                : 0,
+                            vat: item.costPerUnitExVat - item.costPerUnitIncVat,
                             barcode: item.barcode,
                             description: item.detail,
                             name: item.name,

@@ -17,6 +17,7 @@ import { DocumentItem } from '@/types/document-item'
 import { DocumentDetail } from '@/types/document-detail'
 import { Payment } from '@/types/payment/payment'
 import { GetDocumentRemark } from '@/types/remark/document-remark'
+import { roundAndRemoveZeroGenralLedgers } from '@/lib/round-genral-ledger'
 
 export type OtherInvoiceItems = {}
 
@@ -32,14 +33,17 @@ export const updateOtherInvoice = async (
         documentNo,
         referenceNo,
     }: DocumentDetail,
-    items: DocumentItem[],
+    items: (DocumentItem & {
+        costPerUnitIncVat: number
+        costPerUnitExVat: number
+    })[],
     payments: Payment[],
     remarks: GetDocumentRemark[]
 ) => {
     if (!documentNo) documentNo = await generateDocumentNumber('INV', date)
 
     if (
-        items.reduce((a, b) => a + b.pricePerUnit * b.quantity, 0) !==
+        items.reduce((a, b) => a + b.costPerUnitIncVat * b.quantity, 0) !==
         payments.reduce((a, b) => a + b.amount, 0)
     ) {
         throw new Error('จำนวนเงินที่ชำระเงินไม่ตรงกัน')
@@ -57,11 +61,7 @@ export const updateOtherInvoice = async (
                     })
                 return {
                     chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
-                    amount: +(
-                        item.quantity *
-                        item.pricePerUnit *
-                        (item.vatable ? 100 / 107 : 1)
-                    ).toFixed(2),
+                    amount: +(item.quantity * item.costPerUnitExVat).toFixed(2),
                 }
             })
     )
@@ -122,25 +122,49 @@ export const updateOtherInvoice = async (
                                 item.serviceAndNonStockItemId,
                             quantity: item.quantity,
                             unit: item.unit,
-                            costPerUnit: item.pricePerUnit,
-                            vat: item.vatable
-                                ? +(item.pricePerUnit * (7 / 107)).toFixed(2)
-                                : 0,
+                            costPerUnitIncVat: item.costPerUnitIncVat,
+                            costPerUnitExVat: item.costPerUnitExVat,
+                            vat: item.costPerUnitIncVat - item.costPerUnitExVat,
                             name: item.name,
                             description: item.detail,
+                            vatable: item.vatable,
+                            isIncludeVat: item.isIncludeVat,
                         })),
                     },
                     GeneralLedger: {
                         delete: document.OtherInvoice?.GeneralLedger,
-                        create: [
+                        create: roundAndRemoveZeroGenralLedgers([
                             ...serviceAndNonStockItemsGLCreate,
+                            {
+                                chartOfAccountId: 15100,
+                                amount: +items
+                                    .reduce(
+                                        (acc, item) =>
+                                            !!item.vatable
+                                                ? acc + 0
+                                                : item.isIncludeVat
+                                                  ? acc +
+                                                    +(
+                                                        (item.costPerUnitIncVat *
+                                                            7) /
+                                                        107
+                                                    ).toFixed(2)
+                                                  : acc +
+                                                    +(
+                                                        item.costPerUnitExVat *
+                                                        0.07
+                                                    ).toFixed(2),
+                                        0
+                                    )
+                                    .toFixed(2),
+                            },
                             ...payments.map((payment) => {
                                 return {
                                     chartOfAccountId: payment.chartOfAccountId,
                                     amount: -payment.amount,
                                 }
                             }),
-                        ],
+                        ]),
                     },
                 },
             },

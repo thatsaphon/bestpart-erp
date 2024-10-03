@@ -147,10 +147,10 @@ export default async function PurchaseInvoiceDetailPage({
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantity})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.costPerUnit}
+                                    {item.costPerUnitIncVat}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {item.costPerUnit * item.quantity}
+                                    {item.costPerUnitIncVat * item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -166,7 +166,7 @@ export default async function PurchaseInvoiceDetailPage({
                                         document?.Purchase?.PurchaseItem.reduce(
                                             (sum, item) =>
                                                 sum +
-                                                item.costPerUnit *
+                                                item.costPerUnitIncVat *
                                                     item.quantity,
                                             0
                                         )

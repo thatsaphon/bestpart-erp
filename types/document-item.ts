@@ -21,6 +21,8 @@ export type DocumentItem = {
     quantity: number
     lastPurchaseCostPerUnit?: number | null
     pricePerUnit: number
+    costPerUnitIncVat?: number
+    costPerUnitExVat?: number
     partNumber?: string
     remaining?: number
     remainingAt?: Date

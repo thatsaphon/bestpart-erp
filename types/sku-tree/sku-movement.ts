@@ -12,7 +12,8 @@ export type SkuMasterHistory = {
     documentType: DocumentType
     date: Date
     Contact: Contact
-    costPerUnit?: number
+    costPerUnitIncVat?: number
+    costPerUnitExVat?: number
     pricePerUnit?: number
     quantity: number
     quantityPerUnit: number

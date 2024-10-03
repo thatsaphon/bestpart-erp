@@ -36,12 +36,12 @@ export default function SkuMasterHistoryTable({ histories }: Props) {
                         <TableCell>{history.documentType}</TableCell>
                         <TableCell>{history.Contact.name}</TableCell>
                         <TableCell>{history.quantity}</TableCell>
-                        <TableCell>{`${history.pricePerUnit || history.costPerUnit}/${history.unit}(${history.quantityPerUnit})`}</TableCell>
+                        <TableCell>{`${history.pricePerUnit || history.costPerUnitIncVat}/${history.unit}(${history.quantityPerUnit})`}</TableCell>
                         <TableCell>
                             {(
                                 history.quantity *
                                 (history.pricePerUnit ||
-                                    history.costPerUnit ||
+                                    history.costPerUnitIncVat ||
                                     0)
                             ).toLocaleString()}
                         </TableCell>

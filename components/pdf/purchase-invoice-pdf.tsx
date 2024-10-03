@@ -160,7 +160,9 @@ export default function PurchaseInvoicePdf({ document }: Props) {
                         <Text
                             style={styles.col5}
                         >{`${item.unit}(${item.quantityPerUnit})`}</Text>
-                        <Text style={styles.col6}>{item.costPerUnit}</Text>
+                        <Text style={styles.col6}>
+                            {item.costPerUnitIncVat}
+                        </Text>
                     </View>
                 ))}
                 <View style={{ ...styles.footer }}>
@@ -172,13 +174,13 @@ export default function PurchaseInvoicePdf({ document }: Props) {
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
                                 document?.Purchase?.PurchaseItem.reduce(
-                                    (a, b) => a + b.costPerUnit,
+                                    (a, b) => a + b.costPerUnitIncVat,
                                     0
                                 )
                             }
                         >
                             {document?.Purchase?.PurchaseItem.reduce(
-                                (a, b) => a + b.costPerUnit,
+                                (a, b) => a + b.costPerUnitIncVat,
                                 0
                             )}
                         </Text>

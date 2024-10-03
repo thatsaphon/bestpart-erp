@@ -90,11 +90,12 @@ export default async function OtherInvoiceDetailPage({
                                         {item.unit}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        {item.costPerUnit.toLocaleString()}
+                                        {item.costPerUnitIncVat.toLocaleString()}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         {(
-                                            item.costPerUnit * item.quantity
+                                            item.costPerUnitIncVat *
+                                            item.quantity
                                         ).toLocaleString()}
                                     </TableCell>
                                 </TableRow>
@@ -108,7 +109,8 @@ export default async function OtherInvoiceDetailPage({
                             </TableCell>
                             <TableCell className="text-right">
                                 {document.OtherInvoice?.OtherInvoiceItem.reduce(
-                                    (a, b) => a + b.quantity * b.costPerUnit,
+                                    (a, b) =>
+                                        a + b.quantity * b.costPerUnitIncVat,
                                     0
                                 ).toLocaleString()}
                             </TableCell>

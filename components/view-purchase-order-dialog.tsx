@@ -122,7 +122,7 @@ export default function ViewPurchaseOrderDialog({
                                             {purchaseOrder.PurchaseOrder?.PurchaseOrderItem.reduce(
                                                 (total, item) =>
                                                     total +
-                                                    item.costPerUnit *
+                                                    item.costPerUnitIncVat *
                                                         item.quantity,
                                                 0
                                             )}
@@ -220,11 +220,11 @@ export default function ViewPurchaseOrderDialog({
                                                                     </TableCell>
                                                                     <TableCell className="text-right">
                                                                         {
-                                                                            item.costPerUnit
+                                                                            item.costPerUnitIncVat
                                                                         }
                                                                     </TableCell>
                                                                     <TableCell className="pr-0 text-right">
-                                                                        {item.costPerUnit *
+                                                                        {item.costPerUnitIncVat *
                                                                             item.quantity}
                                                                     </TableCell>
                                                                 </TableRow>
@@ -246,7 +246,7 @@ export default function ViewPurchaseOrderDialog({
                                                                         item
                                                                     ) =>
                                                                         total +
-                                                                        item.costPerUnit *
+                                                                        item.costPerUnitIncVat *
                                                                             item.quantity,
                                                                     0
                                                                 ).toLocaleString()}

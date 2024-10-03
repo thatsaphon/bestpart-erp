@@ -117,12 +117,12 @@ export default async function ContactDetailPage({ params: { id } }: Props) {
                                         })`}
                                     </TableCell>
                                     <TableCell>
-                                        {`${stockMovement.pricePerUnit || stockMovement.costPerUnit}`}
+                                        {`${stockMovement.pricePerUnit || stockMovement.costPerUnitIncVat}`}
                                     </TableCell>
                                     <TableCell>
                                         {stockMovement.quantity *
                                             (stockMovement.pricePerUnit ||
-                                                stockMovement.costPerUnit)}
+                                                stockMovement.costPerUnitIncVat)}
                                     </TableCell>
                                 </TableRow>
                             ))}

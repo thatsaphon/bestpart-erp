@@ -27,7 +27,10 @@ export const createPurchaseReturnInvoice = async (
         referenceNo,
         documentNo,
     }: DocumentDetail,
-    items: DocumentItem[],
+    items: (DocumentItem & {
+        costPerUnitExVat: number
+        costPerUnitIncVat: number
+    })[],
     remarks: { id?: number; remark: string }[]
 ) => {
     const getContact = async () => {
@@ -145,7 +148,8 @@ export const createPurchaseReturnInvoice = async (
                                 amount: +items
                                     .reduce(
                                         (a, b) =>
-                                            a + b.pricePerUnit * b.quantity,
+                                            a +
+                                            b.costPerUnitIncVat * b.quantity,
                                         0
                                     )
                                     .toFixed(2),
@@ -158,8 +162,7 @@ export const createPurchaseReturnInvoice = async (
                                         (sum, item) =>
                                             sum +
                                             item.quantity *
-                                                item.pricePerUnit *
-                                                (100 / 107),
+                                                item.costPerUnitExVat,
                                         0
                                     )
                                     .toFixed(2),
@@ -171,9 +174,8 @@ export const createPurchaseReturnInvoice = async (
                                     .reduce(
                                         (sum, item) =>
                                             sum +
-                                            item.quantity *
-                                                item.pricePerUnit *
-                                                (7 / 107),
+                                            (item.costPerUnitIncVat -
+                                                item.costPerUnitExVat),
                                         0
                                     )
                                     .toFixed(2),
@@ -182,10 +184,11 @@ export const createPurchaseReturnInvoice = async (
                     },
                     PurchaseReturnItem: {
                         create: items.map((item) => ({
-                            costPerUnit: item.pricePerUnit,
+                            costPerUnitIncVat: item.costPerUnitIncVat,
+                            costPerUnitExVat: item.costPerUnitExVat,
                             quantity: item.quantity,
                             unit: item.unit,
-                            vat: +(item.pricePerUnit * (7 / 107)).toFixed(2),
+                            vat: item.costPerUnitIncVat - item.costPerUnitExVat,
                             barcode: item.barcode,
                             description: item.detail,
                             name: item.name,

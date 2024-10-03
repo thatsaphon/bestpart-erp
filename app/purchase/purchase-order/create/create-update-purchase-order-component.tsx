@@ -39,6 +39,8 @@ import { GetDocumentRemark } from '@/types/remark/document-remark'
 import ViewCustomerOrderDialog from '@/components/view-customer-order-dialog'
 import CustomerOrderHoverCard from '@/components/customer-order-hover-card'
 import { custom } from 'zod'
+import { convertPricePerUnitToCostPerUnit } from '@/lib/convert-price-per-unit-to-cost-per-unit'
+import DocumentItemFooter from '@/components/document-item-footer'
 
 type Props = {
     existingPurchaseOrder?: GetPurchaseOrder
@@ -74,6 +76,8 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                 (customerOrder) => customerOrder.documentId
             ) || []
         )
+    const [vatable, setVatable] = React.useState(true)
+    const [isIncludeVat, setIsIncludeVat] = React.useState(true)
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -119,7 +123,11 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                         if (!existingPurchaseOrder) {
                             await createPurchaseOrder(
                                 documentDetail,
-                                items,
+                                convertPricePerUnitToCostPerUnit(
+                                    items,
+                                    vatable,
+                                    isIncludeVat
+                                ),
                                 selectedCustomerOrderIds
                             )
                             // setKey(String(Date.now()))
@@ -130,7 +138,11 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                             await updatePurchaseOrder(
                                 existingPurchaseOrder.id,
                                 documentDetail,
-                                items,
+                                convertPricePerUnitToCostPerUnit(
+                                    items,
+                                    vatable,
+                                    isIncludeVat
+                                ),
                                 selectedCustomerOrderIds
                             )
                             toast.success('บันทึกสําเร็จ')
@@ -454,19 +466,13 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                         </TableRow>
                     </TableBody>
                     <TableFooter>
-                        <TableRow className="border-b-2">
-                            <TableCell colSpan={5} className="text-right">
-                                Total
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {items.reduce(
-                                    (acc, item) =>
-                                        acc + item.pricePerUnit * item.quantity,
-                                    0
-                                )}
-                            </TableCell>
-                            <TableCell className="text-right"></TableCell>
-                        </TableRow>
+                        <DocumentItemFooter
+                            vatable={vatable}
+                            setVatable={setVatable}
+                            isIncludeVat={isIncludeVat}
+                            setIsIncludeVat={setIsIncludeVat}
+                            items={items}
+                        />
                         <TableRow className="bg-background hover:bg-background">
                             <TableCell
                                 colSpan={6}

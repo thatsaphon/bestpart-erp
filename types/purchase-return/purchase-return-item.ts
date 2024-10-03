@@ -6,6 +6,7 @@ import {
     SkuMaster,
 } from '@prisma/client'
 import { DocumentItem } from '../document-item'
+import { Item } from '@radix-ui/react-dropdown-menu'
 
 export const getPurchaseReturnItemsDefaultFunction = async (
     where: Prisma.PurchaseReturnItemWhereInput
@@ -120,7 +121,11 @@ export const PurchaseReturnItemsToDocumentItems = (
                 goodsMasterId: item.goodsMasterId,
                 mainSkuId: item.SkuMaster?.mainSkuId,
                 partNumber: item.SkuMaster?.MainSku?.partNumber,
-                pricePerUnit: item.costPerUnit,
+                pricePerUnit: item.isIncludeVat
+                    ? item.costPerUnitIncVat
+                    : item.costPerUnitExVat,
+                costPerUnitIncVat: item.costPerUnitIncVat,
+                costPerUnitExVat: item.costPerUnitExVat,
                 quantity: item.quantity,
                 quantityPerUnit: item.quantityPerUnit,
                 skuMasterId: item.skuMasterId,
@@ -129,6 +134,8 @@ export const PurchaseReturnItemsToDocumentItems = (
                 MainSkuRemark: item.SkuMaster?.MainSku?.MainSkuRemark,
                 SkuMasterRemark: item.SkuMaster?.SkuMasterRemark,
                 serviceAndNonStockItemId: item.serviceAndNonStockItemId,
+                vatable: item.vatable,
+                isIncludeVat: item.isIncludeVat,
             }) as DocumentItem
     )
 }

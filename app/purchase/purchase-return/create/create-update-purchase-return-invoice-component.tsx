@@ -30,6 +30,8 @@ import { GetDocumentRemark } from '@/types/remark/document-remark'
 import CreateDocumentRemark from '@/components/create-document-remark'
 import { GetPurchaseReturn } from '@/types/purchase-return/purchase-return'
 import { PurchaseReturnItemsToDocumentItems } from '@/types/purchase-return/purchase-return-item'
+import DocumentItemFooter from '@/components/document-item-footer'
+import { convertPricePerUnitToCostPerUnit } from '@/lib/convert-price-per-unit-to-cost-per-unit'
 
 type Props = {
     existingPurchaseReturn?: GetPurchaseReturn
@@ -59,6 +61,8 @@ export default function CreateOrUpdatePurchaseReturnInvoiceComponent({
     const [documentRemarks, setDocumentRemarks] = React.useState<
         GetDocumentRemark[]
     >(existingPurchaseReturn?.DocumentRemark || [])
+    const [vatable, setVatable] = React.useState(true)
+    const [isIncludeVat, setIsIncludeVat] = React.useState<boolean>(true)
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -103,18 +107,24 @@ export default function CreateOrUpdatePurchaseReturnInvoiceComponent({
                             await createPurchaseReturnInvoice(
                                 // formData,
                                 documentDetail,
-                                items,
+                                convertPricePerUnitToCostPerUnit(
+                                    items,
+                                    vatable,
+                                    isIncludeVat
+                                ),
                                 documentRemarks
                             )
-                            // setKey(String(Date.now()))
-                            // setItems([])
                             toast.success('บันทึกสําเร็จ')
                         }
                         if (existingPurchaseReturn) {
                             await updatePurchaseReturnInvoice(
                                 existingPurchaseReturn.id,
                                 documentDetail,
-                                items,
+                                convertPricePerUnitToCostPerUnit(
+                                    items,
+                                    vatable,
+                                    isIncludeVat
+                                ),
                                 documentRemarks
                             )
                             toast.success('บันทึกสําเร็จ')
@@ -406,19 +416,13 @@ export default function CreateOrUpdatePurchaseReturnInvoiceComponent({
                         </TableRow>
                     </TableBody>
                     <TableFooter>
-                        <TableRow className="border-b-2">
-                            <TableCell colSpan={5} className="text-right">
-                                Total
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {items.reduce(
-                                    (acc, item) =>
-                                        acc + item.pricePerUnit * item.quantity,
-                                    0
-                                )}
-                            </TableCell>
-                            <TableCell className="text-right"></TableCell>
-                        </TableRow>
+                        <DocumentItemFooter
+                            vatable={vatable}
+                            setVatable={setVatable}
+                            isIncludeVat={isIncludeVat}
+                            setIsIncludeVat={setIsIncludeVat}
+                            items={items}
+                        />
                         <TableRow>
                             <TableCell colSpan={7}>
                                 <CreateDocumentRemark

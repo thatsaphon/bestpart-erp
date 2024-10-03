@@ -36,3 +36,4 @@ id,name,type
 52000,ต้นทุนขาย,Expense
 61000,รายได้อื่น,OtherIncome
 71000,ค่าใช้จ่ายอื่นๆ,OtherExpense
+72000,ปัดเศษ,OtherExpense

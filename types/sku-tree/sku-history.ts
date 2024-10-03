@@ -9,7 +9,8 @@ export type SkuMasterHistory = {
     documentType: DocumentType
     date: Date
     Contact: Contact
-    costPerUnit?: number
+    costPerUnitIncVat?: number
+    costPerUnitExVat?: number
     pricePerUnit?: number
     quantity: number
     quantityPerUnit: number
@@ -35,7 +36,8 @@ export function getSkuMasterHistory(
             },
             goodsMasterId,
             skuMasterId,
-            costPerUnit,
+            costPerUnitIncVat,
+            costPerUnitExVat,
             quantity,
             quantityPerUnit,
             unit,
@@ -48,7 +50,8 @@ export function getSkuMasterHistory(
                 documentType,
                 date,
                 Contact,
-                costPerUnit,
+                costPerUnitIncVat,
+                costPerUnitExVat,
                 quantity,
                 quantityPerUnit,
                 unit,
@@ -67,7 +70,8 @@ export function getSkuMasterHistory(
             },
             goodsMasterId,
             skuMasterId,
-            costPerUnit,
+            costPerUnitIncVat,
+            costPerUnitExVat,
             quantity,
             quantityPerUnit,
             unit,
@@ -80,7 +84,8 @@ export function getSkuMasterHistory(
                 documentType,
                 date,
                 Contact,
-                costPerUnit,
+                costPerUnitIncVat,
+                costPerUnitExVat,
                 quantity,
                 quantityPerUnit,
                 unit,
@@ -91,7 +96,8 @@ export function getSkuMasterHistory(
             PurchaseOrder,
             goodsMasterId,
             skuMasterId,
-            costPerUnit,
+            costPerUnitIncVat,
+            costPerUnitExVat,
             quantity,
             quantityPerUnit,
             unit,
@@ -104,7 +110,8 @@ export function getSkuMasterHistory(
                 documentType: PurchaseOrder?.Document.type,
                 date: PurchaseOrder?.Document.date,
                 Contact: PurchaseOrder?.Contact,
-                costPerUnit,
+                costPerUnitIncVat,
+                costPerUnitExVat,
                 quantity,
                 quantityPerUnit,
                 unit,
@@ -230,7 +237,8 @@ export function getSkuMasterHistory(
                 documentNo,
                 documentType,
                 date,
-                costPerUnit: estimatedCost,
+                costPerUnitIncVat: estimatedCost,
+                costPerUnitExVat: estimatedCost,
                 quantity,
                 quantityPerUnit,
                 unit,

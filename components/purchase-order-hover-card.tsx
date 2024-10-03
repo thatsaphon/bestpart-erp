@@ -77,11 +77,12 @@ export default function PurchaseOrderHoverCard({ purchaseOrder }: Props) {
                                         {`${item.unit}(${item.quantityPerUnit})`}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        {item.costPerUnit.toLocaleString()}
+                                        {item.costPerUnitIncVat.toLocaleString()}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         {(
-                                            item.costPerUnit * item.quantity
+                                            item.costPerUnitIncVat *
+                                            item.quantity
                                         ).toLocaleString()}
                                     </TableCell>
                                 </TableRow>
@@ -97,7 +98,7 @@ export default function PurchaseOrderHoverCard({ purchaseOrder }: Props) {
                                 {purchaseOrder.PurchaseOrder?.PurchaseOrderItem.reduce(
                                     (total, item) =>
                                         total +
-                                        item.costPerUnit * item.quantity,
+                                        item.costPerUnitIncVat * item.quantity,
                                     0
                                 ).toLocaleString()}
                             </TableCell>

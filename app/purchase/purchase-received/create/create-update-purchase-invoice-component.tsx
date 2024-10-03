@@ -36,6 +36,8 @@ import { purchaseItemsToDocumentItems } from '@/types/purchase/purchase-item'
 import { GetPurchaseOrder } from '@/types/purchase-order/purchase-order'
 import ViewPurchaseOrderDialog from '@/components/view-purchase-order-dialog'
 import PurchaseOrderHoverCard from '@/components/purchase-order-hover-card'
+import DocumentItemFooter from '@/components/document-item-footer'
+import { convertPricePerUnitToCostPerUnit } from '@/lib/convert-price-per-unit-to-cost-per-unit'
 
 type Props = {
     existingPurchaseReceived?: GetPurchase
@@ -68,6 +70,8 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                 (purchaseReceived) => purchaseReceived.documentId
             ) || []
         )
+    const [vatable, setVatable] = React.useState(true)
+    const [isIncludeVat, setIsIncludeVat] = React.useState<boolean>(true)
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -113,18 +117,24 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                         if (!existingPurchaseReceived) {
                             await createPurchaseInvoice(
                                 documentDetail,
-                                items,
+                                convertPricePerUnitToCostPerUnit(
+                                    items,
+                                    vatable,
+                                    isIncludeVat
+                                ),
                                 selectedPurchaseOrderIds
                             )
-                            // setKey(String(Date.now()))
-                            // setItems([])
                         }
 
                         if (existingPurchaseReceived) {
                             await updatePurchaseInvoice(
                                 existingPurchaseReceived.id,
                                 documentDetail,
-                                items,
+                                convertPricePerUnitToCostPerUnit(
+                                    items,
+                                    vatable,
+                                    isIncludeVat
+                                ),
                                 selectedPurchaseOrderIds
                             )
                             toast.success('บันทึกสําเร็จ')
@@ -439,19 +449,13 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                         </TableRow>
                     </TableBody>
                     <TableFooter>
-                        <TableRow className="border-b-2">
-                            <TableCell colSpan={5} className="text-right">
-                                Total
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {items.reduce(
-                                    (acc, item) =>
-                                        acc + item.pricePerUnit * item.quantity,
-                                    0
-                                )}
-                            </TableCell>
-                            <TableCell className="text-right"></TableCell>
-                        </TableRow>
+                        <DocumentItemFooter
+                            vatable={vatable}
+                            setVatable={setVatable}
+                            isIncludeVat={isIncludeVat}
+                            setIsIncludeVat={setIsIncludeVat}
+                            items={items}
+                        />
                         <TableRow className="bg-background hover:bg-background">
                             <TableCell
                                 colSpan={6}

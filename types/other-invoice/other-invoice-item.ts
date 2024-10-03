@@ -26,11 +26,16 @@ export const otherInvoiceItemToDocumentItem = (
             serviceAndNonStockItemId: otherInvoiceItem.serviceAndNonStockItemId,
             name: otherInvoiceItem.name,
             detail: otherInvoiceItem.description,
-            pricePerUnit: otherInvoiceItem.costPerUnit,
+            pricePerUnit: otherInvoiceItem.isIncludeVat
+                ? otherInvoiceItem.costPerUnitIncVat
+                : otherInvoiceItem.costPerUnitExVat,
+            costPerUnitIncVat: otherInvoiceItem.costPerUnitIncVat,
+            costPerUnitExVat: otherInvoiceItem.costPerUnitExVat,
             quantity: otherInvoiceItem.quantity,
             quantityPerUnit: 1,
             unit: otherInvoiceItem.unit,
             vatable: otherInvoiceItem.vatable,
+            isIncludeVat: otherInvoiceItem.isIncludeVat,
         } as DocumentItem
     })
 }

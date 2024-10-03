@@ -51,7 +51,11 @@ export const purchaseOrderItemsToDocumentItems = (
                 goodsMasterId: item.goodsMasterId,
                 mainSkuId: item.SkuMaster?.mainSkuId,
                 partNumber: item.SkuMaster?.MainSku?.partNumber,
-                pricePerUnit: item.costPerUnit,
+                pricePerUnit: item.isIncludeVat
+                    ? item.costPerUnitIncVat
+                    : item.costPerUnitExVat,
+                costPerUnitExVat: item.costPerUnitExVat,
+                costPerUnitIncVat: item.costPerUnitIncVat,
                 quantity: item.quantity,
                 quantityPerUnit: item.quantityPerUnit,
                 skuMasterId: item.skuMasterId,
@@ -60,6 +64,8 @@ export const purchaseOrderItemsToDocumentItems = (
                 MainSkuRemark: item.SkuMaster?.MainSku?.MainSkuRemark,
                 SkuMasterRemark: item.SkuMaster?.SkuMasterRemark,
                 serviceAndNonStockItemId: item.serviceAndNonStockItemId,
+                vatable: item.vatable,
+                isIncludeVat: item.isIncludeVat,
             }) as DocumentItem
     )
 }

@@ -23,7 +23,10 @@ export const createPurchaseOrder = async (
         documentNo,
         referenceNo,
     }: DocumentDetail,
-    items: DocumentItem[],
+    items: (DocumentItem & {
+        costPerUnitIncVat: number
+        costPerUnitExVat: number
+    })[],
     customerOrderIds?: number[]
 ) => {
     const contact = await prisma.contact.findUnique({
@@ -54,26 +57,22 @@ export const createPurchaseOrder = async (
 
     const session = await getServerSession(authOptions)
 
-    const serviceAndNonStockItemsGLCreate = await Promise.all(
-        items
-            .filter((item) => item.serviceAndNonStockItemId)
-            .map(async (item) => {
-                const serviceAndNonStockItem =
-                    await prisma.serviceAndNonStockItem.findUniqueOrThrow({
-                        where: {
-                            id: item.serviceAndNonStockItemId,
-                        },
-                    })
-                return {
-                    chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
-                    amount: -(
-                        item.quantity *
-                        item.pricePerUnit *
-                        (item.vatable ? 100 / 107 : 1)
-                    ).toFixed(2),
-                }
-            })
-    )
+    // const serviceAndNonStockItemsGLCreate = await Promise.all(
+    //     items
+    //         .filter((item) => item.serviceAndNonStockItemId)
+    //         .map(async (item) => {
+    //             const serviceAndNonStockItem =
+    //                 await prisma.serviceAndNonStockItem.findUniqueOrThrow({
+    //                     where: {
+    //                         id: item.serviceAndNonStockItemId,
+    //                     },
+    //                 })
+    //             return {
+    //                 chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
+    //                 amount: -(item.quantity * item.costPerUnitExVat).toFixed(2),
+    //             }
+    //         })
+    // )
 
     const invoice = await prisma.document.create({
         data: {
@@ -93,13 +92,12 @@ export const createPurchaseOrder = async (
                     contactId: contact.id,
                     PurchaseOrderItem: {
                         create: items.map((item) => ({
-                            costPerUnit: item.pricePerUnit,
+                            costPerUnitIncVat: item.costPerUnitIncVat,
+                            costPerUnitExVat: item.costPerUnitExVat,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             unit: item.unit,
-                            vat: item.vatable
-                                ? +(item.pricePerUnit * (7 / 107)).toFixed(2)
-                                : 0,
+                            vat: item.costPerUnitIncVat - item.costPerUnitExVat,
                             barcode: item.barcode,
                             description: item.name + ' ' + item.detail,
                             skuMasterId: item.skuMasterId,

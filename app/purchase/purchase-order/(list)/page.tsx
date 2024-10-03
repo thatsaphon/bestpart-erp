@@ -116,7 +116,8 @@ export default async function PurchaseOrderPage({
                                     invoice.PurchaseOrder?.PurchaseOrderItem.reduce(
                                         (acc, item) =>
                                             acc +
-                                            item.costPerUnit * item.quantity,
+                                            item.costPerUnitIncVat *
+                                                item.quantity,
                                         0
                                     ) || 0
                                 ).toLocaleString()}

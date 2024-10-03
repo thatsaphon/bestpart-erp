@@ -88,7 +88,7 @@ export default async function PurchaseReturnListPage({
 
     const documentSum = await prisma.$queryRaw<
         { sum: number | null }[]
-    >`select sum("PurchaseReturnItem"."quantity" * "PurchaseReturnItem"."costPerUnit") from "Document"
+    >`select sum("PurchaseReturnItem"."quantity" * "PurchaseReturnItem"."costPerUnitIncVat") from "Document"
         left join "PurchaseReturn" on "Document"."id" = "PurchaseReturn"."documentId"
         left join "PurchaseReturnItem" on "PurchaseReturn"."id" = "PurchaseReturnItem"."purchaseReturnId"
         where 
@@ -146,7 +146,8 @@ export default async function PurchaseReturnListPage({
                             <TableCell className="text-right">
                                 {sale.PurchaseReturn?.PurchaseReturnItem.reduce(
                                     (acc, item) =>
-                                        acc + item.costPerUnit * item.quantity,
+                                        acc +
+                                        item.costPerUnitIncVat * item.quantity,
                                     0
                                 ).toLocaleString()}
                             </TableCell>
@@ -200,7 +201,7 @@ export default async function PurchaseReturnListPage({
                                                 (total, item) =>
                                                     total +
                                                     item.quantity *
-                                                        item.costPerUnit,
+                                                        item.costPerUnitIncVat,
                                                 0
                                             ) || 0,
                                         0

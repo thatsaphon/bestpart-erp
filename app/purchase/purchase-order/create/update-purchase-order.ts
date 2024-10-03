@@ -24,7 +24,10 @@ export const updatePurchaseOrder = async (
         documentNo,
         referenceNo,
     }: DocumentDetail,
-    items: DocumentItem[],
+    items: (DocumentItem & {
+        costPerUnitIncVat: number
+        costPerUnitExVat: number
+    })[],
     customerOrderIds: number[] = []
 ) => {
     const contact = await prisma.contact.findUnique({
@@ -112,13 +115,12 @@ export const updatePurchaseOrder = async (
                             },
                         },
                         create: items.map((item) => ({
-                            costPerUnit: item.pricePerUnit,
+                            costPerUnitIncVat: item.costPerUnitIncVat,
+                            costPerUnitExVat: item.costPerUnitExVat,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             unit: item.unit,
-                            vat: item.vatable
-                                ? +(item.pricePerUnit * (7 / 107)).toFixed(2)
-                                : 0,
+                            vat: item.costPerUnitIncVat - item.costPerUnitExVat,
                             barcode: item.barcode,
                             description: item.name + ' ' + item.detail,
                             skuMasterId: item.skuMasterId,

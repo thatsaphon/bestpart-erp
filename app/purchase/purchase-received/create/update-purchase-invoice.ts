@@ -23,7 +23,10 @@ export const updatePurchaseInvoice = async (
         documentNo,
         referenceNo,
     }: DocumentDetail,
-    items: DocumentItem[],
+    items: (DocumentItem & {
+        costPerUnitIncVat: number
+        costPerUnitExVat: number
+    })[],
     purchaseOrderIds: number[] = []
 ) => {
     const contact = await prisma.contact.findUnique({
@@ -145,11 +148,7 @@ export const updatePurchaseInvoice = async (
                     })
                 return {
                     chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
-                    amount: -(
-                        item.quantity *
-                        item.pricePerUnit *
-                        (item.vatable ? 100 / 107 : 1)
-                    ).toFixed(2),
+                    amount: -(item.quantity * item.costPerUnitExVat).toFixed(2),
                 }
             })
     )
@@ -182,7 +181,8 @@ export const updatePurchaseInvoice = async (
                                 amount: -items
                                     .reduce(
                                         (a, b) =>
-                                            a + b.pricePerUnit * b.quantity,
+                                            a +
+                                            b.costPerUnitIncVat * b.quantity,
                                         0
                                     )
                                     .toFixed(2),
@@ -194,10 +194,7 @@ export const updatePurchaseInvoice = async (
                                     .filter((item) => item.goodsMasterId)
                                     .reduce(
                                         (a, b) =>
-                                            a +
-                                            b.pricePerUnit *
-                                                b.quantity *
-                                                (b.vatable ? 100 / 107 : 1),
+                                            a + b.costPerUnitExVat * b.quantity,
                                         0
                                     )
                                     .toFixed(2),
@@ -226,14 +223,14 @@ export const updatePurchaseInvoice = async (
                                 id,
                             })) || [],
                         create: items.map((item) => ({
-                            costPerUnit: item.pricePerUnit,
+                            costPerUnitExVat: item.costPerUnitExVat,
+                            costPerUnitIncVat: item.costPerUnitIncVat,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             unit: item.unit,
                             vatable: item.vatable === true,
-                            vat: item.vatable
-                                ? +(item.pricePerUnit * (7 / 107)).toFixed(2)
-                                : 0,
+                            vat:
+                                item.costPerUnitIncVat - item.costPerUnitIncVat,
                             barcode: item.barcode,
                             description: item.detail,
                             name: item.name,

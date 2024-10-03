@@ -175,7 +175,7 @@ export default function PurchaseReturnInvoicePdf_5x9({ document }: Props) {
                             <Text style={styles.col5}>{`${item.unit}`}</Text>
                             <Text style={styles.col6}>
                                 {(
-                                    item.costPerUnit * item.quantity
+                                    item.costPerUnitIncVat * item.quantity
                                 ).toLocaleString()}
                             </Text>
                         </View>
@@ -208,7 +208,8 @@ export default function PurchaseReturnInvoicePdf_5x9({ document }: Props) {
                                 Number(
                                     document?.PurchaseReturn?.PurchaseReturnItem.reduce(
                                         (a, b) =>
-                                            a + b.costPerUnit * b.quantity,
+                                            a +
+                                            b.costPerUnitIncVat * b.quantity,
                                         0
                                     )
                                 )
@@ -223,7 +224,8 @@ export default function PurchaseReturnInvoicePdf_5x9({ document }: Props) {
                             render={({ pageNumber, totalPages }) =>
                                 pageNumber === totalPages &&
                                 document?.PurchaseReturn?.PurchaseReturnItem.reduce(
-                                    (a, b) => a + b.costPerUnit * b.quantity,
+                                    (a, b) =>
+                                        a + b.costPerUnitIncVat * b.quantity,
                                     0
                                 ).toLocaleString()
                             }
