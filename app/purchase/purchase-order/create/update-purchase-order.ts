@@ -128,6 +128,8 @@ export const updatePurchaseOrder = async (
                             serviceAndNonStockItemId:
                                 item.serviceAndNonStockItemId,
                             estimatedDeliveryDate: addDays(new Date(), 7),
+                            isIncludeVat: item.isIncludeVat,
+                            vatable: item.vatable,
                         })),
                     },
                     CustomerOrder: {

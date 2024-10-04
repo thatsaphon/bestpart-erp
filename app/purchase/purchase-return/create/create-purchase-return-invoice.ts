@@ -197,6 +197,8 @@ export const createPurchaseReturnInvoice = async (
                             serviceAndNonStockItemId:
                                 item.serviceAndNonStockItemId,
                             skuMasterId: item.skuMasterId,
+                            vatable: item.vatable,
+                            isIncludeVat: item.isIncludeVat,
                         })),
                     },
                 },

@@ -141,7 +141,6 @@ export const createPurchaseInvoice = async (
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             unit: item.unit,
-                            vatable: item.vatable === true,
                             vat: item.costPerUnitExVat - item.costPerUnitIncVat,
                             barcode: item.barcode,
                             description: item.detail,
@@ -150,6 +149,8 @@ export const createPurchaseInvoice = async (
                             goodsMasterId: item.goodsMasterId,
                             serviceAndNonStockItemId:
                                 item.serviceAndNonStockItemId,
+                            vatable: item.vatable,
+                            isIncludeVat: item.isIncludeVat,
                         })),
                     },
                     PurchaseOrder: {

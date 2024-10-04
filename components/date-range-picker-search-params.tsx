@@ -18,7 +18,7 @@ export default function DateRangePickerSearchParams({}: Props) {
                     ? new Date(searchParams.get('from') as string)
                     : new Date(
                           new Date().getFullYear(),
-                          new Date().getMonth(),
+                          new Date().getMonth() - 1,
                           1
                       )
             }

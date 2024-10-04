@@ -25,6 +25,7 @@ import PurchaseOrderStatusBadge from '../purchase-order-status-badge'
 import PurchaseOrderUpdateStatusComponent from './purchase-order-update-status-component'
 import CustomerOrderHoverCard from '@/components/customer-order-hover-card'
 import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
+import React from 'react'
 
 type Props = {
     params: { documentNo: string }
@@ -120,20 +121,82 @@ export default async function PurchaseOrderDetailPage({
                                         <p>{item.SkuMaster?.detail}</p>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        {item.quantity}
+                                        {item.quantity.toLocaleString()}
                                     </TableCell>
                                     <TableCell className="text-right">{`${item.unit}(${item.quantityPerUnit})`}</TableCell>
                                     <TableCell className="text-right">
-                                        {item.costPerUnitIncVat}
+                                        {(item.isIncludeVat
+                                            ? item.costPerUnitIncVat
+                                            : item.costPerUnitExVat
+                                        ).toLocaleString()}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        {item.costPerUnitIncVat * item.quantity}
+                                        {(
+                                            (item.isIncludeVat
+                                                ? item.costPerUnitIncVat
+                                                : item.costPerUnitExVat) *
+                                            item.quantity
+                                        ).toLocaleString()}
                                     </TableCell>
                                 </TableRow>
                             )
                         )}
                     </TableBody>
                     <TableFooter>
+                        {document?.PurchaseOrder?.PurchaseOrderItem.every(
+                            (item) => item.vatable
+                        ) && (
+                            <React.Fragment>
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={4}
+                                        className="text-right"
+                                    >
+                                        {document?.PurchaseOrder?.PurchaseOrderItem.every(
+                                            (item) => item.isIncludeVat
+                                        )
+                                            ? 'ราคารวมภาษีมูลค่าเพิ่ม'
+                                            : 'ราคาไม่รวมภาษีมูลค่าเพิ่ม'}
+                                    </TableCell>
+                                    <TableCell
+                                        colSpan={1}
+                                        className="text-right"
+                                    >
+                                        ยอดก่อนภาษี
+                                    </TableCell>
+                                    <TableCell
+                                        colSpan={1}
+                                        className="text-right"
+                                    >
+                                        {document?.PurchaseOrder?.PurchaseOrderItem.reduce(
+                                            (sum, item) =>
+                                                sum +
+                                                item.costPerUnitExVat *
+                                                    item.quantity,
+                                            0
+                                        ).toLocaleString()}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={5}
+                                        className="text-right"
+                                    >
+                                        ภาษีมูลค่าเพิ่ม
+                                    </TableCell>
+                                    <TableCell
+                                        colSpan={1}
+                                        className="text-right"
+                                    >
+                                        {document?.PurchaseOrder?.PurchaseOrderItem.reduce(
+                                            (sum, item) =>
+                                                sum + item.vat * item.quantity,
+                                            0
+                                        ).toLocaleString()}
+                                    </TableCell>
+                                </TableRow>
+                            </React.Fragment>
+                        )}
                         <TableRow>
                             <TableCell colSpan={5} className="text-right">
                                 Total
@@ -149,7 +212,7 @@ export default async function PurchaseOrderDetailPage({
                                             0
                                         )
                                     )
-                                )}
+                                ).toLocaleString()}
                             </TableCell>
                         </TableRow>
                         <TableRow>

@@ -31,7 +31,7 @@ export default async function PurchasePage({
         limit = '10',
         page = '1',
         from = format(
-            new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+            new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
             'yyyy-MM-dd'
         ),
         to = format(new Date(), 'yyyy-MM-dd'),

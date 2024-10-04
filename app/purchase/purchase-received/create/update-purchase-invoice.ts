@@ -228,7 +228,6 @@ export const updatePurchaseInvoice = async (
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             unit: item.unit,
-                            vatable: item.vatable === true,
                             vat:
                                 item.costPerUnitIncVat - item.costPerUnitIncVat,
                             barcode: item.barcode,
@@ -238,6 +237,8 @@ export const updatePurchaseInvoice = async (
                             goodsMasterId: item.goodsMasterId,
                             serviceAndNonStockItemId:
                                 item.serviceAndNonStockItemId,
+                            vatable: item.vatable,
+                            isIncludeVat: item.isIncludeVat,
                         })),
                     },
                     PurchaseOrder: {

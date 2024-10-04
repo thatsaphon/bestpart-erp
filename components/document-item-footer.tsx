@@ -45,35 +45,42 @@ export default function DocumentItemFooter({
                                 <Label htmlFor="inclued-vat">รวมภาษี</Label>
                             </div>
                         </TableCell>
-                        <TableCell colSpan={1} className="text-right">
+                        <TableCell colSpan={1} className="w-36 text-right">
                             ราคาก่อนภาษี
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="w-36 text-right">
                             {(+items
                                 .reduce(
                                     (sum, item) =>
                                         isIncludeVat
                                             ? sum +
-                                              item.pricePerUnit * (100 / 107)
-                                            : sum + item.pricePerUnit,
+                                              item.pricePerUnit *
+                                                  item.quantity *
+                                                  (100 / 107)
+                                            : sum +
+                                              item.pricePerUnit * item.quantity,
                                     0
                                 )
                                 .toFixed(2)).toLocaleString()}
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell colSpan={5} className="text-right">
+                        <TableCell colSpan={5} className="w-36 text-right">
                             ภาษีมูลค่าเพิ่ม
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="w-36 text-right">
                             {(+items
                                 .reduce(
                                     (sum, item) =>
                                         isIncludeVat
                                             ? sum +
-                                              item.pricePerUnit * (7 / 107)
+                                              item.pricePerUnit *
+                                                  item.quantity *
+                                                  (7 / 107)
                                             : sum +
-                                              (item.pricePerUnit * 7) / 100,
+                                              item.pricePerUnit *
+                                                  item.quantity *
+                                                  (7 / 100),
                                     0
                                 )
                                 .toFixed(2)).toLocaleString()}
@@ -101,13 +108,14 @@ export default function DocumentItemFooter({
                         </div>
                     )}
                 </TableCell>
-                <TableCell colSpan={1} className="text-right">
+                <TableCell colSpan={1} className="w-36 text-right">
                     รวม
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="w-36 text-right">
                     {(+(
                         items.reduce(
-                            (sum, item) => sum + item.pricePerUnit,
+                            (sum, item) =>
+                                sum + item.pricePerUnit * item.quantity,
                             0
                         ) * (!vatable ? 1 : isIncludeVat ? 1 : 1.07)
                     ).toFixed(2)).toLocaleString()}

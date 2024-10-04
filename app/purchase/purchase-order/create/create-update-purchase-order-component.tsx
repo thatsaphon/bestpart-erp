@@ -76,8 +76,12 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                 (customerOrder) => customerOrder.documentId
             ) || []
         )
-    const [vatable, setVatable] = React.useState(true)
-    const [isIncludeVat, setIsIncludeVat] = React.useState(true)
+    const [vatable, setVatable] = React.useState(
+        items.every((item) => item.vatable)
+    )
+    const [isIncludeVat, setIsIncludeVat] = React.useState(
+        items.every((item) => item.isIncludeVat)
+    )
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {

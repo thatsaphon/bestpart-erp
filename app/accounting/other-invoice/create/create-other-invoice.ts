@@ -98,6 +98,8 @@ export const createOtherInvoice = async (
                             vat: item.costPerUnitIncVat - item.costPerUnitExVat,
                             name: item.name,
                             description: item.detail,
+                            vatable: item.vatable,
+                            isIncludeVat: item.isIncludeVat,
                         })),
                     },
                     GeneralLedger: {
