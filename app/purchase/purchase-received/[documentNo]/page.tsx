@@ -4,7 +4,6 @@ import { Label } from '@/components/ui/label'
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableFooter,
     TableHead,
@@ -20,6 +19,11 @@ import Link from 'next/link'
 import SelectSearchVendor from '../../../../components/select-search-vendor'
 import { getPurchaseOrderDefaultFunction } from '@/types/purchase-order/purchase-order'
 import PurchaseOrderHoverCard from '@/components/purchase-order-hover-card'
+import { purchaseItemsToDocumentItems } from '@/types/purchase/purchase-item'
+import DocumentItemFooterReadonly from '@/components/document-item-footer-readonly'
+import { getPurchaseDefaultFunction } from '@/types/purchase/purchase'
+import { notFound } from 'next/navigation'
+import UpdateDocumentRemark from '@/components/update-document-remark'
 
 type Props = {
     params: { documentNo: string }
@@ -28,7 +32,8 @@ type Props = {
 export default async function PurchaseInvoiceDetailPage({
     params: { documentNo },
 }: Props) {
-    const document = await getPurchaseInvoiceDetail(documentNo)
+    const [document] = await getPurchaseDefaultFunction({ documentNo })
+    if (!document) return notFound()
     const session = await getServerSession(authOptions)
 
     const purchaseOrders = await getPurchaseOrderDefaultFunction({
@@ -38,15 +43,6 @@ export default async function PurchaseInvoiceDetailPage({
             ),
         },
     })
-
-    if (!document)
-        return (
-            <>
-                <Table>
-                    <TableCaption>ไม่พบข้อมูล</TableCaption>
-                </Table>
-            </>
-        )
 
     return (
         <>
@@ -114,13 +110,6 @@ export default async function PurchaseInvoiceDetailPage({
                     ))}
                 </div>
                 <Table className="mt-3">
-                    <TableCaption>
-                        <Textarea
-                            defaultValue={document?.DocumentRemark.map(
-                                ({ remark }) => remark
-                            ).join('\n')}
-                        />
-                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Barcode</TableHead>
@@ -156,29 +145,28 @@ export default async function PurchaseInvoiceDetailPage({
                         ))}
                     </TableBody>
                     <TableFooter>
+                        <DocumentItemFooterReadonly
+                            documentItems={purchaseItemsToDocumentItems(
+                                document?.Purchase?.PurchaseItem
+                            )}
+                            isIncludeVat={
+                                document.Purchase?.PurchaseItem[0]
+                                    ?.isIncludeVat ?? true
+                            }
+                            vatable={
+                                document.Purchase?.PurchaseItem[0]?.vatable ??
+                                true
+                            }
+                        />
                         <TableRow>
-                            <TableCell colSpan={5} className="text-right">
-                                Total
+                            <TableCell colSpan={7} className="text-right">
+                                <UpdateDocumentRemark
+                                    documentId={document.id}
+                                    existingDocumentRemark={
+                                        document.DocumentRemark
+                                    }
+                                />
                             </TableCell>
-                            <TableCell className="text-right">
-                                {Math.abs(
-                                    Number(
-                                        document?.Purchase?.PurchaseItem.reduce(
-                                            (sum, item) =>
-                                                sum +
-                                                item.costPerUnitIncVat *
-                                                    item.quantity,
-                                            0
-                                        )
-                                    )
-                                )}
-                            </TableCell>
-                        </TableRow>
-                        <TableRow className="bg-background">
-                            <TableCell
-                                colSpan={6}
-                                className="space-x-1 text-right"
-                            ></TableCell>
                         </TableRow>
                     </TableFooter>
                 </Table>

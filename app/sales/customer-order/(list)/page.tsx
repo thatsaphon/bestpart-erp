@@ -17,6 +17,7 @@ import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { fullDateFormat } from '@/lib/date-format'
 import CustomerOrderStatusBadge from '../customer-order-status-badge'
+import { getLastMonth } from '@/lib/get-last-month'
 
 type Props = {
     searchParams: {
@@ -31,10 +32,7 @@ export default async function CustomerOrderPage({
     searchParams: {
         limit = '10',
         page = '1',
-        from = format(
-            new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
-            'yyyy-MM-dd'
-        ),
+        from = format(getLastMonth(), 'yyyy-MM-dd'),
         to = format(new Date(), 'yyyy-MM-dd'),
     },
 }: Props) {

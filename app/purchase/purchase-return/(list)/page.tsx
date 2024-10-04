@@ -11,10 +11,11 @@ import {
 } from '@/components/ui/table'
 import { fullDateFormat } from '@/lib/date-format'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
-import { endOfMonth, format, startOfMonth } from 'date-fns'
-import { Link } from 'lucide-react'
+import { endOfMonth, format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import React from 'react'
+import { getLastMonth } from '@/lib/get-last-month'
+import Link from 'next/link'
 
 type Props = {
     searchParams: {
@@ -29,7 +30,7 @@ export default async function PurchaseReturnListPage({
     searchParams: {
         limit = '10',
         page = '1',
-        from = format(startOfMonth(new Date()), 'yyyy-MM-dd'),
+        from = format(getLastMonth(), 'yyyy-MM-dd'),
         to = format(endOfMonth(new Date()), 'yyyy-MM-dd'),
     },
 }: Props) {

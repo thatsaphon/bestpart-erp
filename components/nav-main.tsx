@@ -59,7 +59,7 @@ export function NavMain({
                                     <div
                                         // href={item.url}
                                         className={cn(
-                                            'flex h-8 min-w-8 flex-1 items-center gap-2 overflow-hidden rounded-md px-1.5 text-sm font-medium outline-none ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-2',
+                                            'flex h-8 min-w-8 flex-1 items-center gap-2 overflow-hidden rounded-md px-1.5 text-sm font-medium outline-none ring-ring transition-all hover:cursor-pointer hover:bg-accent hover:text-accent-foreground focus-visible:ring-2',
                                             pathname.includes(item.url) &&
                                                 'bg-accent text-accent-foreground'
                                         )}

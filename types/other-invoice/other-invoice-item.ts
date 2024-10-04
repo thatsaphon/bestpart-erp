@@ -21,21 +21,22 @@ export const otherInvoiceItemToDocumentItem = (
     otherInvoiceItems?: GetOtherInvoiceItem[]
 ): DocumentItem[] => {
     if (otherInvoiceItems === undefined) return []
-    return otherInvoiceItems.map((otherInvoiceItem) => {
+    return otherInvoiceItems.map((item) => {
         return {
-            serviceAndNonStockItemId: otherInvoiceItem.serviceAndNonStockItemId,
-            name: otherInvoiceItem.name,
-            detail: otherInvoiceItem.description,
-            pricePerUnit: otherInvoiceItem.isIncludeVat
-                ? otherInvoiceItem.costPerUnitIncVat
-                : otherInvoiceItem.costPerUnitExVat,
-            costPerUnitIncVat: otherInvoiceItem.costPerUnitIncVat,
-            costPerUnitExVat: otherInvoiceItem.costPerUnitExVat,
-            quantity: otherInvoiceItem.quantity,
+            serviceAndNonStockItemId: item.serviceAndNonStockItemId,
+            name: item.name,
+            detail: item.description,
+            pricePerUnit: item.isIncludeVat
+                ? item.costPerUnitIncVat
+                : item.costPerUnitExVat,
+            costPerUnitIncVat: item.costPerUnitIncVat,
+            costPerUnitExVat: item.costPerUnitExVat,
+            vat: item.vat,
+            quantity: item.quantity,
             quantityPerUnit: 1,
-            unit: otherInvoiceItem.unit,
-            vatable: otherInvoiceItem.vatable,
-            isIncludeVat: otherInvoiceItem.isIncludeVat,
+            unit: item.unit,
+            vatable: item.vatable,
+            isIncludeVat: item.isIncludeVat,
         } as DocumentItem
     })
 }

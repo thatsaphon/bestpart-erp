@@ -23,6 +23,7 @@ export type DocumentItem = {
     pricePerUnit: number
     costPerUnitIncVat?: number
     costPerUnitExVat?: number
+    vat?: number
     partNumber?: string
     remaining?: number
     remainingAt?: Date

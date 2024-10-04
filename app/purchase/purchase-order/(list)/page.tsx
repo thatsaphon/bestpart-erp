@@ -6,6 +6,7 @@ import {
     TableHead,
     TableBody,
     TableCell,
+    TableFooter,
 } from '@/components/ui/table'
 import Link from 'next/link'
 import React from 'react'
@@ -17,6 +18,7 @@ import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { fullDateFormat } from '@/lib/date-format'
 import PurchaseOrderStatusBadge from '../purchase-order-status-badge'
+import { getLastMonth } from '@/lib/get-last-month'
 
 type Props = {
     searchParams: {
@@ -31,10 +33,7 @@ export default async function PurchaseOrderPage({
     searchParams: {
         limit = '10',
         page = '1',
-        from = format(
-            new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
-            'yyyy-MM-dd'
-        ),
+        from = format(getLastMonth(), 'yyyy-MM-dd'),
         to = format(new Date(), 'yyyy-MM-dd'),
     },
 }: Props) {

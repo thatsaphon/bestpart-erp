@@ -20,6 +20,8 @@ import UpdateDocumentRemark from '@/components/update-document-remark'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import DocumentItemFooterReadonly from '@/components/document-item-footer-readonly'
+import { otherInvoiceItemToDocumentItem } from '@/types/other-invoice/other-invoice-item'
 
 type Props = {
     params: { documentNo: string }
@@ -103,19 +105,25 @@ export default async function OtherInvoiceDetailPage({
                         )}
                     </TableBody>
                     <TableFooter>
-                        <TableRow>
-                            <TableCell colSpan={5} className="text-right">
-                                Total
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {document.OtherInvoice?.OtherInvoiceItem.reduce(
-                                    (a, b) =>
-                                        a + b.quantity * b.costPerUnitIncVat,
-                                    0
-                                ).toLocaleString()}
-                            </TableCell>
-                            <TableCell colSpan={3}></TableCell>
-                        </TableRow>
+                        <DocumentItemFooterReadonly
+                            documentItems={otherInvoiceItemToDocumentItem(
+                                document?.OtherInvoice?.OtherInvoiceItem
+                            )}
+                            isIncludeVat={
+                                document?.OtherInvoice?.OtherInvoiceItem[0]
+                                    ?.isIncludeVat === undefined
+                                    ? true
+                                    : document?.OtherInvoice
+                                          ?.OtherInvoiceItem[0]?.isIncludeVat
+                            }
+                            vatable={
+                                document?.OtherInvoice?.OtherInvoiceItem[0]
+                                    ?.isIncludeVat === undefined
+                                    ? true
+                                    : document?.OtherInvoice
+                                          ?.OtherInvoiceItem[0]?.isIncludeVat
+                            }
+                        />
                         <TableRow>
                             <TableCell colSpan={3}>
                                 <UpdateDocumentRemark

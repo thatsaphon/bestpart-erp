@@ -56,6 +56,7 @@ export const purchaseOrderItemsToDocumentItems = (
                     : item.costPerUnitExVat,
                 costPerUnitExVat: item.costPerUnitExVat,
                 costPerUnitIncVat: item.costPerUnitIncVat,
+                vat: item.vat,
                 quantity: item.quantity,
                 quantityPerUnit: item.quantityPerUnit,
                 skuMasterId: item.skuMasterId,

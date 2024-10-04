@@ -87,6 +87,7 @@ enum DocumentType {
   CustomerOrder
   PurchaseOrder
   OtherInvoice
+  OtherPayment
 }
 
 model DocumentRemark {

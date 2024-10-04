@@ -30,6 +30,8 @@ import { getPurchaseReturnDefaultFunction } from '@/types/purchase-return/purcha
 import UpdateDocumentRemark from '@/components/update-document-remark'
 import PaymentComponentReadonly from '@/components/payment-component-readonly'
 import { generalLedgerToPayments } from '@/types/payment/payment'
+import DocumentItemFooterReadonly from '@/components/document-item-footer-readonly'
+import { PurchaseReturnItemsToDocumentItems } from '@/types/purchase-return/purchase-return-item'
 
 type Props = {
     params: { documentNo: string }
@@ -182,28 +184,19 @@ export default async function PurchaseInvoiceDetailPage({
                         )}
                     </TableBody>
                     <TableFooter>
-                        <TableRow>
-                            <TableCell colSpan={5} className="text-right">
-                                Total
-                            </TableCell>
-                            <TableCell className="text-right">
-                                {Math.abs(
-                                    Number(
-                                        document?.PurchaseReturn?.PurchaseReturnItem.reduce(
-                                            (a, b) =>
-                                                a + b.costPerUnit * b.quantity,
-                                            0
-                                        )
-                                    )
-                                )}
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell
-                                colSpan={6}
-                                className="space-x-1 text-right"
-                            ></TableCell>
-                        </TableRow>
+                        <DocumentItemFooterReadonly
+                            documentItems={PurchaseReturnItemsToDocumentItems(
+                                document?.PurchaseReturn?.PurchaseReturnItem
+                            )}
+                            isIncludeVat={
+                                document.PurchaseReturn?.PurchaseReturnItem[0]
+                                    ?.isIncludeVat ?? true
+                            }
+                            vatable={
+                                document.PurchaseReturn?.PurchaseReturnItem[0]
+                                    ?.vatable ?? true
+                            }
+                        />
                         <TableRow>
                             <TableCell
                                 colSpan={4}
@@ -215,12 +208,6 @@ export default async function PurchaseInvoiceDetailPage({
                                     }
                                     documentId={document?.id}
                                 />
-                                {/* <PaymentComponentReadonly
-                                    payments={generalLedgerToPayments(
-                                        document?.Purchase?.GeneralLedger || [],
-                                        true
-                                    )}
-                                /> */}
                             </TableCell>
                             <TableCell
                                 colSpan={2}

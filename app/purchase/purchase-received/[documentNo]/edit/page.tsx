@@ -1,15 +1,4 @@
-import prisma from '@/app/db/db'
-import React, { Suspense } from 'react'
 import CreateOrUpdatePurchaseInvoiceComponent from '../../create/create-update-purchase-invoice-component'
-import {
-    DocumentRemark,
-    MainSkuRemark,
-    Prisma,
-    SkuMasterRemark,
-} from '@prisma/client'
-import Link from 'next/link'
-import { salesItemsToDocumentItems } from '@/types/sales/sales-item'
-import { purchaseItemsToDocumentItems } from '@/types/purchase/purchase-item'
 import { getPurchaseDefaultFunction } from '@/types/purchase/purchase'
 import { getPurchaseOrderDefaultFunction } from '@/types/purchase-order/purchase-order'
 

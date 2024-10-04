@@ -16,6 +16,7 @@ import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import prisma from '@/app/db/db'
 import { fullDateFormat } from '@/lib/date-format'
+import { getLastMonth } from '@/lib/get-last-month'
 
 type Props = {
     searchParams: {
@@ -30,10 +31,7 @@ export default async function PaymentPage({
     searchParams: {
         limit = '10',
         page = '1',
-        from = format(
-            new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
-            'yyyy-MM-dd'
-        ),
+        from = format(getLastMonth(), 'yyyy-MM-dd'),
         to = format(new Date(), 'yyyy-MM-dd'),
     },
 }: Props) {

@@ -139,8 +139,8 @@ export default function CreateOrUpdatePurchaseReturnInvoiceComponent({
                 <DocumentDetailForm
                     setDocumentDetail={setDocumentDetail}
                     documentDetail={documentDetail}
-                    label="ลูกค้า"
-                    placeholder="รหัสลูกค้า"
+                    label="ผู้ขาย"
+                    placeholder="รหัสผู้ขาย"
                 />
                 <Table>
                     <TableHeader>

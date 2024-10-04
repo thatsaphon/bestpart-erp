@@ -126,6 +126,7 @@ export const PurchaseReturnItemsToDocumentItems = (
                     : item.costPerUnitExVat,
                 costPerUnitIncVat: item.costPerUnitIncVat,
                 costPerUnitExVat: item.costPerUnitExVat,
+                vat: item.vat,
                 quantity: item.quantity,
                 quantityPerUnit: item.quantityPerUnit,
                 skuMasterId: item.skuMasterId,

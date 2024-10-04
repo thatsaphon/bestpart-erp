@@ -33,6 +33,7 @@ export const getPurchaseDefaultFunction = async (
                         },
                     },
                     PurchaseOrder: true,
+                    Contact: true,
                 },
             },
             DocumentRemark: {
