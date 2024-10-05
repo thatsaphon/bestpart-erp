@@ -110,20 +110,10 @@ export const createOtherInvoice = async (
                                 amount: +items
                                     .reduce(
                                         (acc, item) =>
-                                            !!item.vatable
-                                                ? acc + 0
-                                                : item.isIncludeVat
-                                                  ? acc +
-                                                    +(
-                                                        (item.costPerUnitIncVat *
-                                                            7) /
-                                                        107
-                                                    ).toFixed(2)
-                                                  : acc +
-                                                    +(
-                                                        item.costPerUnitExVat *
-                                                        0.07
-                                                    ).toFixed(2),
+                                            acc +
+                                            (item.costPerUnitIncVat -
+                                                item.costPerUnitExVat) *
+                                                item.quantity,
                                         0
                                     )
                                     .toFixed(2),

@@ -14,12 +14,9 @@ export default function PaymentComponentReadonly({ payments }: Props) {
                 <Fragment key={index}>
                     <span className="col-start-2">{payment.name}</span>
                     <div className="flex items-baseline gap-2">
-                        <Input
-                            type="number"
-                            className="justify-self-start text-right"
-                            value={payment.amount}
-                            readOnly
-                        />
+                        <div className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-right text-sm">
+                            {payment.amount.toLocaleString()}
+                        </div>
                     </div>
                 </Fragment>
             ))}

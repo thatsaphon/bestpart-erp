@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import prisma from '@/app/db/db'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import PaginationComponent from '@/components/pagination-component'
-import { format } from 'date-fns'
+import { endOfDay, format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { fullDateFormat } from '@/lib/date-format'
 import PurchaseOrderStatusBadge from '../purchase-order-status-badge'
@@ -48,9 +48,7 @@ export default async function PurchaseOrderPage({
                 },
                 {
                     date: {
-                        lt: new Date(
-                            new Date(to).setDate(new Date(to).getDate() + 1)
-                        ),
+                        lt: endOfDay(to),
                     },
                 },
             ],

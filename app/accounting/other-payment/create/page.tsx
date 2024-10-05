@@ -1,14 +1,38 @@
 import Link from 'next/link'
 import React from 'react'
-import CreateUpdatePaymentComponent from './create-update-payment-component'
+import CreateUpdateOtherPaymentComponent from './create-update-other-payment-component'
+import { getUnpaidOtherInvoice } from '@/types/other-payment/unpaid-other-invoice'
+import { unpaidOtherInvoiceToOtherInvoicePaymentItems } from '@/types/other-payment/unpaid-other-invoice-item'
+import { getPaymentMethods } from '@/actions/get-payment-methods'
+import { Metadata } from 'next'
 
-type Props = {}
+export const metadata: Metadata = {
+    title: 'เพิ่มใบสำคัญจ่ายอื่น',
+}
 
-export default function page({}: Props) {
+type Props = {
+    searchParams: { contactId?: string }
+}
+
+export default async function CreateOtherPaymentPage({
+    searchParams: { contactId },
+}: Props) {
+    const unpaidPurchases = Number(contactId)
+        ? await getUnpaidOtherInvoice(Number(contactId))
+        : []
+    const unpaidItems =
+        unpaidOtherInvoiceToOtherInvoicePaymentItems(unpaidPurchases)
+
+    const paymentMethods = await getPaymentMethods()
     return (
         <>
-            <h1 className="my-2 text-3xl transition-colors">New Payment</h1>
-            <CreateUpdatePaymentComponent />
+            <h1 className="my-2 text-3xl transition-colors">
+                เพิ่มใบสำคัญจ่ายอื่น
+            </h1>
+            <CreateUpdateOtherPaymentComponent
+                paymentMethods={paymentMethods}
+                unpaidItems={unpaidItems}
+            />
         </>
     )
 }

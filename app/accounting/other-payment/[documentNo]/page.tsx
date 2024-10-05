@@ -12,10 +12,10 @@ import { fullDateFormat } from '@/lib/date-format'
 import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { getPurchasePaymentDefaultFunction } from '@/types/purchase-payment/purchase-payment'
-import { purchasePaymentToPurchasePaymentItems } from '@/types/purchase-payment/purchase-payment-item'
 import PaymentComponentReadonly from '@/components/payment-component-readonly'
 import { generalLedgerToPayments } from '@/types/payment/payment'
+import { getOtherPaymentDefaultFunction } from '@/types/other-payment/other-payment'
+import { otherPaymentToOtherPaymentItems } from '@/types/other-payment/other-payment-item'
 
 type Props = {
     params: {
@@ -28,23 +28,23 @@ export async function generateMetadata(
     parent: ResolvingMetadata
 ): Promise<Metadata> {
     return {
-        title: `ใบสำคัญจ่าย - ${params.documentNo}`,
+        title: `ใบสำคัญจ่ายอื่น - ${params.documentNo}`,
     }
 }
 
-export default async function PurchasePaymentDetailPage({
+export default async function OtherPaymentDetailPage({
     params: { documentNo },
 }: Props) {
-    const purchasePayment = await getPurchasePaymentDefaultFunction({
-        documentNo,
+    const otherPayment = await getOtherPaymentDefaultFunction({
+        where: { documentNo },
     })
 
-    const purchasePaymentItems = await purchasePaymentToPurchasePaymentItems(
-        purchasePayment[0]
+    const otherPaymentItems = await otherPaymentToOtherPaymentItems(
+        otherPayment[0]
     )
 
     const payments = generalLedgerToPayments(
-        purchasePayment[0].PurchasePayment?.GeneralLedger || [],
+        otherPayment[0].OtherPayment?.GeneralLedger || [],
         { isCash: true },
         true
     )
@@ -52,19 +52,18 @@ export default async function PurchasePaymentDetailPage({
     return (
         <div className="p-3">
             <h1 className="my-2 text-3xl transition-colors">
-                รายละเอียดใบสำคัญจ่าย
+                รายละเอียดใบสำคัญจ่ายอื่น
             </h1>
             <div className="flex items-baseline gap-5">
                 <DocumentDetailReadonly
                     documentDetail={{
-                        ...purchasePayment[0],
-                        contactId:
-                            purchasePayment[0].PurchasePayment?.contactId,
+                        ...otherPayment[0],
+                        contactId: otherPayment[0].OtherPayment?.contactId,
                     }}
                     label="เจ้าหนี้"
                 />
 
-                <Link href={`/purchase/purchase-payment/${documentNo}/edit`}>
+                <Link href={`/accounting/other-payment/${documentNo}/edit`}>
                     <Button variant={'destructive'}>แก้ไข</Button>
                 </Link>
             </div>
@@ -80,7 +79,7 @@ export default async function PurchasePaymentDetailPage({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {purchasePaymentItems.map((item, index) => (
+                    {otherPaymentItems.map((item, index) => (
                         <TableRow key={index}>
                             <TableCell className="text-center">
                                 {index + 1}
@@ -101,7 +100,7 @@ export default async function PurchasePaymentDetailPage({
                             Total
                         </TableHead>
                         <TableHead className="text-right">
-                            {purchasePaymentItems
+                            {otherPaymentItems
                                 .reduce((total, item) => total + item.amount, 0)
                                 .toLocaleString()}
                         </TableHead>

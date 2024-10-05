@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table'
 import { fullDateFormat } from '@/lib/date-format'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
-import { endOfMonth, format } from 'date-fns'
+import { endOfDay, endOfMonth, format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import React from 'react'
 import { getLastMonth } from '@/lib/get-last-month'
@@ -45,9 +45,7 @@ export default async function PurchaseReturnListPage({
                 },
                 {
                     date: {
-                        lt: new Date(
-                            new Date(to).setDate(new Date(to).getDate() + 1)
-                        ),
+                        lt: endOfDay(to),
                     },
                 },
             ],
@@ -78,9 +76,7 @@ export default async function PurchaseReturnListPage({
                 },
                 {
                     date: {
-                        lt: new Date(
-                            new Date(to).setDate(new Date(to).getDate() + 1)
-                        ),
+                        lt: endOfDay(to),
                     },
                 },
             ],

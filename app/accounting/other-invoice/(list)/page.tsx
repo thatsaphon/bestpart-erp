@@ -1,5 +1,5 @@
 import prisma from '@/app/db/db'
-import { format } from 'date-fns'
+import { endOfDay, format } from 'date-fns'
 import {
     Table,
     TableBody,
@@ -58,9 +58,7 @@ export default async function OtherPaymentPage({
                 },
                 {
                     date: {
-                        lt: new Date(
-                            new Date(to).setDate(new Date(to).getDate() + 1)
-                        ),
+                        lt: endOfDay(to),
                     },
                 },
             ],

@@ -15,7 +15,7 @@ import { ViewIcon } from 'lucide-react'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import { Prisma } from '@prisma/client'
 import { Badge } from '@/components/ui/badge'
-import { format, startOfMonth } from 'date-fns'
+import { endOfDay, format, startOfMonth } from 'date-fns'
 import { Avatar } from '@/components/ui/avatar'
 import { fullDateFormat } from '@/lib/date-format'
 import { getLastMonth } from '@/lib/get-last-month'
@@ -48,9 +48,7 @@ export default async function SalesListPage({
                 },
                 {
                     date: {
-                        lt: new Date(
-                            new Date(to).setDate(new Date(to).getDate() + 1)
-                        ),
+                        lt: endOfDay(to),
                     },
                 },
             ],
@@ -82,9 +80,7 @@ export default async function SalesListPage({
                 },
                 {
                     date: {
-                        lt: new Date(
-                            new Date(to).setDate(new Date(to).getDate() + 1)
-                        ),
+                        lt: endOfDay(to),
                     },
                 },
             ],

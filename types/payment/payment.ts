@@ -27,7 +27,7 @@ export type GetGeneralLedgerIncludeChartOfAccount = Awaited<
 >[number]
 
 export const generalLedgerToPayments = (
-    generalLedger: GetGeneralLedgerIncludeChartOfAccount[],
+    generalLedger: GetGeneralLedgerIncludeChartOfAccount[] | undefined,
     {
         isCash = true,
         isAr,
@@ -47,7 +47,7 @@ export const generalLedgerToPayments = (
 ) => {
     return (
         generalLedger
-            .filter(({ ChartOfAccount }) => {
+            ?.filter(({ ChartOfAccount }) => {
                 if (isCash && ChartOfAccount.isCash) return true
                 if (isAr && ChartOfAccount.isAr) return true
                 if (isDeposit && ChartOfAccount.isDeposit) return true
@@ -80,6 +80,8 @@ export const generalLedgerToPayments = (
                     isInputTax,
                     isOutputTax,
                 })
-            ) || []
+            ) ||
+        [] ||
+        []
     )
 }

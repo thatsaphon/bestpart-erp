@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import prisma from '../../../db/db'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import PaginationComponent from '@/components/pagination-component'
-import { format } from 'date-fns'
+import { endOfDay, format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { fullDateFormat } from '@/lib/date-format'
 import { getLastMonth } from '@/lib/get-last-month'
@@ -46,9 +46,7 @@ export default async function PurchasePage({
                 },
                 {
                     date: {
-                        lt: new Date(
-                            new Date(to).setDate(new Date(to).getDate() + 1)
-                        ),
+                        lt: endOfDay(to),
                     },
                 },
             ],
@@ -79,9 +77,7 @@ export default async function PurchasePage({
                 },
                 {
                     date: {
-                        lt: new Date(
-                            new Date(to).setDate(new Date(to).getDate() + 1)
-                        ),
+                        lt: endOfDay(to),
                     },
                 },
             ],
