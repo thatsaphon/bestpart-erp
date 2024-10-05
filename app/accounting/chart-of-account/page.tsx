@@ -15,7 +15,7 @@ import { chartOfAccountSchema } from '../../schema/chart-of-accounts-schema'
 import { EyeOpenIcon } from '@radix-ui/react-icons'
 import ChartOfAccountDetailDialog from '@/components/chart-of-account-detail-dialog'
 import Link from 'next/link'
-import { URLSearchParams } from 'url'
+// import { URLSearchParams } from 'url'
 import { createQueryString } from '@/lib/searchParams'
 
 type Props = {
