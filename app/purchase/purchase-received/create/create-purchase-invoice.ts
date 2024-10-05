@@ -84,7 +84,7 @@ export const createPurchaseInvoice = async (
             date: new Date(date),
             documentNo: documentNo,
             referenceNo: referenceNo,
-            type: 'Purchase',
+            type: 'PurchaseReceived',
             createdBy: session?.user.username,
             updatedBy: session?.user.username,
             Purchase: {

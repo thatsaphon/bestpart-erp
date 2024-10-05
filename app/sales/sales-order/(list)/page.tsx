@@ -39,7 +39,7 @@ export default async function SalesListPage({
 }: Props) {
     const sales = await prisma.document.findMany({
         where: {
-            type: 'Sales',
+            type: 'SalesOrder',
             AND: [
                 {
                     date: {
@@ -71,7 +71,7 @@ export default async function SalesListPage({
 
     const documentCount = await prisma.document.count({
         where: {
-            type: 'Sales',
+            type: 'SalesOrder',
             AND: [
                 {
                     date: {

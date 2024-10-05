@@ -2,7 +2,7 @@ import { getSalesBill } from './sales-bill'
 
 export type SalesBillItem = {
     id: number
-    type: 'Sales' | 'SalesReturn'
+    type: 'SalesOrder' | 'SalesReturn'
     date: Date
     documentId: number
     documentNo: string
@@ -17,7 +17,7 @@ export const salesBillToSalesBillItems = (
     const sales =
         salesBill.SalesBill?.Sales.map((x) => ({
             id: x.id,
-            type: 'Sales' as const,
+            type: 'SalesOrder' as const,
             date: x.Document.date,
             documentId: x.Document.id,
             documentNo: x.Document.documentNo,

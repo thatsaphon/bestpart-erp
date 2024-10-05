@@ -9,7 +9,7 @@ export const unpaidBillsToSalesReceivedItems = (
             if (x.Sales) {
                 return {
                     id: x.Sales.id,
-                    type: 'Sales' as const,
+                    type: 'SalesOrder' as const,
                     date: x.date,
                     documentId: x.id,
                     documentNo: x.documentNo,

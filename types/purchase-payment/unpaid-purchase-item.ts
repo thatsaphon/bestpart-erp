@@ -9,7 +9,7 @@ export const unpaidPurchaseToPurchasePaymentItems = (
             if (x.Purchase) {
                 return {
                     id: x.Purchase.id,
-                    type: 'Purchase' as const,
+                    type: 'PurchaseReceived' as const,
                     date: x.date,
                     documentId: x.id,
                     documentNo: x.documentNo,

@@ -37,7 +37,7 @@ export default async function PurchasePage({
 }: Props) {
     const purchaseInvoices = await prisma.document.findMany({
         where: {
-            type: 'Purchase',
+            type: 'PurchaseReceived',
             AND: [
                 {
                     date: {
@@ -68,7 +68,7 @@ export default async function PurchasePage({
 
     const documentCount = await prisma.document.count({
         where: {
-            type: 'Purchase',
+            type: 'PurchaseOrder',
             AND: [
                 {
                     date: {

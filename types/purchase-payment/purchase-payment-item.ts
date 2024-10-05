@@ -2,7 +2,7 @@ import { GetPurchasePayment } from './purchase-payment'
 
 export type PurchasePaymentItem = {
     id: number
-    type: 'Purchase' | 'PurchaseReturn'
+    type: 'PurchaseReceived' | 'PurchaseReturn'
     date: Date
     documentId: number
     documentNo: string
@@ -16,7 +16,7 @@ export const purchasePaymentToPurchasePaymentItems = (
     const purchase =
         purchasePayment.PurchasePayment?.Purchase.map((x) => ({
             id: x.id,
-            type: 'Purchase' as const,
+            type: 'PurchaseReceived' as const,
             date: x.Document.date,
             documentId: x.Document.id,
             documentNo: x.Document.documentNo,

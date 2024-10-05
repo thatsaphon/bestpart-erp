@@ -127,7 +127,7 @@ export const createSalesInvoice = async (
 
     const invoice = await prisma.document.create({
         data: {
-            type: 'Sales',
+            type: 'SalesOrder',
             referenceNo: referenceNo || '',
             contactName: contactName || '',
             address: address || '',

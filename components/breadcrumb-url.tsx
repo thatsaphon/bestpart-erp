@@ -10,6 +10,7 @@ import {
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { usePathname } from 'next/navigation'
+import { translate } from '@/lib/translate'
 
 type BreadcrumbUrlProps = {
     href: string
@@ -29,7 +30,7 @@ export default function BreadcrumbUrl({}: Props) {
                 (item, index, arr) =>
                     ({
                         href: `/${arr.slice(1, index + 1).join('/')}`,
-                        label: item
+                        label: translate(item)
                             .split('-')
                             .map(
                                 (item) =>

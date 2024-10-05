@@ -41,6 +41,7 @@ import { generalLedgerToPayments, Payment } from '@/types/payment/payment'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
 import AddPaymentComponent from '@/components/add-payment-component'
 import { GetDocumentRemark } from '@/types/remark/document-remark'
+import { translate } from '@/lib/translate'
 
 type Props = {
     existingPurchasePayment?: GetPurchasePayment
@@ -249,7 +250,9 @@ export default function CreateUpdatePurchasePaymentComponents({
                                         {index + 1}
                                     </TableCell>
                                     <TableCell>{item.documentNo}</TableCell>
-                                    <TableCell>{item.type}</TableCell>
+                                    <TableCell>
+                                        {translate(item.type)}
+                                    </TableCell>
                                     <TableCell>
                                         {fullDateFormat(item.date)}
                                     </TableCell>
@@ -336,7 +339,7 @@ export default function CreateUpdatePurchasePaymentComponents({
                                 {index + 1}
                             </TableCell>
                             <TableCell>{item.documentNo}</TableCell>
-                            <TableCell>{item.type}</TableCell>
+                            <TableCell>{translate(item.type)}</TableCell>
                             <TableCell>{fullDateFormat(item.date)}</TableCell>
                             <TableCell className="text-right">
                                 {item.amount.toLocaleString()}

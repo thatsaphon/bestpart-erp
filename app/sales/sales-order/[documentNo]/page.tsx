@@ -50,7 +50,7 @@ export default async function SalesInvoiceDetailPage({
 }: Props) {
     const [document] = await getSalesDefaultFunction({
         documentNo,
-        type: 'Sales',
+        type: 'SalesOrder',
     })
 
     if (!document)

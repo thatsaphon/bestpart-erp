@@ -16,6 +16,7 @@ import { getPurchasePaymentDefaultFunction } from '@/types/purchase-payment/purc
 import { purchasePaymentToPurchasePaymentItems } from '@/types/purchase-payment/purchase-payment-item'
 import PaymentComponentReadonly from '@/components/payment-component-readonly'
 import { generalLedgerToPayments } from '@/types/payment/payment'
+import { translate } from '@/lib/translate'
 
 type Props = {
     params: {
@@ -86,7 +87,7 @@ export default async function PurchasePaymentDetailPage({
                                 {index + 1}
                             </TableCell>
                             <TableCell>{item.documentNo}</TableCell>
-                            <TableCell>{item.type}</TableCell>
+                            <TableCell>{translate(item.type)}</TableCell>
                             <TableCell>{fullDateFormat(item.date)}</TableCell>
                             <TableCell className="text-right">
                                 {item.amount.toLocaleString()}

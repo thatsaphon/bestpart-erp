@@ -9,7 +9,7 @@ export default async function EditPurchaseInvoicePage({
 }: Props) {
     const [purchaseInvoice] = await getPurchaseDefaultFunction({
         documentNo,
-        type: 'Purchase',
+        type: 'PurchaseReceived',
     })
     if (!purchaseInvoice) return null
 

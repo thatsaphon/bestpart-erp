@@ -35,6 +35,7 @@ import { OtherPaymentItem } from '@/types/other-payment/other-payment-item'
 import { createOtherPayment } from './create-other-payment'
 import { updateOtherPayment } from './update-other-payment'
 import { deleteOtherPayment } from './delete-other-payment'
+import { translate } from '@/lib/translate'
 
 type Props = {
     existingOtherPayment?: GetOtherPayment
@@ -240,7 +241,9 @@ export default function CreateUpdateOtherPaymentComponents({
                                             {index + 1}
                                         </TableCell>
                                         <TableCell>{item.documentNo}</TableCell>
-                                        <TableCell>{item.type}</TableCell>
+                                        <TableCell>
+                                            {translate(item.type)}
+                                        </TableCell>
                                         <TableCell>
                                             {fullDateFormat(item.date)}
                                         </TableCell>
@@ -331,7 +334,7 @@ export default function CreateUpdateOtherPaymentComponents({
                                 {index + 1}
                             </TableCell>
                             <TableCell>{item.documentNo}</TableCell>
-                            <TableCell>{item.type}</TableCell>
+                            <TableCell>{translate(item.type)}</TableCell>
                             <TableCell>{fullDateFormat(item.date)}</TableCell>
                             <TableCell className="text-right">
                                 {item.amount.toLocaleString()}

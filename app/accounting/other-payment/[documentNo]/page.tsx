@@ -16,6 +16,7 @@ import PaymentComponentReadonly from '@/components/payment-component-readonly'
 import { generalLedgerToPayments } from '@/types/payment/payment'
 import { getOtherPaymentDefaultFunction } from '@/types/other-payment/other-payment'
 import { otherPaymentToOtherPaymentItems } from '@/types/other-payment/other-payment-item'
+import { translate } from '@/lib/translate'
 
 type Props = {
     params: {
@@ -85,7 +86,7 @@ export default async function OtherPaymentDetailPage({
                                 {index + 1}
                             </TableCell>
                             <TableCell>{item.documentNo}</TableCell>
-                            <TableCell>{item.type}</TableCell>
+                            <TableCell>{translate(item.type)}</TableCell>
                             <TableCell>{fullDateFormat(item.date)}</TableCell>
                             <TableCell className="text-right">
                                 {item.amount.toLocaleString()}

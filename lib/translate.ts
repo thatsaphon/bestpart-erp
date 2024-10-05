@@ -1,0 +1,41 @@
+export const VariableMap: Record<string, string> = {
+    sales: 'งานขาย',
+    salesorder: 'บิลขาย',
+    salesreturn: 'ใบรับคืน',
+    salesbill: 'ใบวางบิล',
+    salesreceived: 'ใบเสร็จรับเงิน',
+    purchase: 'จัดซื้อ',
+    purchasereceived: 'ซื้อ (ใบรับสินค้า)',
+    purchasereturn: 'ใบลดหนี้/ใบส่งคืนสินค้า',
+    purchasepayment: 'ใบสำคัญจ่าย',
+    journalvoucher: 'รายการปรับปรุง',
+    quotation: 'ใบเสนอราคา',
+    customerorder: 'ใบจองสินค้า',
+    purchaseorder: 'ใบสั่งซื้อ',
+    otherinvoice: 'ใบแจ้งหนี้อื่น',
+    otherpayment: 'ใบสำคัญจ่ายอื่น',
+    accounting: 'บัญชี',
+    assets: 'สินทรัพย์',
+    liabilities: 'หนี้สิน',
+    equity: 'ส่วนของผู้ถือหุ้น',
+    revenue: 'รายได้',
+    expense: 'ค่าใช้จ่าย',
+    otherincome: 'รายได้อื่น',
+    otherexpense: 'ค่าใช้จ่ายอื่น',
+    unpaid: 'ยังไม่ได้ชำระ',
+    paid: 'ชำระแล้ว',
+    partial: 'ชำระบางส่วน',
+    billed: 'วางบิลแล้ว',
+    land: 'ที่ดิน',
+    buildings: 'อาคาร',
+    equipment: 'อุปกรณ์',
+    vehicles: 'ยานพาหนะ',
+    furniture: 'เฟอร์นิเจอร์',
+    computers_and_electronics: 'คอมพิวเตอร์และอุปกรณ์ไฟฟ้า',
+    intangible_assets: 'สินทรัพย์ไม่มีตัวตน',
+}
+
+export const translate = (text: string) => {
+    const result = text.replaceAll(/[-\s]/g, '').toLowerCase()
+    return VariableMap[result] || text
+}

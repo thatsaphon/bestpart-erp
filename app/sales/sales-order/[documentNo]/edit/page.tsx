@@ -32,7 +32,7 @@ export default async function EditSalesInvoicePage({
 }: Props) {
     const [document] = await getSalesDefaultFunction({
         documentNo,
-        type: 'Sales',
+        type: 'SalesOrder',
     })
     const paymentMethods = await getPaymentMethods()
     const pendingOrExistingCustomerOrders = document.Sales?.contactId

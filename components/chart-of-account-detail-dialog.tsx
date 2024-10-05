@@ -31,6 +31,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ChartOfAccount, DocumentType } from '@prisma/client'
 import { deleteKeyFromQueryString } from '@/lib/searchParams'
 import getChartOfAccountDetail from '@/app/accounting/get-chart-of-account-detail'
+import { translate } from '@/lib/translate'
 
 type Props = {
     className?: string
@@ -187,7 +188,7 @@ export default function ChartOfAccountDetailDialog({
                         {history.map((item) => (
                             <div key={item.documentNo} className="flex gap-2">
                                 <span>{item.documentNo}</span>
-                                <span>{item.type}</span>
+                                <span>{translate(item.type)}</span>
                                 <span>{item.amount}</span>
                             </div>
                         ))}

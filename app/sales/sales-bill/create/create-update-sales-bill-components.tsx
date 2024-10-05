@@ -33,6 +33,7 @@ import { deleteSalesBill } from './delete-sales-bill'
 import { updateSalesBill } from './update-sales-bill'
 import CreateDocumentRemark from '@/components/create-document-remark'
 import { GetDocumentRemark } from '@/types/remark/document-remark'
+import { translate } from '@/lib/translate'
 
 type Props = {
     existingSalesBill?: getSalesBill
@@ -198,7 +199,9 @@ export default function CreateUpdateSalesBillComponents({
                                             {index + 1}
                                         </TableCell>
                                         <TableCell>{item.documentNo}</TableCell>
-                                        <TableCell>{item.type}</TableCell>
+                                        <TableCell>
+                                            {translate(item.type)}
+                                        </TableCell>
                                         <TableCell>
                                             {fullDateFormat(item.date)}
                                         </TableCell>
@@ -284,7 +287,7 @@ export default function CreateUpdateSalesBillComponents({
                                 {index + 1}
                             </TableCell>
                             <TableCell>{item.documentNo}</TableCell>
-                            <TableCell>{item.type}</TableCell>
+                            <TableCell>{translate(item.type)}</TableCell>
                             <TableCell>{fullDateFormat(item.date)}</TableCell>
                             <TableCell className="text-right">
                                 {item.amount.toLocaleString()}

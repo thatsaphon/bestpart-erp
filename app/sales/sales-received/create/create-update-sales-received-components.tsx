@@ -43,6 +43,7 @@ import { getPaymentMethods } from '@/actions/get-payment-methods'
 import AddPaymentComponent from '@/components/add-payment-component'
 import { GetDocumentRemark } from '@/types/remark/document-remark'
 import CreateDocumentRemark from '@/components/create-document-remark'
+import { translate } from '@/lib/translate'
 
 type Props = {
     existingSalesReceived?: getSalesReceived
@@ -263,7 +264,9 @@ export default function CreateUpdateSalesReceivedComponents({
                                         {index + 1}
                                     </TableCell>
                                     <TableCell>{item.documentNo}</TableCell>
-                                    <TableCell>{item.type}</TableCell>
+                                    <TableCell>
+                                        {translate(item.type)}
+                                    </TableCell>
                                     <TableCell>
                                         {fullDateFormat(item.date)}
                                     </TableCell>
@@ -347,7 +350,7 @@ export default function CreateUpdateSalesReceivedComponents({
                                 {index + 1}
                             </TableCell>
                             <TableCell>{item.documentNo}</TableCell>
-                            <TableCell>{item.type}</TableCell>
+                            <TableCell>{translate(item.type)}</TableCell>
                             <TableCell>{fullDateFormat(item.date)}</TableCell>
                             <TableCell className="text-right">
                                 {item.amount.toLocaleString()}

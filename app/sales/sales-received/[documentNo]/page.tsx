@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { getSalesReceivedDefaultFunction } from '@/types/sales-received/sales-receive'
 import { salesReceiveToSalesReceiveItems } from '@/types/sales-received/sales-receive-item'
 import PaymentComponentReadonly from '@/components/payment-component-readonly'
+import { translate } from '@/lib/translate'
 
 type Props = {
     params: {
@@ -87,7 +88,7 @@ export default async function page({ params: { documentNo } }: Props) {
                                 {index + 1}
                             </TableCell>
                             <TableCell>{item.documentNo}</TableCell>
-                            <TableCell>{item.type}</TableCell>
+                            <TableCell>{translate(item.type)}</TableCell>
                             <TableCell>{fullDateFormat(item.date)}</TableCell>
                             <TableCell className="text-right">
                                 {item.amount.toLocaleString()}

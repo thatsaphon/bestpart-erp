@@ -75,11 +75,11 @@ model Document {
 }
 
 enum DocumentType {
-  Sales
+  SalesOrder
   SalesReturn
   SalesBill
   SalesReceived
-  Purchase
+  PurchaseReceived
   PurchaseReturn
   PurchasePayment
   JournalVoucher

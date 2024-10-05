@@ -2,7 +2,7 @@ import { getSalesReceived } from './sales-receive'
 
 export type SalesReceivedItem = {
     id: number
-    type: 'Sales' | 'SalesReturn' | 'SalesBill'
+    type: 'SalesOrder' | 'SalesReturn' | 'SalesBill'
     date: Date
     documentId: number
     documentNo: string
@@ -17,7 +17,7 @@ export const salesReceiveToSalesReceiveItems = (
     const sales =
         salesReceive.SalesReceived?.Sales.map((x) => ({
             id: x.id,
-            type: 'Sales' as const,
+            type: 'SalesOrder' as const,
             date: x.Document.date,
             documentId: x.Document.id,
             documentNo: x.Document.documentNo,

@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import BillInvoiceLinkComponent from './bill-invoice-link-component'
 import UpdateDocumentRemark from '@/components/update-document-remark'
+import { translate } from '@/lib/translate'
 
 type Props = {
     params: {
@@ -76,7 +77,7 @@ export default async function page({ params: { documentNo } }: Props) {
                                 {index + 1}
                             </TableCell>
                             <TableCell>{item.documentNo}</TableCell>
-                            <TableCell>{item.type}</TableCell>
+                            <TableCell>{translate(item.type)}</TableCell>
                             <TableCell>{fullDateFormat(item.date)}</TableCell>
                             <TableCell className="text-right">
                                 {item.amount.toLocaleString()}
