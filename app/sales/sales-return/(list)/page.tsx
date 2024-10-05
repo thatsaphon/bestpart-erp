@@ -101,7 +101,7 @@ export default async function SalesListPage({
         left join "SalesReturnItem" on "SalesReturn"."id" = "SalesReturnItem"."salesReturnId"
         where 
         "Document"."date" between ${new Date(from)} and ${new Date(new Date(to).setDate(new Date(to).getDate() + 1))}::date and
-        "Document"."type" = 'Sales'
+        "Document"."type" = 'SalesReturn'
 `
 
     const numberOfPage = Math.ceil(documentCount / Number(limit))

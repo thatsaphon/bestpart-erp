@@ -90,7 +90,7 @@ export default async function PurchaseReturnListPage({
         left join "PurchaseReturnItem" on "PurchaseReturn"."id" = "PurchaseReturnItem"."purchaseReturnId"
         where 
         "Document"."date" between ${new Date(from)} and ${new Date(new Date(to).setDate(new Date(to).getDate() + 1))}::date and
-        "Document"."type" = 'Purchase'
+        "Document"."type" = 'PurchaseReceived'
 `
 
     const numberOfPage = Math.ceil(documentCount / Number(limit))
