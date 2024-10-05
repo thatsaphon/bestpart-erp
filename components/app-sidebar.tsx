@@ -178,6 +178,10 @@ const data = {
                     title: 'ใบสำคัญจ่ายอื่น',
                     url: FullRoute.OtherPayment,
                 },
+                {
+                    title: 'รายการปรับปรุง',
+                    url: FullRoute.JournalVoucher,
+                },
             ],
         },
         {

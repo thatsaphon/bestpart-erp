@@ -13,6 +13,7 @@ export type DocumentItem = {
     serviceAndNonStockItemId?: number
     name: string
     detail: string
+    position?: string
     MainSkuRemark: MainSkuRemark[]
     SkuMasterRemark: SkuMasterRemark[]
     Vendors?: Contact[]

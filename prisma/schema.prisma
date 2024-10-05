@@ -215,6 +215,8 @@ model SkuMaster {
   id     Int    @id @default(autoincrement())
   detail String
 
+  position String @default("")
+
   SkuMasterRemark SkuMasterRemark[]
 
   mainSkuId Int

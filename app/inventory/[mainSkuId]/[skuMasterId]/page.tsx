@@ -41,7 +41,7 @@ export default async function SkuMasterDetailPage({
     const histories = getSkuMasterHistory(skuTree.SkuMaster[0])
 
     return (
-        <div className="p-3">
+        <div className="space-y-2 p-3">
             <h1 className="text-3xl">{skuTree.name}</h1>
             <h2 className="text-primary">{skuTree.partNumber}</h2>
             <h2 className="flex gap-2 text-primary">
@@ -51,6 +51,7 @@ export default async function SkuMasterDetailPage({
                     </Badge>
                 ))}
             </h2>
+            <p>ตำแหน่งเก็บ: {skuTree?.SkuMaster[0]?.position}</p>
             <Separator className="my-2" />
             <Tabs defaultValue="detail">
                 <TabsList className="grid w-full grid-cols-3">

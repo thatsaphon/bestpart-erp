@@ -226,6 +226,9 @@ export default function SearchSkuDialog({
                                                     <TableHead className="text-right">
                                                         ราคา
                                                     </TableHead>
+                                                    <TableHead className="text-center">
+                                                        ตำแหน่ง
+                                                    </TableHead>
                                                     <TableHead className="w-[100px]"></TableHead>
                                                 </TableRow>
                                             </TableHeader>
@@ -255,6 +258,7 @@ export default function SearchSkuDialog({
                                                                 </TableCell>
                                                                 <TableCell>{`${good.unit}(${good.quantityPerUnit})`}</TableCell>
                                                                 <TableCell className="text-right">{`${good.pricePerUnit}`}</TableCell>
+                                                                <TableCell className="text-center">{`${sku.position}`}</TableCell>
                                                                 <TableCell className="text-right">
                                                                     <Button
                                                                         type="button"

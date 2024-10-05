@@ -50,6 +50,7 @@ export const purchaseItemsToDocumentItems = (
                 name: item.SkuMaster?.MainSku?.name,
                 goodsMasterId: item.goodsMasterId,
                 mainSkuId: item.SkuMaster?.mainSkuId,
+                position: item.SkuMaster?.position,
                 partNumber: item.SkuMaster?.MainSku?.partNumber,
                 pricePerUnit: item.isIncludeVat
                     ? item.costPerUnitIncVat

@@ -42,6 +42,7 @@ export const searchSkuTree = async (
             SkuMaster: mainSku.SkuMaster.map((sku) => ({
                 skuMasterId: sku.id,
                 detail: sku.detail,
+                position: sku.position,
                 SkuMasterRemark: sku.SkuMasterRemark,
                 Image: sku.Image,
                 GoodsMaster: sku.GoodsMaster.map((goods) => ({

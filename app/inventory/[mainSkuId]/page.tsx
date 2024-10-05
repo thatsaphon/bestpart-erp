@@ -57,6 +57,9 @@ export default async function MainSkuDetailPage({
                                     </Badge>
                                 ))}
                             </CardDescription>
+                            {skuMaster.position && (
+                                <p>ตำแหน่งเก็บ: {skuMaster.position}</p>
+                            )}
                         </CardHeader>
                         <CardContent>
                             <div className="flex flex-wrap justify-between gap-2 lg:grid lg:grid-cols-2">

@@ -153,7 +153,6 @@ export default function AssetUpdateForm({ asset }: Props) {
                     )}
                 />
                 <DateFormfield
-                    formControl={form.control}
                     name="acquisitionDate"
                     label="Acquisition Date"
                 />

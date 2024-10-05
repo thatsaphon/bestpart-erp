@@ -27,20 +27,20 @@ import { DocumentType } from '@prisma/client'
 //     { type: DocumentType.PurchaseOrder, path: '/purchase/purchase-order' },
 //     { type: DocumentType.OtherInvoice, path: '/accounting/other-invoice' },
 // ]
-const documentRoutes: Record<DocumentType, string> = {
-    Sales: '/sales/sales-order',
-    SalesReturn: '/sales/sales-return',
-    SalesBill: '/sales/sales-bill',
-    SalesReceived: '/sales/sales-received',
-    Purchase: '/purchase/purchase-received',
-    PurchaseReturn: '/purchase/purchase-return',
-    PurchasePayment: '/purchase/purchase-payment',
-    JournalVoucher: '/accounting/journal-voucher',
-    Quotation: '/sales/quotation',
-    CustomerOrder: '/sales/customer-order',
-    PurchaseOrder: '/purchase/purchase-order',
-    OtherInvoice: '/accounting/other-invoice',
-}
+// const documentRoutes: Record<DocumentType, string> = {
+//     SalesOrder: '/sales/sales-order',
+//     SalesReturn: '/sales/sales-return',
+//     SalesBill: '/sales/sales-bill',
+//     SalesReceived: '/sales/sales-received',
+//     PurchaseReceived: '/purchase/purchase-received',
+//     PurchaseReturn: '/purchase/purchase-return',
+//     PurchasePayment: '/purchase/purchase-payment',
+//     JournalVoucher: '/accounting/journal-voucher',
+//     Quotation: '/sales/quotation',
+//     CustomerOrder: '/sales/customer-order',
+//     PurchaseOrder: '/purchase/purchase-order',
+//     OtherInvoice: '/accounting/other-invoice',
+// }
 
 export enum FullRoute {
     Sales = '/sales/sales-order',

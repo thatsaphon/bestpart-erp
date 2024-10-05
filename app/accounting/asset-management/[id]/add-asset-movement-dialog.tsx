@@ -70,11 +70,7 @@ export default function AddAssetMovementDialog({ assetId }: Props) {
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="my-3 w-[500px] space-y-3"
                     >
-                        <DateFormfield
-                            formControl={form.control}
-                            name="date"
-                            label="วันที่"
-                        />
+                        <DateFormfield name="date" label="วันที่" />
                         <FormField
                             control={form.control}
                             name="documentNo"

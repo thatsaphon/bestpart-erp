@@ -163,6 +163,7 @@ export const searchSku = async (query: string, page: number = 1) => {
             skuMasterId: goods.skuMasterId,
             name: goods.SkuMaster.MainSku.name,
             detail: goods.SkuMaster.detail,
+            position: goods.SkuMaster.position,
             unit: goods.unit,
             quantityPerUnit: goods.quantityPerUnit,
             quantity: 0,

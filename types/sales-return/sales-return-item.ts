@@ -121,6 +121,7 @@ export const salesReturnItemsToDocumentItems = (
                     item.ServiceAndNonStockItem?.name,
                 goodsMasterId: item.goodsMasterId,
                 mainSkuId: item.SkuMaster?.mainSkuId,
+                position: item.SkuMaster?.position,
                 partNumber: item.SkuMaster?.MainSku?.partNumber,
                 pricePerUnit: item.pricePerUnit,
                 quantity: item.quantity,

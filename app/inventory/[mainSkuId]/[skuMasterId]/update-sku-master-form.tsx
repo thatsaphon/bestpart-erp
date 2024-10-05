@@ -29,6 +29,7 @@ type Props = {
 export default function UpdateSkuMasterForm({ skuMaster }: Props) {
     const [isEdit, setIsEdit] = React.useState(false)
     const [detail, setDetail] = React.useState(skuMaster.detail)
+    const [position, setPosition] = React.useState(skuMaster.position)
     const [skuMasterRemarks, setSkuMasterRemarks] = React.useState<
         { remark: string }[]
     >(skuMaster.SkuMasterRemark)
@@ -69,6 +70,7 @@ export default function UpdateSkuMasterForm({ skuMaster }: Props) {
         try {
             await updateSkuMaster(skuMaster.skuMasterId, {
                 detail,
+                position,
                 SkuMasterRemark: {
                     connectOrCreate: skuMasterRemarks.map((remark) => ({
                         where: { remark: remark.remark },
@@ -146,6 +148,7 @@ export default function UpdateSkuMasterForm({ skuMaster }: Props) {
                         </Badge>
                     ))}
                 </CardDescription>
+                <p>ตำแหน่งเก็บ: {skuMaster.position}</p>
             </CardHeader>
             <CardContent>
                 <div className="flex flex-wrap justify-between gap-2 lg:grid lg:grid-cols-2">
@@ -153,6 +156,7 @@ export default function UpdateSkuMasterForm({ skuMaster }: Props) {
                         <div className="text-center">คงเหลือ</div>
                         <div>Barcode</div>
                         <div>หน่วย</div>
+
                         <div className="text-right">ราคา</div>
                         {skuMaster.GoodsMaster.map((goodsMaster) => (
                             <React.Fragment
@@ -189,14 +193,18 @@ export default function UpdateSkuMasterForm({ skuMaster }: Props) {
         <Card>
             <form action={onFormSubmit}>
                 <CardHeader>
-                    <CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                        <span className="text-base font-medium">
+                            ชื่อสินค้าย่อย:
+                        </span>
                         <Input
+                            className="w-80"
                             value={detail}
                             onChange={(e) => setDetail(e.target.value)}
                             placeholder="รายละเอียดสินค้า"
                         />
                     </CardTitle>
-                    <CardDescription className="flex flex-wrap items-center gap-2">
+                    <CardDescription className="flex flex-wrap items-center gap-2 space-y-2">
                         {skuMasterRemarks.map((remark) => (
                             <Badge
                                 key={`remark-${skuMaster.skuMasterId}-${remark.remark}`}
@@ -221,6 +229,14 @@ export default function UpdateSkuMasterForm({ skuMaster }: Props) {
                             Add
                         </Button>
                     </CardDescription>
+                    <p className="flex items-center gap-2">
+                        ตำแหน่งเก็บ:{' '}
+                        <Input
+                            className="w-48"
+                            value={position}
+                            onChange={(e) => setPosition(e.target.value)}
+                        />
+                    </p>
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-wrap justify-between gap-2 lg:grid lg:grid-cols-2">

@@ -1,3 +1,5 @@
+'use client'
+
 import { cn } from '@/lib/utils'
 import {
     Popover,
@@ -16,18 +18,18 @@ import {
     FormMessage,
 } from './ui/form'
 import { Calendar } from './ui/calendar'
-import { Control, UseFormReturn } from 'react-hook-form'
+import { Control, useFormContext } from 'react-hook-form'
 
 type Props = {
-    formControl: Control<any>
     name: string
     label: string
 }
 
-export default function DateFormfield({ formControl, name, label }: Props) {
+export default function DateFormfield({ name, label }: Props) {
+    const form = useFormContext()
     return (
         <FormField
-            control={formControl}
+            control={form.control}
             name={name}
             render={({ field }) => (
                 <FormItem className="flex flex-col">
