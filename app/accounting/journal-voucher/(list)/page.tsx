@@ -74,6 +74,7 @@ export default async function JournalVoucherListPage({
                             เลขที่เอกสาร
                         </TableHead>
                         <TableHead>สร้างโดย</TableHead>
+                        <TableHead>คำอธิบาย</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
@@ -86,6 +87,9 @@ export default async function JournalVoucherListPage({
                             </TableCell>
                             <TableCell>{invoice.documentNo}</TableCell>
                             <TableCell>{invoice.createdBy}</TableCell>
+                            <TableCell>
+                                {invoice.JournalVoucher?.journalDescription}
+                            </TableCell>
                             <TableCell className="text-right">
                                 {invoice.JournalVoucher?.GeneralLedger.filter(
                                     ({ amount }) => amount > 0

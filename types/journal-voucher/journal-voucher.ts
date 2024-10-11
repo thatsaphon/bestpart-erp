@@ -40,4 +40,4 @@ export const getJournalVoucherDefaultFunction = ({
 
 export type GetJournalVoucher = Awaited<
     ReturnType<typeof getJournalVoucherDefaultFunction>
->
+>[number]

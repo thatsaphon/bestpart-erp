@@ -566,11 +566,12 @@ model StockAdjustmentItem {
 }
 
 model JournalVoucher {
-  id            Int             @id @default(autoincrement())
-  Document      Document        @relation(fields: [documentId], references: [id])
-  documentId    Int             @unique
-  GeneralLedger GeneralLedger[]
-  AssetMovement AssetMovement[]
+  id                 Int             @id @default(autoincrement())
+  Document           Document        @relation(fields: [documentId], references: [id])
+  documentId         Int             @unique
+  journalDescription String
+  GeneralLedger      GeneralLedger[]
+  AssetMovement      AssetMovement[]
 }
 
 model AccountOwner {
