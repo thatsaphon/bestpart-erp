@@ -38,6 +38,7 @@ import ViewCustomerOrderDialog from '@/components/view-customer-order-dialog'
 import CreateDocumentRemark from '@/components/create-document-remark'
 import { GetDocumentRemark } from '@/types/remark/document-remark'
 import CustomerOrderHoverCard from '@/components/customer-order-hover-card'
+import useSecondDisplayStore from '@/store/second-display-store'
 
 type Props = {
     existingSales?: GetSales
@@ -54,6 +55,7 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     quotations = [],
     pendingOrExistingCustomerOrders = [],
 }: Props) {
+    const store = useSecondDisplayStore()
     const [documentDetail, setDocumentDetail] = React.useState<DocumentDetail>(
         existingSales
             ? { ...existingSales, contactId: existingSales?.Sales?.contactId }
@@ -83,6 +85,16 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                 (customerOrder) => customerOrder.documentId
             ) || []
         )
+
+    useEffect(() => {
+        console.log('items changed')
+        console.log(store.customerWindow)
+        // store.customerWindow?.postMessage({ documentDetail, items })
+        store.postDocumentDetail(documentDetail)
+        store.postItems(items)
+        // console.log(store.setItems)
+        // console.log(store.items)
+    }, [items, documentDetail])
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {

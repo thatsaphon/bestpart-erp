@@ -11,6 +11,7 @@ import BreadcrumbUrl from './breadcrumb-url'
 import GenerateBarcodeButton from './generate-barcode-button'
 import { setCookies } from '@/actions/set-cookies'
 import { Button } from './ui/button'
+import OpenSecondDisplayButton from './open-second-display-button'
 
 export default async function LayoutComponent({
     children,
@@ -31,7 +32,8 @@ export default async function LayoutComponent({
                         <BreadcrumbUrl />
 
                         <div className="mr-2 flex items-center gap-2">
-                            <GenerateBarcodeButton />
+                            <OpenSecondDisplayButton />
+                            {/* <GenerateBarcodeButton /> */}
                             <QuickSearchInventory />
                             <ModeToggle />
                             <UserAvatar user={session?.user} />

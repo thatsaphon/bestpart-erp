@@ -44,7 +44,7 @@ export default function LoginComponent({}: Props) {
                 console.error(result.error)
                 return
             } else {
-                setCookies()
+                // setCookies()
                 toast.success('Login success')
                 router.refresh()
             }
