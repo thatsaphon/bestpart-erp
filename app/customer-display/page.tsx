@@ -16,6 +16,8 @@ import {
 } from '@/types/document-detail'
 import { DocumentItem } from '@/types/document-item'
 import React, { useEffect } from 'react'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import Image from 'next/image'
 
 type Props = {}
 
@@ -23,20 +25,36 @@ export default function page({}: Props) {
     const [data, setData] = React.useState<{
         documentDetail: DocumentDetail
         items: DocumentItem[]
+        images: string[]
+        showImage: boolean
+        imageIndex: number
     }>({
         documentDetail: getDefaultDocumentDetail(),
         items: [],
+        images: [],
+        showImage: false,
+        imageIndex: 0,
     })
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
             // Ensure the event data has the correct shape
-            if (!event.data.documentDetail && !event.data.items) return
+            if (
+                !event.data.documentDetail &&
+                !event.data.items &&
+                !event.data.images
+            )
+                return
+
             const data: {
                 documentDetail: DocumentDetail
                 items: DocumentItem[]
+                images: string[]
+                showImage: boolean
+                imageIndex: number
             } = event.data
             setData(data)
+            console.log(data)
         }
 
         // Listen for messages from the cashier window
@@ -49,6 +67,19 @@ export default function page({}: Props) {
 
     return (
         <div className="absolute left-0 top-0 z-50 h-screen w-screen bg-background p-2">
+            <Dialog open={data.showImage}>
+                <DialogContent>
+                    <Image
+                        src={data.images?.[data.imageIndex]}
+                        alt="second-display-image"
+                        width={500}
+                        height={500}
+                        unoptimized
+                    />
+                    {/* {data.images?.[data.imageIndex]?.length > 0 && (
+                    )} */}
+                </DialogContent>
+            </Dialog>
             <div className="flex h-full flex-col gap-1 rounded-md border-2 border-dashed p-4">
                 <div className="grid grid-cols-2">
                     <div>รหัสลูกค้า: {data.documentDetail?.contactId}</div>

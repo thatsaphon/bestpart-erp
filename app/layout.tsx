@@ -11,6 +11,7 @@ import SessionProvider from '@/components/session-provider'
 import { authOptions } from './api/auth/[...nextauth]/authOptions'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { NextRequest } from 'next/server'
+import ShowImageSecondDisplaySwitch from '@/components/show-image-second-display-switch'
 
 export const fontSans = FontSans({
     subsets: ['latin'],
@@ -54,11 +55,13 @@ export default async function RootLayout({
                 >
                     <SessionProvider session={session}>
                         {session && (
-                            <LayoutComponent>{children}</LayoutComponent>
+                            <LayoutComponent>
+                                {children}
+                                <ShowImageSecondDisplaySwitch />
+                            </LayoutComponent>
                         )}
                         {!session && children}
                     </SessionProvider>
-
                     <Toaster />
                 </ThemeProvider>
             </body>

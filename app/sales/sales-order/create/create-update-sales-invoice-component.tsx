@@ -89,11 +89,8 @@ export default function CreateOrUpdateSalesInvoiceComponent({
     useEffect(() => {
         console.log('items changed')
         console.log(store.customerWindow)
-        // store.customerWindow?.postMessage({ documentDetail, items })
         store.postDocumentDetail(documentDetail)
         store.postItems(items)
-        // console.log(store.setItems)
-        // console.log(store.items)
     }, [items, documentDetail])
 
     useEffect(() => {
