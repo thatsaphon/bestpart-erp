@@ -50,6 +50,7 @@
         "cmdk": "1.0.0",
         "csv-string": "^4.1.1",
         "date-fns": "^3.6.0",
+        "embla-carousel-react": "^8.3.0",
         "input-otp": "^1.2.4",
         "jsbarcode": "^3.11.6",
         "lucide": "^0.445.0",

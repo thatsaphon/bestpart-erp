@@ -8,11 +8,19 @@ import {
     DialogTitle,
     DialogTrigger,
 } from './ui/dialog'
-import { Card } from './ui/card'
+import { Card, CardContent } from './ui/card'
 import { Button } from './ui/button'
 import { Switch } from './ui/switch'
 import { Label } from './ui/label'
 import useSecondDisplayStore from '@/store/second-display-store'
+import Image from 'next/image'
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from './ui/carousel'
 
 type Props = {}
 
@@ -25,10 +33,61 @@ export default function ShowImageSecondDisplaySwitch({}: Props) {
                 <DialogTrigger asChild>
                     <Button>Show</Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="flex h-[80vh] w-[600px] max-w-[80vw] flex-col items-center justify-center">
                     <DialogHeader>
                         <DialogTitle>Second Display</DialogTitle>
                     </DialogHeader>
+                    <div className="flex h-full flex-col items-center justify-between">
+                        <div className="flex h-full items-center justify-center">
+                            {store.images[store.imageIndex] && (
+                                <Image
+                                    src={store.images[store.imageIndex]}
+                                    alt="image"
+                                    width={500}
+                                    height={500}
+                                    unoptimized
+                                    className="max-h-[50vh] w-auto"
+                                />
+                            )}
+                        </div>
+                        <Carousel
+                            opts={{
+                                align: 'start',
+                            }}
+                            className="w-full max-w-sm"
+                        >
+                            <CarouselContent>
+                                {store.images.map((image, index) => (
+                                    <CarouselItem
+                                        key={index}
+                                        className="basis-1/3"
+                                    >
+                                        <div className="p-1">
+                                            <Card>
+                                                <CardContent className="flex aspect-square h-full items-center p-6">
+                                                    <Image
+                                                        src={image}
+                                                        alt="image"
+                                                        width={500}
+                                                        height={500}
+                                                        unoptimized
+                                                        className="hover:cursor-pointer"
+                                                        onClick={() => {
+                                                            store.setImageIndex(
+                                                                index
+                                                            )
+                                                        }}
+                                                    />
+                                                </CardContent>
+                                            </Card>
+                                        </div>
+                                    </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                        </Carousel>
+                    </div>
                 </DialogContent>
             </Dialog>
             <div className="flex items-center space-x-2">

@@ -67,7 +67,7 @@ export default function page({}: Props) {
 
     return (
         <div className="absolute left-0 top-0 z-50 h-screen w-screen bg-background p-2">
-            <Dialog open={data.showImage}>
+            <Dialog open={!!data.images.length && data.showImage}>
                 <DialogContent>
                     <Image
                         src={data.images?.[data.imageIndex]}

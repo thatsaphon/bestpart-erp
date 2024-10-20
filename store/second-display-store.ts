@@ -24,6 +24,7 @@ export type SecondDisplay = {
     addImage: (image: string) => void
     removeImage: (image: string) => void
     clearImages: () => void
+    setImageIndex: (index: number) => void
 }
 
 // Create the Zustand store
@@ -59,13 +60,13 @@ const useSecondDisplayStore = create<SecondDisplay>()((set) => ({
                         items: items,
                         documentDetail: state.documentDetail,
                         images: state.images,
-                        showImage: state.showImage,
+                        showImage: false,
                         imageIndex: state.imageIndex,
                     },
                     '*'
                 )
             }
-            return { items }
+            return { items, showImage: false }
         }),
 
     openCustomerWindow: async () => {
@@ -110,13 +111,17 @@ const useSecondDisplayStore = create<SecondDisplay>()((set) => ({
                         items: state.items,
                         documentDetail: state.documentDetail,
                         images: [...state.images, image],
-                        showImage: !state.showImage,
-                        imageIndex: state.imageIndex,
+                        showImage: true,
+                        imageIndex: state.images.length,
                     },
                     '*'
                 )
             }
-            return { images: [...state.images, image] }
+            return {
+                images: [...state.images, image],
+                showImage: true,
+                imageIndex: state.images.length,
+            }
         }),
     removeImage: (image) =>
         set((state) => {
@@ -126,15 +131,50 @@ const useSecondDisplayStore = create<SecondDisplay>()((set) => ({
                         items: state.items,
                         documentDetail: state.documentDetail,
                         images: state.images.filter((i) => i !== image),
-                        showImage: !state.showImage,
-                        imageIndex: state.imageIndex,
+                        showImage: state.showImage,
+                        imageIndex:
+                            state.imageIndex - 1 < 0 ? 0 : state.imageIndex - 1,
                     },
                     '*'
                 )
             }
-            return { images: state.images.filter((i) => i !== image) }
+            return {
+                images: state.images.filter((i) => i !== image),
+                imageIndex: state.imageIndex - 1 < 0 ? 0 : state.imageIndex - 1,
+            }
         }),
-    clearImages: () => set(() => ({ images: [] })),
+    clearImages: () =>
+        set((state) => {
+            if (state.customerWindow) {
+                state.customerWindow?.postMessage(
+                    {
+                        items: state.items,
+                        documentDetail: state.documentDetail,
+                        images: [],
+                        showImage: state.showImage,
+                        imageIndex: 0,
+                    },
+                    '*'
+                )
+            }
+            return { images: [] }
+        }),
+    setImageIndex: (index) =>
+        set((state) => {
+            if (state.customerWindow) {
+                state.customerWindow?.postMessage(
+                    {
+                        items: state.items,
+                        documentDetail: state.documentDetail,
+                        images: state.images,
+                        showImage: state.showImage,
+                        imageIndex: index,
+                    },
+                    '*'
+                )
+            }
+            return { imageIndex: index }
+        }),
 }))
 
 export default useSecondDisplayStore
