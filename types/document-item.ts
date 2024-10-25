@@ -21,9 +21,13 @@ export type DocumentItem = {
     quantityPerUnit: number
     quantity: number
     lastPurchaseCostPerUnit?: number | null
+    discountString?:string
     pricePerUnit: number
+    discountPerUnit?:number
     costPerUnitIncVat?: number
     costPerUnitExVat?: number
+    discountPerUnitIncVat?:number
+    discountPerUnitExVat?:number
     vat?: number
     partNumber?: string
     remaining?: number

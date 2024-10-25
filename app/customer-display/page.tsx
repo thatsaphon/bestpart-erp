@@ -76,8 +76,6 @@ export default function page({}: Props) {
                         height={500}
                         unoptimized
                     />
-                    {/* {data.images?.[data.imageIndex]?.length > 0 && (
-                    )} */}
                 </DialogContent>
             </Dialog>
             <div className="flex h-full flex-col gap-1 rounded-md border-2 border-dashed p-4">

@@ -215,7 +215,10 @@ model SkuMaster {
   id     Int    @id @default(autoincrement())
   detail String
 
-  position String @default("")
+  reorderPoint  Float?
+  maximumAmount Float?
+  minimumAmount Float?
+  position      String @default("")
 
   SkuMasterRemark SkuMasterRemark[]
 
@@ -347,9 +350,12 @@ model SalesItem {
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity     Float
-  pricePerUnit Float
-  vat          Float
+  quantity        Float
+  pricePerUnit    Float
+  discountString  String?
+  discountPerUnit Float?
+  freeQuantity    Float?
+  vat             Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -368,6 +374,7 @@ model ServiceAndNonStockItem {
   canSales        Boolean
   canPurchase     Boolean
   canOtherInvoice Boolean
+  isDiscount      Boolean @default(false)
 
   SalesItem          SalesItem[]
   SalesReturnItem    SalesReturnItem[]
@@ -409,9 +416,12 @@ model SalesReturnItem {
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity     Float
-  pricePerUnit Float
-  vat          Float
+  quantity        Float
+  pricePerUnit    Float
+  discountString  String?
+  discountPerUnit Float?
+  freeQuantity    Float?
+  vat             Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -474,10 +484,14 @@ model PurchaseItem {
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity          Float
-  costPerUnitIncVat Float
-  costPerUnitExVat  Float
-  vat               Float
+  quantity              Float
+  costPerUnitIncVat     Float
+  costPerUnitExVat      Float
+  discountString        String?
+  discountPerUnitIncVat Float?
+  discountPerUnitExVat  Float?
+  freeQuantity          Float?
+  vat                   Float
 
   Purchase   Purchase @relation(fields: [purchaseId], references: [id])
   purchaseId Int
@@ -517,10 +531,14 @@ model PurchaseReturnItem {
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity          Float
-  costPerUnitIncVat Float
-  costPerUnitExVat  Float
-  vat               Float
+  quantity              Float
+  costPerUnitIncVat     Float
+  costPerUnitExVat      Float
+  discountString        String?
+  discountPerUnitIncVat Float?
+  discountPerUnitExVat  Float?
+  freeQuantity          Float?
+  vat                   Float
 
   PurchaseReturn   PurchaseReturn @relation(fields: [purchaseReturnId], references: [id])
   purchaseReturnId Int
@@ -636,10 +654,14 @@ model OtherInvoiceItem {
   unit            String
   quantityPerUnit Float  @default(1)
 
-  quantity          Float
-  costPerUnitIncVat Float
-  costPerUnitExVat  Float
-  vat               Float
+  quantity              Float
+  costPerUnitIncVat     Float
+  costPerUnitExVat      Float
+  discountString        String?
+  discountPerUnitIncVat Float?
+  discountPerUnitExVat  Float?
+  freeQuantity          Float?
+  vat                   Float
 
   vatable      Boolean @default(true)
   isIncludeVat Boolean @default(true)
@@ -771,10 +793,14 @@ model PurchaseOrderItem {
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity          Float
-  costPerUnitIncVat Float
-  costPerUnitExVat  Float
-  vat               Float
+  quantity              Float
+  costPerUnitIncVat     Float
+  costPerUnitExVat      Float
+  discountString        String?
+  discountPerUnitIncVat Float?
+  discountPerUnitExVat  Float?
+  freeQuantity          Float?
+  vat                   Float
 
   estimatedDeliveryDate DateTime
 
@@ -869,31 +895,38 @@ model QuotationItem {
   name            String?
   description     String?
 
-  quantity     Float
-  pricePerUnit Float
-  vat          Float
+  quantity        Float
+  pricePerUnit    Float
+  discountString  String?
+  discountPerUnit Float?
+  freeQuantity    Float?
+  vat             Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
 
 view StockMovement {
-  documentId        Int
-  Document          Document     @relation(fields: [documentId], references: [id])
-  documentNo        String
-  Contact           Contact?     @relation(fields: [contactId], references: [id])
-  contactId         Int?
-  SkuMaster         SkuMaster    @relation(fields: [skuMasterId], references: [id])
-  skuMasterId       Int
-  date              DateTime
-  documentType      DocumentType
-  movementCount     Float
-  quantity          Float
-  quantityPerUnit   Float
-  unit              String
-  costPerUnitIncVat Float
-  costPerUnitExVat  Float
-  pricePerUnit      Float
+  documentId            Int
+  Document              Document     @relation(fields: [documentId], references: [id])
+  documentNo            String
+  Contact               Contact?     @relation(fields: [contactId], references: [id])
+  contactId             Int?
+  SkuMaster             SkuMaster    @relation(fields: [skuMasterId], references: [id])
+  skuMasterId           Int
+  date                  DateTime
+  documentType          DocumentType
+  movementCount         Float
+  quantity              Float
+  quantityPerUnit       Float
+  unit                  String
+  costPerUnitIncVat     Float
+  costPerUnitExVat      Float
+  pricePerUnit          Float
+  discountString        String?
+  discountPerUnitIncVat Float?
+  discountPerUnitExVat  Float?
+  freeQuantity          Float?
 
   @@id([documentId, skuMasterId])
 }

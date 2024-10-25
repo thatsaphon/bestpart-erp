@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import AddUpdateNonStockItemDialog from './add-update-non-stock-item-dialog'
 import { Check } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 type Props = {}
 
@@ -31,6 +32,7 @@ export default async function NonStockSettingPage({}: Props) {
             isInputTax: false,
             isOutputTax: false,
         },
+        orderBy: { id: 'asc' },
     })
     return (
         <div className="p-3">
@@ -57,7 +59,19 @@ export default async function NonStockSettingPage({}: Props) {
                     {items.map((item) => (
                         <TableRow key={item.id}>
                             <TableCell>{item.id}</TableCell>
-                            <TableCell>{item.name}</TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-2">
+                                    <span>{item.name}</span>
+                                    {item.isDiscount && (
+                                        <Badge
+                                            variant={'outline'}
+                                            className="font-medium"
+                                        >
+                                            ส่วนลด
+                                        </Badge>
+                                    )}
+                                </div>
+                            </TableCell>
                             <TableCell>{item.ChartOfAccount.name}</TableCell>
                             <TableCell className="text-center">
                                 {item.canSales && <Check className="inline" />}

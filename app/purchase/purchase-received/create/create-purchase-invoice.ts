@@ -27,6 +27,8 @@ export const createPurchaseInvoice = async (
     items: (DocumentItem & {
         costPerUnitIncVat: number
         costPerUnitExVat: number
+        discountPerUnitExVat: number
+        discountPerUnitIncVat: number
     })[],
     purchaseOrderIds: number[] = []
 ) => {
@@ -48,7 +50,19 @@ export const createPurchaseInvoice = async (
             },
         },
     })
-    if (goodsMasters.length !== items.length) {
+    //check ServiceAndNonStockItem
+    const serviceAndNonStockItems =
+        await prisma.serviceAndNonStockItem.findMany({
+            where: {
+                id: {
+                    in: items
+                        .filter((item) => item.serviceAndNonStockItemId != null)
+                        .map((item) => item.serviceAndNonStockItemId as number),
+                },
+            },
+        })
+
+    if (goodsMasters.length + serviceAndNonStockItems.length !== items.length) {
         throw new Error('goods not found')
     }
 
@@ -70,7 +84,10 @@ export const createPurchaseInvoice = async (
                     })
                 return {
                     chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
-                    amount: -(item.quantity * item.costPerUnitExVat).toFixed(2),
+                    amount: -(
+                        item.quantity *
+                        (item.costPerUnitExVat - item.discountPerUnitExVat)
+                    ).toFixed(2),
                 }
             })
     )
@@ -99,7 +116,9 @@ export const createPurchaseInvoice = async (
                                     .reduce(
                                         (a, b) =>
                                             a +
-                                            b.costPerUnitIncVat * b.quantity,
+                                            (b.costPerUnitIncVat -
+                                                b.discountPerUnitIncVat) *
+                                                b.quantity,
                                         0
                                     )
                                     .toFixed(2),
@@ -111,7 +130,10 @@ export const createPurchaseInvoice = async (
                                     .filter((item) => item.goodsMasterId)
                                     .reduce(
                                         (a, b) =>
-                                            a + b.costPerUnitExVat * b.quantity,
+                                            a +
+                                            (b.costPerUnitExVat -
+                                                b.discountPerUnitExVat) *
+                                                b.quantity,
                                         0
                                     )
                                     .toFixed(2),
@@ -126,7 +148,9 @@ export const createPurchaseInvoice = async (
                                         (a, b) =>
                                             a +
                                             (b.costPerUnitIncVat -
-                                                b.costPerUnitExVat) *
+                                                b.discountPerUnitIncVat -
+                                                (b.costPerUnitExVat -
+                                                    b.discountPerUnitExVat)) *
                                                 (7 / 107),
                                         0
                                     )
@@ -138,10 +162,17 @@ export const createPurchaseInvoice = async (
                         create: items.map((item) => ({
                             costPerUnitIncVat: item.costPerUnitIncVat,
                             costPerUnitExVat: item.costPerUnitExVat,
+                            discountPerUnitIncVat: item.discountPerUnitIncVat,
+                            discountPerUnitExVat: item.discountPerUnitExVat,
+                            discountString: item.discountString,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             unit: item.unit,
-                            vat: item.costPerUnitExVat - item.costPerUnitIncVat,
+                            vat:
+                                item.costPerUnitIncVat -
+                                item.discountPerUnitIncVat -
+                                (item.costPerUnitExVat -
+                                    item.discountPerUnitExVat),
                             barcode: item.barcode,
                             description: item.detail,
                             name: item.name,
@@ -162,14 +193,27 @@ export const createPurchaseInvoice = async (
             },
         },
     })
-
+    await prisma.skuRemainingCache.updateMany({
+        where: {
+            skuMasterId: {
+                in: items
+                    .filter((item) => typeof item.skuMasterId === 'number')
+                    .map((item) => item.skuMasterId) as number[],
+            },
+        },
+        data: {
+            shouldRecheck: true,
+        },
+    })
     await prisma.contact.update({
         where: {
             id: Number(contactId),
         },
         data: {
             SkuMaster: {
-                connect: items.map((item) => ({ id: item.skuMasterId })),
+                connect: items
+                    .filter((item) => typeof item.skuMasterId === 'number')
+                    .map((item) => ({ id: item.skuMasterId })),
             },
         },
     })

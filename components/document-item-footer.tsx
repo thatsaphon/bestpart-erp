@@ -5,6 +5,7 @@ import AddPaymentComponent from './add-payment-component'
 import CreateDocumentRemark from './create-document-remark'
 import { TableRow, TableCell } from './ui/table'
 import { DocumentItem } from '@/types/document-item'
+import { calculateDiscount } from '@/lib/calculate-discount'
 
 type Props = {
     vatable: boolean
@@ -12,6 +13,7 @@ type Props = {
     isIncludeVat: boolean
     setIsIncludeVat: React.Dispatch<React.SetStateAction<boolean>>
     items: DocumentItem[]
+    conSpan?: number
 }
 
 export default function DocumentItemFooter({
@@ -20,13 +22,14 @@ export default function DocumentItemFooter({
     isIncludeVat,
     setIsIncludeVat,
     items,
+    conSpan = 5,
 }: Props) {
     return (
         <>
             {vatable && (
                 <React.Fragment>
                     <TableRow>
-                        <TableCell colSpan={4} className="text-right">
+                        <TableCell colSpan={conSpan - 1} className="text-right">
                             <div className="flex w-full items-center justify-end space-x-2">
                                 <Switch
                                     id="vatable"
@@ -54,18 +57,28 @@ export default function DocumentItemFooter({
                                     (sum, item) =>
                                         isIncludeVat
                                             ? sum +
-                                              item.pricePerUnit *
+                                              calculateDiscount(
+                                                  item.pricePerUnit,
+                                                  item.discountString
+                                              ) *
                                                   item.quantity *
                                                   (100 / 107)
                                             : sum +
-                                              item.pricePerUnit * item.quantity,
+                                              calculateDiscount(
+                                                  item.pricePerUnit,
+                                                  item.discountString
+                                              ) *
+                                                  item.quantity,
                                     0
                                 )
                                 .toFixed(2)).toLocaleString()}
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell colSpan={5} className="w-36 text-right">
+                        <TableCell
+                            colSpan={conSpan}
+                            className="w-36 text-right"
+                        >
                             ภาษีมูลค่าเพิ่ม
                         </TableCell>
                         <TableCell className="w-36 text-right">
@@ -74,11 +87,17 @@ export default function DocumentItemFooter({
                                     (sum, item) =>
                                         isIncludeVat
                                             ? sum +
-                                              item.pricePerUnit *
+                                              calculateDiscount(
+                                                  item.pricePerUnit,
+                                                  item.discountString
+                                              ) *
                                                   item.quantity *
                                                   (7 / 107)
                                             : sum +
-                                              item.pricePerUnit *
+                                              calculateDiscount(
+                                                  item.pricePerUnit,
+                                                  item.discountString
+                                              ) *
                                                   item.quantity *
                                                   (7 / 100),
                                     0
@@ -89,7 +108,7 @@ export default function DocumentItemFooter({
                 </React.Fragment>
             )}
             <TableRow>
-                <TableCell colSpan={4} className="text-right">
+                <TableCell colSpan={conSpan - 1} className="text-right">
                     {!vatable && (
                         <div className="flex w-full items-center justify-end space-x-2">
                             <Switch
@@ -115,7 +134,12 @@ export default function DocumentItemFooter({
                     {(+(
                         items.reduce(
                             (sum, item) =>
-                                sum + item.pricePerUnit * item.quantity,
+                                sum +
+                                calculateDiscount(
+                                    item.pricePerUnit,
+                                    item.discountString
+                                ) *
+                                    item.quantity,
                             0
                         ) * (!vatable ? 1 : isIncludeVat ? 1 : 1.07)
                     ).toFixed(2)).toLocaleString()}

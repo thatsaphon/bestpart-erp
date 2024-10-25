@@ -26,6 +26,8 @@ export const updatePurchaseInvoice = async (
     items: (DocumentItem & {
         costPerUnitIncVat: number
         costPerUnitExVat: number
+        discountPerUnitExVat: number
+        discountPerUnitIncVat: number
     })[],
     purchaseOrderIds: number[] = []
 ) => {
@@ -47,7 +49,19 @@ export const updatePurchaseInvoice = async (
             },
         },
     })
-    if (goodsMasters.length !== items.length) {
+    //check ServiceAndNonStockItem
+    const serviceAndNonStockItems =
+        await prisma.serviceAndNonStockItem.findMany({
+            where: {
+                id: {
+                    in: items
+                        .filter((item) => item.serviceAndNonStockItemId != null)
+                        .map((item) => item.serviceAndNonStockItemId as number),
+                },
+            },
+        })
+
+    if (goodsMasters.length + serviceAndNonStockItems.length !== items.length) {
         throw new Error('goods not found')
     }
 
@@ -148,7 +162,10 @@ export const updatePurchaseInvoice = async (
                     })
                 return {
                     chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
-                    amount: -(item.quantity * item.costPerUnitExVat).toFixed(2),
+                    amount: -(
+                        item.quantity *
+                        (item.costPerUnitExVat - item.discountPerUnitExVat)
+                    ).toFixed(2),
                 }
             })
     )
@@ -182,7 +199,9 @@ export const updatePurchaseInvoice = async (
                                     .reduce(
                                         (a, b) =>
                                             a +
-                                            b.costPerUnitIncVat * b.quantity,
+                                            (b.costPerUnitIncVat -
+                                                b.discountPerUnitIncVat) *
+                                                b.quantity,
                                         0
                                     )
                                     .toFixed(2),
@@ -194,7 +213,10 @@ export const updatePurchaseInvoice = async (
                                     .filter((item) => item.goodsMasterId)
                                     .reduce(
                                         (a, b) =>
-                                            a + b.costPerUnitExVat * b.quantity,
+                                            a +
+                                            (b.costPerUnitExVat -
+                                                b.discountPerUnitExVat) *
+                                                b.quantity,
                                         0
                                     )
                                     .toFixed(2),
@@ -208,8 +230,10 @@ export const updatePurchaseInvoice = async (
                                     .reduce(
                                         (a, b) =>
                                             a +
-                                            b.pricePerUnit *
-                                                b.quantity *
+                                            (b.costPerUnitIncVat -
+                                                b.discountPerUnitIncVat -
+                                                (b.costPerUnitExVat -
+                                                    b.discountPerUnitExVat)) *
                                                 (7 / 107),
                                         0
                                     )
@@ -225,11 +249,17 @@ export const updatePurchaseInvoice = async (
                         create: items.map((item) => ({
                             costPerUnitExVat: item.costPerUnitExVat,
                             costPerUnitIncVat: item.costPerUnitIncVat,
+                            discountPerUnitIncVat: item.discountPerUnitIncVat,
+                            discountPerUnitExVat: item.discountPerUnitExVat,
+                            discountString: item.discountString,
                             quantityPerUnit: item.quantityPerUnit,
                             quantity: item.quantity,
                             unit: item.unit,
                             vat:
-                                item.costPerUnitIncVat - item.costPerUnitIncVat,
+                                item.costPerUnitIncVat -
+                                item.discountPerUnitIncVat -
+                                (item.costPerUnitExVat -
+                                    item.discountPerUnitExVat),
                             barcode: item.barcode,
                             description: item.detail,
                             name: item.name,

@@ -6,19 +6,21 @@ type Props = {
     documentItems: DocumentItem[]
     isIncludeVat: boolean
     vatable: boolean
+    colSpan?: number
 }
 
 export default function DocumentItemFooterReadonly({
     documentItems,
     isIncludeVat,
     vatable,
+    colSpan = 6,
 }: Props) {
     return (
         <>
             {vatable && (
                 <React.Fragment>
                     <TableRow>
-                        <TableCell colSpan={4} className="text-right">
+                        <TableCell colSpan={colSpan - 2} className="text-right">
                             {isIncludeVat
                                 ? 'ราคารวมภาษีมูลค่าเพิ่ม'
                                 : 'ราคาไม่รวมภาษีมูลค่าเพิ่ม'}
@@ -31,14 +33,16 @@ export default function DocumentItemFooterReadonly({
                                 .reduce(
                                     (sum, item) =>
                                         sum +
-                                        item.costPerUnitExVat! * item.quantity,
+                                        (item.costPerUnitExVat! -
+                                            (item.discountPerUnitExVat || 0))! *
+                                            item.quantity,
                                     0
                                 )
                                 .toLocaleString()}
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell colSpan={5} className="text-right">
+                        <TableCell colSpan={colSpan - 1} className="text-right">
                             ภาษีมูลค่าเพิ่ม
                         </TableCell>
                         <TableCell colSpan={1} className="text-right">
@@ -54,7 +58,7 @@ export default function DocumentItemFooterReadonly({
                 </React.Fragment>
             )}
             <TableRow>
-                <TableCell colSpan={5} className="text-right">
+                <TableCell colSpan={colSpan - 1} className="text-right">
                     ยอดรวม
                 </TableCell>
                 <TableCell className="text-right">
@@ -63,7 +67,9 @@ export default function DocumentItemFooterReadonly({
                             documentItems.reduce(
                                 (sum, item) =>
                                     sum +
-                                    item.costPerUnitIncVat! * item.quantity,
+                                    (item.costPerUnitIncVat! -
+                                        (item.discountPerUnitIncVat || 0)) *
+                                        item.quantity,
                                 0
                             )
                         )

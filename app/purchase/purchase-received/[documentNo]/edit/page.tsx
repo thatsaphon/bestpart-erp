@@ -33,7 +33,7 @@ export default async function EditPurchaseInvoicePage({
             ],
         })
     return (
-        <>
+        <div className="pb-24">
             <h1 className="my-2 text-3xl transition-colors">สร้างบิลซื้อ</h1>
             <CreateOrUpdatePurchaseInvoiceComponent
                 existingPurchaseReceived={purchaseInvoice}
@@ -41,6 +41,6 @@ export default async function EditPurchaseInvoicePage({
                     pendingOrExistingPurchaseOrders
                 }
             />
-        </>
+        </div>
     )
 }

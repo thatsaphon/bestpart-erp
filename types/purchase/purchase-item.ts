@@ -47,7 +47,9 @@ export const purchaseItemsToDocumentItems = (
             ({
                 barcode: item.barcode,
                 detail: item.SkuMaster?.detail,
-                name: item.SkuMaster?.MainSku?.name,
+                name:
+                    item.SkuMaster?.MainSku?.name ||
+                    item.ServiceAndNonStockItem?.name,
                 goodsMasterId: item.goodsMasterId,
                 mainSkuId: item.SkuMaster?.mainSkuId,
                 position: item.SkuMaster?.position,
@@ -57,6 +59,11 @@ export const purchaseItemsToDocumentItems = (
                     : item.costPerUnitExVat,
                 costPerUnitExVat: item.costPerUnitExVat,
                 costPerUnitIncVat: item.costPerUnitIncVat,
+                lastPurchaseCostPerUnit:
+                    item.GoodsMaster?.lastPurchaseCostPerUnit,
+                discountString: item.discountString,
+                discountPerUnitExVat: item.discountPerUnitExVat,
+                discountPerUnitIncVat: item.discountPerUnitIncVat,
                 vat: item.vat,
                 quantity: item.quantity,
                 quantityPerUnit: item.quantityPerUnit,

@@ -117,9 +117,15 @@ export default async function PurchaseInvoiceDetailPage({
                             <TableHead className="text-right">
                                 Quantity
                             </TableHead>
-                            <TableHead className="text-right">Unit</TableHead>
-                            <TableHead className="text-right">Price</TableHead>
-                            <TableHead className="text-right">Total</TableHead>
+                            <TableHead className="text-right">หน่วย</TableHead>
+                            <TableHead className="text-right">
+                                ราคาต่อหน่วย
+                            </TableHead>
+                            <TableHead className="text-right">ส่วนลด</TableHead>
+                            <TableHead className="text-right">
+                                หลังหักส่วนลด
+                            </TableHead>
+                            <TableHead className="text-right">รวม</TableHead>
                             <TableHead className="text-right"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -128,18 +134,42 @@ export default async function PurchaseInvoiceDetailPage({
                             <TableRow key={item.barcode}>
                                 <TableCell>{item.barcode}</TableCell>
                                 <TableCell>
-                                    <p>{item.SkuMaster?.MainSku.name}</p>
-                                    <p>{item.SkuMaster?.detail}</p>
+                                    <p>{item.name}</p>
+                                    <p className="text-primary/50">
+                                        {item.description}
+                                    </p>
+
+                                    {/* <p>{item.SkuMaster?.detail}</p> */}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {item.quantity}
                                 </TableCell>
                                 <TableCell className="text-right">{`${item.unit}(${item.quantity})`}</TableCell>
                                 <TableCell className="text-right">
-                                    {item.costPerUnitIncVat}
+                                    {item.isIncludeVat
+                                        ? item.costPerUnitIncVat
+                                        : item.costPerUnitExVat}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {item.costPerUnitIncVat * item.quantity}
+                                    {item.discountString}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {item.isIncludeVat
+                                        ? item.costPerUnitIncVat -
+                                          (item.discountPerUnitIncVat || 0)
+                                        : item.costPerUnitExVat -
+                                          (item.discountPerUnitExVat || 0)}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {item.isIncludeVat
+                                        ? (item.costPerUnitIncVat -
+                                              (item.discountPerUnitIncVat ||
+                                                  0)) *
+                                          item.quantity
+                                        : (item.costPerUnitExVat -
+                                              (item.discountPerUnitExVat ||
+                                                  0)) *
+                                          item.quantity}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -157,6 +187,7 @@ export default async function PurchaseInvoiceDetailPage({
                                 document.Purchase?.PurchaseItem[0]?.vatable ??
                                 true
                             }
+                            colSpan={8}
                         />
                         <TableRow>
                             <TableCell colSpan={7} className="text-right">

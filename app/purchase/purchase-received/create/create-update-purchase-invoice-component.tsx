@@ -38,6 +38,7 @@ import ViewPurchaseOrderDialog from '@/components/view-purchase-order-dialog'
 import PurchaseOrderHoverCard from '@/components/purchase-order-hover-card'
 import DocumentItemFooter from '@/components/document-item-footer'
 import { convertPricePerUnitToCostPerUnit } from '@/lib/convert-price-per-unit-to-cost-per-unit'
+import { calculateDiscount } from '@/lib/calculate-discount'
 
 type Props = {
     existingPurchaseReceived?: GetPurchase
@@ -71,7 +72,12 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
             ) || []
         )
     const [vatable, setVatable] = React.useState(true)
-    const [isIncludeVat, setIsIncludeVat] = React.useState<boolean>(true)
+    const [isIncludeVat, setIsIncludeVat] = React.useState<boolean>(
+        existingPurchaseReceived?.Purchase?.PurchaseItem[0]?.isIncludeVat ===
+            undefined
+            ? true
+            : existingPurchaseReceived?.Purchase?.PurchaseItem[0]?.isIncludeVat
+    )
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -187,8 +193,16 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                                 Quantity
                             </TableHead>
                             <TableHead className="text-right">Unit</TableHead>
-                            <TableHead className="text-right">Price</TableHead>
-                            <TableHead className="text-right">Total</TableHead>
+                            <TableHead className="text-right">
+                                ราคาต่อหน่วย
+                            </TableHead>
+                            <TableHead className="text-right">ส่วนลด</TableHead>
+                            <TableHead className="text-right">
+                                หลังหักส่วนลด
+                            </TableHead>
+                            <TableHead className="text-right">
+                                ราคารวม
+                            </TableHead>
                             <TableHead></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -313,8 +327,33 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                                         }}
                                     />
                                 </TableCell>
+                                <TableCell>
+                                    <Input
+                                        className="text-right"
+                                        id={`discount-${index}`}
+                                        value={item.discountString || undefined}
+                                        onChange={(e) => {
+                                            const newItems = [...items]
+                                            newItems[index].discountString =
+                                                e.target.value
+                                            setItems(newItems)
+                                        }}
+                                    />
+                                </TableCell>
                                 <TableCell className="text-right">
-                                    {item.pricePerUnit * item.quantity}
+                                    {calculateDiscount(
+                                        item.pricePerUnit,
+                                        item.discountString
+                                    ).toLocaleString()}
+                                    {/* {item.pricePerUnit * item.discountString?.split(' ')} */}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {(
+                                        calculateDiscount(
+                                            item.pricePerUnit,
+                                            item.discountString
+                                        ) * item.quantity
+                                    ).toLocaleString()}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Cross1Icon
@@ -333,7 +372,7 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                             </TableRow>
                         ))}
                         <TableRow>
-                            <TableCell colSpan={6} className="text-right">
+                            <TableCell colSpan={8} className="text-right">
                                 <Input
                                     id="barcode"
                                     value={barcodeInput}
@@ -455,10 +494,11 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                             isIncludeVat={isIncludeVat}
                             setIsIncludeVat={setIsIncludeVat}
                             items={items}
+                            conSpan={7}
                         />
-                        <TableRow className="bg-background hover:bg-background">
+                        <TableRow>
                             <TableCell
-                                colSpan={6}
+                                colSpan={8}
                                 className="space-x-1 text-right"
                             >
                                 <Button variant="destructive" type="button">

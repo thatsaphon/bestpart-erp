@@ -27,6 +27,7 @@ import { ChartOfAccount } from '@prisma/client'
 import { Checkbox } from '@/components/ui/checkbox'
 import { createNonStockItem } from './create-non-stock-item'
 import toast from 'react-hot-toast'
+import { Switch } from '@/components/ui/switch'
 
 type Props = {
     chartOfAccount: ChartOfAccount[]
@@ -39,6 +40,7 @@ export default function AddUpdateNonStockItemDialog({ chartOfAccount }: Props) {
     const [canOtherInvoice, setCanOtherInvoice] = React.useState(false)
     const [canPurchase, setCanPurchase] = React.useState(false)
     const [canSales, setCanSales] = React.useState(false)
+    const [isDiscount, setIsDiscount] = React.useState(false)
 
     const onSubmit = async () => {
         try {
@@ -52,6 +54,7 @@ export default function AddUpdateNonStockItemDialog({ chartOfAccount }: Props) {
                 canOtherInvoice,
                 canPurchase,
                 canSales,
+                isDiscount,
             })
             toast.success('บันทึกสําเร็จ')
             setOpen(false)
@@ -150,6 +153,13 @@ export default function AddUpdateNonStockItemDialog({ chartOfAccount }: Props) {
                                     ใบเสร็จอื่น
                                 </Label>
                             </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Label>เป็นรายการส่วนลด</Label>
+                            <Switch
+                                checked={isDiscount}
+                                onCheckedChange={(e) => setIsDiscount(e)}
+                            />
                         </div>
                     </form>
                 </div>

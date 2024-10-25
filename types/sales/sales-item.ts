@@ -126,6 +126,10 @@ export const salesItemsToDocumentItems = (
                 pricePerUnit: item.pricePerUnit,
                 quantity: item.quantity,
                 quantityPerUnit: item.quantityPerUnit,
+                lastPurchaseCostPerUnit:
+                    item.GoodsMaster?.lastPurchaseCostPerUnit,
+                discountString: item.discountString,
+                discountPerUnit: item.discountPerUnit,
                 skuMasterId: item.skuMasterId,
                 unit: item.unit,
                 Image: item.SkuMaster?.Image,
