@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 // import { getServiceAndNonStockItemsDefaultFunction } from './types/service-and-non-stock-item/service-and-non-stock-item'
 import { PrismaClient } from '@prisma/client/edge'
+import prisma from './app/db/db'
 
 export async function middleware(request: NextRequest) {
     const user = await getToken({
@@ -17,10 +18,17 @@ export async function middleware(request: NextRequest) {
     }
 
     if (!user) {
+        if (pathname === '/admin/user/create') {
+            return NextResponse.next()
+        }
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
     if (pathname.startsWith('/admin') && user.role !== 'ADMIN') {
+        const adminPath = pathname.split('/')[3]
+        if (adminPath === 'user' || adminPath === 'role') {
+            return NextResponse.next()
+        }
         return NextResponse.redirect(new URL('/', request.url))
     }
 
