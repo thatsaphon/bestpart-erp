@@ -140,9 +140,10 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                                 0
                             )
                         ) {
-                            return toast.error(
+                            toast.error(
                                 'จํานวนเงินที่ชําระไม่ถูกต้อง กรุณาตรวจสอบ'
                             )
+                            return
                         }
                         if (!existingSales) {
                             await createSalesInvoice(
@@ -169,8 +170,10 @@ export default function CreateOrUpdateSalesInvoiceComponent({
                             toast.success('บันทึกสําเร็จ')
                         }
                     } catch (err) {
-                        if (err instanceof Error)
-                            return toast.error(err.message)
+                        if (err instanceof Error) {
+                            toast.error(err.message)
+                            return
+                        }
                         toast.error('Something went wrong')
                     }
                 }}

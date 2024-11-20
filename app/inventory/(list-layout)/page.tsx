@@ -15,13 +15,13 @@ import { PencilIcon } from 'lucide-react'
 import Link from 'next/link'
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         page?: string
         limit?: string
         search?: string
         remaining?: 'true' | 'false' | ''
         view?: 'card' | 'table'
-    }
+    }>
 }
 
 export const revalidate = 600
@@ -29,14 +29,21 @@ export const dynamic = 'force-dynamic'
 
 export default async function InventoryListPage({
     searchParams,
-    searchParams: {
+    // searchParams: {
+    //     page = '1',
+    //     limit = '10',
+    //     search = '',
+    //     remaining = '',
+    //     view = 'card',
+    // },
+}: Props) {
+    const {
         page = '1',
         limit = '10',
         search = '',
         remaining = '',
         view = 'card',
-    },
-}: Props) {
+    } = await searchParams
     try {
         const skuTree = await searchSkuTreeByKeyword(search, Number(page), {
             createdAt: 'desc',
@@ -147,7 +154,7 @@ export default async function InventoryListPage({
                 </Accordion>
                 <PaginationInventory
                     numberOfPage={numberOfPage}
-                    searchParams={searchParams}
+                    searchParams={await searchParams}
                 />
             </div>
         )
