@@ -38,14 +38,18 @@ import { updateCustomerOrderStatus } from './update-customer-order-status'
 import { CustomerOrderStatus } from '@prisma/client'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
-export default async function CustomerOrderDetailPage({
-    params: { documentNo },
-}: Props) {
+export default async function CustomerOrderDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     // const document = await getCustomerOrderDetail(documentNo)
     const [document] = await getCustomerOrderDefaultFunction({
         documentNo,

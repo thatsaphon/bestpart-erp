@@ -27,15 +27,18 @@ import { Badge } from '@/components/ui/badge'
 import { Pencil1Icon } from '@radix-ui/react-icons'
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         type?: string
-    }
+    }>
 }
 
-export default async function ContactPage({
-    searchParams,
-    searchParams: { type = 'all' },
-}: Props) {
+export default async function ContactPage(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
+        type = 'all'
+    } = searchParams;
+
     const contacts = await prisma.contact.findMany({
         where: {
             isAr: type === 'ar' ? true : undefined,

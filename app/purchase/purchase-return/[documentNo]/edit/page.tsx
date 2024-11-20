@@ -5,20 +5,22 @@ import { Table, TableCaption } from '@/components/ui/table'
 import CreateOrUpdatePurchaseReturnInvoiceComponent from '../../create/create-update-purchase-return-invoice-component'
 import { getPurchaseReturnDefaultFunction } from '@/types/purchase-return/purchase-return'
 
-type Props = { params: { documentNo: string } }
+type Props = { params: Promise<{ documentNo: string }> }
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const params = await props.params;
     return {
         title: `แก้ไขใบคืนสินค้า - ${params.documentNo}`,
     }
 }
 
-export default async function EditPurchaseInvoicePage({
-    params: { documentNo },
-}: Props) {
+export default async function EditPurchaseInvoicePage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [document] = await getPurchaseReturnDefaultFunction({
         documentNo,
         type: 'PurchaseReturn',

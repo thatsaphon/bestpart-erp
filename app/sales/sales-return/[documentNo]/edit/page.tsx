@@ -5,20 +5,22 @@ import { getSalesReturnDefaultFunction } from '@/types/sales-return/sales-return
 import { Table, TableCaption } from '@/components/ui/table'
 import CreateOrUpdateSalesReturnInvoiceComponent from '../../create/create-update-sales-return-invoice-component'
 
-type Props = { params: { documentNo: string } }
+type Props = { params: Promise<{ documentNo: string }> }
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const params = await props.params;
     return {
         title: `แก้ไขใบรับคืนสินค้า - ${params.documentNo}`,
     }
 }
 
-export default async function EditSalesInvoicePage({
-    params: { documentNo },
-}: Props) {
+export default async function EditSalesInvoicePage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [document] = await getSalesReturnDefaultFunction({
         documentNo,
         type: 'SalesReturn',

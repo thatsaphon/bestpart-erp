@@ -23,10 +23,16 @@ import { getAssetDefaultFunction } from '@/types/asset/asset'
 import { notFound } from 'next/navigation'
 
 type Props = {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
-export default async function AssetDetailPage({ params: { id } }: Props) {
+export default async function AssetDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        id
+    } = params;
+
     const [asset] = await getAssetDefaultFunction({ id: +id })
 
     if (!asset) return notFound()

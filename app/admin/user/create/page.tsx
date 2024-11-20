@@ -11,7 +11,7 @@ type Props = {}
 export default async function CreateUserPage({}: Props) {
     const session = await getServerSession(authOptions)
     const userCount = await prisma.user.count()
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     if (!session) {
         console.log('userCount', userCount)
     }

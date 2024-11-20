@@ -26,12 +26,16 @@ import { notFound } from 'next/navigation'
 import UpdateDocumentRemark from '@/components/update-document-remark'
 
 type Props = {
-    params: { documentNo: string }
+    params: Promise<{ documentNo: string }>
 }
 
-export default async function PurchaseInvoiceDetailPage({
-    params: { documentNo },
-}: Props) {
+export default async function PurchaseInvoiceDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [document] = await getPurchaseDefaultFunction({ documentNo })
     if (!document) return notFound()
     const session = await getServerSession(authOptions)

@@ -33,21 +33,23 @@ import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer
 import CustomerOrderHoverCard from '@/components/customer-order-hover-card'
 
 type Props = {
-    params: { documentNo: string }
+    params: Promise<{ documentNo: string }>
 }
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const params = await props.params;
     return {
         title: `รายละเอียดบิลขาย - ${params.documentNo}`,
     }
 }
 
-export default async function SalesInvoiceDetailPage({
-    params: { documentNo },
-}: Props) {
+export default async function SalesInvoiceDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [document] = await getSalesDefaultFunction({
         documentNo,
         type: 'SalesOrder',

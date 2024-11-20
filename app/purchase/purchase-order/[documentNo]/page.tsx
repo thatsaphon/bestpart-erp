@@ -30,12 +30,16 @@ import DocumentItemFooterReadonly from '@/components/document-item-footer-readon
 import { purchaseOrderItemsToDocumentItems } from '@/types/purchase-order/purchase-order-item'
 
 type Props = {
-    params: { documentNo: string }
+    params: Promise<{ documentNo: string }>
 }
 
-export default async function PurchaseOrderDetailPage({
-    params: { documentNo },
-}: Props) {
+export default async function PurchaseOrderDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [document] = await getPurchaseOrderDefaultFunction({ documentNo })
     const session = await getServerSession(authOptions)
 

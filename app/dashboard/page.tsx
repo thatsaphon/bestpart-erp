@@ -5,7 +5,8 @@ import {
 } from "@/components/ui/sidebar"
 
 export default async function Page() {
-  const { cookies } = await import("next/headers")
+  const { cookies } = await /* @next-codemod-error The APIs under 'next/headers' are async now, need to be manually awaited. */
+  import("next/headers")
   return (
     <SidebarLayout
       defaultOpen={cookies().get("sidebar:state")?.value === "true"}

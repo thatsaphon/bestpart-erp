@@ -24,12 +24,16 @@ import DocumentItemFooterReadonly from '@/components/document-item-footer-readon
 import { otherInvoiceItemToDocumentItem } from '@/types/other-invoice/other-invoice-item'
 
 type Props = {
-    params: { documentNo: string }
+    params: Promise<{ documentNo: string }>
 }
 
-export default async function OtherInvoiceDetailPage({
-    params: { documentNo },
-}: Props) {
+export default async function OtherInvoiceDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [document] = await getOtherInvoiceDefaultFunction({ documentNo })
     const session = await getServerSession(authOptions)
     const paymentMethods = await getPaymentMethods()

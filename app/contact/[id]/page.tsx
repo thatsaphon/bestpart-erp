@@ -22,9 +22,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fullDateFormat } from '@/lib/date-format'
 import React from 'react'
 
-type Props = { params: { id: string } }
+type Props = { params: Promise<{ id: string }> }
 
-export default async function ContactDetailPage({ params: { id } }: Props) {
+export default async function ContactDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        id
+    } = params;
+
     const contact = await getContactDetail(id)
 
     if (!contact) return <>Contact not found</>

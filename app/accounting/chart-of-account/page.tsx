@@ -19,12 +19,13 @@ import Link from 'next/link'
 import { createQueryString } from '@/lib/searchParams'
 
 type Props = {
-    searchParams: { accountId?: string }
+    searchParams: Promise<{ accountId?: string }>
 }
 
 export const revalidate = 600
 
-export default async function AccountingPage({ searchParams }: Props) {
+export default async function AccountingPage(props: Props) {
+    const searchParams = await props.searchParams;
     const chartOfAccount = await prisma.chartOfAccount.findMany({})
     const accountDetail = await prisma.chartOfAccount.findUnique({
         where: { id: searchParams.accountId ? +searchParams.accountId : 0 },

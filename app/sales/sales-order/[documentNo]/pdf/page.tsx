@@ -11,13 +11,19 @@ const PDFViewer = dynamic(
         loading: () => <p>Loading...</p>,
     }
 )
-import React, { Suspense, useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState, use } from 'react';
 
 type Props = {
-    params: { documentNo: string }
+    params: Promise<{ documentNo: string }>
 }
 
-export default function InvoicePDFPage({ params: { documentNo } }: Props) {
+export default function InvoicePDFPage(props: Props) {
+    const params = use(props.params);
+
+    const {
+        documentNo
+    } = params;
+
     const [document, setDocument] = useState<GetSales | null>(null)
 
     useEffect(() => {

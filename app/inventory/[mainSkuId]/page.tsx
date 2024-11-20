@@ -16,14 +16,18 @@ import UpdateMainSkuForm from './update-main-sku-form'
 import { Button } from '@/components/ui/button'
 
 type Props = {
-    params: {
+    params: Promise<{
         mainSkuId: string
-    }
+    }>
 }
 
-export default async function MainSkuDetailPage({
-    params: { mainSkuId },
-}: Props) {
+export default async function MainSkuDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        mainSkuId
+    } = params;
+
     const {
         items: [skuTree],
         count,

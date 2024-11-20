@@ -27,16 +27,8 @@ type Props = {
 export const revalidate = 600
 export const dynamic = 'force-dynamic'
 
-export default async function InventoryListPage({
-    searchParams,
-    // searchParams: {
-    //     page = '1',
-    //     limit = '10',
-    //     search = '',
-    //     remaining = '',
-    //     view = 'card',
-    // },
-}: Props) {
+export default async function InventoryListPage(props: Props) {
+    const searchParams = await props.searchParams;
     const {
         page = '1',
         limit = '10',

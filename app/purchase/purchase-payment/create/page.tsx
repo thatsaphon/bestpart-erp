@@ -5,14 +5,18 @@ import { getUnpaidPurchases } from '@/types/purchase-payment/unpaid-purchase'
 import { unpaidPurchaseToPurchasePaymentItems } from '@/types/purchase-payment/unpaid-purchase-item'
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         contactId?: string
-    }
+    }>
 }
 
-export default async function CreatePaymentPage({
-    searchParams: { contactId },
-}: Props) {
+export default async function CreatePaymentPage(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
+        contactId
+    } = searchParams;
+
     const unpaidPurchases = Number(contactId)
         ? await getUnpaidPurchases(Number(contactId))
         : []

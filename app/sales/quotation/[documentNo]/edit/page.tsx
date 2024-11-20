@@ -14,18 +14,22 @@ import { getQuotationDefaultFunction } from '@/types/quotation/quotation'
 import { quotationItemsToDocumentItems } from '@/types/quotation/quotation-items'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
 export const metadata: Metadata = {
     title: 'สร้างบิลขาย',
 }
 
-export default async function UpdateQuotationPage({
-    params: { documentNo },
-}: Props) {
+export default async function UpdateQuotationPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const existingQuotation = await getQuotationDefaultFunction({
         documentNo,
     })

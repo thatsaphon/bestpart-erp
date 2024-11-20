@@ -21,15 +21,20 @@ import QuickSearchInventory from '@/components/quick-search-inventory'
 import UploadImage from './upload-image'
 
 type Props = {
-    params: {
+    params: Promise<{
         mainSkuId: string
         skuMasterId: string
-    }
+    }>
 }
 
-export default async function SkuMasterDetailPage({
-    params: { mainSkuId, skuMasterId },
-}: Props) {
+export default async function SkuMasterDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        mainSkuId,
+        skuMasterId
+    } = params;
+
     const {
         items: [skuTree],
         count,

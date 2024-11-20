@@ -8,14 +8,18 @@ import { unpaidInvoiceToSalesBillItems } from '@/types/sales-bill/unpaid-invoice
 import { salesBillToSalesBillItems } from '@/types/sales-bill/sales-bill-item'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
-export default async function SalesBillEditPage({
-    params: { documentNo },
-}: Props) {
+export default async function SalesBillEditPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const salesBill = await getSalesBillDefaultFunction({ documentNo })
     if (!salesBill[0] || !salesBill[0].SalesBill) {
         return (

@@ -27,15 +27,20 @@ import { fullDateFormat } from '@/lib/date-format'
 import { getSalesBillDefaultFunction } from '@/types/sales-bill/sales-bill'
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         limit?: string
         page?: string
-    }
+    }>
 }
 
-export default async function SalesListPage({
-    searchParams: { limit = '10', page = '1' },
-}: Props) {
+export default async function SalesListPage(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
+        limit = '10',
+        page = '1'
+    } = searchParams;
+
     const salesBills = await prisma.document.findMany({
         where: {
             type: 'SalesBill',

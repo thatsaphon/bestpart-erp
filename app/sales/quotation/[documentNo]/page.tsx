@@ -20,14 +20,18 @@ import UpdateDocumentRemark from '@/components/update-document-remark'
 // import { updateRemark } from '../../sales-return/[documentNo]/update-remarks'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
-export default async function QuotationDetailPage({
-    params: { documentNo },
-}: Props) {
+export default async function QuotationDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const document = await getQuotationDetail(documentNo)
 
     if (!document)

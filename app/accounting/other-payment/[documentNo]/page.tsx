@@ -19,23 +19,25 @@ import { otherPaymentToOtherPaymentItems } from '@/types/other-payment/other-pay
 import { translate } from '@/lib/translate'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const params = await props.params;
     return {
         title: `ใบสำคัญจ่ายอื่น - ${params.documentNo}`,
     }
 }
 
-export default async function OtherPaymentDetailPage({
-    params: { documentNo },
-}: Props) {
+export default async function OtherPaymentDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const otherPayment = await getOtherPaymentDefaultFunction({
         where: { documentNo },
     })

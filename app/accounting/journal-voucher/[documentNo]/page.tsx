@@ -16,14 +16,18 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
-export default async function JournalVoucherDetailPage({
-    params: { documentNo },
-}: Props) {
+export default async function JournalVoucherDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [document] = await getJournalVoucherDefaultFunction({
         where: { documentNo },
     })

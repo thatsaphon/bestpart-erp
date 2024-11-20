@@ -3,10 +3,16 @@ import React from 'react'
 import EditUserForm from './edit-user-form'
 
 type Props = {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
-export default async function EditUserPage({ params: { id } }: Props) {
+export default async function EditUserPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        id
+    } = params;
+
     const user = await prisma.user.findUnique({
         where: { id },
         select: {

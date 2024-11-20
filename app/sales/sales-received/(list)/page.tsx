@@ -15,15 +15,20 @@ import { cn } from '@/lib/utils'
 import { fullDateFormat } from '@/lib/date-format'
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         limit?: string
         page?: string
-    }
+    }>
 }
 
-export default async function SalesReceivedListPage({
-    searchParams: { limit = '10', page = '1' },
-}: Props) {
+export default async function SalesReceivedListPage(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
+        limit = '10',
+        page = '1'
+    } = searchParams;
+
     const salesReceiveds = await prisma.document.findMany({
         where: {
             type: 'SalesReceived',

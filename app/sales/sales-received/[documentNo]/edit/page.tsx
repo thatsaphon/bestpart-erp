@@ -8,14 +8,18 @@ import { getDepositAmount } from '@/actions/get-deposit-amount'
 import { unpaidBillsToSalesReceivedItems } from '@/types/sales-received/unpaid-bills-to-sales-Received-item'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
-export default async function SalesReceivedEditPage({
-    params: { documentNo },
-}: Props) {
+export default async function SalesReceivedEditPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const salesReceived = await getSalesReceivedDefaultFunction({ documentNo })
     if (!salesReceived[0] || !salesReceived[0].SalesReceived) {
         return (
