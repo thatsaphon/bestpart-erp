@@ -28,7 +28,7 @@ export const revalidate = 600
 export const dynamic = 'force-dynamic'
 
 export default async function InventoryListPage(props: Props) {
-    const searchParams = await props.searchParams;
+    const searchParams = await props.searchParams
     const {
         page = '1',
         limit = '10',
@@ -86,13 +86,13 @@ export default async function InventoryListPage(props: Props) {
                                             key={`${item.mainSkuId}-${sku.skuMasterId}`}
                                         >
                                             <div className="col-start-1 row-span-2">
-                                                <p>
+                                                <div>
                                                     {sku.detail}{' '}
                                                     <ImageToolTip
                                                         images={sku.Image}
                                                         alt={`${item.name}-${sku.detail}`}
                                                     />{' '}
-                                                </p>
+                                                </div>
                                                 {sku.SkuMasterRemark.length >
                                                     0 && (
                                                     <div
