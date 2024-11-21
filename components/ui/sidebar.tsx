@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { Sheet, SheetContent, SheetHeader } from '@/components/ui/sheet'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
     Tooltip,
@@ -81,6 +81,7 @@ const SidebarProvider = React.forwardRef<
                         typeof value === 'function' ? value(open) : value
                     )
                 }
+
                 _setOpen(value)
 
                 // This sets the cookie to keep the sidebar state.
@@ -189,7 +190,7 @@ const Sidebar = React.forwardRef<
             return (
                 <div
                     className={cn(
-                        'text-sidebar-foreground bg-sidebar flex h-full w-[--sidebar-width] flex-col',
+                        'bg-sidebar text-sidebar-foreground flex h-full w-[--sidebar-width] flex-col',
                         className
                     )}
                     ref={ref}
@@ -210,7 +211,7 @@ const Sidebar = React.forwardRef<
                     <SheetContent
                         data-sidebar="sidebar"
                         data-mobile="true"
-                        className="text-sidebar-foreground bg-sidebar w-[--sidebar-width] p-0 [&>button]:hidden"
+                        className="bg-sidebar text-sidebar-foreground w-[--sidebar-width] p-0 [&>button]:hidden"
                         style={
                             {
                                 '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
@@ -262,7 +263,7 @@ const Sidebar = React.forwardRef<
                 >
                     <div
                         data-sidebar="sidebar"
-                        className="group-data-[variant=floating]:border-sidebar-border bg-sidebar flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow"
+                        className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow"
                     >
                         {children}
                     </div>
