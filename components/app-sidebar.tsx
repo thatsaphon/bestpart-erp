@@ -149,7 +149,12 @@ const data = {
             title: 'ผู้ติดต่อ',
             url: '/contact',
             icon: BookOpen,
-            items: [],
+            items: [
+                {
+                    title: 'ผู้ติดต่อ',
+                    url: '/contact',
+                },
+            ],
         },
 
         {
