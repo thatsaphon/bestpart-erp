@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useActionState, useEffect } from 'react'
 import {
     Dialog,
     DialogTrigger,
@@ -26,10 +26,11 @@ import {
     deleteChartOfAccount,
 } from '@/app/actions/accounting'
 import toast from 'react-hot-toast'
-import { useFormState } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChartOfAccount } from '@prisma/client'
+import { ChartOfAccount, DocumentType } from '@prisma/client'
 import { deleteKeyFromQueryString } from '@/lib/searchParams'
+import getChartOfAccountDetail from '@/app/accounting/get-chart-of-account-detail'
+import { translate } from '@/lib/translate'
 
 type Props = {
     className?: string
@@ -54,7 +55,7 @@ export default function ChartOfAccountDetailDialog({
     account,
 }: Props) {
     const [open, setOpen] = React.useState(false)
-    const [state, formAction] = useFormState(createChartOfAccounts, {
+    const [state, formAction] = useActionState(createChartOfAccounts, {
         message: '',
     })
     const params = useSearchParams()
@@ -62,7 +63,6 @@ export default function ChartOfAccountDetailDialog({
 
     useEffect(() => {
         const accountId = params.get('accountId')
-
         if (
             account &&
             accountId &&
@@ -103,71 +103,76 @@ export default function ChartOfAccountDetailDialog({
                 </Button> */}
             </DialogTrigger>
             <DialogContent className="flex flex-col">
-                <form action={formAction}>
-                    <DialogHeader>
-                        <DialogTitle>Account Detail</DialogTitle>
-                        <DialogDescription>{}</DialogDescription>
-                    </DialogHeader>
-                    <Label className="mb-3">Account Type</Label>
-                    <Select
-                        name="accountType"
-                        defaultValue={account.type}
-                        disabled
-                    >
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Assets">Assets</SelectItem>
-                            <SelectItem value="Liabilities">
-                                Liabilities
-                            </SelectItem>
-                            <SelectItem value="Equity">Equity</SelectItem>
-                            <SelectItem value="Revenue">Revenue</SelectItem>
-                            <SelectItem value="Expense">Expense</SelectItem>
-                            <SelectItem value="OtherIncome">
-                                Other Income
-                            </SelectItem>
-                            <SelectItem value="OtherExpense">
-                                Other Expense
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-
-                    <Label className="mb-3">Account Number</Label>
-                    <Input
-                        name="accountNumber"
-                        type="number"
-                        defaultValue={account?.id}
-                    />
-                    <Label className="mb-3">Account Name</Label>
-                    <Input name="accountName" defaultValue={account?.name} />
-                    <DialogFooter className="mt-4">
-                        <Button
-                            type="submit"
-                            variant={'destructive'}
-                            formAction={async () => {
-                                try {
-                                    await deleteChartOfAccount(account.id)
-                                    setOpen(false)
-                                    router.push(
-                                        `?${deleteKeyFromQueryString(params.toString(), 'accountId')}`
-                                    )
-                                    toast.success(
-                                        `${account.id} - ${account.name} was deleted`
-                                    )
-                                } catch (error) {
-                                    toast.error('Error')
-                                }
-                            }}
+                <div className="p-1">
+                    <form action={formAction}>
+                        <DialogHeader>
+                            <DialogTitle>Account Detail</DialogTitle>
+                            <DialogDescription>{}</DialogDescription>
+                        </DialogHeader>
+                        <Label className="mb-3">Account Type</Label>
+                        <Select
+                            name="accountType"
+                            defaultValue={account.type}
+                            disabled
                         >
-                            Delete
-                        </Button>
-                        <Button type="submit" variant={'outline'}>
-                            Edit
-                        </Button>
-                    </DialogFooter>
-                </form>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Assets">Assets</SelectItem>
+                                <SelectItem value="Liabilities">
+                                    Liabilities
+                                </SelectItem>
+                                <SelectItem value="Equity">Equity</SelectItem>
+                                <SelectItem value="Revenue">Revenue</SelectItem>
+                                <SelectItem value="Expense">Expense</SelectItem>
+                                <SelectItem value="OtherIncome">
+                                    Other Income
+                                </SelectItem>
+                                <SelectItem value="OtherExpense">
+                                    Other Expense
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Label className="mb-3">Account Number</Label>
+                        <Input
+                            name="accountNumber"
+                            type="number"
+                            defaultValue={account?.id}
+                        />
+                        <Label className="mb-3">Account Name</Label>
+                        <Input
+                            name="accountName"
+                            defaultValue={account?.name}
+                        />
+                        <DialogFooter className="mt-4">
+                            <Button
+                                type="submit"
+                                variant={'destructive'}
+                                formAction={async () => {
+                                    try {
+                                        await deleteChartOfAccount(account.id)
+                                        setOpen(false)
+                                        router.push(
+                                            `?${deleteKeyFromQueryString(params.toString(), 'accountId')}`
+                                        )
+                                        toast.success(
+                                            `${account.id} - ${account.name} was deleted`
+                                        )
+                                    } catch (error) {
+                                        toast.error('Error')
+                                    }
+                                }}
+                            >
+                                Delete
+                            </Button>
+                            <Button type="submit" variant={'outline'}>
+                                Edit
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </div>
             </DialogContent>
         </Dialog>
     )

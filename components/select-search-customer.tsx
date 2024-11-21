@@ -32,7 +32,7 @@ import toast from 'react-hot-toast'
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 import { searchAccountReceivable } from '@/app/actions/contact/searchAccountReceivable'
 import { searchAccountReceivableById } from '@/app/actions/contact/searchAccountReceivableById'
-import { Address, Contact } from '@prisma/client'
+import { Contact } from '@prisma/client'
 import { Label } from './ui/label'
 import { Separator } from './ui/separator'
 import { createNewContact } from '@/app/actions/contact/createNewContact'
@@ -45,9 +45,11 @@ type Props<T> = {
     defaultValue?: string
     defaultAddress?: InvoiceAddress
     disabled?: boolean
+    canCreateNewCustomer?: boolean
 }
 
 type InvoiceAddress = {
+    name: string
     address: string
     phone: string
     taxId: string
@@ -63,20 +65,18 @@ export default function SelectSearchCustomer<T>({
     defaultValue,
     disabled,
     defaultAddress,
+    canCreateNewCustomer,
 }: Props<T>) {
     const [page, setPage] = useState(1)
     const [isOpen, setIsOpen] = useState(false)
     const [popoverType, setPopoverType] = useState<PopoverType>('search')
     const [searchValue, setSearchValue] = useState('')
-    const [searchResults, setSearchResults] = useState<
-        (Contact & { Address: Address[] })[]
-    >([])
+    const [searchResults, setSearchResults] = useState<Contact[]>([])
     const [selectedId, setSelectedId] = useState<string>(defaultValue || '')
-    const [selectedResult, setSelectedResult] = useState<
-        Contact & { Address: Address[] }
-    >()
+    const [selectedResult, setSelectedResult] = useState<Contact>()
     const [address, setAddress] = useState<InvoiceAddress>(
         defaultAddress || {
+            name: '',
             address: '',
             phone: '',
             taxId: '',
@@ -104,7 +104,8 @@ export default function SelectSearchCustomer<T>({
         async function fetchCustomerData(customerId: string) {
             if (defaultValue) {
                 try {
-                    const result = await searchAccountReceivableById(customerId)
+                    const result =
+                        await searchAccountReceivableById(+customerId)
                     setSelectedResult(result)
                 } catch (err) {
                     if (err instanceof Error) {
@@ -117,45 +118,13 @@ export default function SelectSearchCustomer<T>({
         fetchCustomerData(defaultValue || '')
     }, [defaultValue])
 
-    const setTextAreaFromData = (data: Contact & { Address: Address[] }) => {
-        const address = data.Address.find((address) => address.isMain)
-        if (data.Address.length === 0)
-            return setAddress({ address: '', phone: '', taxId: '' })
-        if (address) {
-            let addressText = `${address.name}`
-            addressText += address.addressLine1
-                ? `\n${address.addressLine1}`
-                : ''
-            addressText += address.addressLine2
-                ? `\n${address.addressLine2}`
-                : ''
-            addressText += address.addressLine3
-                ? `\n${address.addressLine3}`
-                : ''
-            setAddress((prev) => ({
-                address: addressText,
-                phone: address.phone,
-                taxId: address.taxId,
-            }))
-        }
-        if (!address) {
-            const someAddress = data.Address[0]
-            let addressText = `${someAddress.name}`
-            addressText += someAddress.addressLine1
-                ? `\n${someAddress.addressLine1}`
-                : ''
-            addressText += someAddress.addressLine2
-                ? `\n${someAddress.addressLine2}`
-                : ''
-            addressText += someAddress.addressLine3
-                ? `\n${someAddress.addressLine3}`
-                : ''
-            setAddress((prev) => ({
-                address: addressText,
-                phone: someAddress.phone,
-                taxId: someAddress.taxId,
-            }))
-        }
+    const setTextAreaFromData = (data: Contact) => {
+        setAddress({
+            name: data.name,
+            address: data.address,
+            phone: data.phone,
+            taxId: data.taxId || '',
+        })
     }
 
     return (
@@ -188,7 +157,7 @@ export default function SelectSearchCustomer<T>({
                                     try {
                                         const result =
                                             await searchAccountReceivableById(
-                                                selectedId
+                                                +selectedId
                                             )
                                         setTextAreaFromData(result)
                                         setSelectedResult(result)
@@ -218,41 +187,56 @@ export default function SelectSearchCustomer<T>({
                         >
                             <SearchIcon className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 hover:cursor-pointer" />
                         </PopoverTrigger>
-                        <PopoverTrigger
-                            asChild
-                            onClick={(e) => {
-                                if (popoverType === 'search' && isOpen)
-                                    e.preventDefault()
-                                setPopoverType('create')
-                            }}
-                        >
-                            {!disabled && (
-                                <Button
-                                    variant={'outline'}
-                                    type="button"
-                                    className="absolute top-1/2 ml-1 -translate-y-1/2 hover:cursor-pointer"
-                                >
-                                    สร้างลูกค้า
-                                </Button>
-                            )}
-                            {/* <SearchIcon className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 hover:cursor-pointer" /> */}
-                        </PopoverTrigger>
+                        {canCreateNewCustomer && (
+                            <PopoverTrigger
+                                asChild
+                                onClick={(e) => {
+                                    if (popoverType === 'search' && isOpen)
+                                        e.preventDefault()
+                                    setPopoverType('create')
+                                }}
+                            >
+                                {!disabled && (
+                                    <Button
+                                        variant={'outline'}
+                                        type="button"
+                                        className="absolute top-1/2 ml-1 -translate-y-1/2 hover:cursor-pointer"
+                                    >
+                                        สร้างลูกค้า
+                                    </Button>
+                                )}
+                            </PopoverTrigger>
+                        )}
                     </span>
                     {hasTextArea && (
                         <>
-                            <Textarea
-                                value={address.address}
-                                name="address"
-                                placeholder="ที่อยู่"
-                                className="col-start-1 row-span-2"
-                                onChange={(e) =>
-                                    setAddress((prev) => ({
-                                        ...prev,
-                                        address: e.target.value,
-                                    }))
-                                }
-                                disabled={disabled}
-                            />
+                            <div className="col-start-1">
+                                <Input
+                                    name="contactName"
+                                    placeholder="ชื่อลูกค้า"
+                                    value={address.name}
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            name: e.target.value,
+                                        }))
+                                    }
+                                    disabled={disabled}
+                                />
+                                <Textarea
+                                    value={address.address}
+                                    name="address"
+                                    placeholder="ที่อยู่"
+                                    className="col-start-1 row-span-2"
+                                    onChange={(e) =>
+                                        setAddress((prev) => ({
+                                            ...prev,
+                                            address: e.target.value,
+                                        }))
+                                    }
+                                    disabled={disabled}
+                                />
+                            </div>
                             <div>
                                 <Input
                                     name="phone"
@@ -342,7 +326,7 @@ export default function SelectSearchCustomer<T>({
                                     page={page}
                                 />
                             </TableCaption>
-                            <TableHeader className="bg-primary-foreground/60 ">
+                            <TableHeader className="bg-primary-foreground/60">
                                 <TableRow>
                                     <TableHead>Id</TableHead>
                                     <TableHead>ชื่อลูกค้า</TableHead>
@@ -479,7 +463,7 @@ export default function SelectSearchCustomer<T>({
                     </PopoverContent>
                 )}
             </Popover>
-            <input type="text" hidden value={credit} name="payment" readOnly />
+            {/* <input type="text" hidden value={credit} name="payment" readOnly />
             {selectedResult && selectedResult.credit && (
                 <ToggleGroup
                     type="single"
@@ -490,7 +474,7 @@ export default function SelectSearchCustomer<T>({
                     <ToggleGroupItem value="transfer">Transfer</ToggleGroupItem>
                     <ToggleGroupItem value="credit">Credit</ToggleGroupItem>
                 </ToggleGroup>
-            )}
+            )} */}
         </>
     )
 }

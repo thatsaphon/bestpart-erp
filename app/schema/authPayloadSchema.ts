@@ -10,7 +10,6 @@ export const AuthPayloadSchema = z.object({
     first_name: z.string().nullable(),
     last_name: z.string().nullable(),
     role: z.enum([firstKey, ...otherKeys]),
-    flag: z.record(z.string()),
     avatarUrl: z.string().nullable(),
     AccountOwner: z
         .array(z.object({ accountNumberId: z.number() }))

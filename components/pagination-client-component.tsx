@@ -27,6 +27,7 @@ export default function PaginationClientComponent({
                     {page !== 1 && (
                         <PaginationItem>
                             <PaginationPrevious
+                                type="button"
                                 onClick={() => onPageClick(+page - 1)}
                             />
                         </PaginationItem>
@@ -37,6 +38,7 @@ export default function PaginationClientComponent({
                         <PaginationItem key={index}>
                             <PaginationLink
                                 isActive={+page === index + 1}
+                                type="button"
                                 // href={`?page=${index + 1}&limit=${limit}`}
                                 onClick={() => onPageClick(index + 1)}
                             >
@@ -44,9 +46,10 @@ export default function PaginationClientComponent({
                             </PaginationLink>
                         </PaginationItem>
                     ))}
-                    {page !== numberOfPage && (
+                    {numberOfPage !== 0 && page !== numberOfPage && (
                         <PaginationItem>
                             <PaginationNext
+                                type="button"
                                 onClick={() => onPageClick(+page + 1)}
                             />
                         </PaginationItem>

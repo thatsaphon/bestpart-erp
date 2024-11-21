@@ -28,7 +28,6 @@ import { getContactDetail } from '@/app/actions/contact/getContactDetail'
 import { Button } from './ui/button'
 import { updateContact } from '@/app/actions/contact/updateContact'
 import toast from 'react-hot-toast'
-import { Address } from '@prisma/client'
 import { Textarea } from './ui/textarea'
 import { Checkbox } from './ui/checkbox'
 import updateAddress from '@/app/actions/contact/updateAddress'
@@ -37,10 +36,9 @@ type Contact = Awaited<ReturnType<typeof getContactDetail>>
 
 type Props = {
     contact: Contact
-    address?: Address
 }
 
-export default function EditAddressDialog({ contact, address }: Props) {
+export default function EditAddressDialog({ contact }: Props) {
     const [isOpen, setIsOpen] = useState(false)
     const dialog = useRef(null)
 
@@ -49,22 +47,14 @@ export default function EditAddressDialog({ contact, address }: Props) {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                {address ? (
-                    <Pencil1Icon className="h-4 w-4 text-primary/50 hover:cursor-pointer" />
-                ) : (
-                    <CrossCircledIcon className="h-6 w-6 rotate-45 text-primary/50 hover:cursor-pointer hover:text-primary" />
-                )}
+                <Pencil1Icon className="h-4 w-4 text-primary/50 hover:cursor-pointer" />
             </DialogTrigger>
             <DialogContent ref={dialog}>
                 <form
                     className="flex flex-col gap-4"
                     action={async (formData) => {
                         try {
-                            await updateAddress(
-                                contact.id,
-                                address?.id,
-                                formData
-                            )
+                            await updateAddress(contact.id, formData)
                             toast.success('แก้ไขผู้ติดต่อสําเร็จ')
                             setIsOpen(false)
                         } catch (error) {
@@ -78,29 +68,25 @@ export default function EditAddressDialog({ contact, address }: Props) {
                     <DialogHeader>แก้ไขผู้ติดต่อ</DialogHeader>
                     <Label>
                         <p className="mb-2">ชื่อผู้ติดต่อ: </p>
-                        <Input defaultValue={address?.name} name="name" />
+                        <Input defaultValue={contact.name} name="name" />
                     </Label>
                     <Label>
                         <p className="mb-2">ที่อยู่: </p>
                         <Textarea
-                            defaultValue={`${address?.addressLine1 ? `${address?.addressLine1}\n` : ''}${address?.addressLine2 ? `${address?.addressLine2}\n` : ''}${address?.addressLine3 ? `${address?.addressLine3}\n` : ''}`}
+                            defaultValue={contact.address}
                             name="address"
                             rows={3}
                         />
                     </Label>
                     <Label>
                         <p className="mb-2">โทร: </p>
-                        <Input defaultValue={address?.phone} name="phone" />
+                        <Input defaultValue={contact.phone} name="phone" />
                     </Label>
                     <Label>
                         <p className="mb-2">เลขประจำตัวผู้เสียภาษี: </p>
-                        <Input defaultValue={address?.taxId} name="taxId" />
-                    </Label>
-                    <Label className="flex items-center space-x-2 p-0">
-                        <p>ที่อยู่หลัก: </p>
-                        <Checkbox
-                            name="isMain"
-                            defaultChecked={address?.isMain}
+                        <Input
+                            defaultValue={contact.taxId || ''}
+                            name="taxId"
                         />
                     </Label>
 

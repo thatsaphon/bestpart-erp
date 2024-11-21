@@ -10,7 +10,7 @@ datasource db {
 generator client {
   provider        = "prisma-client-js"
   output          = "../node_modules/.prisma/client"
-  previewFeatures = ["fullTextSearch"]
+  previewFeatures = ["views"]
 }
 
 model User {
@@ -20,12 +20,14 @@ model User {
   last_name  String?
   role       Role
   password   String
-  flag       Json?
   avatarUrl  String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
 
-  AccountOwner AccountOwner[]
+  AccountOwner    AccountOwner[]
+  DocumentRemark  DocumentRemark[]
+  MainSkuRemark   MainSkuRemark[]
+  SkuMasterRemark SkuMasterRemark[]
 }
 
 enum Role {
@@ -36,23 +38,69 @@ enum Role {
 }
 
 model Document {
-  id            Int             @id @default(autoincrement())
-  documentId    String          @unique
-  date          DateTime
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @default(now()) @updatedAt
-  SkuOut        SkuOut[]
-  SkuIn         SkuIn[]
-  ApSubledger   ApSubledger?
-  ArSubledger   ArSubledger?
-  Image         Image[]
-  GeneralLedger GeneralLedger[]
+  id          Int              @id @default(autoincrement())
+  documentNo  String           @unique
+  referenceNo String?
+  date        DateTime
+  Image       SkuMasterImage[]
 
-  contactName String
-  address     String
-  phone       String
-  taxId       String
-  remark      String @default("")
+  contactName      String
+  address          String
+  phone            String
+  taxId            String
+  DocumentRemark   DocumentRemark[]
+  DocumentAttached DocumentAttached[]
+  type             DocumentType
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  createdBy       String?
+  updatedBy       String?
+  CustomerOrder   CustomerOrder?
+  Quotation       Quotation?
+  PurchaseOrder   PurchaseOrder?
+  Sales           Sales?
+  Purchase        Purchase?
+  SalesReturn     SalesReturn?
+  PurchaseReturn  PurchaseReturn?
+  SalesBill       SalesBill?
+  SalesReceived   SalesReceived?
+  PurchasePayment PurchasePayment?
+  JournalVoucher  JournalVoucher?
+  StockAdjustment StockAdjustment?
+  OtherInvoice    OtherInvoice?
+  StockMovement   StockMovement[]
+  DocumentView    DocumentView?
+  OtherPayment    OtherPayment?
+}
+
+enum DocumentType {
+  SalesOrder
+  SalesReturn
+  SalesBill
+  SalesReceived
+  PurchaseReceived
+  PurchaseReturn
+  PurchasePayment
+  JournalVoucher
+  Quotation
+  CustomerOrder
+  PurchaseOrder
+  OtherInvoice
+  OtherPayment
+}
+
+model DocumentRemark {
+  id Int @id @default(autoincrement())
+
+  Document   Document? @relation(fields: [documentId], references: [id])
+  documentId Int?
+  remark     String    @default("")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
+  isDeleted  Boolean   @default(false)
+  User       User?     @relation(fields: [userId], references: [id])
+  userId     String?
 }
 
 model ChartOfAccount {
@@ -64,6 +112,15 @@ model ChartOfAccount {
   updatedAt     DateTime        @default(now()) @updatedAt
 
   AccountOwner AccountOwner[]
+
+  isCash      Boolean @default(false)
+  isAr        Boolean @default(false)
+  isAp        Boolean @default(false)
+  isInputTax  Boolean @default(false)
+  isOutputTax Boolean @default(false)
+  isDeposit   Boolean @default(false)
+
+  ServiceAndNonStockItem ServiceAndNonStockItem[]
 }
 
 enum AccountType {
@@ -77,51 +134,68 @@ enum AccountType {
 }
 
 model GeneralLedger {
-  id               Int            @id @default(autoincrement())
-  ChartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
+  id               Int              @id @default(autoincrement())
+  ChartOfAccount   ChartOfAccount   @relation(fields: [chartOfAccountId], references: [id])
   chartOfAccountId Int
   amount           Float
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @default(now()) @updatedAt
-  GeneralLedger    Document[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  Sales            Sales?           @relation(fields: [salesId], references: [id])
+  SalesReturn      SalesReturn?     @relation(fields: [salesReturnId], references: [id])
+  SalesReceived    SalesReceived?   @relation(fields: [salesReceivedId], references: [id])
+  Purchase         Purchase?        @relation(fields: [purchaseId], references: [id])
+  PurchaseReturn   PurchaseReturn?  @relation(fields: [purchaseReturnId], references: [id])
+  PurchasePayment  PurchasePayment? @relation(fields: [purchasePaymentId], references: [id])
+  JournalVoucher   JournalVoucher?  @relation(fields: [journalVoucherId], references: [id])
+  OtherInvoice     OtherInvoice?    @relation(fields: [otherInvoiceId], references: [id])
+  CustomerOrder    CustomerOrder?   @relation(fields: [customerOrderId], references: [id])
+  OtherPayment     OtherPayment?    @relation(fields: [otherPaymentId], references: [id])
+
+  salesId           Int?
+  salesReturnId     Int?
+  purchaseId        Int?
+  purchaseReturnId  Int?
+  salesReceivedId   Int?
+  purchasePaymentId Int?
+  journalVoucherId  Int?
+  otherInvoiceId    Int?
+  customerOrderId   Int?
+  otherPaymentId    Int?
 
   @@index([chartOfAccountId])
 }
 
 model Contact {
-  id      Int       @id @default(autoincrement())
+  id      Int     @id @default(autoincrement())
   name    String
-  Address Address[]
+  address String
+  phone   String
   taxId   String?
 
-  ApSubledger   ApSubledger[]
-  ArSubledger   ArSubledger[]
   credit        Boolean?
   searchKeyword String?
 
   isAr Boolean @default(true)
   isAp Boolean @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-}
-
-model Address {
-  id           Int     @id @default(autoincrement())
-  Contact      Contact @relation(fields: [contactId], references: [id])
-  contactId    Int
-  isMain       Boolean
-  name         String
-  addressLine1 String  @default("")
-  addressLine2 String  @default("")
-  addressLine3 String  @default("")
-  taxId        String  @default("")
-  phone        String  @default("")
+  SkuMaster SkuMaster[] @relation("SkuMasterToVendor")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@index([contactId])
+  Sales           Sales[]
+  SalesReturn     SalesReturn[]
+  SalesBill       SalesBill[]
+  SalesReceived   SalesReceived[]
+  Purchase        Purchase[]
+  PurchaseReturn  PurchaseReturn[]
+  PurchasePayment PurchasePayment[]
+  CustomerOrder   CustomerOrder[]
+  Quotation       Quotation[]
+  PurchaseOrder   PurchaseOrder[]
+  OtherInvoice    OtherInvoice[]
+  StockMovement   StockMovement[]
+  OtherPayment    OtherPayment[]
 }
 
 model MainSku {
@@ -129,183 +203,393 @@ model MainSku {
   partNumber String?
   name       String  @unique
 
-  carModelId Int?
-
-  CarModel      CarModel? @relation(fields: [carModelId], references: [id])
+  MainSkuRemark MainSkuRemark[]
   searchKeyword String?
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now()) @updatedAt
   SkuMaster SkuMaster[]
-
-  @@index([carModelId])
 }
 
 model SkuMaster {
   id     Int    @id @default(autoincrement())
   detail String
 
-  Brand   Brand? @relation(fields: [brandId], references: [id])
-  brandId Int?
+  reorderPoint  Float?
+  maximumAmount Float?
+  minimumAmount Float?
+  position      String @default("")
+
+  SkuMasterRemark SkuMasterRemark[]
 
   mainSkuId Int
-  mainSku   MainSku @relation(fields: [mainSkuId], references: [id])
-  remark    String?
+  MainSku   MainSku @relation(fields: [mainSkuId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  Image       Image[]
-  GoodsMaster GoodsMaster[]
-  SkuIn       SkuIn[]
-  SkuOut      SkuOut[]
+  Image               SkuMasterImage[]
+  GoodsMaster         GoodsMaster[]
+  Vendor              Contact[]             @relation("SkuMasterToVendor")
+  SalesItem           SalesItem[]
+  SalesReturnItem     SalesReturnItem[]
+  PurchaseItem        PurchaseItem[]
+  PurchaseReturnItem  PurchaseReturnItem[]
+  StockAdjustmentItem StockAdjustmentItem[]
 
-  @@index([brandId])
+  SkuRemainingCache SkuRemainingCache?
+  PurchaseOrderItem PurchaseOrderItem[]
+  QuotationItem     QuotationItem[]
+  canNegative       Boolean             @default(false)
+  StockMovement     StockMovement[]
+
   @@index([mainSkuId])
 }
 
-model CarModel {
-  id   Int    @id @default(autoincrement())
-  name String
+model SkuRemainingCache {
+  id   Int      @id @default(autoincrement())
+  date DateTime
+
+  SkuMaster   SkuMaster @relation(fields: [skuMasterId], references: [id])
+  skuMasterId Int       @unique
+
+  remaining     Float   @default(0)
+  shouldRecheck Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model MainSkuRemark {
+  id     Int    @id @default(autoincrement())
+  remark String @unique
 
   MainSku MainSku[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
 }
 
-model Brand {
-  id   Int    @id @default(autoincrement())
-  name String
+model SkuMasterRemark {
+  id     Int    @id @default(autoincrement())
+  remark String @unique
 
   SkuMaster SkuMaster[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
 }
 
 model GoodsMaster {
-  id          Int       @id @default(autoincrement())
-  barcode     String    @unique
-  SkuMaster   SkuMaster @relation(fields: [skuMasterId], references: [id])
-  skuMasterId Int
-  quantity    Float
-  unit        String
-  price       Float
-  flag        Json?
+  id                      Int       @id @default(autoincrement())
+  barcode                 String    @unique
+  SkuMaster               SkuMaster @relation(fields: [skuMasterId], references: [id])
+  skuMasterId             Int
+  quantityPerUnit         Float
+  unit                    String
+  lastPurchaseCostPerUnit Float?
+  pricePerUnit            Float
 
-  SkuOut SkuOut[]
-  SkuIn  SkuIn[]
+  SalesItem    SalesItem[]
+  PurchaseItem PurchaseItem[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now()) @updatedAt
+  PurchaseOrderItem   PurchaseOrderItem[]
+  QuotationItem       QuotationItem[]
+  SalesReturnItem     SalesReturnItem[]
+  PurchaseReturnItem  PurchaseReturnItem[]
+  StockAdjustmentItem StockAdjustmentItem[]
 
   @@index([skuMasterId])
 }
 
-model SkuOut {
-  id            Int         @id @default(autoincrement())
-  date          DateTime
-  Document      Document    @relation(fields: [documentId], references: [id])
-  documentId    Int
-  GoodsMaster   GoodsMaster @relation(fields: [goodsMasterId], references: [id])
-  goodsMasterId Int
-  SkuMaster     SkuMaster   @relation(fields: [skuMasterId], references: [id])
+model Sales {
+  id            Int             @id @default(autoincrement())
+  Document      Document        @relation(fields: [documentId], references: [id])
+  documentId    Int             @unique
+  SalesItem     SalesItem[]
+  Contact       Contact?        @relation(fields: [contactId], references: [id])
+  contactId     Int?
+  GeneralLedger GeneralLedger[]
 
-  barcode         String
-  unit            String
-  quantityPerUnit Float  @default(1)
-
-  quantity Float
-  cost     Float
-  price    Float
-  vat      Float
-
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now()) @updatedAt
-  skuMasterId Int
-  SkuInToOut  SkuInToOut[]
-
-  @@index([skuMasterId])
-  @@index([goodsMasterId])
-  @@index([documentId])
+  SalesBill       SalesBill?      @relation(fields: [salesBillId], references: [id])
+  salesBillId     Int?
+  SalesReceived   SalesReceived?  @relation(fields: [salesReceivedId], references: [id])
+  salesReceivedId Int?
+  CustomerOrder   CustomerOrder[]
 }
 
-model SkuIn {
-  id            Int         @id @default(autoincrement())
-  date          DateTime
-  Document      Document    @relation(fields: [documentId], references: [id])
-  documentId    Int
-  GoodsMaster   GoodsMaster @relation(fields: [goodsMasterId], references: [id])
-  goodsMasterId Int
-  SkuMaster     SkuMaster   @relation(fields: [skuMasterId], references: [id])
-  skuMasterId   Int
+enum SalesStatus {
+  Unpaid
+  Paid
+  Partial
+  Billed
+}
 
+model SalesItem {
+  id                       Int                     @id @default(autoincrement())
+  Sales                    Sales                   @relation(fields: [salesId], references: [id])
+  salesId                  Int
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
+
+  name            String?
+  description     String?
   barcode         String?
   unit            String
   quantityPerUnit Float   @default(1)
 
-  quantity Float
-  cost     Float
-  vat      Float
+  quantity        Float
+  pricePerUnit    Float
+  discountString  String?
+  discountPerUnit Float   @default(0)
+  freeQuantity    Float?
+  vat             Float
 
-  remaining  Int
-  SkuInToOut SkuInToOut[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-  @@index([documentId])
-  @@index([goodsMasterId])
   @@index([skuMasterId])
+  @@index([goodsMasterId])
 }
 
-model SkuInToOut {
-  id       Int    @id @default(autoincrement())
-  SkuIn    SkuIn  @relation(fields: [skuInId], references: [id])
-  skuInId  Int
-  SKuOut   SkuOut @relation(fields: [skuOutId], references: [id])
-  skuOutId Int
+model ServiceAndNonStockItem {
+  id               Int            @id @default(autoincrement())
+  ChartOfAccount   ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
+  chartOfAccountId Int
 
-  quantity Float
+  name String
+
+  canSales        Boolean
+  canPurchase     Boolean
+  canOtherInvoice Boolean
+  isDiscount      Boolean @default(false)
+
+  SalesItem          SalesItem[]
+  SalesReturnItem    SalesReturnItem[]
+  PurchaseItem       PurchaseItem[]
+  PurchaseReturnItem PurchaseReturnItem[]
+  QuotationItem      QuotationItem[]
+  PurchaseOrderItem  PurchaseOrderItem[]
+  OtherInvoiceItem   OtherInvoiceItem[]
+}
+
+model SalesReturn {
+  id              Int               @id @default(autoincrement())
+  Document        Document          @relation(fields: [documentId], references: [id])
+  documentId      Int               @unique
+  SalesReturnItem SalesReturnItem[]
+  Contact         Contact?          @relation(fields: [contactId], references: [id])
+  contactId       Int?
+  SalesBill       SalesBill?        @relation(fields: [salesBillId], references: [id])
+  salesBillId     Int?
+  GeneralLedger   GeneralLedger[]
+  SalesReceived   SalesReceived?    @relation(fields: [salesReceivedId], references: [id])
+  salesReceivedId Int?
+}
+
+model SalesReturnItem {
+  id                       Int                     @id @default(autoincrement())
+  SalesReturn              SalesReturn             @relation(fields: [salesReturnId], references: [id])
+  salesReturnId            Int
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
+
+  name            String?
+  description     String?
+  barcode         String?
+  unit            String
+  quantityPerUnit Float   @default(1)
+
+  quantity        Float
+  pricePerUnit    Float
+  discountString  String?
+  discountPerUnit Float   @default(0)
+  freeQuantity    Float?
+  vat             Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([skuMasterId])
+  @@index([goodsMasterId])
 }
 
-model ApSubledger {
-  id            Int           @id @default(autoincrement())
-  Contact       Contact       @relation(fields: [contactId], references: [id])
+model SalesBill {
+  id              Int            @id @default(autoincrement())
+  Document        Document       @relation(fields: [documentId], references: [id])
+  documentId      Int            @unique
+  Contact         Contact        @relation(fields: [contactId], references: [id])
+  contactId       Int
+  Sales           Sales[]
+  SalesReturn     SalesReturn[]
+  SalesReceived   SalesReceived? @relation(fields: [salesReceivedId], references: [id])
+  salesReceivedId Int?
+}
+
+model SalesReceived {
+  id            Int             @id @default(autoincrement())
+  Document      Document        @relation(fields: [documentId], references: [id])
+  documentId    Int             @unique
+  Contact       Contact         @relation(fields: [contactId], references: [id])
   contactId     Int
-  Document      Document      @relation(fields: [documentId], references: [id])
-  documentId    Int           @unique
-  paymentStatus PaymentStatus @default(NotPaid)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@index([contactId])
-  @@index([documentId])
+  Sales         Sales[]
+  SalesReturn   SalesReturn[]
+  SalesBill     SalesBill[]
+  GeneralLedger GeneralLedger[]
 }
 
-model ArSubledger {
-  id            Int           @id @default(autoincrement())
-  Contact       Contact       @relation(fields: [contactId], references: [id])
-  contactId     Int
-  Document      Document      @relation(fields: [documentId], references: [id])
-  documentId    Int           @unique
-  paymentStatus PaymentStatus @default(NotPaid)
+model Purchase {
+  id         Int      @id @default(autoincrement())
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+  Contact    Contact? @relation(fields: [contactId], references: [id])
+  contactId  Int?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  PurchaseItem      PurchaseItem[]
+  GeneralLedger     GeneralLedger[]
+  PurchasePayment   PurchasePayment? @relation(fields: [purchasePaymentId], references: [id])
+  purchasePaymentId Int?
 
-  @@index([contactId])
-  @@index([documentId])
+  PurchaseOrder PurchaseOrder[]
 }
 
-enum PaymentStatus {
-  Cash
-  Paid
-  NotPaid  @map("Not Paid")
-  WriteOff @map("Write Off")
-  Billed
+model PurchaseItem {
+  id                       Int                     @id @default(autoincrement())
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
+
+  name            String?
+  description     String?
+  barcode         String?
+  unit            String
+  quantityPerUnit Float   @default(1)
+
+  quantity              Float
+  costPerUnitIncVat     Float
+  costPerUnitExVat      Float
+  discountString        String?
+  discountPerUnitIncVat Float   @default(0)
+  discountPerUnitExVat  Float   @default(0)
+  freeQuantity          Float?
+  vat                   Float
+
+  Purchase   Purchase @relation(fields: [purchaseId], references: [id])
+  purchaseId Int
+
+  vatable      Boolean @default(true)
+  isIncludeVat Boolean @default(true)
+
+  @@index([skuMasterId])
+  @@index([goodsMasterId])
+}
+
+model PurchaseReturn {
+  id         Int      @id @default(autoincrement())
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+
+  Contact            Contact?             @relation(fields: [contactId], references: [id])
+  contactId          Int?
+  PurchaseReturnItem PurchaseReturnItem[]
+  GeneralLedger      GeneralLedger[]
+  PurchasePayment    PurchasePayment?     @relation(fields: [purchasePaymentId], references: [id])
+  purchasePaymentId  Int?
+}
+
+model PurchaseReturnItem {
+  id                       Int                     @id @default(autoincrement())
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
+
+  name            String?
+  description     String?
+  barcode         String?
+  unit            String
+  quantityPerUnit Float   @default(1)
+
+  quantity              Float
+  costPerUnitIncVat     Float
+  costPerUnitExVat      Float
+  discountString        String?
+  discountPerUnitIncVat Float   @default(0)
+  discountPerUnitExVat  Float   @default(0)
+  freeQuantity          Float?
+  vat                   Float
+
+  PurchaseReturn   PurchaseReturn @relation(fields: [purchaseReturnId], references: [id])
+  purchaseReturnId Int
+
+  vatable      Boolean @default(true)
+  isIncludeVat Boolean @default(true)
+
+  @@index([skuMasterId])
+  @@index([goodsMasterId])
+}
+
+model PurchasePayment {
+  id             Int              @id @default(autoincrement())
+  Document       Document         @relation(fields: [documentId], references: [id])
+  documentId     Int              @unique
+  Contact        Contact          @relation(fields: [contactId], references: [id])
+  contactId      Int
+  Purchase       Purchase[]
+  PurchaseReturn PurchaseReturn[]
+  GeneralLedger  GeneralLedger[]
+}
+
+model StockAdjustment {
+  id                  Int                   @id @default(autoincrement())
+  Document            Document              @relation(fields: [documentId], references: [id])
+  documentId          Int                   @unique
+  StockAdjustmentItem StockAdjustmentItem[]
+}
+
+model StockAdjustmentItem {
+  id                Int             @id @default(autoincrement())
+  SkuMaster         SkuMaster       @relation(fields: [skuMasterId], references: [id])
+  skuMasterId       Int
+  GoodsMaster       GoodsMaster     @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId     Int
+  StockAdjustment   StockAdjustment @relation(fields: [stockAdjustmentId], references: [id])
+  stockAdjustmentId Int
+
+  quantity        Float
+  estimatedCost   Float
+  unit            String
+  quantityPerUnit Float
+}
+
+model JournalVoucher {
+  id                 Int             @id @default(autoincrement())
+  Document           Document        @relation(fields: [documentId], references: [id])
+  documentId         Int             @unique
+  journalDescription String
+  GeneralLedger      GeneralLedger[]
+  AssetMovement      AssetMovement[]
 }
 
 model AccountOwner {
@@ -319,7 +603,7 @@ model AccountOwner {
   @@index([userId])
 }
 
-model Image {
+model SkuMasterImage {
   id          String     @id @default(uuid())
   path        String
   Document    Document?  @relation(fields: [documentId], references: [id])
@@ -331,4 +615,333 @@ model Image {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@index([skuMasterId])
+}
+
+model DocumentAttached {
+  id         Int      @id @default(autoincrement())
+  url        String
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+}
+
+model OtherInvoice {
+  id         Int      @id @default(autoincrement())
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+  Contact    Contact? @relation(fields: [contactId], references: [id])
+  contactId  Int?
+
+  OtherInvoiceItem OtherInvoiceItem[]
+  GeneralLedger    GeneralLedger[]
+  AssetMovement    AssetMovement[]
+  OtherPayment     OtherPayment?      @relation(fields: [otherPaymentId], references: [id])
+  otherPaymentId   Int?
+}
+
+model OtherInvoiceItem {
+  id             Int          @id @default(autoincrement())
+  OtherInvoice   OtherInvoice @relation(fields: [otherInvoiceId], references: [id])
+  otherInvoiceId Int
+
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
+
+  name        String?
+  description String?
+
+  unit            String
+  quantityPerUnit Float  @default(1)
+
+  quantity              Float
+  costPerUnitIncVat     Float
+  costPerUnitExVat      Float
+  discountString        String?
+  discountPerUnitIncVat Float   @default(0)
+  discountPerUnitExVat  Float   @default(0)
+  freeQuantity          Float?
+  vat                   Float
+
+  vatable      Boolean @default(true)
+  isIncludeVat Boolean @default(true)
+}
+
+model OtherPayment {
+  id         Int      @id @default(autoincrement())
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+  Contact    Contact  @relation(fields: [contactId], references: [id])
+  contactId  Int
+
+  OtherInvoice  OtherInvoice[]
+  GeneralLedger GeneralLedger[]
+}
+
+enum AssetType {
+  Land
+  Buildings
+  Equipment
+  Vehicles
+  Furniture
+  Computers_And_Electronics
+  Intangible_Assets
+}
+
+model Asset {
+  id              Int       @id @default(autoincrement())
+  name            String
+  description     String
+  type            AssetType
+  acquisitionDate DateTime
+  usefulLife      Int?
+  cost            Float
+  residualValue   Float     @default(0)
+  remark          String
+  isWriteOff      Boolean   @default(false)
+
+  AssetMovement AssetMovement[]
+  AssetFile     AssetFile[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+}
+
+model AssetFile {
+  id      Int    @id @default(autoincrement())
+  Asset   Asset  @relation(fields: [assetId], references: [id])
+  assetId Int
+  url     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model AssetMovement {
+  id   Int      @id @default(autoincrement())
+  date DateTime
+
+  Asset   Asset @relation(fields: [assetId], references: [id])
+  assetId Int
+
+  OtherInvoice     OtherInvoice?   @relation(fields: [otherInvoiceId], references: [id])
+  otherInvoiceId   Int?
+  JournalVoucher   JournalVoucher? @relation(fields: [journalVoucherId], references: [id])
+  journalVoucherId Int?
+
+  description String @default("")
+  value       Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Knowledge {
+  id             Int              @id @default(autoincrement())
+  content        String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
+  KnowledgeImage KnowledgeImage[]
+}
+
+model KnowledgeImage {
+  id          String    @id @default(uuid())
+  path        String
+  Knowledge   Knowledge @relation(fields: [knowledgeId], references: [id])
+  knowledgeId Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+}
+
+model PurchaseOrder {
+  id Int @id @default(autoincrement())
+
+  Document      Document            @relation(fields: [documentId], references: [id])
+  documentId    Int                 @unique
+  CustomerOrder CustomerOrder[]
+  status        PurchaseOrderStatus
+
+  Contact   Contact @relation(fields: [contactId], references: [id])
+  contactId Int
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now()) @updatedAt
+  PurchaseOrderItem PurchaseOrderItem[]
+  Purchase          Purchase[]
+}
+
+enum PurchaseOrderStatus {
+  Draft
+  Submitted
+  PartiallyReceived
+  FullyReceived // by Officer 
+  Closed // by Supervisor
+  Cancelled
+}
+
+model PurchaseOrderItem {
+  id Int @id @default(autoincrement())
+
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
+
+  barcode         String?
+  description     String?
+  unit            String
+  quantityPerUnit Float   @default(1)
+
+  quantity              Float
+  costPerUnitIncVat     Float
+  costPerUnitExVat      Float
+  discountString        String?
+  discountPerUnitIncVat Float   @default(0)
+  discountPerUnitExVat  Float   @default(0)
+  freeQuantity          Float?
+  vat                   Float
+
+  estimatedDeliveryDate DateTime
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now()) @updatedAt
+  PurchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId Int
+
+  vatable      Boolean @default(true)
+  isIncludeVat Boolean @default(true)
+}
+
+model CustomerOrder {
+  id Int @id @default(autoincrement())
+
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+  Contact    Contact  @relation(fields: [contactId], references: [id])
+  contactId  Int
+
+  status CustomerOrderStatus
+
+  PurchaseOrder PurchaseOrder[]
+  SalesLink     Sales[]
+
+  GeneralLedger GeneralLedger[]
+
+  deposit Float
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now()) @updatedAt
+  CustomerOrderItem CustomerOrderItem[]
+}
+
+enum CustomerOrderStatus {
+  Pending
+  POCreated
+  Ordered
+  Received
+  SOCreated // by Officer
+  Closed // by Supervisor
+  Cancelled
+}
+
+model CustomerOrderItem {
+  id Int @id @default(autoincrement())
+
+  CustomerOrder   CustomerOrder @relation(fields: [customerOrderId], references: [id])
+  customerOrderId Int
+
+  barcode         String?
+  description     String
+  unit            String
+  quantityPerUnit Float   @default(1)
+  quantity        Float
+  pricePerUnit    Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Quotation {
+  id Int @id @default(autoincrement())
+
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+
+  Contact   Contact? @relation(fields: [contactId], references: [id])
+  contactId Int?
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  QuotationItem QuotationItem[]
+}
+
+model QuotationItem {
+  id Int @id @default(autoincrement())
+
+  Quotation   Quotation @relation(fields: [quotationId], references: [id])
+  quotationId Int
+
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
+
+  barcode         String?
+  unit            String?
+  quantityPerUnit Float   @default(1)
+  name            String?
+  description     String?
+
+  quantity        Float
+  pricePerUnit    Float
+  discountString  String?
+  discountPerUnit Float   @default(0)
+  freeQuantity    Float?
+  vat             Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+view StockMovement {
+  documentId            Int
+  Document              Document     @relation(fields: [documentId], references: [id])
+  documentNo            String
+  Contact               Contact?     @relation(fields: [contactId], references: [id])
+  contactId             Int?
+  SkuMaster             SkuMaster    @relation(fields: [skuMasterId], references: [id])
+  skuMasterId           Int
+  date                  DateTime
+  documentType          DocumentType
+  movementCount         Float
+  quantity              Float
+  quantityPerUnit       Float
+  unit                  String
+  costPerUnitIncVat     Float
+  costPerUnitExVat      Float
+  pricePerUnit          Float
+  discountString        String?
+  discountPerUnitIncVat Float        @default(0)
+  discountPerUnitExVat  Float        @default(0)
+  freeQuantity          Float?
+
+  @@id([documentId, skuMasterId])
+}
+
+view DocumentView {
+  id         Int      @id
+  documentId Int      @unique
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentNo String
+
+  documentType DocumentType
+  contactId    Int
+  contactName  String
+  date         DateTime
+
+  createdAt DateTime
+  updatedAt DateTime
 }

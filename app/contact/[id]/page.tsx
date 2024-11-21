@@ -1,5 +1,4 @@
 import { getContactDetail } from '@/app/actions/contact/getContactDetail'
-import prisma from '@/app/db/db'
 import EditAddressDialog from '@/components/edit-address-dialog'
 import EditContactDialog from '@/components/edit-contact-dialog'
 import { Badge } from '@/components/ui/badge'
@@ -10,28 +9,28 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTrigger,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { Pencil1Icon } from '@radix-ui/react-icons'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { fullDateFormat } from '@/lib/date-format'
 import React from 'react'
 
-type Props = { params: { id: string } }
+type Props = { params: Promise<{ id: string }> }
 
-export default async function ContactDetailPage({ params: { id } }: Props) {
+export default async function ContactDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        id
+    } = params;
+
     const contact = await getContactDetail(id)
 
     if (!contact) return <>Contact not found</>
@@ -47,42 +46,96 @@ export default async function ContactDetailPage({ params: { id } }: Props) {
 
             <p>คำค้นหา: {contact.searchKeyword}</p>
             {contact.credit && <Badge>สามารถขายเชื่อได้</Badge>}
-
-            <h3 className="mb-1 mt-3 text-lg font-[600]">ที่อยู่</h3>
             <Separator />
-            <div className="flex flex-wrap items-stretch gap-2">
-                {contact.Address.map((address) => (
-                    <Card
-                        key={`${address.id}-${address.updatedAt}`}
-                        className="my-2 w-[350px]"
-                    >
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-xl font-[600]">
-                                <span>{address.name}</span>
-                                <EditAddressDialog
-                                    address={address}
-                                    contact={contact}
-                                />
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p>{address.addressLine1}</p>
-                            <p>{address.addressLine2}</p>
-                            <p>{address.addressLine3}</p>
-                            <p>{address.phone}</p>
-                            <p>{address.taxId}</p>
-                        </CardContent>
-                        <CardFooter>
-                            {address.isMain && (
-                                <Badge variant={'outline'}>ที่อยู่หลัก</Badge>
-                            )}
-                        </CardFooter>
-                    </Card>
-                ))}
-                <Card className="my-2 flex w-[350px] items-center justify-center">
-                    <EditAddressDialog contact={contact} />
-                </Card>
-            </div>
+
+            {/* <h3 className="mb-1 mt-3 text-lg font-[600]">ที่อยู่</h3> */}
+            <Tabs defaultValue="address">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="address">ที่อยู่</TabsTrigger>
+                    <TabsTrigger value="history">ประวัติ</TabsTrigger>
+                </TabsList>
+                <TabsContent value="address">
+                    <div className="flex flex-wrap items-stretch gap-2">
+                        <Card
+                            key={`${contact.id}-${contact.updatedAt}`}
+                            className="my-2 w-[350px]"
+                        >
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl font-[600]">
+                                    <span>{contact.name}</span>
+                                    <EditAddressDialog contact={contact} />
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p>{contact.address}</p>
+                                <p>{contact.phone}</p>
+                                <p>{contact.taxId}</p>
+                            </CardContent>
+                            <CardFooter>
+                                <p>{contact.searchKeyword}</p>
+                            </CardFooter>
+                        </Card>
+                    </div>
+                </TabsContent>
+                <TabsContent value="history">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>วันที่</TableHead>
+                                <TableHead>เลขที่เอกสาร</TableHead>
+                                <TableHead>ประเภท</TableHead>
+                                <TableHead>สินค้า</TableHead>
+                                <TableHead>จำนวน</TableHead>
+                                <TableHead>หน่วย</TableHead>
+                                <TableHead>ราคาต่อหน่วย</TableHead>
+                                <TableHead>จำนวนเงิน</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {contact.StockMovement.map((stockMovement) => (
+                                <TableRow
+                                    key={
+                                        stockMovement.skuMasterId +
+                                        '-' +
+                                        stockMovement.documentId
+                                    }
+                                >
+                                    <TableCell>
+                                        {fullDateFormat(stockMovement.date)}
+                                    </TableCell>
+                                    <TableCell>
+                                        {stockMovement.documentNo}
+                                    </TableCell>
+                                    <TableCell>
+                                        {stockMovement.Document.type}
+                                    </TableCell>
+                                    <TableCell>
+                                        {stockMovement.SkuMaster.MainSku.name +
+                                            '-' +
+                                            stockMovement.SkuMaster.detail}
+                                    </TableCell>
+                                    <TableCell>
+                                        {`${stockMovement.quantity}`}
+                                    </TableCell>
+                                    <TableCell>
+                                        {`${stockMovement.unit}(${
+                                            stockMovement.quantityPerUnit
+                                        })`}
+                                    </TableCell>
+                                    <TableCell>
+                                        {`${stockMovement.pricePerUnit || stockMovement.costPerUnitIncVat}`}
+                                    </TableCell>
+                                    <TableCell>
+                                        {stockMovement.quantity *
+                                            (stockMovement.pricePerUnit ||
+                                                stockMovement.costPerUnitIncVat)}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TabsContent>
+            </Tabs>
         </div>
     )
 }

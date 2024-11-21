@@ -27,44 +27,46 @@ import { Badge } from '@/components/ui/badge'
 import { Pencil1Icon } from '@radix-ui/react-icons'
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         type?: string
-    }
+    }>
 }
 
-export default async function ContactPage({
-    searchParams,
-    searchParams: { type = 'all' },
-}: Props) {
+export default async function ContactPage(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
+        type = 'all'
+    } = searchParams;
+
     const contacts = await prisma.contact.findMany({
         where: {
             isAr: type === 'ar' ? true : undefined,
             isAp: type === 'ap' ? true : undefined,
         },
         include: {
-            Address: true,
-            ArSubledger: {
+            Sales: {
                 include: {
-                    Document: {
-                        include: {
-                            GeneralLedger: {
-                                where: { chartOfAccountId: 12000 },
-                            },
-                        },
-                    },
+                    SalesItem: true,
+                    GeneralLedger: true,
                 },
             },
-            ApSubledger: {
+            Purchase: {
                 include: {
-                    Document: {
-                        include: {
-                            GeneralLedger: {
-                                where: { chartOfAccountId: 21000 },
-                            },
-                        },
-                    },
+                    PurchaseItem: true,
+                    GeneralLedger: true,
                 },
             },
+            // CustomerOrder: true,
+            // OtherInvoice: true,
+            // PurchaseOrder: true,
+            // PurchasePayment: true,
+            // PurchaseReturn: true,
+            // Quotation: true,
+            // SalesBill: true,
+            // SalesReceived: true,
+            // SalesReturn: true,
+            // SkuMaster: true,
         },
         orderBy: [{ name: 'asc' }],
     })
@@ -161,27 +163,56 @@ export default async function ContactPage({
                                         ''
                                     )}
                                 </TableCell>
+                                <TableCell>{contact.phone}</TableCell>
+                                <TableCell>
+                                    <Link
+                                        href={`/contact/${contact.id}/receivable`}
+                                    >
+                                        {contact.Sales.reduce(
+                                            (acc, curr) =>
+                                                acc +
+                                                curr.GeneralLedger.reduce(
+                                                    (acc, curr) =>
+                                                        curr.chartOfAccountId ===
+                                                        12000
+                                                            ? acc + curr.amount
+                                                            : acc,
+                                                    0
+                                                ),
+                                            0
+                                        )}
+                                        {/* {contact.ArSubledger.filter(
+                                            ({ paymentStatus }) =>
+                                                paymentStatus === 'NotPaid'
+                                        ).reduce(
+                                            (acc, curr) =>
+                                                acc +
+                                                curr.Document.GeneralLedger.reduce(
+                                                    (acc, curr) =>
+                                                        acc + curr.amount,
+                                                    0
+                                                ),
+                                            0
+                                        )} */}
+                                    </Link>
+                                </TableCell>
                                 <TableCell>
                                     {
-                                        contact.Address.find(
-                                            ({ isMain }) => isMain
-                                        )?.phone
+                                        -contact.Purchase.reduce(
+                                            (acc, curr) =>
+                                                acc +
+                                                curr.GeneralLedger.reduce(
+                                                    (acc, curr) =>
+                                                        curr.chartOfAccountId ===
+                                                        21000
+                                                            ? acc + curr.amount
+                                                            : acc,
+                                                    0
+                                                ),
+                                            0
+                                        )
                                     }
-                                </TableCell>
-                                <TableCell>
-                                    {contact.ArSubledger.reduce(
-                                        (acc, curr) =>
-                                            acc +
-                                            curr.Document.GeneralLedger.reduce(
-                                                (acc, curr) =>
-                                                    acc + curr.amount,
-                                                0
-                                            ),
-                                        0
-                                    )}
-                                </TableCell>
-                                <TableCell>
-                                    {
+                                    {/* {
                                         -contact.ApSubledger.reduce(
                                             (acc, curr) =>
                                                 acc +
@@ -192,7 +223,7 @@ export default async function ContactPage({
                                                 ),
                                             0
                                         )
-                                    }
+                                    } */}
                                 </TableCell>
                                 <TableCell>
                                     <Link href={`/contact/${contact.id}`}>

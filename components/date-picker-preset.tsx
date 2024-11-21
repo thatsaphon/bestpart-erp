@@ -23,9 +23,14 @@ import {
 type Props = {
     disabled?: boolean
     defaultDate?: Date
+    name?: string
 }
 
-export function DatePickerWithPresets({ disabled, defaultDate }: Props) {
+export function DatePickerWithPresets({
+    disabled,
+    defaultDate,
+    name = 'date',
+}: Props) {
     const [date, setDate] = React.useState<Date>(defaultDate || new Date())
 
     return (
@@ -40,12 +45,12 @@ export function DatePickerWithPresets({ disabled, defaultDate }: Props) {
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     <input
-                        name="date"
+                        name={name}
                         type="hidden"
                         onChange={(e) => {
                             setDate(new Date(e.target.value))
                         }}
-                        value={date.toISOString().substring(0, 10)}
+                        value={date.toLocaleString()}
                     />
                     {date ? format(date, 'PPP') : <span>Pick a date</span>}
                 </Button>
@@ -56,9 +61,10 @@ export function DatePickerWithPresets({ disabled, defaultDate }: Props) {
                 onInteractOutside={(e) => e.preventDefault()}
             >
                 <Select
-                    onValueChange={(value) =>
+                    onValueChange={(value) => {
                         setDate(addDays(new Date(), parseInt(value)))
-                    }
+                        console.log(date)
+                    }}
                 >
                     <SelectTrigger>
                         <SelectValue placeholder="Select" />
@@ -75,7 +81,10 @@ export function DatePickerWithPresets({ disabled, defaultDate }: Props) {
                     <Calendar
                         mode="single"
                         selected={date}
-                        onSelect={(value) => !!value && setDate(value)}
+                        onSelect={(value) => {
+                            console.log(value)
+                            !!value && setDate(value)
+                        }}
                     />
                 </div>
             </PopoverContent>

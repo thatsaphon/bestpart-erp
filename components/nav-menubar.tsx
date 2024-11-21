@@ -18,15 +18,18 @@ import {
 import { cva } from 'class-variance-authority'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
-import { InventoryDialog } from './inventory-dialog'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
+import { getServerSession } from 'next-auth'
+import { useSession } from 'next-auth/react'
 // import { navigationMenuTriggerStyle } from './ui/navigation-menu'
 
 export function NavMenubar() {
     const pathName = usePathname()
+    const session = useSession()
     return (
-        <Menubar>
+        <Menubar className="space-x-2">
             <MenubarMenu>
                 <Link href={'/'}>
                     <MenubarTrigger
@@ -37,18 +40,47 @@ export function NavMenubar() {
                 </Link>
             </MenubarMenu>
             <MenubarMenu>
-                <Link href={'/sales'}>
-                    <MenubarTrigger
-                        className={cn(
-                            pathName.includes('/sales') && 'bg-accent'
-                        )}
-                    >
-                        งานขาย
-                    </MenubarTrigger>
-                </Link>
+                {!pathName.includes('/sales') ? (
+                    <Link href={'/sales/sales-order'}>
+                        <MenubarTrigger
+                            className={cn(
+                                pathName.includes('/sales') && 'bg-accent'
+                            )}
+                        >
+                            งานขาย
+                        </MenubarTrigger>
+                    </Link>
+                ) : (
+                    <>
+                        <MenubarTrigger
+                            className={cn(
+                                pathName.includes('/sales') && 'bg-accent'
+                            )}
+                        >
+                            งานขาย
+                        </MenubarTrigger>
+                        <MenubarContent>
+                            <Link href={'/sales/sales-order/create'}>
+                                <MenubarItem>สร้างบิลขาย</MenubarItem>
+                            </Link>
+                            <Link href={'/sales/sales-return/create'}>
+                                <MenubarItem>สร้างใบรับคืนสินค้า</MenubarItem>
+                            </Link>
+                            <Link href={'/sales/sales-bill/create'}>
+                                <MenubarItem>สร้างใบวางบิล</MenubarItem>
+                            </Link>
+                            <Link href={'/sales/quotation/create'}>
+                                <MenubarItem>สร้างใบเสนอราคา</MenubarItem>
+                            </Link>
+                            <Link href={'/sales/customer-order/create'}>
+                                <MenubarItem>สร้างใบจองสินค้า</MenubarItem>
+                            </Link>
+                        </MenubarContent>
+                    </>
+                )}
             </MenubarMenu>
             <MenubarMenu>
-                <Link href={'/purchase'}>
+                <Link href={'/purchase/purchase-received'}>
                     <MenubarTrigger
                         className={cn(
                             pathName.includes('/purchase') && 'bg-accent'
@@ -91,6 +123,19 @@ export function NavMenubar() {
                     </MenubarTrigger>
                 </Link>
             </MenubarMenu>
+            {session.data?.user.role === 'ADMIN' && (
+                <MenubarMenu>
+                    <Link href={'/admin'}>
+                        <MenubarTrigger
+                            className={cn(
+                                pathName.includes('/admin') && 'bg-accent'
+                            )}
+                        >
+                            ผู้ดูแลระบบ
+                        </MenubarTrigger>
+                    </Link>
+                </MenubarMenu>
+            )}
         </Menubar>
     )
 }

@@ -14,11 +14,8 @@ const nextConfig = {
     typescript: {
         ignoreBuildErrors: true,
     },
-    experimental: {
-        outputFileTracingIncludes: {
-            '/': ['./master-data/**/*'],
-        },
-        serverComponentsExternalPackages: ['@react-pdf/renderer'],
+    outputFileTracingIncludes: {
+        '/': ['./master-data/**/*'],
     },
     images: {
         remotePatterns: [

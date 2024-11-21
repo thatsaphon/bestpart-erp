@@ -45,7 +45,7 @@ export async function createChartOfAccounts(
                 },
             },
         })
-        revalidatePath('/accounting')
+        revalidatePath('/accounting/chart-of-account')
         return { message: 'success' }
     } catch (err) {
         console.log(err)
@@ -70,5 +70,47 @@ export async function deleteChartOfAccount(id: number) {
             include: { AccountOwner: true },
         }),
     ])
-    revalidatePath('/accounting')
+    revalidatePath('/accounting/chart-of-account')
+}
+
+export async function getPaymentMethods() {
+    return await prisma.chartOfAccount.findMany({
+        where: {
+            OR: [
+                {
+                    isAr: true,
+                },
+                {
+                    isCash: true,
+                },
+                {
+                    isDeposit: true,
+                },
+            ],
+        },
+        select: {
+            id: true,
+            name: true,
+            type: true,
+            isAr: true,
+            isCash: true,
+            isDeposit: true,
+        },
+    })
+}
+
+export async function getApPaymentMethods() {
+    return await prisma.chartOfAccount.findMany({
+        where: {
+            OR: [
+                {
+                    isAp: true,
+                },
+                {
+                    isCash: true,
+                },
+            ],
+        },
+        select: { id: true, name: true, type: true, isAp: true, isCash: true },
+    })
 }

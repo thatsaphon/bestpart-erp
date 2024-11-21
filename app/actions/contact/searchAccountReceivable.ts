@@ -16,23 +16,21 @@ export async function searchAccountReceivable(
                             .split(' ')
                             .map((x) => ({ name: { contains: x } })),
                     },
+
                     {
-                        Address: {
-                            some: {
-                                OR: [
-                                    {
-                                        AND: value.split(' ').map((x) => ({
-                                            name: { contains: x },
-                                        })),
-                                    },
-                                    {
-                                        AND: value.split(' ').map((x) => ({
-                                            phone: { contains: x },
-                                        })),
-                                    },
-                                ],
-                            },
-                        },
+                        AND: value
+                            .split(' ')
+                            .map((x) => ({ address: { contains: x } })),
+                    },
+                    {
+                        AND: value
+                            .split(' ')
+                            .map((x) => ({ phone: { contains: x } })),
+                    },
+                    {
+                        AND: value
+                            .split(' ')
+                            .map((x) => ({ taxId: { contains: x } })),
                     },
                     {
                         AND: value
@@ -41,11 +39,6 @@ export async function searchAccountReceivable(
                     },
                 ],
                 isAr: true,
-                // name: { search: value.split(' ').join(' & ') },
-                // name: { contains: value },
-            },
-            include: {
-                Address: true,
             },
             skip: (page - 1) * limit,
             take: limit,

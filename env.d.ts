@@ -3,10 +3,10 @@ namespace NodeJS {
         BCRYPT_SALT: number
         JWT_SECRET: string
         DATABASE_URL: string
-        NEXT_PUBLIC_S3_API: string
-        NEXT_PUBLIC_S3_SECRET_KEY_ID: string
-        NEXT_PUBLIC_S3_SECRET_ACCESS_KEY: string
-        NEXT_PUBLIC_BUCKET_NAME: string
-        NEXT_PUBLIC_S3_PUBLIC_URL: string
+        S3_API: string
+        S3_SECRET_KEY_ID: string
+        S3_SECRET_ACCESS_KEY: string
+        BUCKET_NAME: string
+        S3_PUBLIC_URL: string
     }
 }
