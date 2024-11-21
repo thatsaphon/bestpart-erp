@@ -192,6 +192,7 @@ export default function CreateOrUpdatePurchaseOrderComponent({
                             )
                             .map((customerOrder) => (
                                 <CustomerOrderHoverCard
+                                    key={customerOrder.id}
                                     customerOrder={customerOrder}
                                 />
                             ))}

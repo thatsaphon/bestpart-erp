@@ -200,6 +200,7 @@ export default function SearchSkuDialog({
                                                 {item.MainSkuRemark.map(
                                                     (remark) => (
                                                         <Badge
+                                                            key={remark.id}
                                                             variant={'outline'}
                                                         >
                                                             {remark.remark}

@@ -356,7 +356,7 @@ export default function UpdateSkuMasterForm({ skuMaster }: Props) {
                         </div>
                         <div className="grid grid-cols-3 gap-2">
                             {skuMaster.Image.map((image) => (
-                                <div className="relative">
+                                <div className="relative" key={image.id}>
                                     <Image
                                         key={`image-${skuMaster.skuMasterId}-${image}`}
                                         src={image.path}

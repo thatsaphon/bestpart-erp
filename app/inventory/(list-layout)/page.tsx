@@ -60,7 +60,10 @@ export default async function InventoryListPage(props: Props) {
                                     </p>
                                     <div className="flex gap-2">
                                         {item.MainSkuRemark.map((remark) => (
-                                            <Badge variant={'outline'}>
+                                            <Badge
+                                                variant={'outline'}
+                                                key={remark.remark}
+                                            >
                                                 {remark.remark}
                                             </Badge>
                                         ))}
@@ -101,6 +104,9 @@ export default async function InventoryListPage(props: Props) {
                                                         {sku.SkuMasterRemark.map(
                                                             (remark) => (
                                                                 <Badge
+                                                                    key={
+                                                                        remark.remark
+                                                                    }
                                                                     variant={
                                                                         'outline'
                                                                     }
