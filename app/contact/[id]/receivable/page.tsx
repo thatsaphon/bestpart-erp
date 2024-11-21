@@ -5,10 +5,16 @@ import React from 'react'
 import ReceivableTable from './receivable-table'
 
 type Props = {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
-export default async function ContactReceivablePage({ params: { id } }: Props) {
+export default async function ContactReceivablePage(props: Props) {
+    const params = await props.params;
+
+    const {
+        id
+    } = params;
+
     const contact = await getContactDetail(id)
     const documents = await prisma.document.findMany({
         where: {

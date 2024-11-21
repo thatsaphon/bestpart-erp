@@ -2,11 +2,15 @@ import CreateOrUpdatePurchaseInvoiceComponent from '../../create/create-update-p
 import { getPurchaseDefaultFunction } from '@/types/purchase/purchase'
 import { getPurchaseOrderDefaultFunction } from '@/types/purchase-order/purchase-order'
 
-type Props = { params: { documentNo: string } }
+type Props = { params: Promise<{ documentNo: string }> }
 
-export default async function EditPurchaseInvoicePage({
-    params: { documentNo },
-}: Props) {
+export default async function EditPurchaseInvoicePage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [purchaseInvoice] = await getPurchaseDefaultFunction({
         documentNo,
         type: 'PurchaseReceived',

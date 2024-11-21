@@ -22,7 +22,7 @@ export function NavUser({
 }: {
     user: {
         name: string
-        email: string
+        role: string
         avatar?: string
     }
 }) {
@@ -43,7 +43,7 @@ export function NavUser({
                     <div className="grid flex-1 leading-none">
                         <div className="font-medium">{user.name}</div>
                         <div className="overflow-hidden text-xs text-muted-foreground">
-                            <div className="line-clamp-1">{user.email}</div>
+                            <div className="line-clamp-1">{user.role}</div>
                         </div>
                     </div>
                     <ChevronsUpDown className="ml-auto mr-0.5 h-4 w-4 text-muted-foreground/50" />
@@ -64,7 +64,7 @@ export function NavUser({
                         <div className="grid flex-1">
                             <div className="font-medium">{user.name}</div>
                             <div className="overflow-hidden text-xs text-muted-foreground">
-                                <div className="line-clamp-1">{user.email}</div>
+                                <div className="line-clamp-1">{user.role}</div>
                             </div>
                         </div>
                     </div>

@@ -25,8 +25,10 @@ export default function GenerateBarcodeButton({}: Props) {
         setTimeout(() => setCopied(false), 1500)
     }
     return (
-        <div className="flex items-center" onClick={onClick}>
-            <div className="mr-2 text-sm font-medium">Generate Barcode</div>
+        <div
+            className="flex items-center hover:cursor-pointer"
+            onClick={onClick}
+        >
             <ClipboardIcon
                 className={cn(
                     'h-5 w-5',

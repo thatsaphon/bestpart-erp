@@ -3,11 +3,15 @@ import React from 'react'
 import CreateUpdateJournalVoucher from '../../create/create-update-journal-voucher'
 import { getJournalVoucherDefaultFunction } from '@/types/journal-voucher/journal-voucher'
 
-type Props = { params: { documentNo: string } }
+type Props = { params: Promise<{ documentNo: string }> }
 
-export default async function EditJournalVoucherPage({
-    params: { documentNo },
-}: Props) {
+export default async function EditJournalVoucherPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const chartOfAccounts = await prisma.chartOfAccount.findMany({})
     const [existingJournalVoucher] = await getJournalVoucherDefaultFunction({
         where: {

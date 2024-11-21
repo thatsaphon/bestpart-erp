@@ -6,19 +6,22 @@ import { getUnpaidInvoices } from '@/types/sales-bill/unpaid-invoice'
 import { unpaidInvoiceToSalesBillItems } from '@/types/sales-bill/unpaid-invoice-to-sales-bill-item'
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         contactId?: string
-    }
+    }>
 }
 
 export const metadata: Metadata = {
     title: 'สร้างใบวางบิล',
 }
 
-export default async function CreateBillPage({
-    searchParams,
-    searchParams: { contactId },
-}: Props) {
+export default async function CreateBillPage(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
+        contactId
+    } = searchParams;
+
     const unpaidInvoices = !!Number(contactId)
         ? await getUnpaidInvoices(Number(contactId))
         : []

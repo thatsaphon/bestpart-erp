@@ -8,16 +8,20 @@ import { getQuotationDefaultFunction } from '@/types/quotation/quotation'
 import { getDepositAmount } from '@/actions/get-deposit-amount'
 
 type Props = {
-    searchParams: { contactId: string }
+    searchParams: Promise<{ contactId: string }>
 }
 
 export const metadata: Metadata = {
     title: 'สร้างบิลขาย',
 }
 
-export default async function CreateSalesInvoicePage({
-    searchParams: { contactId },
-}: Props) {
+export default async function CreateSalesInvoicePage(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
+        contactId
+    } = searchParams;
+
     const paymentMethods = await getPaymentMethods()
 
     const pendingCustomerOrders = contactId

@@ -19,23 +19,25 @@ import { generalLedgerToPayments } from '@/types/payment/payment'
 import { translate } from '@/lib/translate'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const params = await props.params;
     return {
         title: `ใบสำคัญจ่าย - ${params.documentNo}`,
     }
 }
 
-export default async function PurchasePaymentDetailPage({
-    params: { documentNo },
-}: Props) {
+export default async function PurchasePaymentDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const purchasePayment = await getPurchasePaymentDefaultFunction({
         documentNo,
     })

@@ -4,7 +4,7 @@ import { getServiceAndNonStockItemsDefaultFunction } from '@/types/service-and-n
 import { cookies } from 'next/headers'
 
 export const setCookies = async () => {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     if (!cookieStore.has('non-stock')) {
         const nonStockItems = await getServiceAndNonStockItemsDefaultFunction(
             {}

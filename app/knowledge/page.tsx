@@ -45,16 +45,20 @@ export const metadata: Metadata = {
 }
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         page: string
         q: string
-    }
+    }>
 }
 
-export default async function page({
-    searchParams,
-    searchParams: { q = '', page = '1' },
-}: Props) {
+export default async function page(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
+        q = '',
+        page = '1'
+    } = searchParams;
+
     let data = await prisma.knowledge.findMany({
         where: {
             AND: [

@@ -16,20 +16,22 @@ import { getDepositAmount } from '@/actions/get-deposit-amount'
 import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
 import { getQuotationDefaultFunction } from '@/types/quotation/quotation'
 
-type Props = { params: { documentNo: string } }
+type Props = { params: Promise<{ documentNo: string }> }
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const params = await props.params;
     return {
         title: `แก้ไขบิลขาย - ${params.documentNo}`,
     }
 }
 
-export default async function EditSalesInvoicePage({
-    params: { documentNo },
-}: Props) {
+export default async function EditSalesInvoicePage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [document] = await getSalesDefaultFunction({
         documentNo,
         type: 'SalesOrder',

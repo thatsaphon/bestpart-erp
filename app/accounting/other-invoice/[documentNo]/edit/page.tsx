@@ -8,14 +8,18 @@ import { getServiceAndNonStockItemsDefaultFunction } from '@/types/service-and-n
 import { getPaymentMethods } from '@/actions/get-payment-methods'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
-export default async function UpdateOtherExpensePage({
-    params: { documentNo },
-}: Props) {
+export default async function UpdateOtherExpensePage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     //PENDING
     const paymentMethods = await getPaymentMethods()
 

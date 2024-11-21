@@ -14,11 +14,15 @@ import CreateOrUpdatePurchaseOrderComponent from '../../create/create-update-pur
 import { getPurchaseOrderDefaultFunction } from '@/types/purchase-order/purchase-order'
 import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
 
-type Props = { params: { documentNo: string } }
+type Props = { params: Promise<{ documentNo: string }> }
 
-export default async function EditPurchaseOrderPage({
-    params: { documentNo },
-}: Props) {
+export default async function EditPurchaseOrderPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [purchaseOrder] = await getPurchaseOrderDefaultFunction({
         documentNo,
         type: 'PurchaseOrder',

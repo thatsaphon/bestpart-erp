@@ -14,9 +14,11 @@ import {
     History,
     LifeBuoy,
     Map,
+    NotepadText,
     PieChart,
     Rabbit,
     Send,
+    Settings,
     Settings2,
     SquareTerminal,
     Star,
@@ -33,14 +35,23 @@ import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
+    SidebarGroup,
+    SidebarGroupLabel,
     SidebarHeader,
-    SidebarItem,
-    SidebarLabel,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarRail,
 } from '@/components/ui/sidebar'
 import { FullRoute } from '@/types/routes/document-routes'
 import Link from 'next/link'
-import { title } from 'process'
-import { url } from 'inspector'
+import { DashboardIcon } from '@radix-ui/react-icons'
+import { useSession } from 'next-auth/react'
+import { useSearchParams, usePathname } from 'next/navigation'
+import CollapsibleSidebarItem from './collapsible-sidebar-item'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { SheetHeader } from './ui/sheet'
+import { DialogTitle } from './ui/dialog'
 const data = {
     teams: [
         {
@@ -216,106 +227,100 @@ const data = {
             ],
         },
     ],
-
-    navSecondary: [
-        {
-            title: 'Support',
-            url: '#',
-            icon: LifeBuoy,
-        },
-        {
-            title: 'Feedback',
-            url: '#',
-            icon: Send,
-        },
-    ],
-    projects: [
-        {
-            name: 'Design Engineering',
-            url: '#',
-            icon: Frame,
-        },
-        {
-            name: 'Sales & Marketing',
-            url: '#',
-            icon: PieChart,
-        },
-        {
-            name: 'Travel',
-            url: '#',
-            icon: Map,
-        },
-    ],
-    searchResults: [
-        {
-            title: 'Routing Fundamentals',
-            teaser: 'The skeleton of every application is routing. This page will introduce you to the fundamental concepts of routing for the web and how to handle routing in Next.js.',
-            url: '#',
-        },
-        {
-            title: 'Layouts and Templates',
-            teaser: 'The special files layout.js and template.js allow you to create UI that is shared between routes. This page will guide you through how and when to use these special files.',
-            url: '#',
-        },
-        {
-            title: 'Data Fetching, Caching, and Revalidating',
-            teaser: 'Data fetching is a core part of any application. This page goes through how you can fetch, cache, and revalidate data in React and Next.js.',
-            url: '#',
-        },
-        {
-            title: 'Server and Client Composition Patterns',
-            teaser: 'When building React applications, you will need to consider what parts of your application should be rendered on the server or the client. ',
-            url: '#',
-        },
-        {
-            title: 'Server Actions and Mutations',
-            teaser: 'Server Actions are asynchronous functions that are executed on the server. They can be used in Server and Client Components to handle form submissions and data mutations in Next.js applications.',
-            url: '#',
-        },
-    ],
 }
 
-export function AppSidebar() {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
+    const session = useSession()
     return (
-        <Sidebar>
-            <SidebarHeader>
-                {/* <TeamSwitcher teams={data.teams} /> */}
-                <Link
-                    href={'/'}
-                    className="flex items-center gap-1.5 overflow-hidden px-2 py-1.5 text-left text-sm transition-all"
-                >
-                    <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-primary text-primary-foreground">
-                        <Eclipse className="h-3.5 w-3.5 shrink-0" />
-                    </div>
-                    <div className="line-clamp-1 flex-1 pr-2 font-medium">
-                        BestPart Alai
-                    </div>
-                    {/* <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" /> */}
+        <Sidebar collapsible="offcanvas" {...props}>
+            <SidebarHeader className="mb-2 border-b-2 py-1">
+                <Link href={'/'}>
+                    <SidebarMenuButton
+                        tooltip={'SPS Autoparts'}
+                        className="h-[44px] p-2"
+                    >
+                        <Settings className="p-0" />
+                        <span>Sangpiamsuk Autoparts</span>
+                    </SidebarMenuButton>
                 </Link>
             </SidebarHeader>
-            <SidebarContent>
-                <SidebarItem>
-                    <SidebarLabel>Navigation</SidebarLabel>
-                    <NavMain
-                        items={data.navMain}
-                        searchResults={data.searchResults}
-                    />
-                </SidebarItem>
-                {/* <SidebarItem>
-                    <SidebarLabel>Favourites</SidebarLabel>
-                    <NavProjects projects={data.projects} />
-                </SidebarItem>
-                <SidebarItem className="mt-auto">
-                    <SidebarLabel>Help</SidebarLabel>
-                    <NavSecondary items={data.navSecondary} />
-                </SidebarItem>
-                <SidebarItem>
-                    <StorageCard />
-                </SidebarItem> */}
+            <SidebarContent className="-mt-4">
+                <SidebarGroup>
+                    <SidebarGroupLabel>Menu</SidebarGroupLabel>
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton
+                                asChild
+                                isActive={pathname === '/'}
+                            >
+                                <Link
+                                    href={`/${
+                                        searchParams.get('database')
+                                            ? '?database=' +
+                                              searchParams.get('database')
+                                            : ''
+                                    }`}
+                                >
+                                    {<DashboardIcon />}
+                                    <span>หน้าแรก</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        {data.navMain.map((item) => (
+                            <CollapsibleSidebarItem
+                                key={item.title}
+                                title={item.title}
+                                url={item.url}
+                                icon={item.icon}
+                                isActive={pathname === item.url}
+                                items={item.items}
+                            />
+                        ))}
+                    </SidebarMenu>
+                </SidebarGroup>
             </SidebarContent>
+
             <SidebarFooter>
-                <NavUser user={data.user} />
+                <NavUser
+                    user={{
+                        name:
+                            session.data?.user.username ||
+                            session.data?.user.last_name ||
+                            '',
+                        role: session.data?.user.role || '',
+                        avatar: session.data?.user.avatarUrl || '',
+                    }}
+                />
             </SidebarFooter>
+            <SidebarRail />
         </Sidebar>
     )
 }
+
+// const AdminSidebarItem = () => {
+//     const session = useSession()
+//     return (
+//         <>
+//             {session.data?.user.USER_POSN === 1 && (
+//                 <CollapsibleSidebarItem
+//                     title="รายงานผู้บริหาร"
+//                     url="/reports"
+//                     icon={NotepadText}
+//                     isActive={true}
+//                     items={[
+//                         {
+//                             title: 'ยอดขายรายลูกหนี้',
+//                             url: '/reports/ar-custom-range',
+//                         },
+//                         {
+//                             title: 'ยอดขายรายลูกหนี้ เฉพาะสินค้า',
+//                             url: '/reports/ar-per-product',
+//                         },
+//                     ]}
+//                 />
+//             )}
+//         </>
+//     )
+// }

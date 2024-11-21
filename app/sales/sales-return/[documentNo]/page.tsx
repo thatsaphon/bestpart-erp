@@ -32,21 +32,23 @@ import PaymentComponentReadonly from '@/components/payment-component-readonly'
 import { generalLedgerToPayments } from '@/types/payment/payment'
 
 type Props = {
-    params: { documentNo: string }
+    params: Promise<{ documentNo: string }>
 }
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const params = await props.params;
     return {
         title: `รายละเอียดใบรับคืน - ${params.documentNo}`,
     }
 }
 
-export default async function SalesInvoiceDetailPage({
-    params: { documentNo },
-}: Props) {
+export default async function SalesInvoiceDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [document] = await getSalesReturnDefaultFunction({
         documentNo,
         type: 'SalesReturn',

@@ -11,12 +11,16 @@ export const metadata: Metadata = {
 }
 
 type Props = {
-    searchParams: { contactId?: string }
+    searchParams: Promise<{ contactId?: string }>
 }
 
-export default async function CreateOtherPaymentPage({
-    searchParams: { contactId },
-}: Props) {
+export default async function CreateOtherPaymentPage(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
+        contactId
+    } = searchParams;
+
     const unpaidPurchases = Number(contactId)
         ? await getUnpaidOtherInvoice(Number(contactId))
         : []

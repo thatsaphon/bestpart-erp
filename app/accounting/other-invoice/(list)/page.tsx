@@ -20,22 +20,24 @@ import { getOtherInvoiceDefaultFunction } from '@/types/other-invoice/other-invo
 import { getLastMonth } from '@/lib/get-last-month'
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         limit?: string
         page?: string
         from?: string
         to?: string
-    }
+    }>
 }
 
-export default async function OtherPaymentPage({
-    searchParams: {
+export default async function OtherPaymentPage(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
         limit = '10',
         page = '1',
         from = format(getLastMonth(), 'yyyy-MM-dd'),
-        to = format(new Date(), 'yyyy-MM-dd'),
-    },
-}: Props) {
+        to = format(new Date(), 'yyyy-MM-dd')
+    } = searchParams;
+
     const otherInvoice = await getOtherInvoiceDefaultFunction(
         {
             type: 'OtherInvoice',

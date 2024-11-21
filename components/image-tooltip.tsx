@@ -39,7 +39,10 @@ export default function ImageToolTip({ images, alt = 'image' }: Props) {
                         <TooltipContent hideWhenDetached={false}>
                             <div className="relative grid w-[650px] grid-cols-3 gap-2 pb-2">
                                 {images?.map((image, index) => (
-                                    <div className="hover:children:(2)/absolute group relative">
+                                    <div
+                                        key={image.path}
+                                        className="hover:children:(2)/absolute group relative"
+                                    >
                                         <Image
                                             src={image.path}
                                             alt={`${alt}-${index}`}

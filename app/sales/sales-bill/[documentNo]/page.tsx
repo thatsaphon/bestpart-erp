@@ -19,21 +19,25 @@ import UpdateDocumentRemark from '@/components/update-document-remark'
 import { translate } from '@/lib/translate'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const params = await props.params;
     return {
         title: `รายละเอียดใบวางบิล - ${params.documentNo}`,
     }
 }
 
-export default async function page({ params: { documentNo } }: Props) {
+export default async function page(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const billingNote = await getSalesBillDefaultFunction({
         documentNo,
     })

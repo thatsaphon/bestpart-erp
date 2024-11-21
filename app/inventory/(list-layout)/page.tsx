@@ -15,28 +15,27 @@ import { PencilIcon } from 'lucide-react'
 import Link from 'next/link'
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         page?: string
         limit?: string
         search?: string
         remaining?: 'true' | 'false' | ''
         view?: 'card' | 'table'
-    }
+    }>
 }
 
 export const revalidate = 600
 export const dynamic = 'force-dynamic'
 
-export default async function InventoryListPage({
-    searchParams,
-    searchParams: {
+export default async function InventoryListPage(props: Props) {
+    const searchParams = await props.searchParams
+    const {
         page = '1',
         limit = '10',
         search = '',
         remaining = '',
         view = 'card',
-    },
-}: Props) {
+    } = await searchParams
     try {
         const skuTree = await searchSkuTreeByKeyword(search, Number(page), {
             createdAt: 'desc',
@@ -87,13 +86,13 @@ export default async function InventoryListPage({
                                             key={`${item.mainSkuId}-${sku.skuMasterId}`}
                                         >
                                             <div className="col-start-1 row-span-2">
-                                                <p>
+                                                <div>
                                                     {sku.detail}{' '}
                                                     <ImageToolTip
                                                         images={sku.Image}
                                                         alt={`${item.name}-${sku.detail}`}
                                                     />{' '}
-                                                </p>
+                                                </div>
                                                 {sku.SkuMasterRemark.length >
                                                     0 && (
                                                     <div
@@ -147,7 +146,7 @@ export default async function InventoryListPage({
                 </Accordion>
                 <PaginationInventory
                     numberOfPage={numberOfPage}
-                    searchParams={searchParams}
+                    searchParams={await searchParams}
                 />
             </div>
         )

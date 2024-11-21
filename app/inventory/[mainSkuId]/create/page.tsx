@@ -9,15 +9,20 @@ import { searchSkuTree } from '@/actions/search-sku-tree'
 // import UpdateSkuMasterForm from '../[skuMasterId]/update-sku-master-form'
 
 type Props = {
-    params: {
+    params: Promise<{
         mainSkuId: string
         skuMasterId: string
-    }
+    }>
 }
 
-export default async function SkuMasterDetailPage({
-    params: { mainSkuId, skuMasterId },
-}: Props) {
+export default async function SkuMasterDetailPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        mainSkuId,
+        skuMasterId
+    } = params;
+
     const {
         items: [skuTree],
         count,

@@ -10,19 +10,22 @@ import { getDepositAmount } from '@/actions/get-deposit-amount'
 import { unpaidBillsToSalesReceivedItems } from '@/types/sales-received/unpaid-bills-to-sales-Received-item'
 
 type Props = {
-    searchParams: {
+    searchParams: Promise<{
         contactId?: string
-    }
+    }>
 }
 
 export const metadata: Metadata = {
     title: 'สร้างใบวางบิล',
 }
 
-export default async function CreateBillPage({
-    searchParams,
-    searchParams: { contactId },
-}: Props) {
+export default async function CreateBillPage(props: Props) {
+    const searchParams = await props.searchParams;
+
+    const {
+        contactId
+    } = searchParams;
+
     const unpaidInvoices = Number(contactId)
         ? await getUnpaidBills(Number(contactId))
         : []

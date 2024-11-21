@@ -5,18 +5,22 @@ import CreateOrUpdateCustomerOrderComponent from '../../create/create-update-cus
 import { getCustomerOrderDefaultFunction } from '@/types/customer-order/customer-order'
 
 type Props = {
-    params: {
+    params: Promise<{
         documentNo: string
-    }
+    }>
 }
 
 export const metadata: Metadata = {
     title: 'สร้างบิลขาย',
 }
 
-export default async function UpdateCustomerOrderPage({
-    params: { documentNo },
-}: Props) {
+export default async function UpdateCustomerOrderPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        documentNo
+    } = params;
+
     const [document] = await getCustomerOrderDefaultFunction({ documentNo })
 
     if (!document) return <>ไม่พบข้อมูล</>

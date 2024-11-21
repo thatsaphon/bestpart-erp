@@ -5,10 +5,16 @@ import Link from 'next/link'
 import React from 'react'
 
 type Props = {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
-export default async function UserPage({ params: { id } }: Props) {
+export default async function UserPage(props: Props) {
+    const params = await props.params;
+
+    const {
+        id
+    } = params;
+
     const user = await prisma.user.findUnique({
         where: { id },
         select: {
