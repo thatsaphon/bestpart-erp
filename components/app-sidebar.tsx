@@ -49,6 +49,9 @@ import { DashboardIcon } from '@radix-ui/react-icons'
 import { useSession } from 'next-auth/react'
 import { useSearchParams, usePathname } from 'next/navigation'
 import CollapsibleSidebarItem from './collapsible-sidebar-item'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { SheetHeader } from './ui/sheet'
+import { DialogTitle } from './ui/dialog'
 const data = {
     teams: [
         {
@@ -232,20 +235,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const session = useSession()
     return (
         <Sidebar collapsible="offcanvas" {...props}>
-            <SidebarHeader className="">
-                <Link
-                    href={`/${
-                        searchParams.get('database')
-                            ? '?database=' + searchParams.get('database')
-                            : ''
-                    }`}
-                >
+            <SidebarHeader className="mb-2 border-b-2 py-1">
+                <Link href={'/'}>
                     <SidebarMenuButton
                         tooltip={'SPS Autoparts'}
                         className="h-[44px] p-2"
                     >
                         <Settings className="p-0" />
-                        <span>PJB Internal Website</span>
+                        <span>Sangpiamsuk Autoparts</span>
                     </SidebarMenuButton>
                 </Link>
             </SidebarHeader>
@@ -271,24 +268,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
-                        {/* <SidebarMenuItem>
-                            <SidebarMenuButton
-                                asChild
-                                isActive={pathname === '/products'}
-                            >
-                                <Link
-                                    href={`/products${
-                                        searchParams.get('database')
-                                            ? '?database=' +
-                                              searchParams.get('database')
-                                            : ''
-                                    }`}
-                                >
-                                    {<Box />}
-                                    <span>สินค้า</span>
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem> */}
                         {data.navMain.map((item) => (
                             <CollapsibleSidebarItem
                                 key={item.title}
@@ -299,22 +278,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 items={item.items}
                             />
                         ))}
-                        {/* <CollapsibleSidebarItem
-                            title="รายงาน"
-                            url="/reports"
-                            icon={NotepadText}
-                            isActive={true}
-                            items={[
-                                {
-                                    title: 'ยอดซื้อของ Supplier ตามสินค้า',
-                                    url: '/reports/suppliers-per-product',
-                                },
-                                {
-                                    title: 'ยอดซื้อสินค้า ตาม Supplier',
-                                    url: '/reports/products-per-supplier',
-                                },
-                            ]}
-                        /> */}
                     </SidebarMenu>
                 </SidebarGroup>
             </SidebarContent>
