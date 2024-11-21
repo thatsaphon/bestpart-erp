@@ -42,10 +42,12 @@ export default async function LayoutComponent({
                         <BreadcrumbUrl />
                     </div>
                     <div className="ml-auto mr-8 flex items-center gap-2">
-                        <GenerateBarcodeButton />
-                        <OpenSecondDisplayButton />
-                        <QuickSearchInventory />
-                        <ModeToggle />
+                        <div className="hidden items-center gap-2 md:flex">
+                            <GenerateBarcodeButton />
+                            <OpenSecondDisplayButton />
+                            <QuickSearchInventory />
+                            <ModeToggle />
+                        </div>
                         <UserAvatar user={session?.user} />
                     </div>
                 </header>

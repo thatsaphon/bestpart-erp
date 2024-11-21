@@ -52,6 +52,9 @@ import CollapsibleSidebarItem from './collapsible-sidebar-item'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { SheetHeader } from './ui/sheet'
 import { DialogTitle } from './ui/dialog'
+import GenerateBarcodeButton from './generate-barcode-button'
+import QuickSearchInventory from './quick-search-inventory'
+import { ModeToggle } from './mode-toggle'
 const data = {
     teams: [
         {
@@ -278,11 +281,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 items={item.items}
                             />
                         ))}
+                        <SidebarMenuItem className="md:hidden">
+                            <QuickSearchInventory />
+                        </SidebarMenuItem>
                     </SidebarMenu>
                 </SidebarGroup>
             </SidebarContent>
 
             <SidebarFooter>
+                <SidebarMenu>
+                    <SidebarMenuItem className="flex justify-end gap-2 md:hidden">
+                        <GenerateBarcodeButton />
+                        <ModeToggle />
+                    </SidebarMenuItem>
+                </SidebarMenu>
                 <NavUser
                     user={{
                         name:
