@@ -3,7 +3,7 @@
 import prisma from '@/app/db/db'
 import { Prisma } from '@prisma/client'
 
-export const getJournalVoucherDefaultFunction = ({
+export const getJournalVoucherDefaultFunction = async ({
     where,
     orderBy,
     take,
