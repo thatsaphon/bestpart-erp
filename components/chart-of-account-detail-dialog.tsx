@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useActionState, useEffect } from 'react'
 import {
     Dialog,
     DialogTrigger,
@@ -26,7 +26,6 @@ import {
     deleteChartOfAccount,
 } from '@/app/actions/accounting'
 import toast from 'react-hot-toast'
-import { useFormState } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ChartOfAccount, DocumentType } from '@prisma/client'
 import { deleteKeyFromQueryString } from '@/lib/searchParams'
@@ -56,31 +55,20 @@ export default function ChartOfAccountDetailDialog({
     account,
 }: Props) {
     const [open, setOpen] = React.useState(false)
-    const [state, formAction] = useFormState(createChartOfAccounts, {
+    const [state, formAction] = useActionState(createChartOfAccounts, {
         message: '',
     })
     const params = useSearchParams()
     const router = useRouter()
-    const [history, setHistory] = React.useState<
-        { documentNo: string; type: DocumentType; amount: number }[]
-    >([])
 
     useEffect(() => {
         const accountId = params.get('accountId')
-
-        async function fetchDocuments(id: number) {
-            const data = await getChartOfAccountDetail(id)
-
-            setHistory(data)
-        }
-
         if (
             account &&
             accountId &&
             account?.id === Number(params.get('accountId'))
         ) {
             setOpen(true)
-            fetchDocuments(Number(accountId))
         }
     }, [account, params])
 
@@ -114,8 +102,8 @@ export default function ChartOfAccountDetailDialog({
                     {label}
                 </Button> */}
             </DialogTrigger>
-            <DialogContent className="flex max-w-[90vw] flex-col">
-                <div className="grid grid-cols-2 gap-2 divide-x p-1">
+            <DialogContent className="flex flex-col">
+                <div className="p-1">
                     <form action={formAction}>
                         <DialogHeader>
                             <DialogTitle>Account Detail</DialogTitle>
@@ -184,15 +172,6 @@ export default function ChartOfAccountDetailDialog({
                             </Button>
                         </DialogFooter>
                     </form>
-                    <div>
-                        {history.map((item) => (
-                            <div key={item.documentNo} className="flex gap-2">
-                                <span>{item.documentNo}</span>
-                                <span>{translate(item.type)}</span>
-                                <span>{item.amount}</span>
-                            </div>
-                        ))}
-                    </div>
                 </div>
             </DialogContent>
         </Dialog>

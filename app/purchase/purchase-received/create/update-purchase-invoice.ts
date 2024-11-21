@@ -162,7 +162,7 @@ export const updatePurchaseInvoice = async (
                     })
                 return {
                     chartOfAccountId: serviceAndNonStockItem.chartOfAccountId,
-                    amount: -(
+                    amount: +(
                         item.quantity *
                         (item.costPerUnitExVat - item.discountPerUnitExVat)
                     ).toFixed(2),
@@ -225,7 +225,7 @@ export const updatePurchaseInvoice = async (
                             // ภาษีซื้อ
                             {
                                 chartOfAccountId: 15100,
-                                amount: -items
+                                amount: +items
                                     .filter((item) => item.vatable)
                                     .reduce(
                                         (a, b) =>
@@ -234,7 +234,7 @@ export const updatePurchaseInvoice = async (
                                                 b.discountPerUnitIncVat -
                                                 (b.costPerUnitExVat -
                                                     b.discountPerUnitExVat)) *
-                                                (7 / 107),
+                                                b.quantity,
                                         0
                                     )
                                     .toFixed(2),

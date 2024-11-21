@@ -142,7 +142,7 @@ export const createPurchaseInvoice = async (
                             // ภาษีซื้อ
                             {
                                 chartOfAccountId: 15100,
-                                amount: -items
+                                amount: +items
                                     .filter((item) => item.vatable)
                                     .reduce(
                                         (a, b) =>
@@ -151,7 +151,7 @@ export const createPurchaseInvoice = async (
                                                 b.discountPerUnitIncVat -
                                                 (b.costPerUnitExVat -
                                                     b.discountPerUnitExVat)) *
-                                                (7 / 107),
+                                                b.quantity,
                                         0
                                     )
                                     .toFixed(2),
