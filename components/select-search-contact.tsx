@@ -150,11 +150,19 @@ export default function SelectSearchContact<T>({
                                                 `ไม่สามารถใช้รหัส ${contactId} ได้`
                                             )
                                             if (err instanceof Error) {
-                                                return toast.error(err.message)
+                                                if (
+                                                    err.message ===
+                                                    'NEXT_REDIRECT'
+                                                ) {
+                                                    toast.success(
+                                                        'บันทึกสําเร็จ'
+                                                    )
+                                                    return
+                                                }
+                                                toast.error(err.message)
+                                                return
                                             }
-                                            return toast.error(
-                                                'Something went wrong'
-                                            )
+                                            toast.error('Something went wrong')
                                         }
                                     }
                                 }}
@@ -313,7 +321,7 @@ export default function SelectSearchContact<T>({
                                         page={page}
                                     />
                                 </TableCaption>
-                                <TableHeader className="bg-primary-foreground/60 ">
+                                <TableHeader className="bg-primary-foreground/60">
                                     <TableRow>
                                         <TableHead>Id</TableHead>
                                         <TableHead>ชื่อลูกค้า</TableHead>

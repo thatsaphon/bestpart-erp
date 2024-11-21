@@ -77,6 +77,10 @@ export default function UpdateDocumentRemark({
                             toast.success('เพิ่มหมายเหตุสําเร็จ')
                         } catch (err) {
                             if (err instanceof Error) {
+                                if (err.message === 'NEXT_REDIRECT') {
+                                    toast.success('บันทึกสําเร็จ')
+                                    return
+                                }
                                 toast.error(err.message)
                                 return
                             }

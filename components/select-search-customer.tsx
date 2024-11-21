@@ -109,9 +109,14 @@ export default function SelectSearchCustomer<T>({
                     setSelectedResult(result)
                 } catch (err) {
                     if (err instanceof Error) {
-                        return toast.error(err.message)
+                        if (err.message === 'NEXT_REDIRECT') {
+                            toast.success('บันทึกสําเร็จ')
+                            return
+                        }
+                        toast.error(err.message)
+                        return
                     }
-                    return toast.error('Something went wrong')
+                    toast.error('Something went wrong')
                 }
             }
         }
@@ -163,11 +168,16 @@ export default function SelectSearchCustomer<T>({
                                         setSelectedResult(result)
                                     } catch (err) {
                                         if (err instanceof Error) {
-                                            return toast.error(err.message)
+                                            if (
+                                                err.message === 'NEXT_REDIRECT'
+                                            ) {
+                                                toast.success('บันทึกสําเร็จ')
+                                                return
+                                            }
+                                            toast.error(err.message)
+                                            return
                                         }
-                                        return toast.error(
-                                            'Something went wrong'
-                                        )
+                                        toast.error('Something went wrong')
                                     }
                                 }
                             }}

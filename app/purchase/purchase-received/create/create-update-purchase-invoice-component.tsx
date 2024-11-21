@@ -147,6 +147,10 @@ export default function CreateOrUpdatePurchaseInvoiceComponent({
                         }
                     } catch (err) {
                         if (err instanceof Error) {
+                            if (err.message === 'NEXT_REDIRECT') {
+                                toast.success('บันทึกสําเร็จ')
+                                return
+                            }
                             toast.error(err.message)
                             return
                         }

@@ -80,9 +80,7 @@ export default function AssetTypeToChartOfAccountSetup({
                                         } catch (err) {
                                             if (err instanceof Error)
                                                 return toast.error(err.message)
-                                            return toast.error(
-                                                'Something went wrong'
-                                            )
+                                            toast.error('Something went wrong')
                                         }
                                     }}
                                 >
