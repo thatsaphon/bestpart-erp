@@ -358,65 +358,6 @@ export default function CreateUpdateJournalVoucher({
                                                                             </SelectItem>
                                                                         )
                                                                     )}
-                                                                <SelectLabel>
-                                                                    รายได้อื่น
-                                                                </SelectLabel>
-                                                                {chartOfAccounts
-                                                                    .filter(
-                                                                        ({
-                                                                            type,
-                                                                        }) =>
-                                                                            type ===
-                                                                            'OtherIncome'
-                                                                    )
-                                                                    .map(
-                                                                        (
-                                                                            chartOfAccount
-                                                                        ) => (
-                                                                            <SelectItem
-                                                                                value={String(
-                                                                                    chartOfAccount.id
-                                                                                )}
-                                                                                key={
-                                                                                    chartOfAccount.id
-                                                                                }
-                                                                            >
-                                                                                {
-                                                                                    chartOfAccount.name
-                                                                                }
-                                                                            </SelectItem>
-                                                                        )
-                                                                    )}
-
-                                                                <SelectLabel>
-                                                                    ค่าใช้จ่ายอื่น
-                                                                </SelectLabel>
-                                                                {chartOfAccounts
-                                                                    .filter(
-                                                                        ({
-                                                                            type,
-                                                                        }) =>
-                                                                            type ===
-                                                                            'OtherExpense'
-                                                                    )
-                                                                    .map(
-                                                                        (
-                                                                            chartOfAccount
-                                                                        ) => (
-                                                                            <SelectItem
-                                                                                value={String(
-                                                                                    chartOfAccount.id
-                                                                                )}
-                                                                                key={
-                                                                                    chartOfAccount.id
-                                                                                }
-                                                                            >
-                                                                                {
-                                                                                    chartOfAccount.name
-                                                                                }
-                                                                            </SelectItem>
-                                                                        )
-                                                                    )}
                                                             </SelectGroup>
                                                         </SelectContent>
                                                     </Select>

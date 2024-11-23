@@ -10,9 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Textarea } from '../../../../components/ui/textarea'
 import { Button } from '../../../../components/ui/button'
-import { getPurchaseInvoiceDetail } from '@/app/actions/purchase/purchase-invoice-detail'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import Link from 'next/link'
@@ -24,17 +22,16 @@ import DocumentItemFooterReadonly from '@/components/document-item-footer-readon
 import { getPurchaseDefaultFunction } from '@/types/purchase/purchase'
 import { notFound } from 'next/navigation'
 import UpdateDocumentRemark from '@/components/update-document-remark'
+import BarcodePrintDialog from './barcode-print-dialog'
 
 type Props = {
     params: Promise<{ documentNo: string }>
 }
 
 export default async function PurchaseInvoiceDetailPage(props: Props) {
-    const params = await props.params;
+    const params = await props.params
 
-    const {
-        documentNo
-    } = params;
+    const { documentNo } = params
 
     const [document] = await getPurchaseDefaultFunction({ documentNo })
     if (!document) return notFound()
@@ -83,6 +80,13 @@ export default async function PurchaseInvoiceDetailPage(props: Props) {
                             </Link>
                         </div>
                     )}
+                    <div>
+                        <BarcodePrintDialog
+                            items={purchaseItemsToDocumentItems(
+                                document?.Purchase?.PurchaseItem
+                            )}
+                        />
+                    </div>
                 </div>
                 <div className="flex gap-3">
                     <div className="my-1 flex items-baseline space-x-2">
