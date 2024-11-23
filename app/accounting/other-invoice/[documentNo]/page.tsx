@@ -11,7 +11,6 @@ import {
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 
-import { getApPaymentMethods } from '@/app/actions/accounting'
 import { getOtherInvoiceDefaultFunction } from '@/types/other-invoice/other-invoice'
 import { DocumentDetailReadonly } from '@/components/document-detail-readonly'
 import PaymentComponentReadonly from '@/components/payment-component-readonly'
@@ -28,11 +27,9 @@ type Props = {
 }
 
 export default async function OtherInvoiceDetailPage(props: Props) {
-    const params = await props.params;
+    const params = await props.params
 
-    const {
-        documentNo
-    } = params;
+    const { documentNo } = params
 
     const [document] = await getOtherInvoiceDefaultFunction({ documentNo })
     const session = await getServerSession(authOptions)

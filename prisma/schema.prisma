@@ -129,8 +129,6 @@ enum AccountType {
   Equity
   Revenue
   Expense
-  OtherIncome
-  OtherExpense
 }
 
 model GeneralLedger {

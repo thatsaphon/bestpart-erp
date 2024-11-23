@@ -178,7 +178,7 @@ const data = {
                     url: FullRoute.ChartOfAccounts,
                 },
                 {
-                    title: 'งบดุล',
+                    title: 'งบทดลอง',
                     url: FullRoute.BalanceSheet,
                 },
                 {
@@ -240,7 +240,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const searchParams = useSearchParams()
     const pathname = usePathname()
-    const session = useSession()
+    // const session = useSession()
     return (
         <Sidebar collapsible="offcanvas" {...props}>
             <SidebarHeader className="mb-2 border-b-2 py-1">
@@ -300,7 +300,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <ModeToggle />
                     </SidebarMenuItem>
                 </SidebarMenu>
-                <NavUser
+                {/* <NavUser
                     user={{
                         name:
                             session.data?.user.username ||
@@ -309,7 +309,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         role: session.data?.user.role || '',
                         avatar: session.data?.user.avatarUrl || '',
                     }}
-                />
+                /> */}
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>

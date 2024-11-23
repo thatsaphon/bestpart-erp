@@ -1,34 +1,12 @@
-import React, { Fragment } from 'react'
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion'
-import ChartOfAccountDialog from '@/components/chart-of-account-dialog'
+import React from 'react'
 import prisma from '../../db/db'
-import ResetChartOfAccountDialog from '@/components/reset-chart-of-account-dialog'
 import { revalidatePath } from 'next/cache'
 import { promises as fs } from 'fs'
 import { csvToJSONObject } from '@/lib/csvToObject'
 import { chartOfAccountSchema } from '../../schema/chart-of-accounts-schema'
-import { EyeOpenIcon } from '@radix-ui/react-icons'
-import ChartOfAccountDetailDialog from '@/components/chart-of-account-detail-dialog'
-import Link from 'next/link'
 // import { URLSearchParams } from 'url'
-import { createQueryString } from '@/lib/searchParams'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
-import { Collapsible } from '@/components/ui/collapsible'
-import { cn } from '@/lib/utils'
-import { ChevronRight } from 'lucide-react'
 import ChartOfAccountList from './chart-of-account-list'
+import ChartOfAccountDialog from '@/components/chart-of-account-dialog'
 
 type Props = {
     searchParams: Promise<{ accountId?: string }>
@@ -41,7 +19,9 @@ export const revalidate = 600
 export default async function AccountingPageTemplate(props: Props) {
     const searchParams = await props.searchParams
 
-    const chartOfAccounts = await prisma.chartOfAccount.findMany({})
+    const chartOfAccounts = await prisma.chartOfAccount.findMany({
+        orderBy: { id: 'asc' },
+    })
 
     const resetChartOfAccount = async () => {
         'use server'
@@ -67,13 +47,18 @@ export default async function AccountingPageTemplate(props: Props) {
 
     return (
         <main className="h-full w-full p-3">
-            <div className="flex flex-col gap-x-3">
+            <div className="flex gap-x-3">
                 <h1 className="text-3xl font-bold">Chart of Account</h1>
+                <ChartOfAccountDialog label="เพิ่มบัญชี" />
             </div>
             {/* <div className="p-6"></div> */}
-            <div className="flex gap-2">
-                <ChartOfAccountList chartOfAccounts={chartOfAccounts} />
-                {props.detail}
+            <div className="flex items-start justify-start gap-4">
+                <div className="w-[500px]">
+                    <ChartOfAccountList chartOfAccounts={chartOfAccounts} />
+                </div>
+                <div className="rounded-md border-2 border-dashed p-4">
+                    {props.detail}
+                </div>
             </div>
         </main>
     )

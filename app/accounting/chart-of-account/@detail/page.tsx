@@ -1,5 +1,5 @@
 import prisma from '@/app/db/db'
-import ChartOfAccountDetailDialog from '@/components/chart-of-account-detail-dialog'
+import UpdateChartOfAccountDialog from '@/components/update-chart-of-account-dialog'
 import React from 'react'
 
 type Props = { searchParams: Promise<{ accountId: string }> }
@@ -12,10 +12,11 @@ export default async function page(props: Props) {
     })
     return (
         <div>
-            <ChartOfAccountDetailDialog
+            {/* <UpdateChartOfAccountDialog
                 key={searchParams.accountId}
+
                 account={accountDetail}
-            />
+            /> */}
         </div>
     )
 }

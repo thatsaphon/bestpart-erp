@@ -25,7 +25,7 @@ id,name,type,createdAt,updatedAt,isAp,isAr,isCash,isInputTax,isOutputTax,isDepos
 25000,หนี้สินไม่หมุนเวียนอื่น,Liabilities,2024-04-29 19:15:49.481,2024-04-29 19:15:49.481,false,false,false,false,false,false
 31000,หุ้นสามัญ,Equity,2024-04-29 19:15:49.481,2024-04-29 19:15:49.481,false,false,false,false,false,false
 32000,กำไรสะสม,Equity,2024-04-29 19:15:49.481,2024-04-29 19:15:49.481,false,false,false,false,false,false
-41000,รายได้,Revenue,2024-04-29 19:15:49.481,2024-04-29 19:15:49.481,false,false,false,false,false,false
+41000,ขาย,Revenue,2024-04-29 19:15:49.481,2024-04-29 19:15:49.481,false,false,false,false,false,false
 41100,ส่วนลดขาย,Revenue,2024-06-07 09:11:10.106,2024-06-07 09:11:10.106,false,false,false,false,false,false
 41200,รับคืนสินค้า,Revenue,2024-07-30 09:29:54.743,2024-07-30 09:29:54.743,false,false,false,false,false,false
 51000,ซื้อ,Expense,2024-04-29 19:15:49.481,2024-04-29 19:15:49.481,false,false,false,false,false,false

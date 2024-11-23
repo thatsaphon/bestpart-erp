@@ -30,7 +30,6 @@ import { Badge } from './ui/badge'
 import { XIcon } from 'lucide-react'
 import { useFormState } from 'react-dom'
 import toast from 'react-hot-toast'
-import { createChartOfAccounts } from '@/app/actions/accounting'
 
 type Props = {
     className?: string
@@ -53,23 +52,8 @@ export default function CashAccountDialog({
 }: Props) {
     const [open, setOpen] = useState(false)
     const [selectedUsers, setSelectedUsers] = useState<string[]>([])
-    const [state, formAction] = useFormState(createChartOfAccounts, {
-        message: '',
-    })
     const [accountNumber, setAccountNumber] = useState<string>('')
 
-    useEffect(() => {
-        if (state.message === '') return
-        if (state.message === 'success') {
-            toast.success('success')
-            state.message = ''
-            setOpen(false)
-        }
-        if (state.message === 'failed') {
-            toast.error(state.message)
-            state.message = ''
-        }
-    }, [state])
     function addSelectedUser(username: string) {
         setSelectedUsers([...selectedUsers, username])
     }
@@ -88,7 +72,9 @@ export default function CashAccountDialog({
                 </Button>
             </DialogTrigger>
             <DialogContent className="flex flex-col">
-                <form action={formAction}>
+                <form
+                //  action={formAction}
+                >
                     <DialogHeader>
                         <DialogTitle>Add New {type}</DialogTitle>
                         <DialogDescription>สร้างบัญชีใหม่</DialogDescription>

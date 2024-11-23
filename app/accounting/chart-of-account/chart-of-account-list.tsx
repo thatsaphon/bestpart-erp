@@ -15,6 +15,7 @@ import { ChartOfAccount } from '@prisma/client'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import { useParams } from 'next/navigation'
+import UpdateChartOfAccountDialog from '@/components/update-chart-of-account-dialog'
 
 type Props = {
     chartOfAccounts: ChartOfAccount[]
@@ -122,11 +123,9 @@ export default function ChartOfAccountList({ chartOfAccounts }: Props) {
                                             </Link>
                                         </TableCell>
                                         <TableCell className="w-4">
-                                            <Link
-                                                href={`/accounting/chart-of-account?accountId=${chartOfAccount.id}`}
-                                            >
-                                                <Pencil className="h-4 w-4" />
-                                            </Link>
+                                            <UpdateChartOfAccountDialog
+                                                account={chartOfAccount}
+                                            />
                                         </TableCell>
                                     </TableRow>
                                 ))}

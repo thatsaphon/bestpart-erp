@@ -1,10 +1,7 @@
 'use client'
 
-import { DatePickerWithPresets } from '@/components/date-picker-preset'
-import SelectSearchVendor from '@/components/select-search-vendor'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
     Select,
     SelectContent,
@@ -22,16 +19,9 @@ import {
     TableRow,
     Table,
     TableHead,
-    TableCaption,
 } from '@/components/ui/table'
-import {
-    AccountType,
-    AssetType,
-    ChartOfAccount,
-    DocumentRemark,
-} from '@prisma/client'
 import { XIcon } from 'lucide-react'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { createOtherInvoice } from './create-other-invoice'
 import toast from 'react-hot-toast'
 import { getPaymentMethods } from '@/actions/get-payment-methods'
@@ -52,10 +42,8 @@ import { GetOtherInvoice } from '@/types/other-invoice/other-invoice'
 import { GetDocumentRemark } from '@/types/remark/document-remark'
 import AddPaymentComponent from '@/components/add-payment-component'
 import CreateDocumentRemark from '@/components/create-document-remark'
-import { getApPaymentMethods } from '@/app/actions/accounting'
 import { otherInvoiceItemToDocumentItem } from '@/types/other-invoice/other-invoice-item'
 import { updateOtherInvoice } from './update-other-invoice'
-import { Switch } from '@/components/ui/switch'
 import { convertPricePerUnitToCostPerUnit } from '@/lib/convert-price-per-unit-to-cost-per-unit'
 import DocumentItemFooter from '@/components/document-item-footer'
 
