@@ -12,6 +12,16 @@ import React, { Fragment } from 'react'
 import { Prisma } from '@prisma/client'
 import { AuthPayloadSchema } from '@/app/schema/authPayloadSchema'
 import { Metadata } from 'next'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import { getChartOfAccountMovement } from '@/actions/chart-of-account-movement'
+import { endOfDay, startOfDay } from 'date-fns'
 
 type Props = {}
 export const metadata: Metadata = {
@@ -19,28 +29,43 @@ export const metadata: Metadata = {
 }
 
 export default async function CashPage({}: Props) {
-    const users = await prisma.user.findMany({
-        select: {
-            username: true,
-            first_name: true,
-            last_name: true,
-            AccountOwner: { select: { chartOfAccountId: true } },
-            role: true,
-            avatarUrl: true,
-        },
-    })
-    const validated = AuthPayloadSchema.array().safeParse(users)
+    // const users = await prisma.user.findMany({
+    //     select: {
+    //         username: true,
+    //         first_name: true,
+    //         last_name: true,
+    //         AccountOwner: { select: { chartOfAccountId: true } },
+    //         role: true,
+    //         avatarUrl: true,
+    //     },
+    // })
 
     const chartOfAccounts = await prisma.chartOfAccount.findMany({
         where: {
-            AND: [{ id: { gte: 11100 } }, { id: { lt: 11400 } }],
+            isCash: true,
         },
     })
+    const balance = await prisma.generalLedger.groupBy({
+        by: ['chartOfAccountId'],
+        _sum: {
+            amount: true,
+        },
+        where: {
+            chartOfAccountId: {
+                in: chartOfAccounts.map((x) => x.id),
+            },
+        },
+    })
+    const todayChanges = await getChartOfAccountMovement(
+        chartOfAccounts.map((x) => x.id),
+        startOfDay(new Date()),
+        endOfDay(new Date())
+    )
 
     return (
         <main className="max-w-[724px] p-3">
             <div className="mb-3 flex items-center justify-between">
-                <h1 className="text-3xl font-bold">Cash</h1>
+                <h1 className="text-3xl font-bold">เงินสด</h1>
                 <Card>
                     <CardContent className="py-2">
                         <p className="h-full">Account Number: 11000</p>
@@ -48,97 +73,44 @@ export default async function CashPage({}: Props) {
                 </Card>
             </div>
             <div className="p-6">
-                <Accordion type="multiple" className="w-full">
-                    <AccordionItem value="petty cash">
-                        <AccordionTrigger>Petty Cash</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="text-right">
-                                <CashAccountDialog
-                                    users={
-                                        validated.success ? validated.data : []
-                                    }
-                                    type="Petty Cash"
-                                    label="Add new Petty Cash"
-                                />
-                            </div>
-                            <div className="mt-3 grid grid-cols-2 px-3">
-                                {chartOfAccounts
-                                    .filter((account) => account.id < 11200)
-                                    .sort((a, b) => a.id - b.id)
-                                    .map((account, index) => (
-                                        <Fragment key={index}>
-                                            <span>{account.id}</span>
-                                            <span className="text-right">
-                                                {account.name}
-                                            </span>
-                                        </Fragment>
-                                    ))}
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="bank account">
-                        <AccordionTrigger>Bank Account</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="text-right">
-                                <CashAccountDialog
-                                    users={
-                                        validated.success ? validated.data : []
-                                    }
-                                    type="Bank Account"
-                                    label="Add new Bank Account"
-                                />
-                            </div>
-                            <div className="mt-3 grid grid-cols-2 px-3">
-                                {chartOfAccounts
-                                    .filter(
-                                        (account) =>
-                                            account.id >= 11200 &&
-                                            account.id < 11300
-                                    )
-                                    .sort((a, b) => a.id - b.id)
-                                    .map((account, index) => (
-                                        <Fragment key={index}>
-                                            <span>{account.id}</span>
-                                            <span className="text-right">
-                                                {account.name}
-                                            </span>
-                                        </Fragment>
-                                    ))}
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="cashier">
-                        <AccordionTrigger>Cashier</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="text-right">
-                                <CashAccountDialog
-                                    users={
-                                        validated.success ? validated.data : []
-                                    }
-                                    type="Cashier"
-                                    label="Add new Cashier"
-                                />
-                            </div>
-                            <div className="mt-3 grid grid-cols-2 px-3">
-                                {chartOfAccounts
-                                    .filter(
-                                        (account) =>
-                                            account.id >= 11300 &&
-                                            account.id < 11400
-                                    )
-                                    .sort((a, b) => a.id - b.id)
-                                    .map((account, index) => (
-                                        <Fragment key={index}>
-                                            <span>{account.id}</span>
-                                            <span className="text-right">
-                                                {account.name}
-                                            </span>
-                                        </Fragment>
-                                    ))}
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>รหัสบัญชี</TableHead>
+                            <TableHead>ชื่อบัญชี</TableHead>
+                            <TableHead className="text-right">
+                                ยอดคงเหลือ
+                            </TableHead>
+                            <TableHead className="text-right">วันนี้</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {chartOfAccounts.map((chartOfAccount) => (
+                            <TableRow key={chartOfAccount.id}>
+                                <TableCell>{chartOfAccount.id}</TableCell>
+                                <TableCell>{chartOfAccount.name}</TableCell>
+                                <TableCell className="text-right">
+                                    {balance
+                                        .find(
+                                            (x) =>
+                                                x.chartOfAccountId ===
+                                                chartOfAccount.id
+                                        )
+                                        ?.['_sum']?.amount?.toLocaleString()}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {todayChanges.items
+                                        .find(
+                                            (x) =>
+                                                x.chartOfAccountId ===
+                                                chartOfAccount.id
+                                        )
+                                        ?.amount?.toLocaleString() || '-'}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </div>
         </main>
     )
