@@ -19,7 +19,12 @@ export const uploadKnowledgeImage = async (id: number, formData: FormData) => {
         '.' +
         file.name.split('.').pop()
     // Upload to S3
-    const result = await uploadFile(uploadFileName, file, 'knowledge-image')
+    const result = await uploadFile(
+        'bestpart',
+        uploadFileName,
+        file,
+        'knowledge-image'
+    )
 
     if (result) {
         // await addImageToTag(formData, uploadFileName)

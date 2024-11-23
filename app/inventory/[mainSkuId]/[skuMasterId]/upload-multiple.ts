@@ -14,7 +14,12 @@ export const uploadMultiple = async (
     console.log(files)
     const promises = files.map(async (file, index) => {
         const uploadFileName = fileName + '-' + Date.now().toString() + index
-        const result = await uploadFile(uploadFileName, file, 'sku')
+        const result = await uploadFile(
+            process.env.BUCKET_NAME,
+            uploadFileName,
+            file,
+            'sku'
+        )
         console.log(result)
         if (result) {
             await prisma.skuMaster.update({

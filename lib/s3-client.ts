@@ -17,6 +17,7 @@ const s3 = new S3Client({
 })
 
 export const uploadFile = async (
+    bucket: string,
     fileName: string,
     fileContent: File,
     path?: string | undefined
@@ -25,7 +26,7 @@ export const uploadFile = async (
     const fileBuffer = await fileContent.arrayBuffer()
     const fileContentBuffer = Buffer.from(fileBuffer)
     const command = new PutObjectCommand({
-        Bucket: process.env.BUCKET_NAME,
+        Bucket: bucket,
         Key: path ? `${path}/${fileName}` : `${fileName}`,
         Body: fileContentBuffer,
     })
