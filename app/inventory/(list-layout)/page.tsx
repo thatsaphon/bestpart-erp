@@ -11,8 +11,17 @@ import {
 } from '@/components/ui/accordion'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import { PencilIcon } from 'lucide-react'
+import { PencilIcon, Share, Share2, SquareChartGantt } from 'lucide-react'
 import Link from 'next/link'
+import {
+    TableHeader,
+    TableRow,
+    Table,
+    TableHead,
+    TableBody,
+    TableCell,
+} from '@/components/ui/table'
+import { createQueryString } from '@/lib/searchParams'
 
 type Props = {
     searchParams: Promise<{
@@ -45,111 +54,37 @@ export default async function InventoryListPage(props: Props) {
 
         return (
             <div className="w-[800px] space-y-2">
-                <Accordion type="multiple">
-                    {skuTree.items.map((item, index) => (
-                        <AccordionItem value={`${item.mainSkuId}`} key={index}>
-                            <AccordionTrigger>
-                                <div className="flex flex-wrap gap-2">
-                                    <p>
-                                        {item.name}
-                                        <span className="w-[300px] text-primary/50">
-                                            {item.partNumber
-                                                ? ` - ${item.partNumber}`
-                                                : ''}
-                                        </span>
-                                    </p>
-                                    <div className="flex gap-2">
-                                        {item.MainSkuRemark.map((remark) => (
-                                            <Badge
-                                                variant={'outline'}
-                                                key={remark.remark}
-                                            >
-                                                {remark.remark}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                                <div className="grid grid-cols-[1fr_100px_1fr_1fr_1fr] gap-2">
-                                    <div>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Part Number</TableHead>
+                            <TableHead>ชื่อ</TableHead>
+                            <TableHead></TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {skuTree.items.map((item) => (
+                            <React.Fragment key={item.mainSkuId}>
+                                <TableRow>
+                                    <TableCell>{item.partNumber}</TableCell>
+                                    <TableCell>{item.name}</TableCell>
+                                    <TableCell className="flex gap-1">
                                         <Link
                                             href={`/inventory/${item.mainSkuId}`}
                                         >
-                                            <PencilIcon className="h-4 w-4" />
+                                            <PencilIcon />
                                         </Link>
-                                    </div>
-                                    <div className="text-center">จำนวน</div>
-                                    <div>Barcode</div>
-                                    <div>หน่วย</div>
-                                    <div className="text-right">ราคา</div>
-                                    <Separator className="col-span-5" />
-                                    {item.SkuMaster.map((sku, index) => (
-                                        <React.Fragment
-                                            key={`${item.mainSkuId}-${sku.skuMasterId}`}
+                                        <Link
+                                            href={`?${createQueryString(new URLSearchParams(searchParams), 'mainSkuId', String(item.mainSkuId))}`}
                                         >
-                                            <div className="col-start-1 row-span-2">
-                                                <div>
-                                                    {sku.detail}{' '}
-                                                    <ImageToolTip
-                                                        images={sku.Image}
-                                                        alt={`${item.name}-${sku.detail}`}
-                                                    />{' '}
-                                                </div>
-                                                {sku.SkuMasterRemark.length >
-                                                    0 && (
-                                                    <div
-                                                        className={'flex gap-2'}
-                                                    >
-                                                        {sku.SkuMasterRemark.map(
-                                                            (remark) => (
-                                                                <Badge
-                                                                    key={
-                                                                        remark.remark
-                                                                    }
-                                                                    variant={
-                                                                        'outline'
-                                                                    }
-                                                                >
-                                                                    {
-                                                                        remark.remark
-                                                                    }
-                                                                </Badge>
-                                                            )
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {sku.GoodsMaster.map((goods, i) => (
-                                                <React.Fragment
-                                                    key={`${item.mainSkuId}-${sku.skuMasterId}-${goods.goodsMasterId}`}
-                                                >
-                                                    <div
-                                                        className={cn(
-                                                            'col-start-2 text-center'
-                                                        )}
-                                                    >
-                                                        {goods.remaining}
-                                                    </div>
-                                                    <div>{goods.barcode}</div>
-                                                    <div>{`${goods.unit}(${goods.quantityPerUnit})`}</div>
-                                                    <div className="text-right">
-                                                        {goods.pricePerUnit}
-                                                    </div>
-                                                </React.Fragment>
-                                            ))}
-                                            {index !==
-                                                item.SkuMaster.length - 1 && (
-                                                <Separator className="col-span-5 col-start-1" />
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                </Accordion>
+                                            <SquareChartGantt />
+                                        </Link>
+                                    </TableCell>
+                                </TableRow>
+                            </React.Fragment>
+                        ))}
+                    </TableBody>
+                </Table>
                 <PaginationInventory
                     numberOfPage={numberOfPage}
                     searchParams={await searchParams}

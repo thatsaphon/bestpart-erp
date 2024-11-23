@@ -9,8 +9,10 @@ export const metadata: Metadata = {
 
 export default async function Layout({
     children,
+    skuMaster,
 }: {
     children: React.ReactNode
+    skuMaster: React.ReactNode
 }) {
     const contacts = await prisma.contact.findMany({
         where: {
@@ -26,7 +28,10 @@ export default async function Layout({
             <div className="mt-2 w-full items-center gap-1.5">
                 <SearchInventory contacts={contacts} />
             </div>
-            {children}
+            <div className="flex gap-4">
+                {children}
+                {skuMaster}
+            </div>
         </div>
     )
 }
