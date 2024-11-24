@@ -21,6 +21,14 @@ import React from 'react'
 import toast from 'react-hot-toast'
 import { createSkuMaster } from './create-sku-master'
 import { SkuTree } from '@/types/sku-tree/sku-tree'
+import {
+    Table,
+    TableHeader,
+    TableRow,
+    TableHead,
+    TableBody,
+    TableCell,
+} from '@/components/ui/table'
 
 type Props = {
     mainSku: SkuTree['items'][0]
@@ -94,7 +102,14 @@ export default function SkuMasterCreateForm({ mainSku }: Props) {
             })
             toast.success('บันทึกสำเร็จ')
         } catch (err) {
-            if (err instanceof Error) return toast.error(err.message)
+            if (err instanceof Error) {
+                if (err.message === 'NEXT_REDIRECT') {
+                    toast.success('บันทึกสําเร็จ')
+                    return
+                }
+                toast.error(err.message)
+                return
+            }
             toast.error('Something went wrong.')
         }
     }
@@ -138,125 +153,159 @@ export default function SkuMasterCreateForm({ mainSku }: Props) {
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-wrap justify-between gap-2 lg:grid lg:grid-cols-2">
-                        <div className="grid grid-cols-[1fr_1fr_1fr_1fr_80px] place-content-start items-center gap-2 rounded-md border-2 border-dashed p-4">
-                            {/* <div className="text-center">id</div> */}
-                            <div>Barcode</div>
-                            <div>หน่วย</div>
-                            <div>จำนวนต่อหน่วย</div>
-                            <div className="text-right">ราคา</div>
-                            {goodsMasters.map((goodsMaster, index) => (
-                                <React.Fragment
-                                    key={`goodsMaster-${goodsMaster.goodsMasterId}`}
-                                >
-                                    <div className="col-start-1">
-                                        <Input
-                                            value={goodsMaster.barcode}
-                                            onChange={(e) => {
-                                                setGoodsMasters(
-                                                    goodsMasters.map((gm) =>
-                                                        gm.goodsMasterId ===
-                                                        goodsMaster.goodsMasterId
-                                                            ? {
-                                                                  ...gm,
-                                                                  barcode:
-                                                                      e.target
-                                                                          .value,
-                                                              }
-                                                            : gm
-                                                    )
-                                                )
-                                            }}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Input
-                                            value={goodsMaster.unit}
-                                            onChange={(e) => {
-                                                setGoodsMasters(
-                                                    goodsMasters.map((gm) =>
-                                                        gm.goodsMasterId ===
-                                                        goodsMaster.goodsMasterId
-                                                            ? {
-                                                                  ...gm,
-                                                                  unit: e.target
-                                                                      .value,
-                                                              }
-                                                            : gm
-                                                    )
-                                                )
-                                            }}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Input
-                                            value={goodsMaster.quantityPerUnit}
-                                            type="number"
-                                            onKeyDown={(e) =>
-                                                inputNumberPreventDefault(e)
-                                            }
-                                            onChange={(e) => {
-                                                setGoodsMasters(
-                                                    goodsMasters.map((gm) =>
-                                                        gm.goodsMasterId ===
-                                                        goodsMaster.goodsMasterId
-                                                            ? {
-                                                                  ...gm,
-                                                                  quantityPerUnit:
-                                                                      +e.target
-                                                                          .value,
-                                                              }
-                                                            : gm
-                                                    )
-                                                )
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="text-right">
-                                        <Input
-                                            value={goodsMaster.pricePerUnit}
-                                            type="number"
-                                            onKeyDown={(e) =>
-                                                inputNumberPreventDefault(e)
-                                            }
-                                            onChange={(e) => {
-                                                setGoodsMasters(
-                                                    goodsMasters.map((gm) =>
-                                                        gm.goodsMasterId ===
-                                                        goodsMaster.goodsMasterId
-                                                            ? {
-                                                                  ...gm,
-                                                                  pricePerUnit:
-                                                                      +e.target
-                                                                          .value,
-                                                              }
-                                                            : gm
-                                                    )
-                                                )
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="text-right">
-                                        {!goodsMaster.goodsMasterId && (
-                                            <Cross1Icon
-                                                className="h-4 w-4 text-destructive hover:cursor-pointer"
-                                                onClick={() =>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-[200px]">
+                                        Barcode
+                                    </TableHead>
+                                    <TableHead className="w-[150px]">
+                                        หน่วย
+                                    </TableHead>
+                                    <TableHead className="text-right">
+                                        ราคา
+                                    </TableHead>
+                                    <TableHead className="w-16 text-right"></TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {goodsMasters.map((goodsMaster, index) => (
+                                    <TableRow
+                                        key={`goodsMaster-${goodsMaster.goodsMasterId}-${index}`}
+                                    >
+                                        <TableCell>
+                                            <Input
+                                                placeholder="Barcode"
+                                                value={goodsMaster.barcode}
+                                                onChange={(e) => {
                                                     setGoodsMasters(
-                                                        goodsMasters.filter(
-                                                            (_, i) =>
-                                                                i !== index
+                                                        goodsMasters.map(
+                                                            (gm, i) =>
+                                                                i === index
+                                                                    ? {
+                                                                          ...gm,
+                                                                          barcode:
+                                                                              e
+                                                                                  .target
+                                                                                  .value,
+                                                                      }
+                                                                    : gm
                                                         )
                                                     )
-                                                }
+                                                }}
                                             />
-                                        )}
-                                    </div>
-                                </React.Fragment>
-                            ))}
-                            <div className="col-span-4 place-self-center">
-                                <PlusCircle onClick={addNewGoodsMaster} />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2"></div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Input
+                                                placeholder="หน่วย"
+                                                value={goodsMaster.unit}
+                                                onChange={(e) => {
+                                                    setGoodsMasters(
+                                                        goodsMasters.map(
+                                                            (gm, i) =>
+                                                                i === index
+                                                                    ? {
+                                                                          ...gm,
+                                                                          unit: e
+                                                                              .target
+                                                                              .value,
+                                                                      }
+                                                                    : gm
+                                                        )
+                                                    )
+                                                }}
+                                            />{' '}
+                                            <Input
+                                                placeholder="จํานวนต่อหน่วย"
+                                                value={
+                                                    goodsMaster.quantityPerUnit ||
+                                                    ''
+                                                }
+                                                type="number"
+                                                onKeyDown={(e) =>
+                                                    inputNumberPreventDefault(e)
+                                                }
+                                                onChange={(e) => {
+                                                    setGoodsMasters(
+                                                        goodsMasters.map(
+                                                            (gm, i) =>
+                                                                index === i
+                                                                    ? {
+                                                                          ...gm,
+                                                                          quantityPerUnit:
+                                                                              +e
+                                                                                  .target
+                                                                                  .value,
+                                                                      }
+                                                                    : gm
+                                                        )
+                                                    )
+                                                }}
+                                            />
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Input
+                                                placeholder="ราคาต่อหน่วย"
+                                                value={
+                                                    goodsMaster.pricePerUnit ||
+                                                    ''
+                                                }
+                                                type="number"
+                                                onKeyDown={(e) =>
+                                                    inputNumberPreventDefault(e)
+                                                }
+                                                onChange={(e) => {
+                                                    setGoodsMasters(
+                                                        goodsMasters.map(
+                                                            (gm, i) =>
+                                                                i === index
+                                                                    ? {
+                                                                          ...gm,
+                                                                          pricePerUnit:
+                                                                              +e
+                                                                                  .target
+                                                                                  .value,
+                                                                      }
+                                                                    : gm
+                                                        )
+                                                    )
+                                                }}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            {!goodsMaster.goodsMasterId && (
+                                                <Cross1Icon
+                                                    className="h-4 w-4 text-destructive hover:cursor-pointer"
+                                                    onClick={() =>
+                                                        setGoodsMasters(
+                                                            goodsMasters.filter(
+                                                                (_, i) =>
+                                                                    i !== index
+                                                            )
+                                                        )
+                                                    }
+                                                />
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={5}
+                                        className="text-center"
+                                    >
+                                        <Button
+                                            type="button"
+                                            onClick={addNewGoodsMaster}
+                                            size={'icon'}
+                                            variant={'ghost'}
+                                        >
+                                            <PlusCircle />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
                     </div>
                 </CardContent>
                 <CardFooter>

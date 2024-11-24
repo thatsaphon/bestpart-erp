@@ -72,12 +72,18 @@ export default async function InventoryListPage(props: Props) {
                                         <Link
                                             href={`/inventory/${item.mainSkuId}`}
                                         >
-                                            <PencilIcon />
+                                            <PencilIcon
+                                                className="h-5 w-5"
+                                                strokeWidth={1}
+                                            />
                                         </Link>
                                         <Link
                                             href={`?${createQueryString(new URLSearchParams(searchParams), 'mainSkuId', String(item.mainSkuId))}`}
                                         >
-                                            <SquareChartGantt />
+                                            <SquareChartGantt
+                                                className="h-5 w-5"
+                                                strokeWidth={1}
+                                            />
                                         </Link>
                                     </TableCell>
                                 </TableRow>

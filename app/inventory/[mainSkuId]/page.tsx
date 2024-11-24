@@ -14,6 +14,14 @@ import Link from 'next/link'
 import React from 'react'
 import UpdateMainSkuForm from './update-main-sku-form'
 import { Button } from '@/components/ui/button'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
 
 type Props = {
     params: Promise<{
@@ -22,11 +30,9 @@ type Props = {
 }
 
 export default async function MainSkuDetailPage(props: Props) {
-    const params = await props.params;
+    const params = await props.params
 
-    const {
-        mainSkuId
-    } = params;
+    const { mainSkuId } = params
 
     const {
         items: [skuTree],
@@ -42,72 +48,90 @@ export default async function MainSkuDetailPage(props: Props) {
             <div className="flex w-full flex-col gap-2">
                 {skuTree.SkuMaster.map((skuMaster) => (
                     <Card key={`${skuMaster.skuMasterId}`}>
-                        <CardHeader>
-                            <CardTitle>
-                                {skuMaster.detail}
-                                <Link
-                                    href={`/inventory/${skuTree.mainSkuId}/${skuMaster.skuMasterId}`}
-                                >
-                                    <PencilIcon className="ml-2 inline h-4 w-4" />
-                                </Link>
-                            </CardTitle>
-                            <CardDescription>
-                                {skuMaster.SkuMasterRemark.map((remark) => (
-                                    <Badge
-                                        key={`remark-${skuMaster.skuMasterId}-${remark.remark}`}
-                                        variant={'outline'}
-                                    >
-                                        {remark.remark}
-                                    </Badge>
-                                ))}
-                            </CardDescription>
-                            {skuMaster.position && (
-                                <p>ตำแหน่งเก็บ: {skuMaster.position}</p>
-                            )}
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex flex-wrap justify-between gap-2 lg:grid lg:grid-cols-2">
-                                <div className="grid grid-cols-[80px_1fr_1fr_1fr] place-content-start gap-2 rounded-md border-2 border-dashed p-4">
-                                    <div className="text-center">คงเหลือ</div>
-                                    <div>Barcode</div>
-                                    <div>หน่วย</div>
-                                    <div className="text-right">ราคา</div>
-                                    {skuMaster.GoodsMaster.map(
-                                        (goodsMaster) => (
-                                            <React.Fragment
-                                                key={`goodsMaster-${goodsMaster.goodsMasterId}`}
-                                            >
-                                                <div className="text-center">
-                                                    {goodsMaster.remaining}
-                                                </div>
-                                                <div>{goodsMaster.barcode}</div>
-                                                <div>{`${goodsMaster.unit}(${goodsMaster.quantityPerUnit})`}</div>
-                                                <div className="text-right">
-                                                    {goodsMaster.pricePerUnit.toLocaleString()}
-                                                </div>
-                                            </React.Fragment>
-                                        )
+                        <div className="flex flex-wrap justify-between gap-2 lg:grid lg:grid-cols-2">
+                            <div>
+                                <CardHeader>
+                                    <CardTitle>
+                                        {skuMaster.detail}
+                                        <Link
+                                            href={`/inventory/${skuTree.mainSkuId}/${skuMaster.skuMasterId}`}
+                                        >
+                                            <PencilIcon className="ml-2 inline h-4 w-4" />
+                                        </Link>
+                                    </CardTitle>
+                                    <div>
+                                        {skuMaster.SkuMasterRemark.map(
+                                            (remark) => (
+                                                <Badge
+                                                    key={`remark-${skuMaster.skuMasterId}-${remark.remark}`}
+                                                    variant={'outline'}
+                                                >
+                                                    {remark.remark}
+                                                </Badge>
+                                            )
+                                        )}
+                                    </div>
+                                    {skuMaster.position && (
+                                        <span>
+                                            ตำแหน่งเก็บ: {skuMaster.position}
+                                        </span>
                                     )}
-                                </div>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {skuMaster.Image.map((image) => (
-                                        <Image
-                                            key={`image-${skuMaster.skuMasterId}-${image}`}
-                                            src={image.path}
-                                            alt={
-                                                skuTree.name +
-                                                '-' +
-                                                skuMaster.detail
-                                            }
-                                            className="w-full"
-                                            width={300}
-                                            height={300}
-                                            unoptimized
-                                        />
-                                    ))}
-                                </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>คงเหลือ</TableHead>
+                                                <TableHead>Barcode</TableHead>
+                                                <TableHead>หน่วย</TableHead>
+                                                <TableHead>ราคา</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {skuMaster.GoodsMaster.map(
+                                                (goodsMaster) => (
+                                                    <TableRow
+                                                        key={`goodsMaster-${goodsMaster.goodsMasterId}`}
+                                                    >
+                                                        <TableCell>
+                                                            {
+                                                                goodsMaster.remaining
+                                                            }
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {
+                                                                goodsMaster.barcode
+                                                            }
+                                                        </TableCell>
+                                                        <TableCell>{`${goodsMaster.unit}(${goodsMaster.quantityPerUnit})`}</TableCell>
+                                                        <TableCell>
+                                                            {goodsMaster.pricePerUnit.toLocaleString()}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
                             </div>
-                        </CardContent>
+                            <div className="grid grid-cols-3 gap-2 pt-3">
+                                {skuMaster.Image.map((image) => (
+                                    <Image
+                                        key={`image-${skuMaster.skuMasterId}-${image}`}
+                                        src={image.path}
+                                        alt={
+                                            skuTree.name +
+                                            '-' +
+                                            skuMaster.detail
+                                        }
+                                        className="w-full"
+                                        width={300}
+                                        height={300}
+                                        unoptimized
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     </Card>
                 ))}
                 <Link

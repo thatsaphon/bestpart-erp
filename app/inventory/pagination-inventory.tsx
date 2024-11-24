@@ -26,8 +26,8 @@ export default function PaginationInventory({
     searchParams: { page = '1', limit, search },
 }: Props) {
     return (
-        <Pagination>
-            <PaginationContent>
+        <Pagination key={'pagination'}>
+            <PaginationContent key={'pagination-content'}>
                 {page !== '1' && (
                     <PaginationItem key={'first-page'}>
                         <PaginationPrevious
