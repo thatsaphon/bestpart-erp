@@ -52,26 +52,27 @@ model Document {
   DocumentAttached DocumentAttached[]
   type             DocumentType
 
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @default(now()) @updatedAt
-  createdBy       String?
-  updatedBy       String?
-  CustomerOrder   CustomerOrder?
-  Quotation       Quotation?
-  PurchaseOrder   PurchaseOrder?
-  Sales           Sales?
-  Purchase        Purchase?
-  SalesReturn     SalesReturn?
-  PurchaseReturn  PurchaseReturn?
-  SalesBill       SalesBill?
-  SalesReceived   SalesReceived?
-  PurchasePayment PurchasePayment?
-  JournalVoucher  JournalVoucher?
-  StockAdjustment StockAdjustment?
-  OtherInvoice    OtherInvoice?
-  StockMovement   StockMovement[]
-  DocumentView    DocumentView?
-  OtherPayment    OtherPayment?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @default(now()) @updatedAt
+  createdBy        String?
+  updatedBy        String?
+  CustomerOrder    CustomerOrder?
+  Quotation        Quotation?
+  PurchaseOrder    PurchaseOrder?
+  Sales            Sales?
+  Purchase         Purchase?
+  SalesReturn      SalesReturn?
+  PurchaseReturn   PurchaseReturn?
+  SalesBill        SalesBill?
+  SalesReceived    SalesReceived?
+  PurchasePayment  PurchasePayment?
+  JournalVoucher   JournalVoucher?
+  StockAdjustment  StockAdjustment?
+  OtherInvoice     OtherInvoice?
+  StockMovement    StockMovement[]
+  DocumentView     DocumentView?
+  OtherPayment     OtherPayment?
+  QuotationRequest QuotationRequest?
 }
 
 enum DocumentType {
@@ -88,6 +89,7 @@ enum DocumentType {
   PurchaseOrder
   OtherInvoice
   OtherPayment
+  QuotationRequest
 }
 
 model DocumentRemark {
@@ -181,19 +183,20 @@ model Contact {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  Sales           Sales[]
-  SalesReturn     SalesReturn[]
-  SalesBill       SalesBill[]
-  SalesReceived   SalesReceived[]
-  Purchase        Purchase[]
-  PurchaseReturn  PurchaseReturn[]
-  PurchasePayment PurchasePayment[]
-  CustomerOrder   CustomerOrder[]
-  Quotation       Quotation[]
-  PurchaseOrder   PurchaseOrder[]
-  OtherInvoice    OtherInvoice[]
-  StockMovement   StockMovement[]
-  OtherPayment    OtherPayment[]
+  Sales            Sales[]
+  SalesReturn      SalesReturn[]
+  SalesBill        SalesBill[]
+  SalesReceived    SalesReceived[]
+  Purchase         Purchase[]
+  PurchaseReturn   PurchaseReturn[]
+  PurchasePayment  PurchasePayment[]
+  CustomerOrder    CustomerOrder[]
+  Quotation        Quotation[]
+  PurchaseOrder    PurchaseOrder[]
+  OtherInvoice     OtherInvoice[]
+  StockMovement    StockMovement[]
+  OtherPayment     OtherPayment[]
+  QuotationRequest QuotationRequest[]
 }
 
 model MainSku {
@@ -235,11 +238,12 @@ model SkuMaster {
   PurchaseReturnItem  PurchaseReturnItem[]
   StockAdjustmentItem StockAdjustmentItem[]
 
-  SkuRemainingCache SkuRemainingCache?
-  PurchaseOrderItem PurchaseOrderItem[]
-  QuotationItem     QuotationItem[]
-  canNegative       Boolean             @default(false)
-  StockMovement     StockMovement[]
+  SkuRemainingCache    SkuRemainingCache?
+  PurchaseOrderItem    PurchaseOrderItem[]
+  QuotationItem        QuotationItem[]
+  canNegative          Boolean                @default(false)
+  StockMovement        StockMovement[]
+  QuotationRequestItem QuotationRequestItem[]
 
   @@index([mainSkuId])
 }
@@ -297,13 +301,14 @@ model GoodsMaster {
   SalesItem    SalesItem[]
   PurchaseItem PurchaseItem[]
 
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now()) @updatedAt
-  PurchaseOrderItem   PurchaseOrderItem[]
-  QuotationItem       QuotationItem[]
-  SalesReturnItem     SalesReturnItem[]
-  PurchaseReturnItem  PurchaseReturnItem[]
-  StockAdjustmentItem StockAdjustmentItem[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
+  PurchaseOrderItem    PurchaseOrderItem[]
+  QuotationItem        QuotationItem[]
+  SalesReturnItem      SalesReturnItem[]
+  PurchaseReturnItem   PurchaseReturnItem[]
+  StockAdjustmentItem  StockAdjustmentItem[]
+  QuotationRequestItem QuotationRequestItem[]
 
   @@index([skuMasterId])
 }
@@ -374,13 +379,14 @@ model ServiceAndNonStockItem {
   canOtherInvoice Boolean
   isDiscount      Boolean @default(false)
 
-  SalesItem          SalesItem[]
-  SalesReturnItem    SalesReturnItem[]
-  PurchaseItem       PurchaseItem[]
-  PurchaseReturnItem PurchaseReturnItem[]
-  QuotationItem      QuotationItem[]
-  PurchaseOrderItem  PurchaseOrderItem[]
-  OtherInvoiceItem   OtherInvoiceItem[]
+  SalesItem            SalesItem[]
+  SalesReturnItem      SalesReturnItem[]
+  PurchaseItem         PurchaseItem[]
+  PurchaseReturnItem   PurchaseReturnItem[]
+  QuotationItem        QuotationItem[]
+  PurchaseOrderItem    PurchaseOrderItem[]
+  OtherInvoiceItem     OtherInvoiceItem[]
+  QuotationRequestItem QuotationRequestItem[]
 }
 
 model SalesReturn {
@@ -902,6 +908,50 @@ model QuotationItem {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+}
+
+model QuotationRequest {
+  id String @id @default(uuid())
+
+  Document   Document @relation(fields: [documentId], references: [id])
+  documentId Int      @unique
+  Contact    Contact? @relation(fields: [contactId], references: [id])
+  contactId  Int?
+
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
+  QuotationRequestItem QuotationRequestItem[]
+}
+
+model QuotationRequestItem {
+  id Int @id @default(autoincrement())
+
+  QuotationRequest   QuotationRequest @relation(fields: [quotationRequestId], references: [id])
+  quotationRequestId String
+
+  GoodsMaster              GoodsMaster?            @relation(fields: [goodsMasterId], references: [id])
+  goodsMasterId            Int?
+  SkuMaster                SkuMaster?              @relation(fields: [skuMasterId], references: [id])
+  skuMasterId              Int?
+  ServiceAndNonStockItem   ServiceAndNonStockItem? @relation(fields: [serviceAndNonStockItemId], references: [id])
+  serviceAndNonStockItemId Int?
+
+  barcode         String?
+  unit            String?
+  quantityPerUnit Float   @default(1)
+  name            String?
+  description     String?
+
+  quantity Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+enum QuotationRequestStatus {
+  WaitingConfirmation
+  Cancelled
+  QuotationIssued
 }
 
 view StockMovement {
